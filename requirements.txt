@@ -26,4 +26,4 @@ fit-tool
 garmin-fit-sdk
 haversine==2.8.0
 pycryptodome
-duckdb
+duckdb==1.2.2
