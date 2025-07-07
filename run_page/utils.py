@@ -67,7 +67,7 @@ def make_activities_file(
       filtered_runs = [
         {k: v for k, v in rec.items() if k not in skip_columns}
         for rec in activities_list
-        if rec.get("start_date_local", "").startswith(target_year)
+        if rec.get("start_date_local", "").startswith(year)
       ]
       with open(yearly_json_file, "w") as f:
         json.dump(filtered_runs,f)
