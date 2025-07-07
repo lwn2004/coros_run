@@ -139,6 +139,7 @@ async def download_and_generate(account, password):
     )
     print(f"Download finished. Elapsed {time.time()-start_time} seconds")
     await coros.req.aclose()
+    print("yearly file: ", CUR_YEAR_JSON_FILE)
     make_activities_file(SQL_FILE, FIT_FOLDER, JSON_FILE, "fit", CUR_YEAR_JSON_FILE)
 
 
