@@ -7,7 +7,7 @@ import time
 import aiofiles
 import httpx
 
-from config import JSON_FILE, SQL_FILE, FIT_FOLDER
+from config import JSON_FILE, CUR_YEAR_JSON_FILE, SQL_FILE, FIT_FOLDER
 from utils import make_activities_file
 
 COROS_URL_DICT = {
