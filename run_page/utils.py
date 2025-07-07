@@ -1,6 +1,8 @@
 import json
 import time
 from datetime import datetime
+import os
+import json
 
 import pytz
 
@@ -49,7 +51,7 @@ def to_date(ts):
 
 
 def make_activities_file(
-    sql_file, data_dir, json_file, file_suffix="gpx", activity_title_dict={}
+    sql_file, data_dir, json_file, file_suffix="gpx", activity_title_dict={}, yearly_json_file=""
 ):
     generator = Generator(sql_file)
     generator.sync_from_data_dir(
@@ -58,6 +60,17 @@ def make_activities_file(
     activities_list = generator.load()
     with open(json_file, "w") as f:
         json.dump(activities_list, f)
+    if yearly_json_file:
+      filename = os.path.basename(yearly_json_file)  # "2025.json"
+      year = filename[:4]
+      skip_columns = {"summary_polyline"}
+      filtered_runs = [
+        {k: v for k, v in rec.items() if k not in skip_columns}
+        for rec in activities_list
+        if rec.get("start_date_local", "").startswith(target_year)
+      ]
+      with open(yearly_json_file, "w") as f:
+        json.dump(,f)
 
 
 def make_strava_client(client_id, client_secret, refresh_token):
