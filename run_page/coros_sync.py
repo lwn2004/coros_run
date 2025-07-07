@@ -140,7 +140,7 @@ async def download_and_generate(account, password):
     print(f"Download finished. Elapsed {time.time()-start_time} seconds")
     await coros.req.aclose()
     print("yearly file: ", CUR_YEAR_JSON_FILE)
-    make_activities_file(SQL_FILE, FIT_FOLDER, JSON_FILE, "fit", CUR_YEAR_JSON_FILE)
+    make_activities_file(SQL_FILE, FIT_FOLDER, JSON_FILE, "fit", yearly_json_file = CUR_YEAR_JSON_FILE)
 
 
 async def gather_with_concurrency(n, tasks):
