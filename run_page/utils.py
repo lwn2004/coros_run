@@ -70,7 +70,7 @@ def make_activities_file(
         if rec.get("start_date_local", "").startswith(target_year)
       ]
       with open(yearly_json_file, "w") as f:
-        json.dump(,f)
+        json.dump(filtered_runs,f)
 
 
 def make_strava_client(client_id, client_secret, refresh_token):
