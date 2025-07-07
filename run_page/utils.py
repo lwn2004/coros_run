@@ -60,7 +60,7 @@ def make_activities_file(
     activities_list = generator.load()
     with open(json_file, "w") as f:
         json.dump(activities_list, f)
-    if yearly_json_file:
+    if True or yearly_json_file:
       filename = os.path.basename(yearly_json_file)  # "2025.json"
       year = filename[:4]
       skip_columns = {"summary_polyline"}
