@@ -7,13 +7,14 @@ import time
 import aiofiles
 import httpx
 
-from config import JSON_FILE, CUR_YEAR_JSON_FILE, SQL_FILE, FIT_FOLDER
+from config import JSON_FILE, JSON_FILE2, SQL_FILE, FIT_FOLDER
 from utils import make_activities_file
 
 COROS_URL_DICT = {
     "LOGIN_URL": "https://teamcnapi.coros.com/account/login",
     "DOWNLOAD_URL": "https://teamcnapi.coros.com/activity/detail/download",
     "ACTIVITY_LIST": "https://teamcnapi.coros.com/activity/query?&modeList=100,102,103",
+    "DASHBOARD":"https://teamcnapi.coros.com/dashboard/query",
 }
 
 TIME_OUT = httpx.Timeout(240.0, connect=360.0)
@@ -139,8 +140,7 @@ async def download_and_generate(account, password):
     )
     print(f"Download finished. Elapsed {time.time()-start_time} seconds")
     await coros.req.aclose()
-    print("yearly file: ", CUR_YEAR_JSON_FILE)
-    make_activities_file(SQL_FILE, FIT_FOLDER, JSON_FILE, "fit", yearly_json_file = CUR_YEAR_JSON_FILE)
+    make_activities_file(SQL_FILE, FIT_FOLDER, JSON_FILE, "fit", json_file2 = JSON_FILE2)
 
 
 async def gather_with_concurrency(n, tasks):
