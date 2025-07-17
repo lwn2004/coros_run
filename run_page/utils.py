@@ -3,7 +3,7 @@ import time
 from datetime import datetime
 import os
 import json
-
+import re
 import pytz
 
 try:
@@ -48,13 +48,17 @@ def to_date(ts):
             pass
 
     raise ValueError(f"cannot parse timestamp {ts} into date with fmts: {ts_fmts}")
-
+  
+def get_city_name(text):
+    pattern = re.compile(r'([\u4e00-\u9fa5]{2,}(市|自治州|特别行政区|盟|地区))')
+    match = pattern.search(text)
+    return match.group(1) if match else '未知'
 
 def make_activities_file(
-    sql_file, data_dir, json_file, file_suffix="gpx", activity_title_dict=None, yearly_json_file=None
+    sql_file, data_dir, json_file, file_suffix="gpx", activity_title_dict=None, json_file2=None
 ):
     print("json_file: ", json_file)
-    print("yearly file: ", yearly_json_file)
+    print("json file2: ", json_file2)
     generator = Generator(sql_file)
     generator.sync_from_data_dir(
         data_dir, file_suffix=file_suffix, activity_title_dict=activity_title_dict
@@ -62,17 +66,19 @@ def make_activities_file(
     activities_list = generator.load()
     with open(json_file, "w") as f:
         json.dump(activities_list, f)
-    if True:
-      filename = os.path.basename(yearly_json_file)  # "2025.json"
-      year = filename[:4]
-      skip_columns = {"summary_polyline"}
-      filtered_runs = [
-        {k: v for k, v in rec.items() if k not in skip_columns}
-        for rec in activities_list
-        if rec.get("start_date_local", "").startswith(year)
-      ]
-      with open(yearly_json_file, "w") as f:
-        json.dump(filtered_runs,f)
+    processed = []
+    for activity in activities_list:
+      location = activity.get("location_country", "")
+      city = get_city_name(location)
+      activity["city"] = city
+      processed.append(activity)
+    skip_columns = {"summary_polyline", "start_date", "location_country"}
+    filtered_runs = [
+      {k: v for k, v in rec.items() if k not in skip_columns}
+      for rec in processed
+    ]
+    with open(json_file2, "w") as f:
+      json.dump(filtered_runs,f)
 
 
 def make_strava_client(client_id, client_secret, refresh_token):
