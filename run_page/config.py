@@ -1,9 +1,6 @@
 import os
 from collections import namedtuple
 import yaml
-from datetime import datetime
-
-year = datetime.now().year
 
 # getting content root directory
 current = os.path.dirname(os.path.realpath(__file__))
@@ -21,7 +18,7 @@ FOLDER_DICT = {
 }
 SQL_FILE = os.path.join(parent, "run_page", "data.db")
 JSON_FILE = os.path.join(parent, "src", "static", "activities.json")
-CUR_YEAR_JSON_FILE = os.path.join(parent, "src", "static", f"{year}.json")
+JSON_FILE2 = os.path.join(parent, "src", "static", "all.json")
 SYNCED_FILE = os.path.join(parent, "imported.json")
 SYNCED_ACTIVITY_FILE = os.path.join(parent, "synced_activity.json")
 
