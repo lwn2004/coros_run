@@ -11,17 +11,21 @@ interface ISiteMetadataResult {
 
 const data: ISiteMetadataResult = {
   siteTitle: 'Running Page',
-  siteUrl: 'https://cr.linwn.net',
+  siteUrl: 'https://run.linwn.net',
   logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQTtc69JxHNcmN1ETpMUX4dozAgAN6iPjWalQ&usqp=CAU',
   description: 'Personal site and blog',
   navLinks: [
     {
+      name: 'Fun',
+      url: 'https://run.linwn.net/fun',
+    },    
+    {
       name: 'Blog',
-      url: 'https://cr.linwn.net',
+      url: '#',
     },
     {
       name: 'About',
-      url: 'https://cr.linwn.net',
+      url: '#',
     },
   ],
 };
