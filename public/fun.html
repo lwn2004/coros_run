@@ -14,21 +14,21 @@
       --text-primary: #212529;
       --text-secondary: #5a6a79;
       --border-color: #dee2e6;
-      --accent-color: #0d6efd; /* Bootstrap Blue */
+      --accent-color: #0d6efd;
       --success-color: #198754;
-      --trophy-color: #ffc107; /* Bootstrap Warning Yellow */
+      --trophy-color: #ffc107;
       --hover-bg: #e9ecef;
     }
 
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg-color: #1c1e21; /* 更柔和的深色背景 */
-        --card-bg: #282a2d; /* 卡片背景，与主背景形成对比 */
-        --text-primary: #e4e6eb; /* 亮灰色文字 */
-        --text-secondary: #a8b3cf; /* 次要文字，带一点蓝色调，对比度更高 */
+        --bg-color: #1c1e21;
+        --card-bg: #282a2d;
+        --text-primary: #e4e6eb;
+        --text-secondary: #a8b3cf;
         --border-color: #495057;
-        --accent-color: #4dabf7; /* 更亮的蓝色，在深色背景下更醒目 */
-        --success-color: #20c997; /* 更鲜艳的绿色 */
+        --accent-color: #4dabf7;
+        --success-color: #20c997;
         --trophy-color: #fcc419;
         --hover-bg: #3a3b3c;
       }
@@ -101,7 +101,6 @@
       cursor: pointer;
     }
 
-
     .stat-label {
       font-size: 0.9rem;
       color: var(--text-secondary);
@@ -159,14 +158,13 @@
         color: var(--text-primary);
     }
     
-    /* 关键修改: 调整折叠菜单和表格样式 */
     .collapsing {
       transition: height 0.2s ease;
     }
     .accordion-button {
       background-color: var(--card-bg);
       color: var(--text-primary);
-      padding-left: 0.75rem; /* 减小左边距 */
+      padding-left: 0.75rem;
       padding-right: 0.75rem;
     }
     .accordion-button:not(.collapsed) {
@@ -208,8 +206,116 @@
     .details-row .card-body {
       background-color: var(--hover-bg);
       color: var(--text-secondary);
-      padding-left: 1rem; /* 调整展开详情的缩进 */
+      padding-left: 1rem;
     }
+	.carousel-control-prev, .carousel-control-next {
+	  width: 30px;
+	  height: 30px;
+	  top: 50%;
+	  transform: translateY(-50%);
+	  background-color: rgba(0,0,0,0.2);
+	  border-radius: 50%;
+	}
+
+	.carousel-control-prev {
+	  left: 10px;
+	}
+
+	.carousel-control-next {
+	  right: 10px;
+	}
+
+	.carousel-indicators button {
+	  width: 8px;
+	  height: 8px;
+	  border-radius: 50%;
+	  margin: 0 3px;
+	  background-color: var(--text-secondary);
+	  opacity: 0.5;
+	}
+
+	.carousel-indicators button.active {
+	  opacity: 1;
+	  background-color: var(--accent-color);
+	}	
+	.carousel-item {
+	  min-height: 450px;
+	}
+
+	.carousel-inner {
+	  overflow: hidden;
+	}
+	
+	.badge.bg-success {
+	  font-size: 0.75em;
+	  padding: 0.25em 0.5em;
+	  font-weight: 500;
+	}
+    
+    /* --- New/Modified CSS for Race Records --- */
+    .event-entry {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .clickable-certificate {
+        color: var(--accent-color);
+        cursor: pointer;
+        text-decoration: none;
+        border-bottom: 1px dashed var(--accent-color);
+        transition: all 0.2s;
+    }
+    .clickable-certificate:hover {
+        color: var(--accent-color);
+        border-bottom-style: solid;
+    }
+
+    .modal-header .btn-close {
+        filter: invert(0.8);
+    }
+    .dark-modal .modal-header .btn-close {
+        filter: none;
+    }
+
+
+/* 添加到style标签中 */
+
+/* 比赛记录字体颜色优化 */
+.text-primary-emphasis {
+  color: var(--text-primary) !important;
+}
+
+.text-body-secondary {
+  color: var(--text-secondary) !important;
+}
+
+/* 达标信息样式 */
+.classification-text {
+  color: var(--success-color);
+  font-weight: 500;
+  font-size: 0.9em;
+}
+
+.certificate-link {
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+}
+
+.certificate-link:hover {
+  text-decoration: none;
+  transform: scale(1.05);
+}
+
+/* 深色模式适配 */
+@media (prefers-color-scheme: dark) {
+  .classification-text {
+    color: #20c997; /* 更亮的绿色增强可读性 */
+  }
+}
+
+	
   </style>
 </head>
 <body>
@@ -219,38 +325,38 @@
     <span class="navbar-main-title">步履不停</span>
     <span class="navbar-sub-title">我的40000KM绕地球一圈儿跑量挑战</span>
   </div>
-  <button class="btn p-0" data-bs-toggle="modal" data-bs-target="#pbModal" title="个人最佳">
-    <span class="trophy-icon">🏆</span>
-  </button>
+	<button class="btn p-0" data-bs-toggle="modal" data-bs-target="#pbModal" title="跑步成就">
+	  <span class="trophy-icon">🏆</span>
+	</button>
 </nav>
 
 <div class="container mt-4">
   <div class="row g-2 mb-3">
-    <div class="col-12 mb-3">
-      <div class="stat-card stat-card-clickable" id="dist-card"
-          data-label-front="当前跑量"
-          data-value-front="3493.39 &lt;small class=&#34;small-muted&#34;&gt;km&lt;/small&gt;"
-          data-details-front="<div class='mt-2'><div class='stat-label'>已沿赤道行进</div><div class='progress mt-2' style='height: 6px;'><div class='progress-bar' role='progressbar' style='width: 8.7171%;'></div></div><small class='small-muted'>8.7171%</small></div>"
-          data-label-back="总耗时"
-          data-value-back="15天 09小时 47分 18秒"
-          data-details-back="<div class='mt-2'><div class='stat-label'>按这速度，到2043年04月13日可绕地球一圈儿。</div><small class='remaining-time'>再坚持17年267天！</small></div>">
-        <div class="stat-card-content">
-          <div>
-            <div class="stat-label">当前跑量</div>
-            <div class="stat-value">3493.39 <small class="small-muted">km</small></div>
-          </div>
-          <div class="stat-details">
-            <div class="mt-2">
-              <div class="stat-label">已沿赤道行进</div>
-              <div class="progress mt-2" style="height: 6px;">
-                <div class="progress-bar" role="progressbar" style="width: 8.7171%;"></div>
-              </div>
-              <small class="small-muted">8.7171%</small>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+	<div class="col-12 mb-3">
+	  <div class="stat-card stat-card-clickable" id="dist-card"
+		  data-label-front="当前跑量"
+		  data-value-front="3493.39 &lt;small class=&#34;small-muted&#34;&gt;km&lt;/small&gt;"
+		  data-details-front="<div class='mt-2'><div class='stat-label'>已沿赤道行进</div><div class='progress mt-2' style='height: 6px;'><div class='progress-bar' role='progressbar' style='width: 8.7171%;'></div></div><small class='small-muted'>8.7171%</small></div>"
+		  data-label-back="日均跑量"
+		  data-value-back="5.65 &lt;small class=&#34;small-muted&#34;&gt;km/天&lt;/small&gt;"
+		  data-details-back="<div class='mt-2'><div class='stat-label'>按这速度，到2043年04月13日可绕地球一圈儿。</div><div class='progress mt-2 mb-2' style='height: 4px;'><div class='progress-bar' role='progressbar' style='width: 8.7171%;'></div></div><small class='remaining-time'>再坚持17年267天！</small></div>">
+		<div class="stat-card-content">
+		  <div>
+			<div class="stat-label">当前跑量</div>
+			<div class="stat-value">3493.39 <small class="small-muted">km</small></div>
+		  </div>
+		  <div class="stat-details">
+			<div class="mt-2">
+			  <div class="stat-label">已沿赤道行进</div>
+			  <div class="progress mt-2" style="height: 6px;">
+				<div class="progress-bar" role="progressbar" style="width: 8.7171%;"></div>
+			  </div>
+			  <small class="small-muted">8.7171%</small>
+			</div>
+		  </div>
+		</div>
+	  </div>
+	</div>
     
     <div class="col-6 col-md-6">
       <div class="stat-card stat-card-clickable h-100" id="count-card"
@@ -7350,87 +7456,385 @@
 <div class="modal fade" id="pbModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content dark-modal">
-      <div class="modal-header dark-modal">
-        <h5 class="modal-title">个人最佳纪录</h5>
+      <div class="modal-header dark-modal position-relative">
+        <h5 class="modal-title">跑步成就</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"
-          style="--bs-btn-close-color: var(--text-primary); filter: invert(0.8);"></button>
+          style="--bs-btn-close-color: var(--text-primary);"></button>
       </div>
-      <div class="modal-body">
-        
-          <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry dark-modal">
-            <div>
-              <div class="fw-bold">1公里</div>
-              <small class="small-muted">2025年03月16日</small>
+      <div class="modal-body p-0">
+        <div id="achievementCarousel" class="carousel slide" data-bs-ride="carousel">
+          <div class="carousel-inner">
+            <div class="carousel-item active">
+              <div class="p-3">
+                <h6 class="text-center mb-3">个人最佳纪录</h6>
+                
+                  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry dark-modal">
+                    <div>
+                      <div class="fw-bold">1公里</div>
+                      <small class="small-muted">2025年03月16日</small>
+                    </div>
+                    <div class="text-end">
+                      <div class="fw-bold">0:04:07</div>
+                      <small class="small-muted">配速: 4&#39;07&#34;</small>
+                    </div>
+                  </div>
+                
+                  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry dark-modal">
+                    <div>
+                      <div class="fw-bold">3公里</div>
+                      <small class="small-muted">2025年03月16日</small>
+                    </div>
+                    <div class="text-end">
+                      <div class="fw-bold">0:13:06</div>
+                      <small class="small-muted">配速: 4&#39;22&#34;</small>
+                    </div>
+                  </div>
+                
+                  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry dark-modal">
+                    <div>
+                      <div class="fw-bold">5公里</div>
+                      <small class="small-muted">2025年03月16日</small>
+                    </div>
+                    <div class="text-end">
+                      <div class="fw-bold">0:22:17</div>
+                      <small class="small-muted">配速: 4&#39;27&#34;</small>
+                    </div>
+                  </div>
+                
+                  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry dark-modal">
+                    <div>
+                      <div class="fw-bold">10公里</div>
+                      <small class="small-muted">2025年03月16日</small>
+                    </div>
+                    <div class="text-end">
+                      <div class="fw-bold">0:45:45</div>
+                      <small class="small-muted">配速: 4&#39;35&#34;</small>
+                    </div>
+                  </div>
+                
+                  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry dark-modal">
+                    <div>
+                      <div class="fw-bold">半马</div>
+                      <small class="small-muted">2025年03月16日</small>
+                    </div>
+                    <div class="text-end">
+                      <div class="fw-bold">1:43:26</div>
+                      <small class="small-muted">配速: 4&#39;54&#34;</small>
+                    </div>
+                  </div>
+                
+                  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry dark-modal">
+                    <div>
+                      <div class="fw-bold">全马</div>
+                      <small class="small-muted">无记录</small>
+                    </div>
+                    <div class="text-end">
+                      <div class="fw-bold">--</div>
+                      <small class="small-muted">配速: --</small>
+                    </div>
+                  </div>
+                
+              </div>
             </div>
-            <div class="text-end">
-              <div class="fw-bold">0:04:07</div>
-              <small class="small-muted">配速: 4&#39;07&#34;</small>
-            </div>
+            
+			<div class="carousel-item">
+			  <div class="p-3">
+				<h6 class="text-center mb-3">里程碑</h6>
+				
+				
+				
+				  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry dark-modal 
+							 border-success border-2">
+					<div>
+					  <div class="fw-bold text-success">
+						踏出第一步
+						
+						  <span class="badge bg-success ms-2">已完成</span>
+						
+					  </div>
+					  <small class="text-success">
+						
+						  2021年03月24日
+						
+					  </small>
+					</div>
+					<div class="text-end">
+					  <div class="fw-bold text-success">
+						
+						  0.37 km
+						
+					  </div>
+					  <small class="text-success">
+						首跑
+					  </small>
+					</div>
+				  </div>
+				
+				  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry dark-modal 
+							 border-success border-2">
+					<div>
+					  <div class="fw-bold text-success">
+						1000公里
+						
+						  <span class="badge bg-success ms-2">已完成</span>
+						
+					  </div>
+					  <small class="text-success">
+						
+						  2024年02月11日
+						
+					  </small>
+					</div>
+					<div class="text-end">
+					  <div class="fw-bold text-success">
+						
+						  1000 km
+						
+					  </div>
+					  <small class="text-success">
+						里程碑达成
+					  </small>
+					</div>
+				  </div>
+				
+				  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry dark-modal 
+							 ">
+					<div>
+					  <div class="fw-bold ">
+						10000公里
+						
+					  </div>
+					  <small class="small-muted">
+						
+						  未达成
+						
+					  </small>
+					</div>
+					<div class="text-end">
+					  <div class="fw-bold text-muted">
+						
+						  10000 km
+						
+					  </div>
+					  <small class="small-muted">
+						进行中
+					  </small>
+					</div>
+				  </div>
+				
+				  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry dark-modal 
+							 ">
+					<div>
+					  <div class="fw-bold ">
+						20000公里
+						
+					  </div>
+					  <small class="small-muted">
+						
+						  未达成
+						
+					  </small>
+					</div>
+					<div class="text-end">
+					  <div class="fw-bold text-muted">
+						
+						  20000 km
+						
+					  </div>
+					  <small class="small-muted">
+						进行中
+					  </small>
+					</div>
+				  </div>
+				
+				  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry dark-modal 
+							 ">
+					<div>
+					  <div class="fw-bold ">
+						30000公里
+						
+					  </div>
+					  <small class="small-muted">
+						
+						  未达成
+						
+					  </small>
+					</div>
+					<div class="text-end">
+					  <div class="fw-bold text-muted">
+						
+						  30000 km
+						
+					  </div>
+					  <small class="small-muted">
+						进行中
+					  </small>
+					</div>
+				  </div>
+				
+				  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry dark-modal 
+							 ">
+					<div>
+					  <div class="fw-bold ">
+						40000公里
+						
+					  </div>
+					  <small class="small-muted">
+						
+						  未达成
+						
+					  </small>
+					</div>
+					<div class="text-end">
+					  <div class="fw-bold text-muted">
+						
+						  40000 km
+						
+					  </div>
+					  <small class="small-muted">
+						进行中
+					  </small>
+					</div>
+				  </div>
+				
+			  </div>
+			</div>
+			
+			<!-- 比赛记录 -->
+			<div class="carousel-item">
+			  <div class="p-3" style="min-height: 400px; display: flex; flex-direction: column;">
+				<h6 class="text-center mb-3">比赛记录</h6>
+				<div style="flex: 1; overflow-y: auto;">
+				  
+					
+					  <div class="border-bottom py-2 pb-entry dark-modal">
+						<!-- 第一行：赛事名称 + 达标信息 + 用时 -->
+						<div class="d-flex justify-content-between align-items-center">
+						  <div class="fw-bold text-primary-emphasis">
+							清远马拉松
+							<small class="text-body-secondary">(21.10 km)</small>
+						  </div>
+						  
+						  <!-- 达标信息居中显示 -->
+						  <div class="flex-grow-1 text-center px-2">
+							
+							  <a href="#" class="certificate-link text-decoration-none" 
+								 data-img="images/certificates/Level2AmateurHalfMarathonRunner.jpg">
+								<span class="badge bg-success me-1">达标</span>
+								<span class="classification-text">大二</span>
+							  </a>
+							
+						  </div>
+						  
+						  <!-- 用时在最右侧 -->
+						  <div class="text-nowrap text-primary-emphasis">
+							1:44:34
+						  </div>
+						</div>
+						
+						<!-- 第二行：日期 + 城市 + 配速 -->
+						<div class="d-flex justify-content-between align-items-center mt-1">
+						  <div>
+							<small class="text-body-secondary">
+							  2025.03.16
+							</small>
+							<small class="text-body-secondary ms-2">清远市</small>
+						  </div>
+						  <div class="text-end">
+							<small class="text-body-secondary">配速: 4&#39;57&#34;</small>
+						  </div>
+						</div>
+					  </div>
+					
+					  <div class="border-bottom py-2 pb-entry dark-modal">
+						<!-- 第一行：赛事名称 + 达标信息 + 用时 -->
+						<div class="d-flex justify-content-between align-items-center">
+						  <div class="fw-bold text-primary-emphasis">
+							茂名马拉松
+							<small class="text-body-secondary">(21.10 km)</small>
+						  </div>
+						  
+						  <!-- 达标信息居中显示 -->
+						  <div class="flex-grow-1 text-center px-2">
+							
+						  </div>
+						  
+						  <!-- 用时在最右侧 -->
+						  <div class="text-nowrap text-primary-emphasis">
+							2:15:47
+						  </div>
+						</div>
+						
+						<!-- 第二行：日期 + 城市 + 配速 -->
+						<div class="d-flex justify-content-between align-items-center mt-1">
+						  <div>
+							<small class="text-body-secondary">
+							  2024.03.24
+							</small>
+							<small class="text-body-secondary ms-2">茂名市</small>
+						  </div>
+						  <div class="text-end">
+							<small class="text-body-secondary">配速: 6&#39;26&#34;</small>
+						  </div>
+						</div>
+					  </div>
+					
+				  
+				</div>
+				<!-- 保留底部空白 -->
+				<div style="height: 20px;"></div>
+			  </div>
+			</div>
+			
           </div>
-        
-          <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry dark-modal">
-            <div>
-              <div class="fw-bold">3公里</div>
-              <small class="small-muted">2025年03月16日</small>
-            </div>
-            <div class="text-end">
-              <div class="fw-bold">0:13:06</div>
-              <small class="small-muted">配速: 4&#39;22&#34;</small>
-            </div>
-          </div>
-        
-          <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry dark-modal">
-            <div>
-              <div class="fw-bold">5公里</div>
-              <small class="small-muted">2025年03月16日</small>
-            </div>
-            <div class="text-end">
-              <div class="fw-bold">0:22:17</div>
-              <small class="small-muted">配速: 4&#39;27&#34;</small>
-            </div>
-          </div>
-        
-          <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry dark-modal">
-            <div>
-              <div class="fw-bold">10公里</div>
-              <small class="small-muted">2025年03月16日</small>
-            </div>
-            <div class="text-end">
-              <div class="fw-bold">0:45:45</div>
-              <small class="small-muted">配速: 4&#39;35&#34;</small>
-            </div>
-          </div>
-        
-          <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry dark-modal">
-            <div>
-              <div class="fw-bold">半马</div>
-              <small class="small-muted">2025年03月16日</small>
-            </div>
-            <div class="text-end">
-              <div class="fw-bold">1:43:26</div>
-              <small class="small-muted">配速: 4&#39;54&#34;</small>
-            </div>
-          </div>
-        
-          <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry dark-modal">
-            <div>
-              <div class="fw-bold">全马</div>
-              <small class="small-muted">无记录</small>
-            </div>
-            <div class="text-end">
-              <div class="fw-bold">--</div>
-              <small class="small-muted">配速: --</small>
-            </div>
-          </div>
-        
+          
+          <button class="carousel-control-prev" type="button" data-bs-target="#achievementCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#achievementCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+          </button>
+          
+			<div class="carousel-indicators position-static mt-2 justify-content-center">
+			  <button type="button" data-bs-target="#achievementCarousel" data-bs-slide-to="0" class="active" aria-current="true"></button>
+			  <button type="button" data-bs-target="#achievementCarousel" data-bs-slide-to="1"></button>
+			  <button type="button" data-bs-target="#achievementCarousel" data-bs-slide-to="2"></button>
+			</div>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
+
+<!-- 证书模态框 -->
+<div class="modal fade" id="certificateModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content dark-modal">
+      <div class="modal-header">
+        <h5 class="modal-title">等级证书</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <img id="certificateImage" src="" class="img-fluid" style="max-height: 70vh;">
+      </div>
+      <div class="modal-footer">
+        <a id="downloadCertificate" href="#" class="btn btn-sm btn-primary" download>
+          <i class="bi bi-download"></i> 下载证书
+        </a>
+        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.bootcdn.net/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
+  // Stat card flipping logic
   document.querySelectorAll('.stat-card-clickable').forEach(card => {
     card.dataset.state = 'front';
     const contentEl = card.querySelector('.stat-card-content');
@@ -7442,15 +7846,10 @@
         const newValue = card.dataset[`value${targetState.charAt(0).toUpperCase() + targetState.slice(1)}`];
         const newDetails = card.dataset[`details${targetState.charAt(0).toUpperCase() + targetState.slice(1)}`] || '';
 
-        let valueClass = 'stat-value';
-        if (card.id === 'dist-card' && targetState === 'back') {
-            valueClass = 'stat-value-small';
-        }
-
         const newContentHTML = `
             <div>
                 <div class="stat-label">${newLabel}</div>
-                <div class="${valueClass}">${newValue}</div>
+                <div class="stat-value">${newValue}</div>
             </div>
             <div class="stat-details">${newDetails}</div>
         `;
@@ -7458,10 +7857,10 @@
         contentEl.innerHTML = newContentHTML;
         card.dataset.state = targetState;
     });
-});
+  });
 
+  // Monthly distance chart logic
   const chartCtx = document.getElementById('monthlyDistanceChart').getContext('2d');
-  const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   const gridColor = 'rgba(128, 128, 128, 0.2)';
   const tickColor = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim();
   const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
@@ -7472,8 +7871,8 @@
       labels: ["24-08", "24-09", "24-10", "24-11", "24-12", "25-01", "25-02", "25-03", "25-04", "25-05", "25-06", "25-07"],
       datasets: [{
         label: '距离 (km)',
-        data: [126.75317000000001, 109.63328, 129.56132, 126.45856, 171.69214, 204.68943, 202.16500999999994, 203.37226, 201.70057999999995, 150.97975, 204.55767999999998, 193.32998999999995],
-        backgroundColor: accentColor + '99', // Add alpha
+        data: [126.75, 109.63, 129.56, 126.46, 171.69, 204.69, 202.17, 203.37, 201.7, 150.98, 204.56, 193.33],
+        backgroundColor: accentColor + '99',
         borderColor: accentColor,
         borderWidth: 1,
         borderRadius: 4,
@@ -7496,6 +7895,21 @@
       }
     }
   });
+// 初始化证书预览
+document.querySelectorAll('.certificate-link').forEach(link => {
+  link.addEventListener('click', function(e) {
+    e.preventDefault();
+    const imgUrl = this.getAttribute('data-img');
+    document.getElementById('certificateImage').src = imgUrl;
+    document.getElementById('downloadCertificate').href = imgUrl;
+    new bootstrap.Modal(document.getElementById('certificateModal')).show();
+  });
+});
+
+// 关闭模态框时清除图片
+document.getElementById('certificateModal').addEventListener('hidden.bs.modal', function() {
+  document.getElementById('certificateImage').src = '';
+});
 </script>
 </body>
 </html>
