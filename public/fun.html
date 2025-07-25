@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-bs-theme="dark">
 <head>
   <meta charset="UTF-8">
   <title>步履不停 - 已绕地球0.09圈儿</title>
@@ -7,31 +7,17 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
   <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    /* 颜色系统 */
+    /* 颜色系统 - 强制深色模式 */
     :root {
-      --bg-color: #f8f9fa;
-      --card-bg: #ffffff;
-      --text-primary: #212529;
-      --text-secondary: #5a6a79;
-      --border-color: #dee2e6;
-      --accent-color: #0d6efd;
-      --success-color: #198754;
-      --trophy-color: #ffc107;
-      --hover-bg: #e9ecef;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg-color: #1c1e21;
-        --card-bg: #282a2d;
-        --text-primary: #e4e6eb;
-        --text-secondary: #a8b3cf;
-        --border-color: #495057;
-        --accent-color: #4dabf7;
-        --success-color: #20c997;
-        --trophy-color: #fcc419;
-        --hover-bg: #3a3b3c;
-      }
+      --bg-color: #1c1e21;
+      --card-bg: #282a2d;
+      --text-primary: #e4e6eb;
+      --text-secondary: #a8b3cf;
+      --border-color: #495057;
+      --accent-color: #4dabf7;
+      --success-color: #20c997;
+      --trophy-color: #fcc419;
+      --hover-bg: #3a3b3c;
     }
     
     html {
@@ -49,9 +35,9 @@
       background-color: var(--card-bg);
       border-bottom: 1px solid var(--border-color);
       padding: 0.75rem 1rem;
-	  position: sticky;
-	  top: 0;
-	  z-index: 1000;	  
+      position: sticky;
+      top: 0;
+      z-index: 1000;
     }
 
     .navbar-main-title {
@@ -154,6 +140,19 @@
       }
     }
 
+    @media (max-width: 576px) {
+      .stat-card {
+        height: 140px;
+        padding: 1rem;
+      }
+      #dist-card {
+        height: 160px;
+      }
+      .stat-value {
+        font-size: 1.5rem;
+      }
+    }
+
     .card-title {
         color: var(--text-primary);
     }
@@ -189,14 +188,14 @@
       --bs-table-border-color: var(--border-color);
     }
 
-    .modal-content.dark-modal {
+    .modal-content {
       background-color: var(--card-bg);
       color: var(--text-primary);
     }
-    .modal-header.dark-modal {
+    .modal-header {
       border-bottom-color: var(--border-color);
     }
-    .pb-entry.dark-modal {
+    .pb-entry {
       border-bottom: 1px solid var(--border-color) !important;
     }
     .details-row > td {
@@ -208,51 +207,39 @@
       color: var(--text-secondary);
       padding-left: 1rem;
     }
-	.carousel-control-prev, .carousel-control-next {
-	  width: 30px;
-	  height: 30px;
-	  top: 50%;
-	  transform: translateY(-50%);
-	  background-color: rgba(0,0,0,0.2);
-	  border-radius: 50%;
-	}
 
-	.carousel-control-prev {
-	  left: 10px;
-	}
+    .carousel-control-prev, .carousel-control-next {
+      width: 30px;
+      height: 30px;
+      top: 50%;
+      transform: translateY(-50%);
+      background-color: rgba(0,0,0,0.2);
+      border-radius: 50%;
+    }
 
-	.carousel-control-next {
-	  right: 10px;
-	}
+    .carousel-control-prev {
+      left: 10px;
+    }
 
-	.carousel-indicators button {
-	  width: 8px;
-	  height: 8px;
-	  border-radius: 50%;
-	  margin: 0 3px;
-	  background-color: var(--text-secondary);
-	  opacity: 0.5;
-	}
-
-	.carousel-indicators button.active {
-	  opacity: 1;
-	  background-color: var(--accent-color);
-	}	
-	.carousel-item {
-	  min-height: 450px;
-	}
-
-	.carousel-inner {
-	  overflow: hidden;
-	}
-	
-	.badge.bg-success {
-	  font-size: 0.75em;
-	  padding: 0.25em 0.5em;
-	  font-weight: 500;
-	}
+    .carousel-control-next {
+      right: 10px;
+    }
     
-    /* --- New/Modified CSS for Race Records --- */
+    .carousel-item {
+      min-height: 450px;
+    }
+
+    .carousel-inner {
+      overflow: hidden;
+    }
+    
+    .badge.bg-success {
+      font-size: 0.75em;
+      padding: 0.25em 0.5em;
+      font-weight: 500;
+    }
+    
+    /* 比赛记录相关样式 */
     .event-entry {
         display: flex;
         flex-direction: column;
@@ -274,102 +261,108 @@
     .modal-header .btn-close {
         filter: invert(0.8);
     }
-    .dark-modal .modal-header .btn-close {
-        filter: none;
+
+    /* 比赛记录字体颜色优化 */
+    .text-primary-emphasis {
+      color: var(--text-primary) !important;
     }
 
+    .text-body-secondary {
+      color: var(--text-secondary) !important;
+    }
 
-/* 添加到style标签中 */
+    /* 达标信息样式 */
+    .classification-text {
+      color: var(--success-color);
+      font-weight: 500;
+      font-size: 0.9em;
+    }
 
-/* 比赛记录字体颜色优化 */
-.text-primary-emphasis {
-  color: var(--text-primary) !important;
-}
+    .certificate-link {
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+    }
 
-.text-body-secondary {
-  color: var(--text-secondary) !important;
-}
+    .certificate-link:hover {
+      text-decoration: none;
+      transform: scale(1.05);
+    }
 
-/* 达标信息样式 */
-.classification-text {
-  color: var(--success-color);
-  font-weight: 500;
-  font-size: 0.9em;
-}
-
-.certificate-link {
-  transition: all 0.2s;
-  display: inline-flex;
-  align-items: center;
-}
-
-.certificate-link:hover {
-  text-decoration: none;
-  transform: scale(1.05);
-}
-
-/* 深色模式适配 */
-@media (prefers-color-scheme: dark) {
-  .classification-text {
-    color: #20c997; /* 更亮的绿色增强可读性 */
-  }
-}
-
-	
+    /* 加载动画 */
+    #loading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--bg-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
   </style>
 </head>
 <body>
+
+<!-- 加载状态 -->
+<div id="loading">
+  <div class="spinner-border" role="status">
+    <span class="visually-hidden">加载中...</span>
+  </div>
+</div>
 
 <nav class="navbar justify-content-between">
   <div class="d-flex flex-column">
     <span class="navbar-main-title">步履不停</span>
     <span class="navbar-sub-title">我的40000KM绕地球一圈儿跑量挑战</span>
   </div>
-	<button class="btn p-0" data-bs-toggle="modal" data-bs-target="#pbModal" title="跑步成就">
-	  <span class="trophy-icon">🏆</span>
-	</button>
+  <button class="btn p-0" data-bs-toggle="modal" data-bs-target="#pbModal" title="跑步成就" aria-label="查看跑步成就">
+    <span class="trophy-icon">🏆</span>
+  </button>
 </nav>
 
 <div class="container mt-4">
   <div class="row g-2 mb-3">
-	<div class="col-12 mb-3">
-	  <div class="stat-card stat-card-clickable" id="dist-card"
-		  data-label-front="当前跑量"
-		  data-value-front="3493.39 &lt;small class=&#34;small-muted&#34;&gt;km&lt;/small&gt;"
-		  data-details-front="<div class='mt-2'><div class='stat-label'>已沿赤道行进</div><div class='progress mt-2' style='height: 6px;'><div class='progress-bar' role='progressbar' style='width: 8.7171%;'></div></div><small class='small-muted'>8.7171%</small></div>"
-		  data-label-back="日均跑量"
-		  data-value-back="5.65 &lt;small class=&#34;small-muted&#34;&gt;km/天&lt;/small&gt;"
-		  data-details-back="<div class='mt-2'><div class='stat-label'>按这速度，到2043年04月13日可绕地球一圈儿。</div><div class='progress mt-2 mb-2' style='height: 4px;'><div class='progress-bar' role='progressbar' style='width: 8.7171%;'></div></div><small class='remaining-time'>再坚持17年267天！</small></div>">
-		<div class="stat-card-content">
-		  <div>
-			<div class="stat-label">当前跑量</div>
-			<div class="stat-value">3493.39 <small class="small-muted">km</small></div>
-		  </div>
-		  <div class="stat-details">
-			<div class="mt-2">
-			  <div class="stat-label">已沿赤道行进</div>
-			  <div class="progress mt-2" style="height: 6px;">
-				<div class="progress-bar" role="progressbar" style="width: 8.7171%;"></div>
-			  </div>
-			  <small class="small-muted">8.7171%</small>
-			</div>
-		  </div>
-		</div>
-	  </div>
-	</div>
+    <div class="col-12 mb-3">
+      <div class="stat-card stat-card-clickable" id="dist-card"
+          data-label-front="当前跑量"
+          data-value-front="3493.39 &lt;small class=&#34;small-muted&#34;&gt;km&lt;/small&gt;"
+          data-details-front="<div class='mt-2'><div class='stat-label'>已沿赤道行进</div><div class='progress mt-2' style='height: 6px;'><div class='progress-bar' role='progressbar' style='width: 8.7171%;'></div></div><small class='small-muted'>8.7171%</small></div>"
+          data-label-back="日均跑量"
+          data-value-back="5.64 &lt;small class=&#34;small-muted&#34;&gt;km/天&lt;/small&gt;"
+          data-details-back="<div class='mt-2'><div class='stat-label'>预计2043年05月03日可绕地球一圈儿。</div><small class='remaining-time'>再坚持17年286天！</small></div>">
+        <div class="stat-card-content">
+          <div>
+            <div class="stat-label">当前跑量</div>
+            <div class="stat-value">3493.39 <small class="small-muted">km</small></div>
+          </div>
+          <div class="stat-details">
+            <div class="mt-2">
+              <div class="stat-label">已沿赤道行进</div>
+              <div class="progress mt-2" style="height: 6px;">
+                <div class="progress-bar" role="progressbar" style="width: 8.7171%;"></div>
+              </div>
+              <small class="small-muted">8.7171%</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     
     <div class="col-6 col-md-6">
       <div class="stat-card stat-card-clickable h-100" id="count-card"
           data-label-front="次数"
           data-value-front="424"
-		  data-details-front="<small class='small-muted'>&nbsp;</small>"
+          data-details-front="<small class='small-muted'>&nbsp;</small>"
           data-label-back="平均单次距离"
           data-value-back="8.24 &lt;small class=&#34;small-muted&#34;&gt;km&lt;/small&gt;"
-		  data-details-back="<small class='small-muted'>&nbsp;</small>">
+          data-details-back="<small class='small-muted'>&nbsp;</small>">
         <div class="stat-card-content">
           <div class="stat-label">次数</div>
           <div class="stat-value">424</div>
-		  <div class="stat-defails"><small class='small-muted'>&nbsp;</small></div>
+          <div class="stat-details"><small class='small-muted'>&nbsp;</small></div>
         </div>
       </div>
     </div>
@@ -378,14 +371,14 @@
       <div class="stat-card stat-card-clickable h-100" id="pace-card"
           data-label-front="平均配速"
           data-value-front="6&#39;21&#34;"
-		  data-details-front="<small class='small-muted'>&nbsp;</small>"
+          data-details-front="<small class='small-muted'>&nbsp;</small>"
           data-label-back="最快配速"
           data-value-back="4&#39;54&#34;"
           data-details-back="<small class='small-muted'>2025-03-16</small>">
         <div class="stat-card-content">
           <div class="stat-label">平均配速</div>
           <div class="stat-value">6&#39;21&#34;</div>
-		  <div class="stat-defails"><small class='small-muted'>&nbsp;</small></div>
+          <div class="stat-details"><small class='small-muted'>&nbsp;</small></div>
         </div>
       </div>
     </div>
@@ -394,7 +387,7 @@
   <div class="card mb-4" style="background-color: var(--card-bg); border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
     <div class="card-body">
       <h5 class="card-title">月度距离 (最近12个月)</h5>
-      <canvas id="monthlyDistanceChart"></canvas>
+      <canvas id="monthlyDistanceChart" aria-label="最近12个月跑步距离统计图表"></canvas>
     </div>
   </div>
 
@@ -409,7 +402,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20257">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20257" aria-expanded="false" aria-controls="collapse-m20257">
               07月 &nbsp; 
               <span class="small-muted small">(193.33 km | 5&#39;56&#34;)</span>
             </button>
@@ -631,7 +624,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20256">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20256" aria-expanded="false" aria-controls="collapse-m20256">
               06月 &nbsp; 
               <span class="small-muted small">(204.56 km | 6&#39;00&#34;)</span>
             </button>
@@ -867,7 +860,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20255">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20255" aria-expanded="false" aria-controls="collapse-m20255">
               05月 &nbsp; 
               <span class="small-muted small">(150.98 km | 5&#39;56&#34;)</span>
             </button>
@@ -1075,7 +1068,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20254">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20254" aria-expanded="false" aria-controls="collapse-m20254">
               04月 &nbsp; 
               <span class="small-muted small">(201.70 km | 5&#39;54&#34;)</span>
             </button>
@@ -1353,7 +1346,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20253">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20253" aria-expanded="false" aria-controls="collapse-m20253">
               03月 &nbsp; 
               <span class="small-muted small">(203.37 km | 5&#39;43&#34;)</span>
             </button>
@@ -1617,7 +1610,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20252">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20252" aria-expanded="false" aria-controls="collapse-m20252">
               02月 &nbsp; 
               <span class="small-muted small">(202.17 km | 5&#39;48&#34;)</span>
             </button>
@@ -1853,7 +1846,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20251">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20251" aria-expanded="false" aria-controls="collapse-m20251">
               01月 &nbsp; 
               <span class="small-muted small">(204.69 km | 5&#39;50&#34;)</span>
             </button>
@@ -2127,7 +2120,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m202412">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m202412" aria-expanded="false" aria-controls="collapse-m202412">
               12月 &nbsp; 
               <span class="small-muted small">(171.69 km | 5&#39;48&#34;)</span>
             </button>
@@ -2363,7 +2356,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m202411">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m202411" aria-expanded="false" aria-controls="collapse-m202411">
               11月 &nbsp; 
               <span class="small-muted small">(126.46 km | 6&#39;00&#34;)</span>
             </button>
@@ -2585,7 +2578,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m202410">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m202410" aria-expanded="false" aria-controls="collapse-m202410">
               10月 &nbsp; 
               <span class="small-muted small">(129.56 km | 5&#39;56&#34;)</span>
             </button>
@@ -2765,7 +2758,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20249">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20249" aria-expanded="false" aria-controls="collapse-m20249">
               09月 &nbsp; 
               <span class="small-muted small">(109.63 km | 6&#39;02&#34;)</span>
             </button>
@@ -2987,7 +2980,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20248">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20248" aria-expanded="false" aria-controls="collapse-m20248">
               08月 &nbsp; 
               <span class="small-muted small">(126.75 km | 6&#39;08&#34;)</span>
             </button>
@@ -3223,7 +3216,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20247">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20247" aria-expanded="false" aria-controls="collapse-m20247">
               07月 &nbsp; 
               <span class="small-muted small">(121.57 km | 6&#39;21&#34;)</span>
             </button>
@@ -3445,7 +3438,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20246">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20246" aria-expanded="false" aria-controls="collapse-m20246">
               06月 &nbsp; 
               <span class="small-muted small">(78.50 km | 6&#39;36&#34;)</span>
             </button>
@@ -3611,7 +3604,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20245">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20245" aria-expanded="false" aria-controls="collapse-m20245">
               05月 &nbsp; 
               <span class="small-muted small">(34.26 km | 6&#39;19&#34;)</span>
             </button>
@@ -3707,7 +3700,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20244">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20244" aria-expanded="false" aria-controls="collapse-m20244">
               04月 &nbsp; 
               <span class="small-muted small">(116.95 km | 6&#39;24&#34;)</span>
             </button>
@@ -3971,7 +3964,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20243">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20243" aria-expanded="false" aria-controls="collapse-m20243">
               03月 &nbsp; 
               <span class="small-muted small">(99.77 km | 6&#39;39&#34;)</span>
             </button>
@@ -4137,7 +4130,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20242">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20242" aria-expanded="false" aria-controls="collapse-m20242">
               02月 &nbsp; 
               <span class="small-muted small">(24.72 km | 6&#39;29&#34;)</span>
             </button>
@@ -4233,7 +4226,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20241">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20241" aria-expanded="false" aria-controls="collapse-m20241">
               01月 &nbsp; 
               <span class="small-muted small">(21.46 km | 6&#39;33&#34;)</span>
             </button>
@@ -4325,7 +4318,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m202312">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m202312" aria-expanded="false" aria-controls="collapse-m202312">
               12月 &nbsp; 
               <span class="small-muted small">(33.15 km | 7&#39;13&#34;)</span>
             </button>
@@ -4435,7 +4428,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m202311">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m202311" aria-expanded="false" aria-controls="collapse-m202311">
               11月 &nbsp; 
               <span class="small-muted small">(61.05 km | 6&#39;15&#34;)</span>
             </button>
@@ -4629,7 +4622,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m202310">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m202310" aria-expanded="false" aria-controls="collapse-m202310">
               10月 &nbsp; 
               <span class="small-muted small">(51.79 km | 6&#39;54&#34;)</span>
             </button>
@@ -4795,7 +4788,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20239">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20239" aria-expanded="false" aria-controls="collapse-m20239">
               09月 &nbsp; 
               <span class="small-muted small">(41.33 km | 6&#39;47&#34;)</span>
             </button>
@@ -4905,7 +4898,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20238">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20238" aria-expanded="false" aria-controls="collapse-m20238">
               08月 &nbsp; 
               <span class="small-muted small">(101.85 km | 6&#39;48&#34;)</span>
             </button>
@@ -5169,7 +5162,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20237">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20237" aria-expanded="false" aria-controls="collapse-m20237">
               07月 &nbsp; 
               <span class="small-muted small">(106.38 km | 7&#39;05&#34;)</span>
             </button>
@@ -5433,7 +5426,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20236">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20236" aria-expanded="false" aria-controls="collapse-m20236">
               06月 &nbsp; 
               <span class="small-muted small">(104.83 km | 7&#39;15&#34;)</span>
             </button>
@@ -5655,7 +5648,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20235">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20235" aria-expanded="false" aria-controls="collapse-m20235">
               05月 &nbsp; 
               <span class="small-muted small">(100.38 km | 7&#39;23&#34;)</span>
             </button>
@@ -5891,7 +5884,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20234">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20234" aria-expanded="false" aria-controls="collapse-m20234">
               04月 &nbsp; 
               <span class="small-muted small">(85.45 km | 7&#39;14&#34;)</span>
             </button>
@@ -6099,7 +6092,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20233">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20233" aria-expanded="false" aria-controls="collapse-m20233">
               03月 &nbsp; 
               <span class="small-muted small">(20.77 km | 7&#39;35&#34;)</span>
             </button>
@@ -6191,7 +6184,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m202211">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m202211" aria-expanded="false" aria-controls="collapse-m202211">
               11月 &nbsp; 
               <span class="small-muted small">(5.01 km | 8&#39;02&#34;)</span>
             </button>
@@ -6231,7 +6224,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m202210">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m202210" aria-expanded="false" aria-controls="collapse-m202210">
               10月 &nbsp; 
               <span class="small-muted small">(42.69 km | 7&#39;57&#34;)</span>
             </button>
@@ -6355,7 +6348,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20229">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20229" aria-expanded="false" aria-controls="collapse-m20229">
               09月 &nbsp; 
               <span class="small-muted small">(49.57 km | 6&#39;54&#34;)</span>
             </button>
@@ -6521,7 +6514,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20228">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20228" aria-expanded="false" aria-controls="collapse-m20228">
               08月 &nbsp; 
               <span class="small-muted small">(37.29 km | 7&#39;19&#34;)</span>
             </button>
@@ -6631,7 +6624,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20227">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20227" aria-expanded="false" aria-controls="collapse-m20227">
               07月 &nbsp; 
               <span class="small-muted small">(24.92 km | 6&#39;55&#34;)</span>
             </button>
@@ -6797,7 +6790,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20226">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20226" aria-expanded="false" aria-controls="collapse-m20226">
               06月 &nbsp; 
               <span class="small-muted small">(43.28 km | 8&#39;05&#34;)</span>
             </button>
@@ -6949,7 +6942,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20225">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20225" aria-expanded="false" aria-controls="collapse-m20225">
               05月 &nbsp; 
               <span class="small-muted small">(3.95 km | 8&#39;05&#34;)</span>
             </button>
@@ -7017,7 +7010,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20222">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20222" aria-expanded="false" aria-controls="collapse-m20222">
               02月 &nbsp; 
               <span class="small-muted small">(10.91 km | 9&#39;55&#34;)</span>
             </button>
@@ -7099,7 +7092,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20221">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20221" aria-expanded="false" aria-controls="collapse-m20221">
               01月 &nbsp; 
               <span class="small-muted small">(11.19 km | 7&#39;22&#34;)</span>
             </button>
@@ -7177,7 +7170,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m202112">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m202112" aria-expanded="false" aria-controls="collapse-m202112">
               12月 &nbsp; 
               <span class="small-muted small">(30.60 km | 6&#39;19&#34;)</span>
             </button>
@@ -7357,7 +7350,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20214">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20214" aria-expanded="false" aria-controls="collapse-m20214">
               04月 &nbsp; 
               <span class="small-muted small">(3.37 km | 16&#39;48&#34;)</span>
             </button>
@@ -7397,7 +7390,7 @@
       
         <div class="accordion-item">
           <h2 class="accordion-header">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20213">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20213" aria-expanded="false" aria-controls="collapse-m20213">
               03月 &nbsp; 
               <span class="small-muted small">(1.49 km | 12&#39;08&#34;)</span>
             </button>
@@ -7453,22 +7446,29 @@
   
 </div>
 
-<div class="modal fade" id="pbModal" tabindex="-1">
+<!-- 成就模态框 -->
+<div class="modal fade" id="pbModal" tabindex="-1" aria-labelledby="pbModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content dark-modal">
-      <div class="modal-header dark-modal position-relative">
-        <h5 class="modal-title">跑步成就</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"
-          style="--bs-btn-close-color: var(--text-primary);"></button>
+    <div class="modal-content">
+      <div class="modal-header position-relative">
+        <h5 class="modal-title" id="pbModalLabel">跑步成就</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body p-0">
         <div id="achievementCarousel" class="carousel slide" data-bs-ride="carousel">
+          <!-- 使用Bootstrap原生指示器 -->
+          <div class="carousel-indicators">
+            <button type="button" data-bs-target="#achievementCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="个人最佳纪录"></button>
+            <button type="button" data-bs-target="#achievementCarousel" data-bs-slide-to="1" aria-label="里程碑"></button>
+            <button type="button" data-bs-target="#achievementCarousel" data-bs-slide-to="2" aria-label="比赛记录"></button>
+          </div>
+          
           <div class="carousel-inner">
             <div class="carousel-item active">
               <div class="p-3">
                 <h6 class="text-center mb-3">个人最佳纪录</h6>
                 
-                  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry dark-modal">
+                  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry">
                     <div>
                       <div class="fw-bold">1公里</div>
                       <small class="small-muted">2025年03月16日</small>
@@ -7479,7 +7479,7 @@
                     </div>
                   </div>
                 
-                  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry dark-modal">
+                  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry">
                     <div>
                       <div class="fw-bold">3公里</div>
                       <small class="small-muted">2025年03月16日</small>
@@ -7490,7 +7490,7 @@
                     </div>
                   </div>
                 
-                  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry dark-modal">
+                  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry">
                     <div>
                       <div class="fw-bold">5公里</div>
                       <small class="small-muted">2025年03月16日</small>
@@ -7501,7 +7501,7 @@
                     </div>
                   </div>
                 
-                  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry dark-modal">
+                  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry">
                     <div>
                       <div class="fw-bold">10公里</div>
                       <small class="small-muted">2025年03月16日</small>
@@ -7512,7 +7512,7 @@
                     </div>
                   </div>
                 
-                  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry dark-modal">
+                  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry">
                     <div>
                       <div class="fw-bold">半马</div>
                       <small class="small-muted">2025年03月16日</small>
@@ -7523,7 +7523,7 @@
                     </div>
                   </div>
                 
-                  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry dark-modal">
+                  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry">
                     <div>
                       <div class="fw-bold">全马</div>
                       <small class="small-muted">无记录</small>
@@ -7537,255 +7537,253 @@
               </div>
             </div>
             
-			<div class="carousel-item">
-			  <div class="p-3">
-				<h6 class="text-center mb-3">里程碑</h6>
-				
-				
-				
-				  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry dark-modal 
-							 border-success border-2">
-					<div>
-					  <div class="fw-bold text-success">
-						踏出第一步
-						
-						  <span class="badge bg-success ms-2">已完成</span>
-						
-					  </div>
-					  <small class="text-success">
-						
-						  2021年03月24日
-						
-					  </small>
-					</div>
-					<div class="text-end">
-					  <div class="fw-bold text-success">
-						
-						  0.37 km
-						
-					  </div>
-					  <small class="text-success">
-						首跑
-					  </small>
-					</div>
-				  </div>
-				
-				  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry dark-modal 
-							 border-success border-2">
-					<div>
-					  <div class="fw-bold text-success">
-						1000公里
-						
-						  <span class="badge bg-success ms-2">已完成</span>
-						
-					  </div>
-					  <small class="text-success">
-						
-						  2024年02月11日
-						
-					  </small>
-					</div>
-					<div class="text-end">
-					  <div class="fw-bold text-success">
-						
-						  1000 km
-						
-					  </div>
-					  <small class="text-success">
-						里程碑达成
-					  </small>
-					</div>
-				  </div>
-				
-				  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry dark-modal 
-							 ">
-					<div>
-					  <div class="fw-bold ">
-						10000公里
-						
-					  </div>
-					  <small class="small-muted">
-						
-						  未达成
-						
-					  </small>
-					</div>
-					<div class="text-end">
-					  <div class="fw-bold text-muted">
-						
-						  10000 km
-						
-					  </div>
-					  <small class="small-muted">
-						进行中
-					  </small>
-					</div>
-				  </div>
-				
-				  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry dark-modal 
-							 ">
-					<div>
-					  <div class="fw-bold ">
-						20000公里
-						
-					  </div>
-					  <small class="small-muted">
-						
-						  未达成
-						
-					  </small>
-					</div>
-					<div class="text-end">
-					  <div class="fw-bold text-muted">
-						
-						  20000 km
-						
-					  </div>
-					  <small class="small-muted">
-						进行中
-					  </small>
-					</div>
-				  </div>
-				
-				  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry dark-modal 
-							 ">
-					<div>
-					  <div class="fw-bold ">
-						30000公里
-						
-					  </div>
-					  <small class="small-muted">
-						
-						  未达成
-						
-					  </small>
-					</div>
-					<div class="text-end">
-					  <div class="fw-bold text-muted">
-						
-						  30000 km
-						
-					  </div>
-					  <small class="small-muted">
-						进行中
-					  </small>
-					</div>
-				  </div>
-				
-				  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry dark-modal 
-							 ">
-					<div>
-					  <div class="fw-bold ">
-						40000公里
-						
-					  </div>
-					  <small class="small-muted">
-						
-						  未达成
-						
-					  </small>
-					</div>
-					<div class="text-end">
-					  <div class="fw-bold text-muted">
-						
-						  40000 km
-						
-					  </div>
-					  <small class="small-muted">
-						进行中
-					  </small>
-					</div>
-				  </div>
-				
-			  </div>
-			</div>
-			
-			<!-- 比赛记录 -->
-			<div class="carousel-item">
-			  <div class="p-3" style="min-height: 400px; display: flex; flex-direction: column;">
-				<h6 class="text-center mb-3">比赛记录</h6>
-				<div style="flex: 1; overflow-y: auto;">
-				  
-					
-					  <div class="border-bottom py-2 pb-entry dark-modal">
-						<!-- 第一行：赛事名称 + 达标信息 + 用时 -->
-						<div class="d-flex justify-content-between align-items-center">
-						  <div class="fw-bold text-primary-emphasis">
-							清远马拉松
-							<small class="text-body-secondary">(21.10 km)</small>
-						  </div>
-						  
-						  <!-- 达标信息居中显示 -->
-						  <div class="flex-grow-1 text-center px-2">
-							
-							  <a href="#" class="certificate-link text-decoration-none" 
-								 data-img="images/certificates/Level2AmateurHalfMarathonRunner.jpg">
-								<span class="badge bg-success me-1">达标</span>
-								<span class="classification-text">大二</span>
-							  </a>
-							
-						  </div>
-						  
-						  <!-- 用时在最右侧 -->
-						  <div class="text-nowrap text-primary-emphasis">
-							1:44:34
-						  </div>
-						</div>
-						
-						<!-- 第二行：日期 + 城市 + 配速 -->
-						<div class="d-flex justify-content-between align-items-center mt-1">
-						  <div>
-							<small class="text-body-secondary">
-							  2025.03.16
-							</small>
-							<small class="text-body-secondary ms-2">清远市</small>
-						  </div>
-						  <div class="text-end">
-							<small class="text-body-secondary">配速: 4&#39;57&#34;</small>
-						  </div>
-						</div>
-					  </div>
-					
-					  <div class="border-bottom py-2 pb-entry dark-modal">
-						<!-- 第一行：赛事名称 + 达标信息 + 用时 -->
-						<div class="d-flex justify-content-between align-items-center">
-						  <div class="fw-bold text-primary-emphasis">
-							茂名马拉松
-							<small class="text-body-secondary">(21.10 km)</small>
-						  </div>
-						  
-						  <!-- 达标信息居中显示 -->
-						  <div class="flex-grow-1 text-center px-2">
-							
-						  </div>
-						  
-						  <!-- 用时在最右侧 -->
-						  <div class="text-nowrap text-primary-emphasis">
-							2:15:47
-						  </div>
-						</div>
-						
-						<!-- 第二行：日期 + 城市 + 配速 -->
-						<div class="d-flex justify-content-between align-items-center mt-1">
-						  <div>
-							<small class="text-body-secondary">
-							  2024.03.24
-							</small>
-							<small class="text-body-secondary ms-2">茂名市</small>
-						  </div>
-						  <div class="text-end">
-							<small class="text-body-secondary">配速: 6&#39;26&#34;</small>
-						  </div>
-						</div>
-					  </div>
-					
-				  
-				</div>
-				<!-- 保留底部空白 -->
-				<div style="height: 20px;"></div>
-			  </div>
-			</div>
-			
+            <div class="carousel-item">
+              <div class="p-3">
+                <h6 class="text-center mb-3">里程碑</h6>
+                
+                
+                
+                  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry 
+                             border-success border-2">
+                    <div>
+                      <div class="fw-bold text-success">
+                        踏出第一步
+                        
+                          <span class="badge bg-success ms-2">已完成</span>
+                        
+                      </div>
+                      <small class="text-success">
+                        
+                          2021年03月24日
+                        
+                      </small>
+                    </div>
+                    <div class="text-end">
+                      <div class="fw-bold text-success">
+                        
+                          0.37 km
+                        
+                      </div>
+                      <small class="text-success">
+                        首跑
+                      </small>
+                    </div>
+                  </div>
+                
+                  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry 
+                             border-success border-2">
+                    <div>
+                      <div class="fw-bold text-success">
+                        1000公里
+                        
+                          <span class="badge bg-success ms-2">已完成</span>
+                        
+                      </div>
+                      <small class="text-success">
+                        
+                          2024年02月11日
+                        
+                      </small>
+                    </div>
+                    <div class="text-end">
+                      <div class="fw-bold text-success">
+                        
+                          1000 km
+                        
+                      </div>
+                      <small class="text-success">
+                        里程碑达成
+                      </small>
+                    </div>
+                  </div>
+                
+                  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry 
+                             ">
+                    <div>
+                      <div class="fw-bold ">
+                        10000公里
+                        
+                      </div>
+                      <small class="small-muted">
+                        
+                          未达成
+                        
+                      </small>
+                    </div>
+                    <div class="text-end">
+                      <div class="fw-bold text-muted">
+                        
+                          10000 km
+                        
+                      </div>
+                      <small class="small-muted">
+                        进行中
+                      </small>
+                    </div>
+                  </div>
+                
+                  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry 
+                             ">
+                    <div>
+                      <div class="fw-bold ">
+                        20000公里
+                        
+                      </div>
+                      <small class="small-muted">
+                        
+                          未达成
+                        
+                      </small>
+                    </div>
+                    <div class="text-end">
+                      <div class="fw-bold text-muted">
+                        
+                          20000 km
+                        
+                      </div>
+                      <small class="small-muted">
+                        进行中
+                      </small>
+                    </div>
+                  </div>
+                
+                  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry 
+                             ">
+                    <div>
+                      <div class="fw-bold ">
+                        30000公里
+                        
+                      </div>
+                      <small class="small-muted">
+                        
+                          未达成
+                        
+                      </small>
+                    </div>
+                    <div class="text-end">
+                      <div class="fw-bold text-muted">
+                        
+                          30000 km
+                        
+                      </div>
+                      <small class="small-muted">
+                        进行中
+                      </small>
+                    </div>
+                  </div>
+                
+                  <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry 
+                             ">
+                    <div>
+                      <div class="fw-bold ">
+                        40000公里
+                        
+                      </div>
+                      <small class="small-muted">
+                        
+                          未达成
+                        
+                      </small>
+                    </div>
+                    <div class="text-end">
+                      <div class="fw-bold text-muted">
+                        
+                          40000 km
+                        
+                      </div>
+                      <small class="small-muted">
+                        进行中
+                      </small>
+                    </div>
+                  </div>
+                
+              </div>
+            </div>
+            
+            <!-- 比赛记录 -->
+            <div class="carousel-item">
+              <div class="p-3" style="min-height: 400px; display: flex; flex-direction: column;">
+                <h6 class="text-center mb-3">比赛记录</h6>
+                <div style="flex: 1; overflow-y: auto;">
+                  
+                    
+                      <div class="border-bottom py-2 pb-entry">
+                        <!-- 第一行：赛事名称 + 距离 + 用时 -->
+                        <div class="d-flex justify-content-between align-items-center">
+                          <div class="fw-bold text-primary-emphasis">
+                            清远马拉松
+                            <small class="text-body-secondary">半马</small>
+                          </div>
+                          
+                          <!-- 达标信息居中显示 -->
+                          <div class="flex-grow-1 text-center px-2">
+                            
+                              <abbr title="点击查看证书" class="certificate-link text-decoration-none" 
+                                    data-img="images/certificates/AmateurLevel2HalfMarathon.jpg" style="cursor: pointer; border-bottom: 1px dotted var(--text-secondary)">
+                                <span class="classification-text">大众二级</span>
+                              </abbr>
+                            
+                          </div>
+                          
+                          <!-- 用时在最右侧 -->
+                          <div class="text-nowrap text-primary-emphasis">
+                            1:44:34
+                          </div>
+                        </div>
+                        
+                        <!-- 第二行：日期 + 城市 + 配速 -->
+                        <div class="d-flex justify-content-between align-items-center mt-1">
+                          <div>
+                            <small class="text-body-secondary">
+                              2025.03.16
+                            </small>
+                            <small class="text-body-secondary ms-2">清远市</small>
+                          </div>
+                          <div class="text-end">
+                            <small class="text-body-secondary">配速: 4&#39;57&#34;</small>
+                          </div>
+                        </div>
+                      </div>
+                    
+                      <div class="border-bottom py-2 pb-entry">
+                        <!-- 第一行：赛事名称 + 距离 + 用时 -->
+                        <div class="d-flex justify-content-between align-items-center">
+                          <div class="fw-bold text-primary-emphasis">
+                            茂名马拉松
+                            <small class="text-body-secondary">半马</small>
+                          </div>
+                          
+                          <!-- 达标信息居中显示 -->
+                          <div class="flex-grow-1 text-center px-2">
+                            
+                          </div>
+                          
+                          <!-- 用时在最右侧 -->
+                          <div class="text-nowrap text-primary-emphasis">
+                            2:15:47
+                          </div>
+                        </div>
+                        
+                        <!-- 第二行：日期 + 城市 + 配速 -->
+                        <div class="d-flex justify-content-between align-items-center mt-1">
+                          <div>
+                            <small class="text-body-secondary">
+                              2024.03.24
+                            </small>
+                            <small class="text-body-secondary ms-2">茂名市</small>
+                          </div>
+                          <div class="text-end">
+                            <small class="text-body-secondary">配速: 6&#39;26&#34;</small>
+                          </div>
+                        </div>
+                      </div>
+                    
+                  
+                </div>
+                <!-- 保留底部空白 -->
+                <div style="height: 20px;"></div>
+              </div>
+            </div>
           </div>
           
           <button class="carousel-control-prev" type="button" data-bs-target="#achievementCarousel" data-bs-slide="prev">
@@ -7796,33 +7794,26 @@
             <span class="carousel-control-next-icon" aria-hidden="true"></span>
             <span class="visually-hidden">Next</span>
           </button>
-          
-			<div class="carousel-indicators position-static mt-2 justify-content-center">
-			  <button type="button" data-bs-target="#achievementCarousel" data-bs-slide-to="0" class="active" aria-current="true"></button>
-			  <button type="button" data-bs-target="#achievementCarousel" data-bs-slide-to="1"></button>
-			  <button type="button" data-bs-target="#achievementCarousel" data-bs-slide-to="2"></button>
-			</div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-
 <!-- 证书模态框 -->
-<div class="modal fade" id="certificateModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="certificateModal" tabindex="-1" aria-labelledby="certificateModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content dark-modal">
+    <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">等级证书</h5>
+        <h5 class="modal-title" id="certificateModalLabel">等级证书</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body text-center">
-        <img id="certificateImage" src="" class="img-fluid" style="max-height: 70vh;">
+        <img id="certificateImage" src="" class="img-fluid" style="max-height: 70vh;" alt="跑步等级证书">
       </div>
       <div class="modal-footer">
         <a id="downloadCertificate" href="#" class="btn btn-sm btn-primary" download>
-          <i class="bi bi-download"></i> 下载证书
+          下载证书
         </a>
         <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">关闭</button>
       </div>
@@ -7830,86 +7821,139 @@
   </div>
 </div>
 
-
 <script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.bootcdn.net/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
-  // Stat card flipping logic
-  document.querySelectorAll('.stat-card-clickable').forEach(card => {
-    card.dataset.state = 'front';
-    const contentEl = card.querySelector('.stat-card-content');
+  // 全局图表变量
+  let distanceChart = null;
+  
+  // 强制使用深色模式
+  document.documentElement.setAttribute('data-bs-theme', 'dark');
+  
+  // 页面加载完成后执行
+  document.addEventListener('DOMContentLoaded', function() {
+    // 隐藏加载状态
+    document.getElementById('loading').style.display = 'none';
     
-    card.addEventListener('click', () => {
+    // 统计卡片翻转逻辑
+    document.querySelectorAll('.stat-card-clickable').forEach(card => {
+      card.dataset.state = 'front';
+      const contentEl = card.querySelector('.stat-card-content');
+      
+      const handleCardFlip = (e) => {
+        // 阻止触摸事件的默认行为（如滚动）
+        if(e.type === 'touchstart') {
+          e.preventDefault();
+        }
+        
         const targetState = card.dataset.state === 'front' ? 'back' : 'front';
         
         const newLabel = card.dataset[`label${targetState.charAt(0).toUpperCase() + targetState.slice(1)}`];
         const newValue = card.dataset[`value${targetState.charAt(0).toUpperCase() + targetState.slice(1)}`];
         const newDetails = card.dataset[`details${targetState.charAt(0).toUpperCase() + targetState.slice(1)}`] || '';
-
-        const newContentHTML = `
-            <div>
-                <div class="stat-label">${newLabel}</div>
-                <div class="stat-value">${newValue}</div>
-            </div>
-            <div class="stat-details">${newDetails}</div>
-        `;
         
-        contentEl.innerHTML = newContentHTML;
+        // 安全地更新内容
+        const newContent = document.createElement('div');
+        const labelDiv = document.createElement('div');
+        labelDiv.className = 'stat-label';
+        labelDiv.textContent = newLabel;
+        
+        const valueDiv = document.createElement('div');
+        valueDiv.className = 'stat-value';
+        valueDiv.innerHTML = newValue;
+        
+        const detailsDiv = document.createElement('div');
+        detailsDiv.className = 'stat-details';
+        detailsDiv.innerHTML = newDetails;
+        
+        newContent.appendChild(labelDiv);
+        newContent.appendChild(valueDiv);
+        newContent.appendChild(detailsDiv);
+        
+        contentEl.innerHTML = '';
+        contentEl.appendChild(newContent);
         card.dataset.state = targetState;
+      };
+      
+      // 使用passive: false以便能够阻止默认行为
+      card.addEventListener('touchstart', handleCardFlip, { passive: false });
+      card.addEventListener('click', handleCardFlip);
+    });
+
+    // 月度距离图表逻辑
+    const chartCtx = document.getElementById('monthlyDistanceChart').getContext('2d');
+    const gridColor = 'rgba(128, 128, 128, 0.2)';
+    const tickColor = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim();
+    const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
+
+    distanceChart = new Chart(chartCtx, {
+      type: 'bar',
+      data: {
+        labels: ["24-08", "24-09", "24-10", "24-11", "24-12", "25-01", "25-02", "25-03", "25-04", "25-05", "25-06", "25-07"],
+        datasets: [{
+          label: '距离 (km)',
+          data: [126.75, 109.63, 129.56, 126.46, 171.69, 204.69, 202.17, 203.37, 201.7, 150.98, 204.56, 193.33],
+          backgroundColor: accentColor + '99',
+          borderColor: accentColor,
+          borderWidth: 1,
+          borderRadius: 4,
+          hoverBackgroundColor: accentColor
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: { 
+            beginAtZero: true, 
+            grid: { color: gridColor }, 
+            ticks: { 
+              color: tickColor, 
+              callback: (v) => v + ' km' 
+            } 
+          },
+          x: { 
+            grid: { display: false }, 
+            ticks: { color: tickColor } 
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+              callbacks: {
+                  label: (context) => `${context.dataset.label}: ${context.raw} km`
+              }
+          }
+        }
+      }
+    });
+
+    // 初始化证书预览
+    document.querySelectorAll('.certificate-link').forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const imgUrl = this.getAttribute('data-img');
+        if(imgUrl) {
+          document.getElementById('certificateImage').src = imgUrl;
+          document.getElementById('downloadCertificate').href = imgUrl;
+          const certificateModal = new bootstrap.Modal(document.getElementById('certificateModal'));
+          certificateModal.show();
+        }
+      });
+    });
+
+    // 关闭模态框时清除内容
+    document.getElementById('certificateModal').addEventListener('hidden.bs.modal', function() {
+      document.getElementById('certificateImage').src = '';
+      document.getElementById('downloadCertificate').href = '#';
     });
   });
 
-  // Monthly distance chart logic
-  const chartCtx = document.getElementById('monthlyDistanceChart').getContext('2d');
-  const gridColor = 'rgba(128, 128, 128, 0.2)';
-  const tickColor = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim();
-  const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
-
-  new Chart(chartCtx, {
-    type: 'bar',
-    data: {
-      labels: ["24-08", "24-09", "24-10", "24-11", "24-12", "25-01", "25-02", "25-03", "25-04", "25-05", "25-06", "25-07"],
-      datasets: [{
-        label: '距离 (km)',
-        data: [126.75, 109.63, 129.56, 126.46, 171.69, 204.69, 202.17, 203.37, 201.7, 150.98, 204.56, 193.33],
-        backgroundColor: accentColor + '99',
-        borderColor: accentColor,
-        borderWidth: 1,
-        borderRadius: 4,
-        hoverBackgroundColor: accentColor
-      }]
-    },
-    options: {
-      responsive: true,
-      scales: {
-        y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km' } },
-        x: { grid: { display: false }, ticks: { color: tickColor } }
-      },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-            callbacks: {
-                label: (context) => `${context.dataset.label}: ${context.raw} km`
-            }
-        }
-      }
+  // 页面卸载时销毁图表
+  window.addEventListener('beforeunload', () => {
+    if(distanceChart) {
+      distanceChart.destroy();
     }
   });
-// 初始化证书预览
-document.querySelectorAll('.certificate-link').forEach(link => {
-  link.addEventListener('click', function(e) {
-    e.preventDefault();
-    const imgUrl = this.getAttribute('data-img');
-    document.getElementById('certificateImage').src = imgUrl;
-    document.getElementById('downloadCertificate').href = imgUrl;
-    new bootstrap.Modal(document.getElementById('certificateModal')).show();
-  });
-});
-
-// 关闭模态框时清除图片
-document.getElementById('certificateModal').addEventListener('hidden.bs.modal', function() {
-  document.getElementById('certificateImage').src = '';
-});
 </script>
 </body>
 </html>
