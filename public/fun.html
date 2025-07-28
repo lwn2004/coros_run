@@ -6,8 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
   <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
   <style>
-    /* 颜色系统 - 强制深色模式 */
     :root {
       --bg-color: #1c1e21;
       --card-bg: #282a2d;
@@ -20,6 +20,40 @@
       --hover-bg: #3a3b3c;
     }
     
+    .custom-menu-button {
+      width: 24px;
+      height: 20px;
+      position: relative;
+      cursor: pointer;
+      padding: 0;
+      background: none;
+      border: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .custom-menu-button .menu-line {
+      width: 100%;
+      height: 2px;
+      background-color: var(--text-primary);
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      transform-origin: center;
+    }
+
+    .custom-menu-button[aria-expanded="true"] .menu-line:nth-child(1) {
+      transform: translateY(9px) rotate(45deg);
+    }
+    .custom-menu-button[aria-expanded="true"] .menu-line:nth-child(2) {
+      opacity: 0;
+    }
+    .custom-menu-button[aria-expanded="true"] .menu-line:nth-child(3) {
+      transform: translateY(-9px) rotate(-45deg);
+    }
+
+    .custom-menu-button.dropdown-toggle::after {
+      display: none !important;
+    }    
     html {
       scrollbar-gutter: stable;
     }
@@ -38,6 +72,8 @@
       position: sticky;
       top: 0;
       z-index: 1000;
+      display: flex;
+      align-items: center;
     }
 
     .navbar-main-title {
@@ -50,12 +86,6 @@
       font-weight: 500;
       font-size: 0.8rem;
       color: var(--text-secondary);
-    }
-
-    .trophy-icon {
-      font-size: 1.5rem;
-      color: var(--trophy-color);
-      line-height: 1;
     }
 
     .stat-card {
@@ -75,12 +105,16 @@
     #dist-card {
       height: 200px;
     }
-
+	.stat-details {
+	  margin-top: auto;
+	  width: 100%;
+	}
     .stat-card-content {
       display: flex;
       flex-direction: column;
       justify-content: center;
       height: 100%;
+      padding: 0.5rem 0;
     }
     
     .stat-card-clickable {
@@ -92,6 +126,7 @@
       color: var(--text-secondary);
       text-transform: uppercase;
       margin-bottom: 0.5rem;
+	  min-height: 1.2rem;
     }
 
     .stat-value {
@@ -99,6 +134,7 @@
       font-weight: 700;
       color: var(--text-primary);
       line-height: 1.2;
+	  min-height: 2.4rem;
     }
 
     .stat-value-small {
@@ -127,6 +163,22 @@
         --bs-progress-bar-bg: var(--success-color);
     }
 
+    .card-title-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn-group .btn {
+        --bs-btn-bg: var(--hover-bg);
+        --bs-btn-border-color: var(--border-color);
+        --bs-btn-hover-bg: var(--accent-color);
+        --bs-btn-hover-border-color: var(--accent-color);
+        --bs-btn-active-bg: var(--accent-color);
+        --bs-btn-active-border-color: var(--accent-color);
+        font-size: 0.8rem;
+    }
+    
     @media (max-width: 768px) {
       .stat-card {
         padding: 1.25rem;
@@ -155,6 +207,7 @@
 
     .card-title {
         color: var(--text-primary);
+        margin-bottom: 0;
     }
     
     .collapsing {
@@ -239,7 +292,6 @@
       font-weight: 500;
     }
     
-    /* 比赛记录相关样式 */
     .event-entry {
         display: flex;
         flex-direction: column;
@@ -262,7 +314,6 @@
         filter: invert(0.8);
     }
 
-    /* 比赛记录字体颜色优化 */
     .text-primary-emphasis {
       color: var(--text-primary) !important;
     }
@@ -271,7 +322,6 @@
       color: var(--text-secondary) !important;
     }
 
-    /* 达标信息样式 */
     .classification-text {
       color: var(--success-color);
       font-weight: 500;
@@ -289,7 +339,6 @@
       transform: scale(1.05);
     }
 
-    /* 加载动画 */
     #loading {
       position: fixed;
       top: 0;
@@ -301,12 +350,81 @@
       justify-content: center;
       align-items: center;
       z-index: 9999;
+    }    
+    .dropdown-menu {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
+    
+    .dropdown-item {
+      color: var(--text-primary);
+      padding: 0.5rem 1rem;
+    }
+    
+    .dropdown-item:hover, .dropdown-item:focus {
+      background-color: var(--hover-bg);
+      color: var(--text-primary);
+    }
+    
+    #mapModal .modal-body {
+      height: 70vh;
+      min-height: 400px;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    #cityMap {
+      width: 100%;
+      flex-grow: 1;
+      background-color: var(--card-bg);
+    }
+    
+    .city-list-container {
+      padding: 1rem;
+      background-color: var(--bg-color);
+    }
+    
+    .city-list {
+      max-height: 150px;
+      overflow-y: auto;
+    }
+    
+    .city-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .city-item:last-child {
+      border-bottom: none;
+    }
+    
+    #aboutModal .modal-body {
+      line-height: 1.8;
+    }
+
+    .leaflet-popup-content-wrapper {
+        background: var(--card-bg);
+        color: var(--text-primary);
+        border-radius: 8px;
+    }
+    .leaflet-popup-content {
+        margin: 12px;
+    }
+    .leaflet-popup-tip {
+        background: var(--card-bg);
+    }
+    .leaflet-popup-close-button {
+        color: var(--text-primary) !important;
+        padding: 4px 4px 0 0 !important;
+    }
+
   </style>
 </head>
 <body>
 
-<!-- 加载状态 -->
 <div id="loading">
   <div class="spinner-border" role="status">
     <span class="visually-hidden">加载中...</span>
@@ -318,50 +436,59 @@
     <span class="navbar-main-title">步履不停</span>
     <span class="navbar-sub-title">我的40000KM绕地球一圈儿跑量挑战</span>
   </div>
-  <button class="btn p-0" data-bs-toggle="modal" data-bs-target="#pbModal" title="跑步成就" aria-label="查看跑步成就">
-    <span class="trophy-icon">🏆</span>
-  </button>
+  <div class="dropdown">
+    <button class="custom-menu-button dropdown-toggle" type="button" id="mainMenu" data-bs-toggle="dropdown" aria-expanded="false" title="菜单" aria-label="菜单">
+      <span class="menu-line"></span>
+      <span class="menu-line"></span>
+      <span class="menu-line"></span>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="mainMenu">
+      <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#mapModal">足迹</a></li>
+      <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#pbModal">跑步成就</a></li>
+      <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#aboutModal">关于</a></li>
+    </ul>
+  </div>
 </nav>
 
 <div class="container mt-4">
   <div class="row g-2 mb-3">
     <div class="col-12 mb-3">
-      <div class="stat-card stat-card-clickable" id="dist-card"
-          data-label-front="当前跑量"
-          data-value-front="3493.39 &lt;small class=&#34;small-muted&#34;&gt;km&lt;/small&gt;"
-          data-details-front="<div class='mt-2'><div class='stat-label'>已沿赤道行进</div><div class='progress mt-2' style='height: 6px;'><div class='progress-bar' role='progressbar' style='width: 8.7171%;'></div></div><small class='small-muted'>8.7171%</small></div>"
-          data-label-back="日均跑量"
-          data-value-back="5.64 &lt;small class=&#34;small-muted&#34;&gt;km/天&lt;/small&gt;"
-          data-details-back="<div class='mt-2'><div class='stat-label'>预计2043年05月03日可绕地球一圈儿。</div><small class='remaining-time'>再坚持17年286天！</small></div>">
-        <div class="stat-card-content">
-          <div>
-            <div class="stat-label">当前跑量</div>
-            <div class="stat-value">3493.39 <small class="small-muted">km</small></div>
-          </div>
-          <div class="stat-details">
-            <div class="mt-2">
-              <div class="stat-label">已沿赤道行进</div>
-              <div class="progress mt-2" style="height: 6px;">
-                <div class="progress-bar" role="progressbar" style="width: 8.7171%;"></div>
-              </div>
-              <small class="small-muted">8.7171%</small>
-            </div>
-          </div>
-        </div>
-      </div>
+	<div class="stat-card stat-card-clickable" id="dist-card"
+		data-label-front="当前跑量"
+		data-value-front="3536.04 &lt;small class=&#34;small-muted&#34;&gt;km&lt;/small&gt;"
+		data-details-front="<div class='mt-2'><div class='stat-label'>已沿赤道行进</div><div class='progress mt-2' style='height: 6px;'><div class='progress-bar' role='progressbar' style='width: 8.8235%;'></div></div><small class='small-muted'>8.8235%</small></div>"
+		data-label-back="日均跑量"
+		data-value-back="5.74 &lt;small class=&#34;small-muted&#34;&gt;km/天&lt;/small&gt;"
+		data-details-back="<div class='mt-2'><div class='stat-label'>预计2042年12月27日可绕地球一圈儿</div><div class='remaining-time'>再坚持17年156天！</div></div>">
+	  <div class="stat-card-content d-flex flex-column justify-content-center h-100">
+		<div>
+		  <div class="stat-label">当前跑量</div>
+		  <div class="stat-value">3536.04 <small class="small-muted">km</small></div>
+		</div>
+		<div class="stat-details">
+		  <div class="mt-2">
+			<div class="stat-label">已沿赤道行进</div>
+			<div class="progress mt-2" style="height: 6px;">
+			  <div class="progress-bar" role="progressbar" style="width: 8.8235%;"></div>
+			</div>
+			<small class="small-muted">8.8235%</small>
+		  </div>
+		</div>
+	  </div>
+	</div>
     </div>
     
     <div class="col-6 col-md-6">
       <div class="stat-card stat-card-clickable h-100" id="count-card"
           data-label-front="次数"
-          data-value-front="424"
+          data-value-front="427"
           data-details-front="<small class='small-muted'>&nbsp;</small>"
           data-label-back="平均单次距离"
-          data-value-back="8.24 &lt;small class=&#34;small-muted&#34;&gt;km&lt;/small&gt;"
+          data-value-back="8.28 &lt;small class=&#34;small-muted&#34;&gt;km&lt;/small&gt;"
           data-details-back="<small class='small-muted'>&nbsp;</small>">
         <div class="stat-card-content">
           <div class="stat-label">次数</div>
-          <div class="stat-value">424</div>
+          <div class="stat-value">427</div>
           <div class="stat-details"><small class='small-muted'>&nbsp;</small></div>
         </div>
       </div>
@@ -370,14 +497,14 @@
     <div class="col-6 col-md-6">
       <div class="stat-card stat-card-clickable h-100" id="pace-card"
           data-label-front="平均配速"
-          data-value-front="6&#39;21&#34;"
+          data-value-front="6&#39;20&#34;"
           data-details-front="<small class='small-muted'>&nbsp;</small>"
           data-label-back="最快配速"
           data-value-back="4&#39;54&#34;"
           data-details-back="<small class='small-muted'>2025-03-16</small>">
         <div class="stat-card-content">
           <div class="stat-label">平均配速</div>
-          <div class="stat-value">6&#39;21&#34;</div>
+          <div class="stat-value">6&#39;20&#34;</div>
           <div class="stat-details"><small class='small-muted'>&nbsp;</small></div>
         </div>
       </div>
@@ -385,9 +512,22 @@
   </div>
 
   <div class="card mb-4" style="background-color: var(--card-bg); border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    <div class="card-header bg-transparent border-0 pt-3">
+        <div class="card-title-container">
+            <h5 class="card-title">跑量分析</h5>
+            <div class="btn-group btn-group-sm" role="group" id="chart-toggle">
+                <button type="button" class="btn active" data-chart="monthly">近12月</button>
+                <button type="button" class="btn" data-chart="daily">近30天</button>
+            </div>
+        </div>
+    </div>
     <div class="card-body">
-      <h5 class="card-title">月度距离 (最近12个月)</h5>
-      <canvas id="monthlyDistanceChart" aria-label="最近12个月跑步距离统计图表"></canvas>
+      <div id="monthlyChartContainer">
+        <canvas id="monthlyDistanceChart" aria-label="最近12个月跑步距离统计图表"></canvas>
+      </div>
+      <div id="dailyChartContainer" style="display: none;">
+        <canvas id="dailyDistanceChart" aria-label="最近30天跑步距离统计图表"></canvas>
+      </div>
     </div>
   </div>
 
@@ -395,7 +535,7 @@
     <div class="d-flex justify-content-between align-items-center mt-5">
       <h2 class="mb-0">2025 年</h2>
       <span class="small-muted small">
-        109次 | 1360.79 km | 5&#39;52&#34;
+        112次 | 1403.44 km | 5&#39;52&#34;
       </span>
     </div>
     <div class='accordion mb-4 mt-2' id='accordion2025'>
@@ -404,7 +544,7 @@
           <h2 class="accordion-header">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m20257" aria-expanded="false" aria-controls="collapse-m20257">
               07月 &nbsp; 
-              <span class="small-muted small">(193.33 km | 5&#39;56&#34;)</span>
+              <span class="small-muted small">(235.98 km | 5&#39;56&#34;)</span>
             </button>
           </h2>
           <div id="collapse-m20257" class="accordion-collapse collapse" data-bs-parent="#accordion2025">
@@ -419,6 +559,48 @@
                   </tr>
                 </thead>
                 <tbody>
+                  
+                    <tr data-bs-toggle="collapse" data-bs-target="#details-1753653368000" style="cursor: pointer;" aria-expanded="false" aria-controls="details-1753653368000">
+                      <td>07-28</td>
+                      <td>10.05</td>
+                      <td>0:57:09</td>
+                      <td>5&#39;41&#34;</td>
+                    </tr>
+                    <tr id="details-1753653368000" class="collapse details-row">
+                      <td colspan="4">
+                        <div class="card-body small">
+                          时间: 05:56:08 | 地点: 广州市 | 心率: 149
+                        </div>
+                      </td>
+                    </tr>
+                  
+                    <tr data-bs-toggle="collapse" data-bs-target="#details-1753480401000" style="cursor: pointer;" aria-expanded="false" aria-controls="details-1753480401000">
+                      <td>07-26</td>
+                      <td>21.60</td>
+                      <td>2:11:14</td>
+                      <td>6&#39;04&#34;</td>
+                    </tr>
+                    <tr id="details-1753480401000" class="collapse details-row">
+                      <td colspan="4">
+                        <div class="card-body small">
+                          时间: 05:53:21 | 地点: 广州市 | 心率: 144
+                        </div>
+                      </td>
+                    </tr>
+                  
+                    <tr data-bs-toggle="collapse" data-bs-target="#details-1753393847000" style="cursor: pointer;" aria-expanded="false" aria-controls="details-1753393847000">
+                      <td>07-25</td>
+                      <td>11.00</td>
+                      <td>1:04:14</td>
+                      <td>5&#39;50&#34;</td>
+                    </tr>
+                    <tr id="details-1753393847000" class="collapse details-row">
+                      <td colspan="4">
+                        <div class="card-body small">
+                          时间: 05:50:47 | 地点: 广州市 | 心率: 145
+                        </div>
+                      </td>
+                    </tr>
                   
                     <tr data-bs-toggle="collapse" data-bs-target="#details-1753220371000" style="cursor: pointer;" aria-expanded="false" aria-controls="details-1753220371000">
                       <td>07-23</td>
@@ -7446,7 +7628,6 @@
   
 </div>
 
-<!-- 成就模态框 -->
 <div class="modal fade" id="pbModal" tabindex="-1" aria-labelledby="pbModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -7456,7 +7637,6 @@
       </div>
       <div class="modal-body p-0">
         <div id="achievementCarousel" class="carousel slide" data-bs-ride="carousel">
-          <!-- 使用Bootstrap原生指示器 -->
           <div class="carousel-indicators">
             <button type="button" data-bs-target="#achievementCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="个人最佳纪录"></button>
             <button type="button" data-bs-target="#achievementCarousel" data-bs-slide-to="1" aria-label="里程碑"></button>
@@ -7700,7 +7880,6 @@
               </div>
             </div>
             
-            <!-- 比赛记录 -->
             <div class="carousel-item">
               <div class="p-3" style="min-height: 400px; display: flex; flex-direction: column;">
                 <h6 class="text-center mb-3">比赛记录</h6>
@@ -7708,14 +7887,12 @@
                   
                     
                       <div class="border-bottom py-2 pb-entry">
-                        <!-- 第一行：赛事名称 + 距离 + 用时 -->
                         <div class="d-flex justify-content-between align-items-center">
                           <div class="fw-bold text-primary-emphasis">
                             清远马拉松
                             <small class="text-body-secondary">半马</small>
                           </div>
                           
-                          <!-- 达标信息居中显示 -->
                           <div class="flex-grow-1 text-center px-2">
                             
                               <abbr title="点击查看证书" class="certificate-link text-decoration-none" 
@@ -7725,13 +7902,11 @@
                             
                           </div>
                           
-                          <!-- 用时在最右侧 -->
                           <div class="text-nowrap text-primary-emphasis">
                             1:44:34
                           </div>
                         </div>
                         
-                        <!-- 第二行：日期 + 城市 + 配速 -->
                         <div class="d-flex justify-content-between align-items-center mt-1">
                           <div>
                             <small class="text-body-secondary">
@@ -7746,25 +7921,21 @@
                       </div>
                     
                       <div class="border-bottom py-2 pb-entry">
-                        <!-- 第一行：赛事名称 + 距离 + 用时 -->
                         <div class="d-flex justify-content-between align-items-center">
                           <div class="fw-bold text-primary-emphasis">
                             茂名马拉松
                             <small class="text-body-secondary">半马</small>
                           </div>
                           
-                          <!-- 达标信息居中显示 -->
                           <div class="flex-grow-1 text-center px-2">
                             
                           </div>
                           
-                          <!-- 用时在最右侧 -->
                           <div class="text-nowrap text-primary-emphasis">
                             2:15:47
                           </div>
                         </div>
                         
-                        <!-- 第二行：日期 + 城市 + 配速 -->
                         <div class="d-flex justify-content-between align-items-center mt-1">
                           <div>
                             <small class="text-body-secondary">
@@ -7780,7 +7951,6 @@
                     
                   
                 </div>
-                <!-- 保留底部空白 -->
                 <div style="height: 20px;"></div>
               </div>
             </div>
@@ -7800,7 +7970,6 @@
   </div>
 </div>
 
-<!-- 证书模态框 -->
 <div class="modal fade" id="certificateModal" tabindex="-1" aria-labelledby="certificateModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
@@ -7820,79 +7989,190 @@
     </div>
   </div>
 </div>
+<div class="modal fade" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="mapModalLabel">跑步足迹</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="cityMap"></div>
+        <div class="city-list-container">
+          <h6 class="mb-2">城市统计 (Top 3)</h6>
+          <div class="city-list">
+            
+              <div class="city-item">
+                <span>1. 广州市</span>
+                <span class="text-end">411次 (3410.64km)</span>
+              </div>
+            
+              <div class="city-item">
+                <span>2. 茂名市</span>
+                <span class="text-end">11次 (81.6km)</span>
+              </div>
+            
+              <div class="city-item">
+                <span>3. 深圳市</span>
+                <span class="text-end">1次 (5.01km)</span>
+              </div>
+            
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer justify-content-center">
+        <small class="text-body-secondary">足迹已遍布 4 个城市</small>
+      </div>
+    </div>
+  </div>
+</div>
 
+<div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="aboutModalLabel">关于</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>这个跑步数据记录网站的灵感来源于水木社区跑步版看到的一位跑友。他分享了自己十年跑步三万公里的经历，并计划继续跑到四万公里——正好是地球赤道的周长。</p>
+        <p>这个目标让我很受触动。四万公里，相当于每天跑十公里，连续跑十年。虽然看起来很远，但分解到每一天，就是坚持跑下去。</p>
+        <p>我不是专业跑者，也不追求速度。对我来说，跑步更重要的是保持健康和坚持的习惯。这个网站记录我的跑步历程，看着数字一点点增长，就是最好的动力。</p>
+        <p>如果你也有类似的跑步目标，欢迎一起坚持。跑步路上，我们都不孤单。</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
 <script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.bootcdn.net/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 <script>
-  // 全局图表变量
-  let distanceChart = null;
+  let monthlyDistanceChart = null;
+  let dailyDistanceChart = null;
+  let cityMap = null;
   
-  // 强制使用深色模式
   document.documentElement.setAttribute('data-bs-theme', 'dark');
   
-  // 页面加载完成后执行
   document.addEventListener('DOMContentLoaded', function() {
-    // 隐藏加载状态
-    document.getElementById('loading').style.display = 'none';
+    const loadingElement = document.getElementById('loading');
+    if (loadingElement) loadingElement.style.display = 'none';
     
-    // 统计卡片翻转逻辑
-    document.querySelectorAll('.stat-card-clickable').forEach(card => {
-      card.dataset.state = 'front';
-      const contentEl = card.querySelector('.stat-card-content');
-      
-      const handleCardFlip = (e) => {
-        // 阻止触摸事件的默认行为（如滚动）
-        if(e.type === 'touchstart') {
-          e.preventDefault();
+    // --- MAP LOGIC ---
+    const mapModal = document.getElementById('mapModal');
+    if (mapModal) {
+      mapModal.addEventListener('shown.bs.modal', function() {
+        if (!cityMap) {
+          cityMap = L.map('cityMap', {
+              center: [36, 106],
+              zoom: 4,
+              maxBounds: [[15, 70], [55, 140]],
+              maxBoundsViscosity: 1.0,
+          });
+
+          L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            minZoom: 4,
+            maxZoom: 18
+          }).addTo(cityMap);
+          
+		
+		  
+			L.circleMarker([23.129, 113.264], {
+				radius: 6,
+				fillColor: "var(--accent-color)",
+				color: "var(--bg-color)",
+				weight: 1.5,
+				opacity: 1,
+				fillOpacity: 0.7
+			}).addTo(cityMap).bindPopup(`<b>广州市</b><br>跑步次数: 411<br>总距离: 3410.64km`);
+		  
+		
+		  
+			L.circleMarker([21.663, 110.925], {
+				radius: 6,
+				fillColor: "var(--accent-color)",
+				color: "var(--bg-color)",
+				weight: 1.5,
+				opacity: 1,
+				fillOpacity: 0.7
+			}).addTo(cityMap).bindPopup(`<b>茂名市</b><br>跑步次数: 11<br>总距离: 81.6km`);
+		  
+		
+		  
+			L.circleMarker([22.543, 114.058], {
+				radius: 6,
+				fillColor: "var(--accent-color)",
+				color: "var(--bg-color)",
+				weight: 1.5,
+				opacity: 1,
+				fillOpacity: 0.7
+			}).addTo(cityMap).bindPopup(`<b>深圳市</b><br>跑步次数: 1<br>总距离: 5.01km`);
+		  
+		
+		  
+			L.circleMarker([23.682, 113.056], {
+				radius: 6,
+				fillColor: "var(--accent-color)",
+				color: "var(--bg-color)",
+				weight: 1.5,
+				opacity: 1,
+				fillOpacity: 0.7
+			}).addTo(cityMap).bindPopup(`<b>清远市</b><br>跑步次数: 1<br>总距离: 21.3km`);
+		  
+		
+        } else {
+          cityMap.invalidateSize();
         }
-        
-        const targetState = card.dataset.state === 'front' ? 'back' : 'front';
-        
-        const newLabel = card.dataset[`label${targetState.charAt(0).toUpperCase() + targetState.slice(1)}`];
-        const newValue = card.dataset[`value${targetState.charAt(0).toUpperCase() + targetState.slice(1)}`];
-        const newDetails = card.dataset[`details${targetState.charAt(0).toUpperCase() + targetState.slice(1)}`] || '';
-        
-        // 安全地更新内容
-        const newContent = document.createElement('div');
-        const labelDiv = document.createElement('div');
-        labelDiv.className = 'stat-label';
-        labelDiv.textContent = newLabel;
-        
-        const valueDiv = document.createElement('div');
-        valueDiv.className = 'stat-value';
-        valueDiv.innerHTML = newValue;
-        
-        const detailsDiv = document.createElement('div');
-        detailsDiv.className = 'stat-details';
-        detailsDiv.innerHTML = newDetails;
-        
-        newContent.appendChild(labelDiv);
-        newContent.appendChild(valueDiv);
-        newContent.appendChild(detailsDiv);
-        
-        contentEl.innerHTML = '';
-        contentEl.appendChild(newContent);
-        card.dataset.state = targetState;
-      };
-      
-      // 使用passive: false以便能够阻止默认行为
-      card.addEventListener('touchstart', handleCardFlip, { passive: false });
-      card.addEventListener('click', handleCardFlip);
+      });
+    }
+    
+    // --- MAIN STATS CARD LOGIC ---
+    document.querySelectorAll('.stat-card-clickable').forEach(card => {
+		card.dataset.state = 'front';
+		const contentEl = card.querySelector('.stat-card-content');
+		const handleCardFlip = (e) => {
+		  if(e.type === 'touchstart') e.preventDefault();
+		  const targetState = card.dataset.state === 'front' ? 'back' : 'front';
+		  const newLabel = card.dataset[`label${targetState.charAt(0).toUpperCase() + targetState.slice(1)}`];
+		  const newValue = card.dataset[`value${targetState.charAt(0).toUpperCase() + targetState.slice(1)}`];
+		  const newDetails = card.dataset[`details${targetState.charAt(0).toUpperCase() + targetState.slice(1)}`] || '';
+		  
+		  // 使用相同的HTML结构
+		  const newContent = `
+			<div class="d-flex flex-column justify-content-center h-100">
+			  <div>
+				<div class="stat-label">${newLabel}</div>
+				<div class="stat-value">${newValue}</div>
+			  </div>
+			  <div class="stat-details">${newDetails}</div>
+			</div>
+		  `;
+		  
+		  contentEl.innerHTML = newContent;
+		  card.dataset.state = targetState;
+		};
+		card.addEventListener('touchstart', handleCardFlip, { passive: false });
+		card.addEventListener('click', handleCardFlip);
     });
 
-    // 月度距离图表逻辑
-    const chartCtx = document.getElementById('monthlyDistanceChart').getContext('2d');
+    // --- DUAL CHART LOGIC ---
     const gridColor = 'rgba(128, 128, 128, 0.2)';
     const tickColor = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim();
     const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
-
-    distanceChart = new Chart(chartCtx, {
+    
+    // Init Monthly Chart
+    const monthlyCtx = document.getElementById('monthlyDistanceChart').getContext('2d');
+    monthlyDistanceChart = new Chart(monthlyCtx, {
       type: 'bar',
       data: {
         labels: ["24-08", "24-09", "24-10", "24-11", "24-12", "25-01", "25-02", "25-03", "25-04", "25-05", "25-06", "25-07"],
         datasets: [{
           label: '距离 (km)',
-          data: [126.75, 109.63, 129.56, 126.46, 171.69, 204.69, 202.17, 203.37, 201.7, 150.98, 204.56, 193.33],
+          data: [126.75, 109.63, 129.56, 126.46, 171.69, 204.69, 202.17, 203.37, 201.7, 150.98, 204.56, 235.98],
           backgroundColor: accentColor + '99',
           borderColor: accentColor,
           borderWidth: 1,
@@ -7900,34 +8180,49 @@
           hoverBackgroundColor: accentColor
         }]
       },
-      options: {
-        responsive: true,
-        scales: {
-          y: { 
-            beginAtZero: true, 
-            grid: { color: gridColor }, 
-            ticks: { 
-              color: tickColor, 
-              callback: (v) => v + ' km' 
-            } 
-          },
-          x: { 
-            grid: { display: false }, 
-            ticks: { color: tickColor } 
-          }
-        },
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-              callbacks: {
-                  label: (context) => `${context.dataset.label}: ${context.raw} km`
-              }
-          }
-        }
-      }
+      options: { responsive: true, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km' } }, x: { grid: { display: false }, ticks: { color: tickColor } } }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (context) => `${context.dataset.label}: ${context.raw} km` }}}}
     });
 
-    // 初始化证书预览
+    // Init Daily Chart
+    const dailyCtx = document.getElementById('dailyDistanceChart').getContext('2d');
+    dailyDistanceChart = new Chart(dailyCtx, {
+      type: 'bar',
+      data: {
+        labels: ["06-29", "06-30", "07-01", "07-02", "07-03", "07-04", "07-05", "07-06", "07-07", "07-08", "07-09", "07-10", "07-11", "07-12", "07-13", "07-14", "07-15", "07-16", "07-17", "07-18", "07-19", "07-20", "07-21", "07-22", "07-23", "07-24", "07-25", "07-26", "07-27", "07-28"],
+        datasets: [{
+          label: '距离 (km)',
+          data: [0.0, 8.25, 12.01, 0.0, 12.13, 10.25, 21.21, 0.0, 11.21, 12.01, 13.94, 0.0, 10.01, 21.25, 0.0, 10.1, 0.0, 12.21, 13.4, 0.0, 23.45, 0.0, 0.0, 0.0, 10.16, 0.0, 11.0, 21.6, 0.0, 10.05],
+          backgroundColor: accentColor + '99',
+          borderColor: accentColor,
+          borderWidth: 1,
+          borderRadius: 2,
+          hoverBackgroundColor: accentColor
+        }]
+      },
+      options: { responsive: true, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km' } }, x: { grid: { display: false }, ticks: { color: tickColor } } }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (context) => `${context.dataset.label}: ${context.raw} km` }}}}
+    });
+
+    // Chart toggle button logic
+    const chartToggleButtons = document.querySelectorAll('#chart-toggle .btn');
+    const monthlyContainer = document.getElementById('monthlyChartContainer');
+    const dailyContainer = document.getElementById('dailyChartContainer');
+    
+    chartToggleButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            chartToggleButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            if (this.dataset.chart === 'monthly') {
+                monthlyContainer.style.display = 'block';
+                dailyContainer.style.display = 'none';
+            } else {
+                monthlyContainer.style.display = 'none';
+                dailyContainer.style.display = 'block';
+            }
+        });
+    });
+
+    // --- CERTIFICATE MODAL LOGIC ---
     document.querySelectorAll('.certificate-link').forEach(link => {
       link.addEventListener('click', function(e) {
         e.preventDefault();
@@ -7935,24 +8230,20 @@
         if(imgUrl) {
           document.getElementById('certificateImage').src = imgUrl;
           document.getElementById('downloadCertificate').href = imgUrl;
-          const certificateModal = new bootstrap.Modal(document.getElementById('certificateModal'));
-          certificateModal.show();
+          new bootstrap.Modal(document.getElementById('certificateModal')).show();
         }
       });
     });
 
-    // 关闭模态框时清除内容
     document.getElementById('certificateModal').addEventListener('hidden.bs.modal', function() {
       document.getElementById('certificateImage').src = '';
       document.getElementById('downloadCertificate').href = '#';
     });
   });
 
-  // 页面卸载时销毁图表
   window.addEventListener('beforeunload', () => {
-    if(distanceChart) {
-      distanceChart.destroy();
-    }
+    if(monthlyDistanceChart) monthlyDistanceChart.destroy();
+    if(dailyDistanceChart) dailyDistanceChart.destroy();
   });
 </script>
 </body>
