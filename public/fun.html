@@ -444,7 +444,7 @@
     </button>
     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="mainMenu">
       <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#mapModal">足迹</a></li>
-      <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#pbModal">跑步成就</a></li>
+      <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#pbModal">事件</a></li>
       <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#aboutModal">关于</a></li>
     </ul>
   </div>
@@ -7632,13 +7632,13 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header position-relative">
-        <h5 class="modal-title" id="pbModalLabel">跑步成就</h5>
+        <h5 class="modal-title" id="pbModalLabel">事件</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body p-0">
         <div id="achievementCarousel" class="carousel slide" data-bs-ride="carousel">
           <div class="carousel-indicators">
-            <button type="button" data-bs-target="#achievementCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="个人最佳纪录"></button>
+            <button type="button" data-bs-target="#achievementCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="PB"></button>
             <button type="button" data-bs-target="#achievementCarousel" data-bs-slide-to="1" aria-label="里程碑"></button>
             <button type="button" data-bs-target="#achievementCarousel" data-bs-slide-to="2" aria-label="比赛记录"></button>
           </div>
@@ -7646,7 +7646,7 @@
           <div class="carousel-inner">
             <div class="carousel-item active">
               <div class="p-3">
-                <h6 class="text-center mb-3">个人最佳纪录</h6>
+                <h6 class="text-center mb-3">PB</h6>
                 
                   <div class="d-flex justify-content-between align-items-center border-bottom py-2 pb-entry">
                     <div>
@@ -8066,23 +8066,23 @@
       mapModal.addEventListener('shown.bs.modal', function() {
         if (!cityMap) {
           cityMap = L.map('cityMap', {
-              center: [36, 106],
-              zoom: 4,
+              center: [23.129, 113.264],
+              zoom: 3,
               maxBounds: [[15, 70], [55, 140]],
               maxBoundsViscosity: 1.0,
           });
 
           L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            attribution: '',
             subdomains: 'abcd',
-            minZoom: 4,
+            minZoom: 3,
             maxZoom: 18
           }).addTo(cityMap);
           
 		
 		  
 			L.circleMarker([23.129, 113.264], {
-				radius: 6,
+				radius: 4,
 				fillColor: "var(--accent-color)",
 				color: "var(--bg-color)",
 				weight: 1.5,
@@ -8093,7 +8093,7 @@
 		
 		  
 			L.circleMarker([21.663, 110.925], {
-				radius: 6,
+				radius: 4,
 				fillColor: "var(--accent-color)",
 				color: "var(--bg-color)",
 				weight: 1.5,
@@ -8104,7 +8104,7 @@
 		
 		  
 			L.circleMarker([22.543, 114.058], {
-				radius: 6,
+				radius: 4,
 				fillColor: "var(--accent-color)",
 				color: "var(--bg-color)",
 				weight: 1.5,
@@ -8115,7 +8115,7 @@
 		
 		  
 			L.circleMarker([23.682, 113.056], {
-				radius: 6,
+				radius: 4,
 				fillColor: "var(--accent-color)",
 				color: "var(--bg-color)",
 				weight: 1.5,
