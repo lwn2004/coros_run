@@ -88,57 +88,26 @@
       color: var(--text-secondary);
     }
 
-    .stat-card {
-      background-color: var(--card-bg);
-      border-radius: 0.75rem;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      padding: 1.5rem;
-      text-align: center;
-      height: 180px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      transition: all 0.2s ease;
-      overflow: hidden;
+    .stat-card-base {
+        background-color: var(--card-bg);
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        transition: all 0.2s ease;
+        overflow: hidden;
     }
     
-    #dist-card {
-      height: 200px;
-    }
-	.stat-details {
-	  margin-top: auto;
-	  width: 100%;
-	}
     .stat-card-content {
       display: flex;
       flex-direction: column;
       justify-content: center;
       height: 100%;
-      padding: 0.5rem 0;
+      width: 100%;
     }
-    
-    .stat-card-clickable {
-      cursor: pointer;
-      position: relative; /* 为图标定位提供基准 */
-    }
-
-    /* --- [新功能] 翻转图标样式 --- */
-    .stat-card-clickable::after {
-      content: '🔄'; /* 使用Emoji作为图标，简单高效 */
-      position: absolute;
-      bottom: 8px;
-      right: 12px;
-      font-size: 1rem;
-      opacity: 0.3; /* 默认状态下比较透明，不打扰视觉 */
-      transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
-    }
-
-    .stat-card-clickable:hover::after {
-      opacity: 0.7; /* 悬停时更明显 */
-      transform: rotate(30deg); /* 增加一点旋转的交互感 */
-    }
-    /* --- [新功能] 结束 --- */
-
 
     .stat-label {
       font-size: 0.9rem;
@@ -155,20 +124,76 @@
       line-height: 1.2;
 	  min-height: 2.4rem;
     }
-
-    .stat-value-small {
-      font-size: 1.1rem;
-      font-weight: 500;
-      color: var(--text-primary);
-      line-height: 1.4;
-      padding: 0.5rem 0;
-    }
+    
+    .stat-details {
+	  margin-top: auto;
+	  width: 100%;
+	}
 
     .remaining-time {
       font-feature-settings: "tnum";
       font-variant-numeric: tabular-nums;
       color: var(--text-secondary);
     }
+
+    /* ------------------- [新功能] 卡片翻转样式 ------------------- */
+    .stat-card-flip-container {
+        perspective: 1000px;
+        height: 180px;
+    }
+    #dist-card-container {
+        height: 200px;
+    }
+
+    .stat-card-flipper {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.6s;
+        transform-style: preserve-3d;
+    }
+
+    .stat-card-flipper.flipped {
+        transform: rotateY(180deg);
+    }
+
+    .stat-card-front, .stat-card-back {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--card-bg);
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        padding: 1.5rem;
+    }
+
+    .stat-card-back {
+        transform: rotateY(180deg);
+    }
+
+    .flip-icon-container {
+        position: absolute;
+        bottom: 10px;
+        right: 15px;
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+        cursor: pointer;
+        opacity: 0.6;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+        z-index: 5; /* Ensure icon is clickable */
+    }
+
+    .flip-icon-container:hover {
+        opacity: 1;
+        transform: scale(1.1) rotate(30deg);
+    }
+    /* ------------------- [新功能] 结束 ------------------- */
+
 
     .small-muted {
         color: var(--text-secondary);
@@ -200,33 +225,19 @@
 		color: var(--text-secondary);
     }
     .btn-group .btn.active {
-		color: var(--text-primary); /* 确保选中状态文字颜色更明显 */
-		font-weight: 500; /* 可选：加粗选中文字 */
+		color: var(--text-primary);
+		font-weight: 500;
 	}
     @media (max-width: 768px) {
-      .stat-card {
-        padding: 1.25rem;
-        height: 160px;
-      }
-      #dist-card {
-        height: 180px;
-      }
-      .stat-value {
-        font-size: 1.8rem;
-      }
+      .stat-card-flip-container { height: 160px; }
+      #dist-card-container { height: 180px; }
+      .stat-value { font-size: 1.8rem; }
     }
 
     @media (max-width: 576px) {
-      .stat-card {
-        height: 140px;
-        padding: 1rem;
-      }
-      #dist-card {
-        height: 160px;
-      }
-      .stat-value {
-        font-size: 1.5rem;
-      }
+      .stat-card-flip-container { height: 140px; }
+      #dist-card-container { height: 160px; }
+      .stat-value { font-size: 1.5rem; }
     }
 
     .card-title {
@@ -289,12 +300,6 @@
       font-size: 0.75em;
       padding: 0.25em 0.5em;
       font-weight: 500;
-    }
-    
-    .event-entry {
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
     }
 
     .clickable-certificate {
@@ -420,7 +425,6 @@
         padding: 4px 4px 0 0 !important;
     }
 
-    /* --- [新功能] Tabs 样式微调 --- */
     .nav-tabs {
         --bs-nav-tabs-border-color: var(--border-color);
         --bs-nav-tabs-link-hover-border-color: var(--border-color);
@@ -469,61 +473,89 @@
 <div class="container mt-4">
   <div class="row g-2 mb-3">
     <div class="col-12 mb-3">
-	<div class="stat-card stat-card-clickable" id="dist-card"
-		data-label-front="当前跑量"
-		data-value-front="3536.04 &lt;small class=&#34;small-muted&#34;&gt;km&lt;/small&gt;"
-		data-details-front="<div class='mt-2'><div class='stat-label'>已沿赤道行进</div><div class='progress mt-2' style='height: 6px;'><div class='progress-bar' role='progressbar' style='width: 8.8235%;'></div></div><small class='small-muted'>8.8235%</small></div>"
-		data-label-back="日均跑量"
-		data-value-back="5.66 &lt;small class=&#34;small-muted&#34;&gt;km/天&lt;/small&gt;"
-		data-details-back="<div class='mt-2'><div class='stat-label'><small class='small-muted'>预计</small>2043年03月28日<small>可绕地球一圈儿</small></div><div class='remaining-time'><small class='small-muted'>再坚持</small>17年245天！</div></div>">
-	  <div class="stat-card-content d-flex flex-column justify-content-center h-100">
-		<div>
-		  <div class="stat-label">当前跑量</div>
-		  <div class="stat-value">3536.04 <small class="small-muted">km</small></div>
-		</div>
-		<div class="stat-details">
-		  <div class="mt-2">
-			<div class="stat-label">已沿赤道行进</div>
-			<div class="progress mt-2" style="height: 6px;">
-			  <div class="progress-bar" role="progressbar" style="width: 8.8235%;"></div>
-			</div>
-			<small class="small-muted">8.8235%</small>
-		  </div>
-		</div>
-	  </div>
-	</div>
+        <div class="stat-card-flip-container" id="dist-card-container">
+            <div class="stat-card-flipper">
+                <div class="stat-card-front">
+                    <div class="stat-card-content">
+                        <div>
+                            <div class="stat-label">当前跑量</div>
+                            <div class="stat-value">3536.04 <small class="small-muted">km</small></div>
+                        </div>
+                        <div class="stat-details">
+                            <div class="mt-2">
+                                <div class="stat-label">已沿赤道行进</div>
+                                <div class="progress mt-2" style="height: 6px;">
+                                    <div class="progress-bar" role="progressbar" style="width: 8.8235%;"></div>
+                                </div>
+                                <small class="small-muted">8.8235%</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flip-icon-container" title="翻转查看详情">🔄</div>
+                </div>
+                <div class="stat-card-back">
+                    <div class="stat-card-content">
+                        <div>
+                            <div class="stat-label">日均跑量</div>
+                            <div class="stat-value">5.66 <small class="small-muted">km/天</small></div>
+                        </div>
+                        <div class="stat-details">
+                            <div class="mt-2">
+                                <div class="stat-label"><small class="small-muted">预计</small>2043年03月28日<small>可绕地球一圈儿</small></div>
+                                <div class="remaining-time"><small class="small-muted">再坚持</small>17年245天！</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flip-icon-container" title="翻转返回">🔄</div>
+                </div>
+            </div>
+        </div>
     </div>
     
     <div class="col-6 col-md-6">
-      <div class="stat-card stat-card-clickable h-100" id="count-card"
-          data-label-front="次数"
-          data-value-front="427"
-          data-details-front="<small class='small-muted'>&nbsp;</small>"
-          data-label-back="平均单次距离"
-          data-value-back="8.28 &lt;small class=&#34;small-muted&#34;&gt;km&lt;/small&gt;"
-          data-details-back="<small class='small-muted'>&nbsp;</small>">
-        <div class="stat-card-content">
-          <div class="stat-label">次数</div>
-          <div class="stat-value">427</div>
-          <div class="stat-details"><small class='small-muted'>&nbsp;</small></div>
+        <div class="stat-card-flip-container">
+            <div class="stat-card-flipper">
+                <div class="stat-card-front">
+                    <div class="stat-card-content">
+                        <div class="stat-label">次数</div>
+                        <div class="stat-value">427</div>
+                        <div class="stat-details"><small class='small-muted'>&nbsp;</small></div>
+                    </div>
+                    <div class="flip-icon-container" title="翻转查看详情">🔄</div>
+                </div>
+                <div class="stat-card-back">
+                    <div class="stat-card-content">
+                        <div class="stat-label">平均单次距离</div>
+                        <div class="stat-value">8.28 <small class="small-muted">km</small></div>
+                        <div class="stat-details"><small class='small-muted'>&nbsp;</small></div>
+                    </div>
+                    <div class="flip-icon-container" title="翻转返回">🔄</div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
 
     <div class="col-6 col-md-6">
-      <div class="stat-card stat-card-clickable h-100" id="pace-card"
-          data-label-front="平均配速"
-          data-value-front="6&#39;20&#34;"
-          data-details-front="<small class='small-muted'>&nbsp;</small>"
-          data-label-back="最快配速"
-          data-value-back="4&#39;54&#34;"
-          data-details-back="<small class='small-muted'>2025-03-16</small>">
-        <div class="stat-card-content">
-          <div class="stat-label">平均配速</div>
-          <div class="stat-value">6&#39;20&#34;</div>
-          <div class="stat-details"><small class='small-muted'>&nbsp;</small></div>
+        <div class="stat-card-flip-container">
+            <div class="stat-card-flipper">
+                <div class="stat-card-front">
+                    <div class="stat-card-content">
+                        <div class="stat-label">平均配速</div>
+                        <div class="stat-value">6&#39;20&#34;</div>
+                        <div class="stat-details"><small class='small-muted'>&nbsp;</small></div>
+                    </div>
+                    <div class="flip-icon-container" title="翻转查看详情">🔄</div>
+                </div>
+                <div class="stat-card-back">
+                    <div class="stat-card-content">
+                        <div class="stat-label">最快配速</div>
+                        <div class="stat-value">4&#39;54&#34;</div>
+                        <div class="stat-details"><small class='small-muted'>2025-03-16</small></div>
+                    </div>
+                    <div class="flip-icon-container" title="翻转返回">🔄</div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
   </div>
 
@@ -7663,7 +7695,6 @@
             <button class="nav-link" id="race-tab" data-bs-toggle="tab" data-bs-target="#race-tab-pane" type="button" role="tab" aria-controls="race-tab-pane" aria-selected="false">比赛记录</button>
           </li>
         </ul>
-
         <div class="tab-content pt-3" id="eventTabContent">
           <div class="tab-pane fade show active" id="pb-tab-pane" role="tabpanel" aria-labelledby="pb-tab" tabindex="0">
             
@@ -7734,7 +7765,6 @@
               </div>
             
           </div>
-          
           <div class="tab-pane fade" id="milestone-tab-pane" role="tabpanel" aria-labelledby="milestone-tab" tabindex="0">
             
             
@@ -7894,7 +7924,6 @@
               </div>
             
           </div>
-          
           <div class="tab-pane fade" id="race-tab-pane" role="tabpanel" aria-labelledby="race-tab" tabindex="0">
             <div style="min-height: 350px; display: flex; flex-direction: column;">
               <div style="flex: 1; overflow-y: auto;">
@@ -8155,33 +8184,15 @@
       });
     }
     
-    // --- MAIN STATS CARD LOGIC ---
-    document.querySelectorAll('.stat-card-clickable').forEach(card => {
-		card.dataset.state = 'front';
-		const contentEl = card.querySelector('.stat-card-content');
-		const handleCardFlip = (e) => {
-		  if(e.type === 'touchstart') e.preventDefault();
-		  const targetState = card.dataset.state === 'front' ? 'back' : 'front';
-		  const newLabel = card.dataset[`label${targetState.charAt(0).toUpperCase() + targetState.slice(1)}`];
-		  const newValue = card.dataset[`value${targetState.charAt(0).toUpperCase() + targetState.slice(1)}`];
-		  const newDetails = card.dataset[`details${targetState.charAt(0).toUpperCase() + targetState.slice(1)}`] || '';
-		  
-		  // 使用相同的HTML结构
-		  const newContent = `
-			<div class="d-flex flex-column justify-content-center h-100">
-			  <div>
-				<div class="stat-label">${newLabel}</div>
-				<div class="stat-value">${newValue}</div>
-			  </div>
-			  <div class="stat-details">${newDetails}</div>
-			</div>
-		  `;
-		  
-		  contentEl.innerHTML = newContent;
-		  card.dataset.state = targetState;
-		};
-		card.addEventListener('touchstart', handleCardFlip, { passive: false });
-		card.addEventListener('click', handleCardFlip);
+    // --- [新] MAIN STATS CARD FLIP LOGIC ---
+    document.querySelectorAll('.flip-icon-container').forEach(icon => {
+        icon.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const flipper = icon.closest('.stat-card-flipper');
+            if (flipper) {
+                flipper.classList.toggle('flipped');
+            }
+        });
     });
 
     // --- DUAL CHART LOGIC ---
