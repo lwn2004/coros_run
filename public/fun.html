@@ -126,7 +126,7 @@
       color: var(--text-secondary);
       text-transform: uppercase;
       margin-bottom: 0.5rem;
-	  min-height: 1.2rem;
+	  min-height: 1.0rem;
     }
 
     .stat-value {
@@ -176,9 +176,14 @@
         --bs-btn-hover-border-color: var(--accent-color);
         --bs-btn-active-bg: var(--accent-color);
         --bs-btn-active-border-color: var(--accent-color);
+		--bs-btn-active-color: var(--text-primary);
         font-size: 0.8rem;
+		color: var(--text-secondary);
     }
-    
+    .btn-group .btn.active {
+		color: var(--text-primary); /* 确保选中状态文字颜色更明显 */
+		font-weight: 500; /* 可选：加粗选中文字 */
+	}
     @media (max-width: 768px) {
       .stat-card {
         padding: 1.25rem;
@@ -458,8 +463,8 @@
 		data-value-front="3536.04 &lt;small class=&#34;small-muted&#34;&gt;km&lt;/small&gt;"
 		data-details-front="<div class='mt-2'><div class='stat-label'>已沿赤道行进</div><div class='progress mt-2' style='height: 6px;'><div class='progress-bar' role='progressbar' style='width: 8.8235%;'></div></div><small class='small-muted'>8.8235%</small></div>"
 		data-label-back="日均跑量"
-		data-value-back="5.74 &lt;small class=&#34;small-muted&#34;&gt;km/天&lt;/small&gt;"
-		data-details-back="<div class='mt-2'><div class='stat-label'>预计2042年12月27日可绕地球一圈儿</div><div class='remaining-time'>再坚持17年156天！</div></div>">
+		data-value-back="5.72 &lt;small class=&#34;small-muted&#34;&gt;km/天&lt;/small&gt;"
+		data-details-back="<div class='mt-2'><div class='stat-label'><small class='small-muted'>预计</small>2043年01月20日<small>可绕地球一圈儿</small></div><div class='remaining-time'><small class='small-muted'>再坚持</small>17年179天！</div></div>">
 	  <div class="stat-card-content d-flex flex-column justify-content-center h-100">
 		<div>
 		  <div class="stat-label">当前跑量</div>
@@ -2691,7 +2696,7 @@
                     <tr id="details-1731193170000" class="collapse details-row">
                       <td colspan="4">
                         <div class="card-body small">
-                          时间: 06:59:30 | 地点: 未知 | 心率: 144
+                          时间: 06:59:30 | 地点: 澳门 | 心率: 144
                         </div>
                       </td>
                     </tr>
@@ -7999,7 +8004,7 @@
       <div class="modal-body">
         <div id="cityMap"></div>
         <div class="city-list-container">
-          <h6 class="mb-2">城市统计 (Top 3)</h6>
+          <h6 class="mb-2">城市统计 (Top 5)</h6>
           <div class="city-list">
             
               <div class="city-item">
@@ -8017,11 +8022,21 @@
                 <span class="text-end">1次 (5.01km)</span>
               </div>
             
+              <div class="city-item">
+                <span>4. 澳门</span>
+                <span class="text-end">1次 (10.12km)</span>
+              </div>
+            
+              <div class="city-item">
+                <span>5. 清远市</span>
+                <span class="text-end">1次 (21.3km)</span>
+              </div>
+            
           </div>
         </div>
       </div>
       <div class="modal-footer justify-content-center">
-        <small class="text-body-secondary">足迹已遍布 4 个城市</small>
+        <small class="text-body-secondary">足迹已遍布 5 个城市</small>
       </div>
     </div>
   </div>
@@ -8035,8 +8050,9 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <p>这个跑步数据记录网站的灵感来源于水木社区跑步版看到的一位跑友。他分享了自己十年跑步三万公里的经历，并计划继续跑到四万公里——正好是地球赤道的周长。</p>
-        <p>这个目标让我很受触动。四万公里，相当于每天跑十公里，连续跑十年。虽然看起来很远，但分解到每一天，就是坚持跑下去。</p>
+        <p>这个跑步记录网站的灵感，来自我在水木社区看到的一个帖子。</p>
+		<p>一位跑友分享了他坚持跑步十年的经历，累计跑量达到了三万公里。他接下来的目标是跑到四万公里——正好是绕地球赤道一圈的距离。</p>
+        <p>这个目标让我很受触动。四万公里，相当于每天跑<span style="text-decoration: line-through;text-decoration-color: #ff6b6b;text-decoration-thickness: 2px;">十公里</span>五公里，连续跑<span style="text-decoration: line-through;text-decoration-color: #ff6b6b;text-decoration-thickness: 2px;">十一年</span>二十二年。虽然看起来很远，但分解到每一天，就是坚持跑下去。</p>
         <p>我不是专业跑者，也不追求速度。对我来说，跑步更重要的是保持健康和坚持的习惯。这个网站记录我的跑步历程，看着数字一点点增长，就是最好的动力。</p>
         <p>如果你也有类似的跑步目标，欢迎一起坚持。跑步路上，我们都不孤单。</p>
       </div>
@@ -8114,6 +8130,17 @@
 		  
 		
 		  
+			L.circleMarker([22.179, 113.549], {
+				radius: 4,
+				fillColor: "var(--accent-color)",
+				color: "var(--bg-color)",
+				weight: 1.5,
+				opacity: 1,
+				fillOpacity: 0.7
+			}).addTo(cityMap).bindPopup(`<b>澳门</b><br>跑步次数: 1<br>总距离: 10.12km`);
+		  
+		
+		  
 			L.circleMarker([23.682, 113.056], {
 				radius: 4,
 				fillColor: "var(--accent-color)",
@@ -8188,10 +8215,10 @@
     dailyDistanceChart = new Chart(dailyCtx, {
       type: 'bar',
       data: {
-        labels: ["06-29", "06-30", "07-01", "07-02", "07-03", "07-04", "07-05", "07-06", "07-07", "07-08", "07-09", "07-10", "07-11", "07-12", "07-13", "07-14", "07-15", "07-16", "07-17", "07-18", "07-19", "07-20", "07-21", "07-22", "07-23", "07-24", "07-25", "07-26", "07-27", "07-28"],
+        labels: ["06-30", "07-01", "07-02", "07-03", "07-04", "07-05", "07-06", "07-07", "07-08", "07-09", "07-10", "07-11", "07-12", "07-13", "07-14", "07-15", "07-16", "07-17", "07-18", "07-19", "07-20", "07-21", "07-22", "07-23", "07-24", "07-25", "07-26", "07-27", "07-28", "07-29"],
         datasets: [{
           label: '距离 (km)',
-          data: [0.0, 8.25, 12.01, 0.0, 12.13, 10.25, 21.21, 0.0, 11.21, 12.01, 13.94, 0.0, 10.01, 21.25, 0.0, 10.1, 0.0, 12.21, 13.4, 0.0, 23.45, 0.0, 0.0, 0.0, 10.16, 0.0, 11.0, 21.6, 0.0, 10.05],
+          data: [8.25, 12.01, 0.0, 12.13, 10.25, 21.21, 0.0, 11.21, 12.01, 13.94, 0.0, 10.01, 21.25, 0.0, 10.1, 0.0, 12.21, 13.4, 0.0, 23.45, 0.0, 0.0, 0.0, 10.16, 0.0, 11.0, 21.6, 0.0, 10.05, 0.0],
           backgroundColor: accentColor + '99',
           borderColor: accentColor,
           borderWidth: 1,
