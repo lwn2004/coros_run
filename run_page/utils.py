@@ -1,3 +1,4 @@
+# coding=utf-8
 import json
 import time
 from datetime import datetime
@@ -53,6 +54,7 @@ def to_date(ts):
 def get_city_name(text):
     if text == None:
       return '未知'
+    text = str(text)
     print(text)
     text = cc.convert(text)  # 转换为简体字
     print(text)
