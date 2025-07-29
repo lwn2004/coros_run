@@ -71,8 +71,11 @@ def make_activities_file(
         json.dump(activities_list, f)
     processed = []
     for activity in activities_list:
+      print activity["start_date_local"]
+      print activity["location_country"]
       location = activity.get("location_country", "")
       city = get_city_name(location)
+      print city
       activity["city"] = city
       processed.append(activity)
     skip_columns = {"summary_polyline", "start_date", "location_country"}
