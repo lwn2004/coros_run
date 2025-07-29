@@ -52,7 +52,8 @@ def to_date(ts):
 def get_city_name(text):
     if text == None:
       return '未知'
-    pattern = re.compile(r'([\u4e00-\u9fa5]{2,}(市|自治州|特别行政区|盟|地区))')
+    text = text.replace("澳門", "澳门")
+    pattern = re.compile(r'澳门|香港|([\u4e00-\u9fa5]{2,}(市|自治州|特别行政区|盟|地区))')
     match = pattern.search(text)
     return match.group(1) if match else '未知'
 
