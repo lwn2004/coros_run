@@ -55,9 +55,9 @@ def get_city_name(text):
       return '未知'
     text = str(text)
     print(text)
-    text = cc.convert(text)  # 转换为简体字
+    text = text.replace("澳門", "澳门").replace("中國", "中国").replace("臺灣", "台湾")
     print(text)
-    pattern = re.compile(r'(澳门|香港|[\u4e00-\u9fa5]{2,}(市|自治州|特别行政区|盟|地区))')
+    pattern = re.compile(r"(澳门|香港|北京|天津|重庆|上海|[\u4e00-\u9fa5]{2,}(市|区|县|自治区|自治州|地区|盟|特别行政区))")
     match = pattern.search(text)
     return match.group(1) if match else '未知'
 
@@ -76,7 +76,6 @@ def make_activities_file(
     processed = []
     for activity in activities_list:
       print(activity["start_date_local"])
-      print(activity["location_country"])
       location = activity.get("location_country", "")
       city = get_city_name(location)
       print(city)
