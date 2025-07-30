@@ -5,8 +5,8 @@
   <title>步履不停 - 已绕地球0.09圈儿</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
-  <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
   <style>
     :root {
       --bg-color: #1c1e21;
@@ -137,6 +137,30 @@
     }
 
     /* ------------------- [新功能] 卡片翻转样式 ------------------- */
+    .stat-card {
+      background-color: var(--card-bg);
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 1.5rem;
+      text-align: center;
+      height: 180px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      transition: all 0.2s ease;
+      overflow: hidden;
+    }
+    #dist-card {
+      height: 200px;
+    }
+
+    .stat-card-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      height: 100%;
+    }
+    	
     .stat-card-flip-container {
         perspective: 1000px;
         height: 180px;
@@ -146,6 +170,7 @@
     }
 
     .stat-card-flipper {
+		text-align: center;
         position: relative;
         width: 100%;
         height: 100%;
@@ -246,13 +271,13 @@
 		font-weight: 500;
 	}
     @media (max-width: 768px) {
-      .stat-card-flip-container { height: 160px; }
+      .stat-card-flip-container { height: 100px; }
       #dist-card-container { height: 180px; }
       .stat-value { font-size: 1.8rem; }
     }
 
     @media (max-width: 576px) {
-      .stat-card-flip-container { height: 140px; }
+      .stat-card-flip-container { height: 100px; }
       #dist-card-container { height: 160px; }
       .stat-value { font-size: 1.5rem; }
     }
@@ -496,7 +521,7 @@
       <span class="menu-line"></span>
     </button>
     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="mainMenu">
-      <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#mapModal"><span style="margin-right: 0.5em;">📍&nbsp;</span>足迹</a></li>
+      <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#mapModal"><span style="margin-right: 0.5em;">📍</span>足迹</a></li>
       <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#pbModal"><span style="margin-right: 0.5em;">🏁</span>事件</a></li>
       <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#aboutModal"><span style="margin-right: 0.5em;">ℹ️</span>关于</a></li>
     </ul>
@@ -549,15 +574,21 @@
             <div class="stat-card-flipper">
                 <div class="stat-card-front">
                     <div class="stat-card-content">
-                        <div class="stat-label">跑步次数</div>
-                        <div class="stat-value">427</div>
+						<div>
+							<div class="stat-label">跑步次数</div>
+							<div class="stat-value">427</div>
+						</div>
+						<div class="stat-details"></div>						
                     </div>
-                    <div class="flip-icon-container" title="翻转查看详情">🔄</div>
+					<div class="flip-icon-container" title="翻转查看详情">🔄</div>					
                 </div>
                 <div class="stat-card-back">
                     <div class="stat-card-content">
-                        <div class="stat-label">总耗时</div>
-                        <div class="stat-value">373:59:57</div>
+						<div>
+							<div class="stat-label">总耗时</div>
+							<div class="stat-value">373:59:57</div>
+						</div>
+						<div class="stat-details"></div>
                     </div>
                     <div class="flip-icon-container" title="翻转返回">🔄</div>
                 </div>
@@ -570,15 +601,21 @@
             <div class="stat-card-flipper">
                 <div class="stat-card-front">
                     <div class="stat-card-content">
-                        <div class="stat-label">平均配速</div>
-                        <div class="stat-value">6&#39;20&#34;</div>
+						<div>
+							<div class="stat-label">平均配速</div>
+							<div class="stat-value">6&#39;20&#34;</div>
+						</div>
+						<div class="stat-details"></div>
                     </div>
                     <div class="flip-icon-container" title="翻转查看详情">🔄</div>
                 </div>
                 <div class="stat-card-back">
                     <div class="stat-card-content">
-                        <div class="stat-label">最快配速</div>
-                        <div class="stat-value">4&#39;54&#34;</div>
+						<div>
+							<div class="stat-label">最快配速</div>
+							<div class="stat-value">4&#39;54&#34;</div>
+						</div>
+						<div class="stat-details"></div>
                     </div>
                     <div class="flip-icon-container" title="翻转返回">🔄</div>
                 </div>
@@ -8123,10 +8160,10 @@
 </div>
 <div id="menu-backdrop"></div>
 </body>
-<script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.bootcdn.net/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.1.0/chartjs-plugin-annotation.min.js"></script>
-<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
 <script>
 	let monthlyDistanceChart = null;
 	let dailyDistanceChart = null;
@@ -8149,7 +8186,18 @@
 		backdrop.addEventListener('click', () => {
 		  menuButton.click(); // 触发按钮关闭菜单
 		});
-	 
+		// 为三个模态框添加关闭事件监听
+		const modals = ['mapModal', 'pbModal', 'aboutModal'];
+		modals.forEach(modalId => {
+		  const modal = document.getElementById(modalId);
+		  if (modal) {
+			modal.addEventListener('hidden.bs.modal', () => {
+			  setTimeout(() => {
+				backdrop.style.display = "none";
+			  }, 100);
+			});
+		  }
+		});	 
 		const loadingElement = document.getElementById('loading');
 		if (loadingElement) loadingElement.style.display = 'none';
 		
