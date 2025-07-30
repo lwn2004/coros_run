@@ -176,22 +176,39 @@
         transform: rotateY(180deg);
     }
 
-    .flip-icon-container {
-        position: absolute;
-        bottom: 10px;
-        right: 15px;
-        font-size: 1.1rem;
-        color: var(--text-secondary);
-        cursor: pointer;
-        opacity: 0.6;
-        transition: opacity 0.2s ease, transform 0.2s ease;
-        z-index: 5; /* Ensure icon is clickable */
-    }
+	.flip-icon-container {
+		position: absolute;
+		top: 10px;
+		right: 15px;
+		font-size: 1.1rem;
+		color: var(--text-secondary);
+		cursor: pointer;
+		opacity: 0.6;
+		transition: opacity 0.2s ease, transform 0.2s ease;
+		z-index: 5;
+	}
 
-    .flip-icon-container:hover {
-        opacity: 1;
-        transform: scale(1.1) rotate(30deg);
-    }
+	.flip-icon-container:hover {
+		opacity: 1;
+		transform: scale(1.1) rotate(30deg);
+	}
+
+	.stat-card-front .flip-icon-container {
+		display: block;
+	}
+
+	.stat-card-back .flip-icon-container {
+		display: none;
+	}
+
+	.stat-card-flipper.flipped .stat-card-front .flip-icon-container {
+		display: none;
+	}
+
+	.stat-card-flipper.flipped .stat-card-back .flip-icon-container {
+		display: block;
+	}
+
     /* ------------------- [新功能] 结束 ------------------- */
 
 
@@ -364,6 +381,8 @@
     .dropdown-item {
       color: var(--text-primary);
       padding: 0.5rem 1rem;
+	  font-size: 0.95rem;
+	  padding-left: 1rem;
     }
     
     .dropdown-item:hover, .dropdown-item:focus {
@@ -440,6 +459,20 @@
         border-color: var(--border-color);
         border-bottom-color: var(--hover-bg);
     }
+	#menu-backdrop {
+	  position: fixed;
+	  top: 0;
+	  left: 0;
+	  width: 100%;
+	  height: 100%;
+	  background-color: rgba(0,0,0,0.5);
+	  z-index: 998;
+	  display: none;
+	}
+
+	.dropdown-menu.show {
+	  z-index: 999;
+	}
 
   </style>
 </head>
@@ -463,9 +496,9 @@
       <span class="menu-line"></span>
     </button>
     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="mainMenu">
-      <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#mapModal">足迹</a></li>
-      <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#pbModal">事件</a></li>
-      <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#aboutModal">关于</a></li>
+      <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#mapModal"><span style="margin-right: 0.5em;">📍&nbsp;&nbsp;</span>足迹</a></li>
+      <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#pbModal"><span style="margin-right: 0.5em;">🏁</span>事件</a></li>
+      <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#aboutModal"><span style="margin-right: 0.5em;">ℹ️</span>关于</a></li>
     </ul>
   </div>
 </nav>
@@ -7925,7 +7958,7 @@
             
           </div>
           <div class="tab-pane fade" id="race-tab-pane" role="tabpanel" aria-labelledby="race-tab" tabindex="0">
-            <div style="min-height: 350px; display: flex; flex-direction: column;">
+            <div style="min-height: 409.2px; display: flex; flex-direction: column;">
               <div style="flex: 1; overflow-y: auto;">
                 
                   
@@ -8089,100 +8122,117 @@
     </div>
   </div>
 </div>
+<div id="menu-backdrop"></div>
+</body>
 <script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.bootcdn.net/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 <script>
-  let monthlyDistanceChart = null;
-  let dailyDistanceChart = null;
-  let cityMap = null;
-  
-  document.documentElement.setAttribute('data-bs-theme', 'dark');
-  
-  document.addEventListener('DOMContentLoaded', function() {
-    const loadingElement = document.getElementById('loading');
-    if (loadingElement) loadingElement.style.display = 'none';
-    
-    // --- MAP LOGIC ---
-    const mapModal = document.getElementById('mapModal');
-    if (mapModal) {
-      mapModal.addEventListener('shown.bs.modal', function() {
-        if (!cityMap) {
-          cityMap = L.map('cityMap', {
-              center: [23.129, 113.264],
-              zoom: 3,
-              maxBounds: [[15, 70], [55, 140]],
-              maxBoundsViscosity: 1.0,
-          });
+	let monthlyDistanceChart = null;
+	let dailyDistanceChart = null;
+	let cityMap = null;
 
-          L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
-            attribution: '',
-            subdomains: 'abcd',
-            minZoom: 3,
-            maxZoom: 18
-          }).addTo(cityMap);
-          
+	document.documentElement.setAttribute('data-bs-theme', 'dark');
+
+	document.addEventListener('DOMContentLoaded', function() {
+		const menuButton = document.getElementById('mainMenu');
+		const dropdownMenu = document.querySelector('.dropdown-menu');
+		const backdrop = document.getElementById('menu-backdrop');
+
+		menuButton.addEventListener('click', () => {
+		  setTimeout(() => {
+			const isOpen = dropdownMenu.classList.contains('show');
+			backdrop.style.display = isOpen ? 'block' : 'none';
+		  }, 50); // 延迟一点，确保 show 类已添加
+		});
+
+		backdrop.addEventListener('click', () => {
+		  menuButton.click(); // 触发按钮关闭菜单
+		});
+	 
+		const loadingElement = document.getElementById('loading');
+		if (loadingElement) loadingElement.style.display = 'none';
 		
-		  
-			L.circleMarker([23.129, 113.264], {
-				radius: 4,
-				fillColor: "var(--accent-color)",
-				color: "var(--bg-color)",
-				weight: 1.5,
-				opacity: 1,
-				fillOpacity: 0.7
-			}).addTo(cityMap).bindPopup(`<b>广州市</b><br>跑步次数: 411<br>总距离: 3410.64km`);
-		  
-		
-		  
-			L.circleMarker([21.663, 110.925], {
-				radius: 4,
-				fillColor: "var(--accent-color)",
-				color: "var(--bg-color)",
-				weight: 1.5,
-				opacity: 1,
-				fillOpacity: 0.7
-			}).addTo(cityMap).bindPopup(`<b>茂名市</b><br>跑步次数: 11<br>总距离: 81.6km`);
-		  
-		
-		  
-			L.circleMarker([23.682, 113.056], {
-				radius: 4,
-				fillColor: "var(--accent-color)",
-				color: "var(--bg-color)",
-				weight: 1.5,
-				opacity: 1,
-				fillOpacity: 0.7
-			}).addTo(cityMap).bindPopup(`<b>清远市</b><br>跑步次数: 1<br>总距离: 21.3km`);
-		  
-		
-		  
-			L.circleMarker([22.179, 113.549], {
-				radius: 4,
-				fillColor: "var(--accent-color)",
-				color: "var(--bg-color)",
-				weight: 1.5,
-				opacity: 1,
-				fillOpacity: 0.7
-			}).addTo(cityMap).bindPopup(`<b>澳门</b><br>跑步次数: 1<br>总距离: 10.12km`);
-		  
-		
-		  
-			L.circleMarker([22.543, 114.058], {
-				radius: 4,
-				fillColor: "var(--accent-color)",
-				color: "var(--bg-color)",
-				weight: 1.5,
-				opacity: 1,
-				fillOpacity: 0.7
-			}).addTo(cityMap).bindPopup(`<b>深圳市</b><br>跑步次数: 1<br>总距离: 5.01km`);
-		  
-		
-        } else {
-          cityMap.invalidateSize();
-        }
-      });
-    }
+		// --- MAP LOGIC ---
+		const mapModal = document.getElementById('mapModal');
+		if (mapModal) {
+		  mapModal.addEventListener('shown.bs.modal', function() {
+			if (!cityMap) {
+			  cityMap = L.map('cityMap', {
+				  center: [23.129, 113.264],
+				  zoom: 3,
+				  maxBounds: [[15, 70], [55, 140]],
+				  maxBoundsViscosity: 1.0,
+			  });
+
+			  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
+				attribution: '',
+				subdomains: 'abcd',
+				minZoom: 3,
+				maxZoom: 18
+			  }).addTo(cityMap);
+			  
+			
+			  
+				L.circleMarker([23.129, 113.264], {
+					radius: 4,
+					fillColor: "var(--accent-color)",
+					color: "var(--bg-color)",
+					weight: 1.5,
+					opacity: 1,
+					fillOpacity: 0.7
+				}).addTo(cityMap).bindPopup(`<b>广州市</b><br>跑步次数: 411<br>总距离: 3410.64km`);
+			  
+			
+			  
+				L.circleMarker([21.663, 110.925], {
+					radius: 4,
+					fillColor: "var(--accent-color)",
+					color: "var(--bg-color)",
+					weight: 1.5,
+					opacity: 1,
+					fillOpacity: 0.7
+				}).addTo(cityMap).bindPopup(`<b>茂名市</b><br>跑步次数: 11<br>总距离: 81.6km`);
+			  
+			
+			  
+				L.circleMarker([23.682, 113.056], {
+					radius: 4,
+					fillColor: "var(--accent-color)",
+					color: "var(--bg-color)",
+					weight: 1.5,
+					opacity: 1,
+					fillOpacity: 0.7
+				}).addTo(cityMap).bindPopup(`<b>清远市</b><br>跑步次数: 1<br>总距离: 21.3km`);
+			  
+			
+			  
+				L.circleMarker([22.179, 113.549], {
+					radius: 4,
+					fillColor: "var(--accent-color)",
+					color: "var(--bg-color)",
+					weight: 1.5,
+					opacity: 1,
+					fillOpacity: 0.7
+				}).addTo(cityMap).bindPopup(`<b>澳门</b><br>跑步次数: 1<br>总距离: 10.12km`);
+			  
+			
+			  
+				L.circleMarker([22.543, 114.058], {
+					radius: 4,
+					fillColor: "var(--accent-color)",
+					color: "var(--bg-color)",
+					weight: 1.5,
+					opacity: 1,
+					fillOpacity: 0.7
+				}).addTo(cityMap).bindPopup(`<b>深圳市</b><br>跑步次数: 1<br>总距离: 5.01km`);
+			  
+			
+			} else {
+			  cityMap.invalidateSize();
+			}
+		  });
+		}
     
     // --- [新] MAIN STATS CARD FLIP LOGIC ---
     document.querySelectorAll('.flip-icon-container').forEach(icon => {
@@ -8282,5 +8332,4 @@
     if(dailyDistanceChart) dailyDistanceChart.destroy();
   });
 </script>
-</body>
 </html>
