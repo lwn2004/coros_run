@@ -496,7 +496,7 @@
       <span class="menu-line"></span>
     </button>
     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="mainMenu">
-      <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#mapModal"><span style="margin-right: 0.5em;">📍&nbsp;&nbsp;</span>足迹</a></li>
+      <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#mapModal"><span style="margin-right: 0.5em;">📍&nbsp;</span>足迹</a></li>
       <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#pbModal"><span style="margin-right: 0.5em;">🏁</span>事件</a></li>
       <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#aboutModal"><span style="margin-right: 0.5em;">ℹ️</span>关于</a></li>
     </ul>
@@ -529,13 +529,12 @@
                 <div class="stat-card-back">
                     <div class="stat-card-content">
                         <div>
-                            <div class="stat-label">日均跑量</div>
-                            <div class="stat-value">5.66 <small class="small-muted">km/天</small></div>
+                            <div class="stat-label">继续坚持</div>
+                            <div class="stat-value">17年245天</div>
                         </div>
                         <div class="stat-details">
                             <div class="mt-2">
                                 <div class="stat-label"><small class="small-muted">预计</small>2043年03月28日<small>可绕地球一圈儿</small></div>
-                                <div class="remaining-time"><small class="small-muted">再坚持</small>17年245天！</div>
                             </div>
                         </div>
                     </div>
@@ -550,17 +549,15 @@
             <div class="stat-card-flipper">
                 <div class="stat-card-front">
                     <div class="stat-card-content">
-                        <div class="stat-label">次数</div>
+                        <div class="stat-label">跑步次数</div>
                         <div class="stat-value">427</div>
-                        <div class="stat-details"><small class='small-muted'>&nbsp;</small></div>
                     </div>
                     <div class="flip-icon-container" title="翻转查看详情">🔄</div>
                 </div>
                 <div class="stat-card-back">
                     <div class="stat-card-content">
-                        <div class="stat-label">平均单次距离</div>
-                        <div class="stat-value">8.28 <small class="small-muted">km</small></div>
-                        <div class="stat-details"><small class='small-muted'>&nbsp;</small></div>
+                        <div class="stat-label">总耗时</div>
+                        <div class="stat-value">373:59:57</div>
                     </div>
                     <div class="flip-icon-container" title="翻转返回">🔄</div>
                 </div>
@@ -575,7 +572,6 @@
                     <div class="stat-card-content">
                         <div class="stat-label">平均配速</div>
                         <div class="stat-value">6&#39;20&#34;</div>
-                        <div class="stat-details"><small class='small-muted'>&nbsp;</small></div>
                     </div>
                     <div class="flip-icon-container" title="翻转查看详情">🔄</div>
                 </div>
@@ -583,7 +579,6 @@
                     <div class="stat-card-content">
                         <div class="stat-label">最快配速</div>
                         <div class="stat-value">4&#39;54&#34;</div>
-                        <div class="stat-details"><small class='small-muted'>2025-03-16</small></div>
                     </div>
                     <div class="flip-icon-container" title="翻转返回">🔄</div>
                 </div>
@@ -604,9 +599,13 @@
     </div>
     <div class="card-body">
       <div id="monthlyChartContainer">
+	    <div id="monthlyAvgText" style="color:#FF6B6B;text-align:right; margin-bottom: -10px; font-size: 11px;font-weight: bold;">
+		</div>
         <canvas id="monthlyDistanceChart" aria-label="最近12个月跑步距离统计图表"></canvas>
       </div>
       <div id="dailyChartContainer" style="display: none;">
+	    <div id="dailyAvgText" style="color:#FF6B6B;text-align:right; margin-bottom: -10px; font-size: 11px;font-weight: bold;">
+		</div>	  
         <canvas id="dailyDistanceChart" aria-label="最近30天跑步距离统计图表"></canvas>
       </div>
     </div>
@@ -7958,7 +7957,7 @@
             
           </div>
           <div class="tab-pane fade" id="race-tab-pane" role="tabpanel" aria-labelledby="race-tab" tabindex="0">
-            <div style="min-height: 409.2px; display: flex; flex-direction: column;">
+            <div style="min-height: 409px; display: flex; flex-direction: column;">
               <div style="flex: 1; overflow-y: auto;">
                 
                   
@@ -8126,6 +8125,7 @@
 </body>
 <script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.bootcdn.net/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.1.0/chartjs-plugin-annotation.min.js"></script>
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 <script>
 	let monthlyDistanceChart = null;
@@ -8249,44 +8249,133 @@
     const gridColor = 'rgba(128, 128, 128, 0.2)';
     const tickColor = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim();
     const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
-    
+	// 计算月跑量平均值（分母为实际有跑量的月数）
+	const monthlyData = [126.75, 109.63, 129.56, 126.46, 171.69, 204.69, 202.17, 203.37, 201.7, 150.98, 204.56, 235.98];
+	const monthlyRunningMonths = monthlyData.filter(d => d > 0).length;
+	const monthlyTotal = monthlyData.reduce((a, b) => a + b, 0);
+	const monthlyAvg = monthlyRunningMonths > 0 ? (monthlyTotal / monthlyRunningMonths) : 0;
+
+	// 计算日跑量平均值（分母为实际有跑量的天数）
+	const dailyData = [12.01, 0.0, 12.13, 10.25, 21.21, 0.0, 11.21, 12.01, 13.94, 0.0, 10.01, 21.25, 0.0, 10.1, 0.0, 12.21, 13.4, 0.0, 23.45, 0.0, 0.0, 0.0, 10.16, 0.0, 11.0, 21.6, 0.0, 10.05, 0.0, 0.0];
+	const runningDays = dailyData.filter(d => d > 0).length;
+	const dailyTotal = dailyData.reduce((a, b) => a + b, 0);
+	const dailyAvg = runningDays > 0 ? (dailyTotal / runningDays) : 0; 
+	
     // Init Monthly Chart
     const monthlyCtx = document.getElementById('monthlyDistanceChart').getContext('2d');
-    monthlyDistanceChart = new Chart(monthlyCtx, {
-      type: 'bar',
-      data: {
-        labels: ["24-08", "24-09", "24-10", "24-11", "24-12", "25-01", "25-02", "25-03", "25-04", "25-05", "25-06", "25-07"],
-        datasets: [{
-          label: '距离 (km)',
-          data: [126.75, 109.63, 129.56, 126.46, 171.69, 204.69, 202.17, 203.37, 201.7, 150.98, 204.56, 235.98],
-          backgroundColor: accentColor + '99',
-          borderColor: accentColor,
-          borderWidth: 1,
-          borderRadius: 4,
-          hoverBackgroundColor: accentColor
-        }]
-      },
-      options: { responsive: true, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km' } }, x: { grid: { display: false }, ticks: { color: tickColor } } }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (context) => `${context.dataset.label}: ${context.raw} km` }}}}
-    });
+	monthlyDistanceChart = new Chart(monthlyCtx, {
+		type: 'bar',
+		data: {
+		  labels: ["24-08", "24-09", "24-10", "24-11", "24-12", "25-01", "25-02", "25-03", "25-04", "25-05", "25-06", "25-07"],
+		  datasets: [{
+			label: '距离 (km)',
+			data: monthlyData,
+			backgroundColor: accentColor + '99',
+			borderColor: accentColor,
+			borderWidth: 1,
+			borderRadius: 4,
+			hoverBackgroundColor: accentColor
+		  }]
+		},
+		options: {
+		  responsive: true,
+		  scales: {
+			y: {
+			  beginAtZero: true,
+			  grid: { color: gridColor },
+			  ticks: {
+				color: tickColor,
+				callback: (v) => v + ' km'
+			  }
+			},
+			x: {
+			  grid: { display: false },
+			  ticks: { color: tickColor }
+			}
+		  },
+		  plugins: {
+			legend: { display: false },
+			tooltip: {
+			  callbacks: {
+				label: (context) => `${context.dataset.label}: ${context.raw} km`
+			  }
+			},
+			// 添加平均线插件
+			annotation: {
+			  annotations: {
+				avgLine: {
+				  type: 'line',
+				  yMin: monthlyAvg,
+				  yMax: monthlyAvg,
+				  borderColor: '#FF6B6B',
+				  borderWidth: 2,
+				  borderDash: [5, 5],
+				}
+			  }
+			}
+		  }
+		}
+	});
+
 
     // Init Daily Chart
     const dailyCtx = document.getElementById('dailyDistanceChart').getContext('2d');
-    dailyDistanceChart = new Chart(dailyCtx, {
-      type: 'bar',
-      data: {
-        labels: ["07-01", "07-02", "07-03", "07-04", "07-05", "07-06", "07-07", "07-08", "07-09", "07-10", "07-11", "07-12", "07-13", "07-14", "07-15", "07-16", "07-17", "07-18", "07-19", "07-20", "07-21", "07-22", "07-23", "07-24", "07-25", "07-26", "07-27", "07-28", "07-29", "07-30"],
-        datasets: [{
-          label: '距离 (km)',
-          data: [12.01, 0.0, 12.13, 10.25, 21.21, 0.0, 11.21, 12.01, 13.94, 0.0, 10.01, 21.25, 0.0, 10.1, 0.0, 12.21, 13.4, 0.0, 23.45, 0.0, 0.0, 0.0, 10.16, 0.0, 11.0, 21.6, 0.0, 10.05, 0.0, 0.0],
-          backgroundColor: accentColor + '99',
-          borderColor: accentColor,
-          borderWidth: 1,
-          borderRadius: 2,
-          hoverBackgroundColor: accentColor
-        }]
-      },
-      options: { responsive: true, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km' } }, x: { grid: { display: false }, ticks: { color: tickColor } } }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (context) => `${context.dataset.label}: ${context.raw} km` }}}}
-    });
+	dailyDistanceChart = new Chart(dailyCtx, {
+		type: 'bar',
+		data: {
+		  labels: ["07-01", "07-02", "07-03", "07-04", "07-05", "07-06", "07-07", "07-08", "07-09", "07-10", "07-11", "07-12", "07-13", "07-14", "07-15", "07-16", "07-17", "07-18", "07-19", "07-20", "07-21", "07-22", "07-23", "07-24", "07-25", "07-26", "07-27", "07-28", "07-29", "07-30"],
+		  datasets: [{
+			label: '距离 (km)',
+			data: dailyData,
+			backgroundColor: accentColor + '99',
+			borderColor: accentColor,
+			borderWidth: 1,
+			borderRadius: 2,
+			hoverBackgroundColor: accentColor
+		  }]
+		},
+		options: {
+		  responsive: true,
+		  scales: {
+			y: {
+			  beginAtZero: true,
+			  grid: { color: gridColor },
+			  ticks: {
+				color: tickColor,
+				callback: (v) => v + ' km'
+			  }
+			},
+			x: {
+			  grid: { display: false },
+			  ticks: { color: tickColor }
+			}
+		  },
+		  plugins: {
+			legend: { display: false },
+			tooltip: {
+			  callbacks: {
+				label: (context) => `${context.dataset.label}: ${context.raw} km`
+			  }
+			},
+			// 添加平均线插件
+			annotation: {
+			  annotations: {
+				avgLine: {
+				  type: 'line',
+				  yMin: dailyAvg,
+				  yMax: dailyAvg,
+				  borderColor: '#FF6B6B',
+				  borderWidth: 2,
+				  borderDash: [5, 5],
+				}
+			  }
+			}
+		  }
+		}
+	});
+	dailyDistanceChart.options.animation = false;
+	document.getElementById('monthlyAvgText').innerHTML=`月均: ${monthlyAvg.toFixed(1)}km`;	
+	document.getElementById('dailyAvgText').innerHTML=`日均: ${dailyAvg.toFixed(1)}km`;
 
     // Chart toggle button logic
     const chartToggleButtons = document.querySelectorAll('#chart-toggle .btn');
