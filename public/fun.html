@@ -5,8 +5,9 @@
   <title>步履不停 - 已绕地球0.09圈儿</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
+  <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.min.css" rel="stylesheet">
   <style>
     :root {
       --bg-color: #1c1e21;
@@ -521,9 +522,9 @@
       <span class="menu-line"></span>
     </button>
     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="mainMenu">
-      <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#mapModal"><span style="margin-right: 0.5em;">📍</span>足迹</a></li>
-      <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#pbModal"><span style="margin-right: 0.5em;">🏁</span>事件</a></li>
-      <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#aboutModal"><span style="margin-right: 0.5em;">ℹ️</span>关于</a></li>
+      <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#mapModal"><i class="bi bi-pin-map"></i> 足迹</a></li>
+      <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#pbModal"><i class="bi bi-calendar4-event"></i> 事件</a></li>
+      <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#aboutModal"><i class="bi bi-info-circle"></i> 关于</a></li>
     </ul>
   </div>
 </nav>
@@ -549,7 +550,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="flip-icon-container" title="翻转查看详情">🔄</div>
+                    <div class="flip-icon-container" title="翻转查看详情"><i class="bi bi-phone-flip"></i></div>
                 </div>
                 <div class="stat-card-back">
                     <div class="stat-card-content">
@@ -563,7 +564,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="flip-icon-container" title="翻转返回">🔄</div>
+                    <div class="flip-icon-container" title="翻转返回"><i class="bi bi-phone-flip"></i></div>
                 </div>
             </div>
         </div>
@@ -580,7 +581,7 @@
 						</div>
 						<div class="stat-details"></div>						
                     </div>
-					<div class="flip-icon-container" title="翻转查看详情">🔄</div>					
+					<div class="flip-icon-container" title="翻转查看详情"><i class="bi bi-phone-flip"></i></div>					
                 </div>
                 <div class="stat-card-back">
                     <div class="stat-card-content">
@@ -590,7 +591,7 @@
 						</div>
 						<div class="stat-details"></div>
                     </div>
-                    <div class="flip-icon-container" title="翻转返回">🔄</div>
+                    <div class="flip-icon-container" title="翻转返回"><i class="bi bi-phone-flip"></i></div>
                 </div>
             </div>
         </div>
@@ -607,7 +608,7 @@
 						</div>
 						<div class="stat-details"></div>
                     </div>
-                    <div class="flip-icon-container" title="翻转查看详情">🔄</div>
+                    <div class="flip-icon-container" title="翻转查看详情"><i class="bi bi-phone-flip"></i></div>
                 </div>
                 <div class="stat-card-back">
                     <div class="stat-card-content">
@@ -617,7 +618,7 @@
 						</div>
 						<div class="stat-details"></div>
                     </div>
-                    <div class="flip-icon-container" title="翻转返回">🔄</div>
+                    <div class="flip-icon-container" title="翻转返回"><i class="bi bi-phone-flip"></i></div>
                 </div>
             </div>
         </div>
@@ -8161,9 +8162,9 @@
 <div id="menu-backdrop"></div>
 </body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.1.0/chartjs-plugin-annotation.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/chartjs-plugin-annotation/3.1.0/chartjs-plugin-annotation.min.js "></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 	let monthlyDistanceChart = null;
 	let dailyDistanceChart = null;
@@ -8211,6 +8212,7 @@
 				  zoom: 3,
 				  maxBounds: [[15, 70], [55, 140]],
 				  maxBoundsViscosity: 1.0,
+				  zoomControl: false,
 			  });
 
 			  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
@@ -8219,6 +8221,7 @@
 				minZoom: 3,
 				maxZoom: 18
 			  }).addTo(cityMap);
+			  cityMap.attributionControl.setPrefix('')
 			  
 			
 			  
