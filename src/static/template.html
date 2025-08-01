@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <title>步履不停 - 已绕地球{{ "%.2f"|format(overall_stats.dist_km/40075.017) }}圈儿</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #1c1e21;
+      --card-bg: #282a2d;
+      --text-primary: #e4e6eb;
+      --text-secondary: #a8b3cf;
+      --border-color: #495057;
+      --accent-color: #4dabf7;
+      --success-color: #20c997;
+      --trophy-color: #fcc419;
+      --hover-bg: #3a3b3c;
+    }
+    html {
+      scrollbar-gutter: stable;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-primary);
+      font-family: 'Noto Sans SC', -apple-system, sans-serif;
+      line-height: 1.6;
+    }
+
+    .main-title-container {
+      padding: 1.5rem 0;
+    }
+
+    .main-title {
+      font-weight: 700;
+      font-size: 2rem;
+    }
+
+    .main-subtitle {
+      font-weight: 400;
+      font-size: 1.1rem;
+    }
+    
+    .stat-card-base {
+        background-color: var(--card-bg);
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        transition: all 0.2s ease;
+        overflow: hidden;
+    }
+    
+    .stat-card-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      height: 100%;
+      width: 100%;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+	  min-height: 1.0rem;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.2;
+	  min-height: 2.4rem;
+    }
+    
+    .stat-details {
+	  margin-top: auto;
+	  width: 100%;
+	}
+
+    .remaining-time {
+      font-feature-settings: "tnum";
+      font-variant-numeric: tabular-nums;
+      color: var(--text-secondary);
+    }
+
+    .stat-card-flip-container {
+        perspective: 1000px;
+        height: 180px;
+    }
+    #dist-card-container {
+        height: 200px;
+    }
+
+    .stat-card-flipper {
+		text-align: center;
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.6s;
+        transform-style: preserve-3d;
+    }
+
+    .stat-card-flipper.flipped {
+        transform: rotateY(180deg);
+    }
+
+    .stat-card-front, .stat-card-back {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--card-bg);
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        padding: 1.5rem;
+    }
+
+    .stat-card-back {
+        transform: rotateY(180deg);
+    }
+
+	.flip-icon-container {
+		position: absolute;
+		top: 10px;
+		right: 15px;
+		font-size: 1.1rem;
+		color: var(--text-secondary);
+		cursor: pointer;
+		opacity: 0.6;
+		transition: opacity 0.2s ease, transform 0.2s ease;
+		z-index: 5;
+	}
+
+	.flip-icon-container:hover {
+		opacity: 1;
+		transform: scale(1.1) rotate(30deg);
+	}
+	.stat-card-flipper.flipped .stat-card-front .flip-icon-container {
+		display: none;
+	}  
+    .small-muted {
+        color: var(--text-secondary);
+    }
+
+    .progress {
+        --bs-progress-bg: var(--hover-bg);
+    }
+    
+    .progress-bar {
+        --bs-progress-bar-bg: var(--success-color);
+    }
+
+    .card-title-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn-group .btn {
+        --bs-btn-bg: var(--hover-bg);
+        --bs-btn-border-color: var(--border-color);
+        --bs-btn-hover-bg: var(--accent-color);
+        --bs-btn-hover-border-color: var(--accent-color);
+        --bs-btn-active-bg: var(--accent-color);
+        --bs-btn-active-border-color: var(--accent-color);
+		--bs-btn-active-color: var(--text-primary);
+        font-size: 0.8rem;
+		color: var(--text-secondary);
+    }
+    .btn-group .btn.active {
+		color: var(--text-primary);
+		font-weight: 500;
+	}
+    @media (max-width: 768px) {
+      .stat-card-flip-container { height: 100px; }
+      #dist-card-container { height: 180px; }
+      .stat-value { font-size: 1.8rem; }
+    }
+
+    @media (max-width: 576px) {
+      .stat-card-flip-container { height: 100px; }
+      #dist-card-container { height: 160px; }
+      .stat-value { font-size: 1.5rem; }
+      .main-title { font-size: 1.5rem; }
+      .main-subtitle { font-size: 0.9rem; }
+    }
+
+    .card-title {
+        color: var(--text-primary);
+        margin-bottom: 0;
+    }
+    
+    .collapsing {
+      transition: height 0.2s ease;
+    }
+    .accordion-button {
+      background-color: var(--card-bg);
+      color: var(--text-primary);
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
+    }
+    .accordion-button:not(.collapsed) {
+      background-color: var(--hover-bg);
+      color: var(--text-primary);
+    }
+    .accordion-button:focus {
+      box-shadow: none;
+    }
+    .accordion-item {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+    }
+    .table-light {
+        --bs-table-color: var(--text-primary);
+        --bs-table-bg: var(--hover-bg);
+    }
+    .table {
+      --bs-table-bg: var(--card-bg);
+      --bs-table-striped-bg: var(--hover-bg);
+      --bs-table-color: var(--text-primary);
+      --bs-table-border-color: var(--border-color);
+    }
+
+    .modal-content {
+      background-color: var(--card-bg);
+      color: var(--text-primary);
+    }
+    .modal-header {
+      border-bottom-color: var(--border-color);
+    }
+    .pb-entry {
+      border-bottom: 1px solid var(--border-color) !important;
+    }
+    .details-row > td {
+      padding: 0 !important;
+      border-top: none;
+    }
+    .details-row .card-body {
+      background-color: var(--hover-bg);
+      color: var(--text-secondary);
+      padding-left: 1rem;
+    }
+    
+    .badge.bg-success {
+      font-size: 0.75em;
+      padding: 0.25em 0.5em;
+      font-weight: 500;
+    }
+
+    .clickable-certificate {
+        color: var(--accent-color);
+        cursor: pointer;
+        text-decoration: none;
+        border-bottom: 1px dashed var(--accent-color);
+        transition: all 0.2s;
+    }
+    .clickable-certificate:hover {
+        color: var(--accent-color);
+        border-bottom-style: solid;
+    }
+
+    .modal-header .btn-close {
+        filter: invert(0.8);
+    }
+
+    .text-primary-emphasis {
+      color: var(--text-primary) !important;
+    }
+
+    .text-body-secondary {
+      color: var(--text-secondary) !important;
+    }
+
+    .classification-text {
+      color: var(--success-color);
+      font-weight: 500;
+      font-size: 0.9em;
+    }
+
+    .certificate-link {
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .certificate-link:hover {
+      text-decoration: none;
+      transform: scale(1.05);
+    }
+
+    #loading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--bg-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    .leaflet-popup-content-wrapper {
+        background: var(--card-bg);
+        color: var(--text-primary);
+        border-radius: 8px;
+    }
+    .leaflet-popup-content {
+        margin: 12px;
+    }
+    .leaflet-popup-tip {
+        background: var(--card-bg);
+    }
+    .leaflet-popup-close-button {
+        color: var(--text-primary) !important;
+        padding: 4px 4px 0 0 !important;
+    }
+
+    .nav-tabs {
+        --bs-nav-tabs-border-color: var(--border-color);
+        --bs-nav-tabs-link-hover-border-color: var(--border-color);
+    }
+    .nav-tabs .nav-link {
+        color: var(--text-secondary);
+        background: none;
+        border-bottom-color: var(--border-color);
+    }
+    .nav-tabs .nav-link.active {
+        color: var(--text-primary);
+        background-color: var(--hover-bg);
+        border-color: var(--border-color) var(--border-color) var(--hover-bg);
+    }
+    #cityMap {
+      width: 100%;
+      height: 500px;
+      background-color: var(--card-bg);
+      border-radius: .75rem;
+    }
+    .content-card {
+        background-color: var(--card-bg);
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        padding: 1.5rem;
+        border: 1px solid var(--border-color);
+    }
+  </style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="spinner-border" role="status">
+    <span class="visually-hidden">加载中...</span>
+  </div>
+</div>
+
+<div class="container">
+  <div class="main-title-container">
+    <h1 class="main-title">步履不停 <small class="main-subtitle text-body-secondary"> — 我的四万公里跑量挑战</small></h1>
+  </div>
+
+  <ul class="nav nav-tabs mb-4" id="main-nav-tabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary-pane" type="button" role="tab" aria-controls="summary-pane" aria-selected="true">概要</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="data-tab" data-bs-toggle="tab" data-bs-target="#data-pane" type="button" role="tab" aria-controls="data-pane" aria-selected="false">数据</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="events-tab" data-bs-toggle="tab" data-bs-target="#events-pane" type="button" role="tab" aria-controls="events-pane" aria-selected="false">事件</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="footprints-tab" data-bs-toggle="tab" data-bs-target="#footprints-pane" type="button" role="tab" aria-controls="footprints-pane" aria-selected="false">足迹</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="about-tab" data-bs-toggle="tab" data-bs-target="#about-pane" type="button" role="tab" aria-controls="about-pane" aria-selected="false">关于</button>
+    </li>
+  </ul>
+
+  <div class="tab-content" id="mainTabContent">
+    <div class="tab-pane fade show active" id="summary-pane" role="tabpanel" aria-labelledby="summary-tab" tabindex="0">
+      <div class="row g-2 mb-3">
+        <div class="col-12 mb-3">
+            <div class="stat-card-flip-container" id="dist-card-container">
+                <div class="stat-card-flipper">
+                    <div class="stat-card-front">
+                        <div class="stat-card-content">
+                            <div>
+                                <div class="stat-label">当前跑量</div>
+                                <div class="stat-value">{{ "%.2f"|format(overall_stats.dist_km) }} <small class="small-muted">km</small></div>
+                            </div>
+                            <div class="stat-details">
+                                <div class="mt-2">
+                                    <div class="stat-label">已沿赤道行进</div>
+                                    <div class="progress mt-2" style="height: 6px;">
+                                        <div class="progress-bar" role="progressbar" style="width: {{ '%.4f'|format(progress_around_earth) }}%;"></div>
+                                    </div>
+                                    <small class="small-muted">{{ "%.4f"|format(progress_around_earth) }}%</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flip-icon-container" title="翻转查看详情"><i class="bi bi-phone-flip"></i></div>
+                    </div>
+                    <div class="stat-card-back">
+                        <div class="stat-card-content">
+                            <div>
+                                <div class="stat-label">继续坚持</div>
+                                <div class="stat-value">{{ estimated_info.days_left }}</div>
+                            </div>
+                            <div class="stat-details">
+                                <div class="mt-2">
+                                    <div class="stat-label"><small class="small-muted">预计</small>{{ estimated_info.date_str }}<small>可绕地球一圈儿</small></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flip-icon-container" title="翻转返回"><i class="bi bi-phone-flip"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-6 col-md-6">
+            <div class="stat-card-flip-container">
+                <div class="stat-card-flipper">
+                    <div class="stat-card-front">
+                        <div class="stat-card-content">
+                            <div>
+                                <div class="stat-label">跑步次数</div>
+                                <div class="stat-value">{{ overall_stats.count }}</div>
+                            </div>
+                            <div class="stat-details"></div>						
+                        </div>
+                        <div class="flip-icon-container" title="翻转查看详情"><i class="bi bi-phone-flip"></i></div>					
+                    </div>
+                    <div class="stat-card-back">
+                        <div class="stat-card-content">
+                            <div>
+                                <div class="stat-label">总耗时</div>
+                                <div class="stat-value">{{ overall_stats.duration_str }}</div>
+                            </div>
+                            <div class="stat-details"></div>
+                        </div>
+                        <div class="flip-icon-container" title="翻转返回"><i class="bi bi-phone-flip"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="col-6 col-md-6">
+            <div class="stat-card-flip-container">
+                <div class="stat-card-flipper">
+                    <div class="stat-card-front">
+                        <div class="stat-card-content">
+                            <div>
+                                <div class="stat-label">平均配速</div>
+                                <div class="stat-value">{{ overall_stats.pace }}</div>
+                            </div>
+                            <div class="stat-details"></div>
+                        </div>
+                        <div class="flip-icon-container" title="翻转查看详情"><i class="bi bi-phone-flip"></i></div>
+                    </div>
+                    <div class="stat-card-back">
+                        <div class="stat-card-content">
+                            <div>
+                                <div class="stat-label">最快配速</div>
+                                <div class="stat-value">{{ fastest_pace_info.pace }}</div>
+                            </div>
+                            <div class="stat-details"></div>
+                        </div>
+                        <div class="flip-icon-container" title="翻转返回"><i class="bi bi-phone-flip"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+      <div class="card mb-4" style="background-color: var(--card-bg); border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <div class="card-header bg-transparent border-0 pt-3">
+            <div class="card-title-container">
+                <h5 class="card-title">跑量分析</h5>
+                <div class="btn-group btn-group-sm" role="group" id="chart-toggle">
+                    <button type="button" class="btn active" data-chart="daily">近30天</button>
+                    <button type="button" class="btn" data-chart="monthly">近12月</button>
+                    <button type="button" class="btn" data-chart="yearly">年度汇总</button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+          <div id="dailyChartContainer" style="display: block; height: 300px;">
+            <canvas id="dailyDistanceChart" aria-label="最近30天跑步距离统计图表"></canvas>
+          </div>
+          <div id="monthlyChartContainer" style="display: none; height: 300px;">
+            <canvas id="monthlyDistanceChart" aria-label="最近12个月跑步距离统计图表"></canvas>
+          </div>
+          <div id="yearlyChartContainer" style="display: none; height: 300px;">
+            <canvas id="yearlyDistanceChart" aria-label="年度跑步距离统计图表"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="tab-pane fade" id="data-pane" role="tabpanel" aria-labelledby="data-tab" tabindex="0">
+        {% for year, year_data in summarized_by_year.items() %}
+            <div class="d-flex justify-content-between align-items-center mt-4">
+                <h2 class="mb-0">{{ year }} 年</h2>
+                <span class="small-muted small">
+                {{ year_data.summary.count }}次 | {{ "%.2f"|format(year_data.summary.dist_km) }} km | {{ year_data.summary.duration_str }} |  {{ year_data.summary.pace }}
+                </span>
+            </div>
+            <div class='accordion mb-4 mt-2' id='accordion{{ year }}'>
+                {% for month_num, month_data in year_data.months.items()|sort(reverse=True) %}
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m{{ year }}{{ month_num }}" aria-expanded="false" aria-controls="collapse-m{{ year }}{{ month_num }}">
+                        {{ months_map[month_num] }} &nbsp; 
+                        <span class="small-muted small">({{ month_data.summary.count }}次 | {{ "%.2f"|format(month_data.summary.dist_km) }} km | {{ month_data.summary.duration_str }} | {{ month_data.summary.pace }})</span>
+                    </button>
+                    </h2>
+                    <div id="collapse-m{{ year }}{{ month_num }}" class="accordion-collapse collapse" data-bs-parent="#accordion{{ year }}">
+                    <div class="accordion-body">
+                        <table class="table table-hover table-borderless align-middle mb-0">
+                        <tbody>
+                            {% for r in month_data.runs %}
+                            <tr data-bs-toggle="collapse" data-bs-target="#details-{{ r.id }}" style="cursor: pointer;">
+                                <td><code>{{ r.date.strftime('%m-%d') }}</code></td>
+                                <td>{{ "%.2f"|format(r.distance / 1000) }} <span class="text-muted small">km</span></td>
+                                <td><span class="text-body">{{ format_duration(r.duration) }}</span></td>
+                                <td><span class="text-body">{{ r.pace }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        </table>
+                    </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="tab-pane fade" id="events-pane" role="tabpanel" aria-labelledby="events-tab" tabindex="0">
+        <div class="row">
+			<div class="col-lg-4 mb-4">
+                <div class="content-card h-100">
+                    <h5 class="card-title mb-3"><i class="bi bi-flag"></i> 里程碑</h5>
+                    {% set milestones = [
+                    {'name': '踏出第一步', 'distance': first_run_distance, 'date': first_run_date, 'is_first': True},
+                    {'name': '1000公里', 'distance': 1000, 'date': milestone_dates.get(1000)},
+                    {'name': '10000公里', 'distance': 10000, 'date': milestone_dates.get(10000)},
+                    {'name': '20000公里', 'distance': 20000, 'date': milestone_dates.get(20000)},
+                    {'name': '30000公里', 'distance': 30000, 'date': milestone_dates.get(30000)},
+                    {'name': '40000公里', 'distance': 40000, 'date': milestone_dates.get(40000)}
+                    ] %}
+                    
+                    {% for m in milestones %}
+                    <div class="d-flex justify-content-between align-items-center py-2 pb-entry 
+                                {% if m.date %}border-success border-2{% endif %}">
+                        <div>
+                        <div class="fw-bold {% if m.date %}text-success{% endif %}">
+                            {{ m.name }}
+                            {% if m.date %}<span class="badge bg-success ms-2">已完成</span>{% endif %}
+                        </div>
+                        <small class="{% if m.date %}text-success{% else %}small-muted{% endif %}">
+                            {% if m.date %}{{ m.date.strftime('%Y年%m月%d日') }}{% else %}{% if m.is_first %}初次跑步{% else %}未达成{% endif %}{% endif %}
+                        </small>
+                        </div>
+                        <div class="text-end">
+                        <div class="fw-bold {% if m.date %}text-success{% elif not m.date and not m.is_first %}text-muted{% endif %}">
+                            {% if m.is_first %}{{ "%.2f"|format(m.distance) }} km{% else %}{{ "%.0f"|format(m.distance) }} km{% endif %}
+                        </div>
+                        <small class="{% if m.date %}text-success{% else %}small-muted{% endif %}">
+                            {% if m.is_first %}首跑{% elif m.date %}里程碑达成{% else %}进行中{% endif %}
+                        </small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-lg-4 mb-4">
+                <div class="content-card h-100">
+                    <h5 class="card-title mb-3"><i class="bi bi-award"></i> 个人最佳 (PB)</h5>
+                    {% for label, pb in personal_bests.items() %}
+                    <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
+                        <div>
+                        <div class="fw-bold">{{ label }}</div>
+                        <small class="small-muted">{{ pb.date }}</small>
+                        </div>
+                        <div class="text-end">
+                        <div class="fw-bold">{{ pb.time }}</div>
+                        <small class="small-muted">配速: {{ pb.pace }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="col-lg-4 mb-4">
+                <div class="content-card h-100">
+                    <h5 class="card-title mb-3"><i class="bi bi-trophy"></i> 比赛记录</h5>
+                    <div style="flex: 1; overflow-y: auto;">
+                        {% if events %}
+                        {% for event in events %}
+                            <div class="border-bottom py-2 pb-entry">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="fw-bold text-primary-emphasis">
+                                {{ event.name }}
+                                <small class="text-body-secondary">{{ event.category }}</small>
+                                </div>
+                                <div class="flex-grow-1 text-center px-2">
+                                {% if event.certified %}
+                                    <abbr title="点击查看证书" class="certificate-link text-decoration-none" 
+                                        data-img="{{ event.certificate }}" style="cursor: pointer; border-bottom: 1px dotted var(--text-secondary)">
+                                    <span class="classification-text">{{ event.certified }}</span>
+                                    </abbr>
+                                {% endif %}
+                                </div>
+                                <div class="text-nowrap text-primary-emphasis">{{ format_duration(event.duration) }}</div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-1">
+                                <div>
+                                <small class="text-body-secondary">
+                                    {% if event.date %}{{ event.date.strftime('%Y.%m.%d') }}{% else %}日期未知{% endif %}
+                                </small>
+                                <small class="text-body-secondary ms-2">{{ event.city }}</small>
+                                </div>
+                                <div class="text-end"><small class="text-body-secondary">配速: {{ event.pace }}</small></div>
+                            </div>
+                            </div>
+                        {% endfor %}
+                        {% else %}
+                        <div class="text-center py-4 text-body-secondary">暂无比赛记录</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="tab-pane fade" id="footprints-pane" role="tabpanel" aria-labelledby="footprints-tab" tabindex="0">
+        <div class="row">
+            <div class="col-md-9 mb-4">
+              <div id="cityMap"></div>
+            </div>
+            <div class="col-md-3 mb-4">
+              <div class="content-card h-100">
+                <h5 class="mb-3">城市统计</h5>
+                <p class="small-muted">足迹已遍布 {{ city_stats|length }} 个城市</p>
+                <div class="city-list">
+                  {% for city in city_stats %}
+                    <div class="d-flex justify-content-between py-2 border-bottom">
+                      <span>{{ loop.index }}. {{ city.name }}</span>
+                      <span class="text-end text-nowrap">{{ city.count }}次 ({{ city.distance }}km)</span>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+    </div>
+    
+    <div class="tab-pane fade" id="about-pane" role="tabpanel" aria-labelledby="about-tab" tabindex="0">
+        <div class="content-card">
+            <h5 class="card-title mb-4">关于这个网站</h5>
+            <p>这个跑步记录网站的灵感，来自我在水木社区看到的一个帖子。</p>
+            <p>一位跑友分享了他坚持跑步十年的经历，累计跑量达到了三万公里。他接下来的目标是跑到四万公里——正好是绕地球赤道一圈的距离。</p>
+            <p>这个目标让我很受触动。四万公里，相当于每天跑<span style="text-decoration: line-through;text-decoration-color: #ff6b6b;text-decoration-thickness: 2px;">十公里</span>五公里，连续跑<span style="text-decoration: line-through;text-decoration-color: #ff6b6b;text-decoration-thickness: 2px;">十一年</span>二十二年。虽然看起来很远，但分解到每一天，就是坚持跑下去。</p>
+            <p>我不是专业跑者，也不追求速度。对我来说，跑步更重要的是保持健康和坚持的习惯。这个网站记录我的跑步历程，看着数字一点点增长，就是最好的动力。</p>
+            <p>如果你也有类似的跑步目标，欢迎一起坚持。跑步路上，我们都不孤单。</p>
+        </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="certificateModal" tabindex="-1" aria-labelledby="certificateModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="certificateModalLabel">等级证书</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <img id="certificateImage" src="" class="img-fluid" style="max-height: 70vh;" alt="跑步等级证书">
+      </div>
+      <div class="modal-footer">
+        <!--<a id="downloadCertificate" href="#" class="btn btn-sm btn-primary" download>下载证书</a>-->
+        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="container text-center py-4 mt-4">
+    <small class="text-body-secondary">步履不停 &copy; {% if summarized_by_year %}{{ summarized_by_year.keys()|max }}{% endif %}</small>
+</footer>
+
+
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/chartjs-plugin-annotation/3.1.0/chartjs-plugin-annotation.min.js "></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+	let monthlyDistanceChart = null;
+	let dailyDistanceChart = null;
+	let yearlyDistanceChart = null;
+	let cityMap = null;
+	document.documentElement.setAttribute('data-bs-theme', 'dark');
+
+	document.addEventListener('DOMContentLoaded', function() {
+		const loadingElement = document.getElementById('loading');
+		if (loadingElement) loadingElement.style.display = 'none';
+		
+		// --- MAP LOGIC ---
+        const footprintsTab = document.querySelector('#footprints-tab');
+        if(footprintsTab) {
+            footprintsTab.addEventListener('shown.bs.tab', function() {
+                if (!cityMap) {
+                cityMap = L.map('cityMap', {
+                    center: [36, 108], // Centered on China
+                    zoom: 4,
+                    zoomControl: false,
+                });
+
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
+                    attribution: '',
+                    subdomains: 'abcd',
+                    minZoom: 3,
+                    maxZoom: 18
+                }).addTo(cityMap);
+                cityMap.attributionControl.setPrefix('')
+                
+                {% for city in city_stats %}
+                {% if city.coordinates and city.coordinates|length == 2 %}
+                    L.circleMarker([{{ city.coordinates[0] }}, {{ city.coordinates[1] }}], {
+                        radius: Math.log({{ city.count }}) + 3, // Scale radius based on run count
+                        fillColor: "var(--accent-color)",
+                        color: "var(--bg-color)",
+                        weight: 1.5,
+                        opacity: 1,
+                        fillOpacity: 0.7
+                    }).addTo(cityMap).bindPopup(`<b>{{ city.name }}</b><br>跑步次数: {{ city.count }}<br>总距离: {{ city.distance }}km`);
+                {% endif %}
+                {% endfor %}
+                } else {
+                cityMap.invalidateSize();
+                }
+            });
+        }
+    
+    // --- MAIN STATS CARD FLIP LOGIC ---
+    document.querySelectorAll('.flip-icon-container').forEach(icon => {
+        icon.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const flipper = icon.closest('.stat-card-flipper');
+            if (flipper) {
+                flipper.classList.toggle('flipped');
+            }
+        });
+    });
+
+    // --- CHART LOGIC ---
+    const gridColor = 'rgba(128, 128, 128, 0.2)';
+    const tickColor = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim();
+    const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
+    const annotationColor = getComputedStyle(document.documentElement).getPropertyValue('--bs-code-color').trim();
+    const annotationLabelBg = 'rgba(255, 107, 107, 0.7)';
+
+	// --- Data & Average Calculation ---
+	const monthlyData = {{ chart_monthly_data|tojson }};
+	const monthlyRunningMonths = monthlyData.filter(d => d > 0).length;
+	const monthlyTotal = monthlyData.reduce((a, b) => a + b, 0);
+	const monthlyAvg = monthlyRunningMonths > 0 ? (monthlyTotal / monthlyRunningMonths) : 0;
+
+	const dailyData = {{ chart_30_days.data|tojson }};
+	const runningDays = dailyData.filter(d => d > 0).length;
+	const dailyTotal = dailyData.reduce((a, b) => a + b, 0);
+	const dailyAvg = runningDays > 0 ? (dailyTotal / runningDays) : 0; 
+	
+	const yearlyData = {{ chart_yearly_data|tojson }};
+	const runningYears = yearlyData.filter(d => d > 0).length;
+	const yearlyTotal = yearlyData.reduce((a, b) => a + b, 0);
+	const yearlyAvg = runningYears > 0 ? (yearlyTotal / runningYears) : 0;
+	Chart.defaults.font.family = "'Noto Sans SC', sans-serif";
+    const annotationDefaults = (avg, total, labelPrefix) => ({
+      type: 'line',
+      yMin: avg,
+      yMax: avg,
+      borderColor: annotationColor,
+      borderWidth: 1.5,
+      borderDash: [6, 6],
+      label: {
+        content: `总跑量 ${total.toFixed(1)}km / ${labelPrefix} ${avg.toFixed(1)}km`,
+        display: false,
+        position: 'end',
+		yAdjust: 10,
+        backgroundColor: annotationLabelBg,
+        color: '#fff',
+        font: { size: 11, weight: 'bold' },
+        padding: { x: 5, y: 3 },
+        borderRadius: 4
+      }
+    });
+	
+    // Init Daily Chart (Default)
+    const dailyCtx = document.getElementById('dailyDistanceChart').getContext('2d');
+	dailyDistanceChart = new Chart(dailyCtx, {
+		type: 'bar',
+		data: {
+		  labels: {{ chart_30_days.labels|tojson }},
+		  datasets: [{
+			label: '距离 (km)',
+			data: dailyData,
+			backgroundColor: accentColor + '99',
+			borderColor: accentColor,
+			borderWidth: 1,
+			borderRadius: 2,
+			hoverBackgroundColor: accentColor
+		  }]
+		},
+		options: {
+		  responsive: true,
+          maintainAspectRatio: false,
+		  scales: {
+			y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}},
+			x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 }}
+		  },
+		  plugins: {
+			legend: { display: false },
+			title: {
+				display: true,
+				text: `总 ${dailyTotal.toFixed(1)}km / 日均 ${dailyAvg.toFixed(1)}km`,
+				align: 'start',
+				color: annotationColor,
+			},
+			tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }},
+			annotation: { annotations: { avgLine: annotationDefaults(dailyAvg, dailyTotal, '日均') } }
+		  }
+		}
+	});
+
+    // Init Monthly Chart
+    const monthlyCtx = document.getElementById('monthlyDistanceChart').getContext('2d');
+	monthlyDistanceChart = new Chart(monthlyCtx, {
+		type: 'bar',
+		data: {
+		  labels: {{ chart_monthly_labels|tojson }},
+		  datasets: [{
+			label: '距离 (km)',
+			data: monthlyData,
+			backgroundColor: accentColor + '99',
+			borderColor: accentColor,
+			borderWidth: 1,
+			borderRadius: 4,
+			hoverBackgroundColor: accentColor
+		  }]
+		},
+		options: {
+		  responsive: true,
+          maintainAspectRatio: false,
+		  scales: {
+			y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km' }},
+			x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 }}
+		  },
+		  plugins: {
+			legend: { display: false },
+			title: {
+				display: true,
+				text: `总 ${monthlyTotal.toFixed(1)}km / 月均 ${monthlyAvg.toFixed(1)}km`,
+				align: 'start',
+				color: annotationColor,
+			},
+			tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }},
+			annotation: { annotations: { avgLine: annotationDefaults(monthlyAvg, monthlyTotal, '月均') } }
+		  }
+		}
+	});
+    
+	// Init Yearly Chart
+    const yearlyCtx = document.getElementById('yearlyDistanceChart').getContext('2d');
+	yearlyDistanceChart = new Chart(yearlyCtx, {
+		type: 'bar',
+		data: {
+		  labels: {{ chart_yearly_labels|tojson }},
+		  datasets: [{
+			label: '距离 (km)',
+			data: yearlyData,
+			backgroundColor: accentColor + '99',
+			borderColor: accentColor,
+			borderWidth: 1,
+			borderRadius: 4,
+			hoverBackgroundColor: accentColor
+		  }]
+		},
+		options: {
+		  responsive: true,
+          maintainAspectRatio: false,
+		  scales: {
+			y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km' }},
+			x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 } }
+		  },
+		  plugins: {
+			legend: { display: false },
+			title: {
+				display: true,
+				text: `总 ${yearlyTotal.toFixed(1)}km / 年均 ${yearlyAvg.toFixed(1)}km`,
+				align: 'start',
+				color: annotationColor,
+			},
+			tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }},
+			annotation: { annotations: { avgLine: annotationDefaults(yearlyAvg, yearlyTotal, '年均') } }
+		  }
+		}
+	});
+
+    // Chart toggle button logic
+    const chartToggleButtons = document.querySelectorAll('#chart-toggle .btn');
+    const chartContainers = {
+        monthly: document.getElementById('monthlyChartContainer'),
+        daily: document.getElementById('dailyChartContainer'),
+        yearly: document.getElementById('yearlyChartContainer')
+    };
+    
+    chartToggleButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            chartToggleButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            const chartType = this.dataset.chart;
+            Object.values(chartContainers).forEach(c => c.style.display = 'none');
+            chartContainers[chartType].style.display = 'block';
+        });
+    });
+
+    // --- CERTIFICATE MODAL LOGIC ---
+    document.querySelectorAll('.certificate-link').forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const imgUrl = this.getAttribute('data-img');
+        if(imgUrl) {
+          document.getElementById('certificateImage').src = imgUrl;
+          //document.getElementById('downloadCertificate').href = imgUrl;
+          new bootstrap.Modal(document.getElementById('certificateModal')).show();
+        }
+      });
+    });
+
+    document.getElementById('certificateModal').addEventListener('hidden.bs.modal', function() {
+      document.getElementById('certificateImage').src = '';
+      //document.getElementById('downloadCertificate').href = '#';
+    });
+  });
+
+  window.addEventListener('beforeunload', () => {
+    if(monthlyDistanceChart) monthlyDistanceChart.destroy();
+    if(dailyDistanceChart) dailyDistanceChart.destroy();
+    if(yearlyDistanceChart) yearlyDistanceChart.destroy();
+  });
+</script>
+</html>
