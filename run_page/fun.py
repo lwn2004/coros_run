@@ -4,7 +4,7 @@ from collections import defaultdict
 from jinja2 import Environment, FileSystemLoader
 import sys
 import locale
-
+import os
 # --- Configuration ---
 CONFIG = {
     "earth_circumference_km": 40075.017,
