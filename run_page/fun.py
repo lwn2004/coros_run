@@ -1,7 +1,6 @@
 import json
 from datetime import datetime, timedelta, date
 from collections import defaultdict
-import argparse
 from jinja2 import Environment, FileSystemLoader
 import sys
 import locale
