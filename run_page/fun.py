@@ -5,6 +5,8 @@ from jinja2 import Environment, FileSystemLoader
 import sys
 import locale
 import os
+current = os.path.dirname(os.path.realpath(__file__))
+parent = os.path.dirname(current)
 # --- Configuration ---
 CONFIG = {
     "earth_circumference_km": 40075.017,
