@@ -338,12 +338,12 @@ def main():
 
     setup_locale()
 
-    all_runs, fastest_run = load_run_data(args.runs_file)
+    all_runs, fastest_run = load_run_data(runs_file)
     if not all_runs:
         print("No run data found. Aborting.")
         return
 
-    context = prepare_template_context(all_runs, fastest_run, args.pb_file, args.events_file)
+    context = prepare_template_context(all_runs, fastest_run, pb_file, events_file)
 
     env = Environment(loader=FileSystemLoader('.'), autoescape=True)
     env.globals['format_duration'] = format_duration
@@ -351,7 +351,7 @@ def main():
     try:
         template = env.get_template(template_file)
     except Exception as e:
-        print(f"Error loading template '{args.template}': {e}")
+        print(f"Error loading template '{template_file}': {e}")
         return
         
     html_output = template.render(context)
@@ -359,7 +359,7 @@ def main():
     with open(output_file, "w", encoding="utf-8") as f:
         f.write(html_output)
     
-    print(f"Successfully generated report: '{args.output}'")
+    print(f"Successfully generated report: '{output_file}'")
 
 if __name__ == "__main__":
     main()
