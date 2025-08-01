@@ -28,3 +28,9 @@ haversine==2.8.0
 pycryptodome
 duckdb
 opencc-python-reimplemented
+json
+datetime
+collections
+jinja2
+sys
+locale
