@@ -328,13 +328,11 @@ def prepare_template_context(all_runs, fastest_run, pb_file, events_file):
     }
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate a running summary HTML page from JSON data.")
-    parser.add_argument("runs_file", help="JSON file with all running records.")
-    parser.add_argument("pb_file", help="JSON file with personal best records.")
-    parser.add_argument("events_file", help="JSON file with race/event records.")
-    parser.add_argument("-t", "--template", default="template.html", help="HTML template file name.")
-    parser.add_argument("-o", "--output", default="running_summary.html", help="Output HTML file name.")
-    args = parser.parse_args()
+    runs_file = os.path.join(parent, "src", "static", "all.json")
+    pb_file = os.path.join(parent, "src", "static", "pb.json") 
+    events_file = os.path.join(parent, "src", "static", "events.json")
+    template_file = os.path.join(parent, "src", "static", "template.html")
+    output_file = os.path.join(parent, "public", "fun.html")
 
     setup_locale()
 
@@ -349,14 +347,14 @@ def main():
     env.globals['format_duration'] = format_duration
     
     try:
-        template = env.get_template(args.template)
+        template = env.get_template(template_file)
     except Exception as e:
         print(f"Error loading template '{args.template}': {e}")
         return
         
     html_output = template.render(context)
 
-    with open(args.output, "w", encoding="utf-8") as f:
+    with open(output_file, "w", encoding="utf-8") as f:
         f.write(html_output)
     
     print(f"Successfully generated report: '{args.output}'")
