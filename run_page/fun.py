@@ -333,7 +333,7 @@ def main():
     runs_file = os.path.join(parent, "src", "static", "all.json")
     pb_file = os.path.join(parent, "src", "static", "pb.json")
     events_file = os.path.join(parent, "src", "static", "events.json")
-    template_file = os.path.join(parent, "src", "static", "template.html")
+    template_file = "template.html"
     output_file = os.path.join(parent, "public", "fun.html")
 
     setup_locale()
