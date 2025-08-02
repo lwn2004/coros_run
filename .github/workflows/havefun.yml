@@ -22,9 +22,13 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - name: List files
-        run: ls -la
-
       - name: Have Fun
         run: |
           python run_page/fun.py
+      - name: Push new runs
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m 'update new runs' || echo "nothing to commit"
+          git push || echo "nothing to push"
