@@ -22,18 +22,8 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - name: Cache Data Files
-        uses: actions/cache@v4
-        with:
-          path: |
-            src/static/events.json
-            src/static/template.html
-            src/static/pb.json
-            src/static/all.json
-          key: ${{ env.DATA_CACHE_PREFIX }}-${{ github.sha }}-${{ github.run_id }}
-          restore-keys: |
-            ${{ env.DATA_CACHE_PREFIX }}-${{ github.sha }}-
-            ${{ env.DATA_CACHE_PREFIX }}-
+      - name: List files
+        run: ls -la
 
       - name: Have Fun
         run: |
