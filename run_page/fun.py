@@ -331,9 +331,13 @@ def prepare_template_context(all_runs, fastest_run, pb_file, events_file):
 
 def main():
     runs_file = os.path.join(parent, "src", "static", "all.json")
-    pb_file = os.path.join(parent, "src", "static", "pb.json") 
+    print(runs_file)
+    pb_file = os.path.join(parent, "src", "static", "pb.json")
+    print(pb_file)
     events_file = os.path.join(parent, "src", "static", "events.json")
+    print(events_file)
     template_file = os.path.join(parent, "src", "static", "template.html")
+    print(template_file)
     output_file = os.path.join(parent, "public", "fun.html")
 
     setup_locale()
