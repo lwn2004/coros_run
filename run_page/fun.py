@@ -339,6 +339,7 @@ def main():
     template_file = os.path.join(parent, "src", "static", "template.html")
     print(template_file)
     output_file = os.path.join(parent, "public", "fun.html")
+    print(output_file)
 
     setup_locale()
 
