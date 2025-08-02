@@ -1,7 +1,10 @@
 name: Have Fun
 
 on:
-  workflow_dispatch: 
+  workflow_run:
+    workflows: ["Run Data Sync"]
+    types:
+      - completed
 jobs:
   sync:
     name: Sync
