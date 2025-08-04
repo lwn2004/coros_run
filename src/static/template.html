@@ -549,13 +549,24 @@
                     <button type="button" class="btn" data-view="standard">标准</button>                  
                 </div>
             </div>
-            <div>
-                <span class="small me-2 text-body-secondary">按距离筛选:</span>
-                <div class="btn-group btn-group-sm" id="data-filter-toggle" role="group">
-                    <button type="button" class="btn active" data-dist="0">全部</button>
-                    <button type="button" class="btn" data-dist="5000">&gt; 5km</button>
-                    <button type="button" class="btn" data-dist="10000">&gt; 10km</button>
-                    <button type="button" class="btn" data-dist="21097">&gt; 半马</button>
+            <div class="d-flex flex-wrap gap-3">
+                <div>
+                    <span class="small me-2 text-body-secondary">按距离筛选:</span>
+                    <div class="btn-group btn-group-sm" id="data-dist-filter-toggle" role="group">
+                        <button type="button" class="btn active" data-dist="0">全部</button>
+                        <button type="button" class="btn" data-dist="5000">&gt; 5km</button>
+                        <button type="button" class="btn" data-dist="10000">&gt; 10km</button>
+                        <button type="button" class="btn" data-dist="21097">&gt; 半马</button>
+                    </div>
+                </div>
+                <div>
+                    <span class="small me-2 text-body-secondary">按配速筛选:</span>
+                    <div class="btn-group btn-group-sm" id="data-pace-filter-toggle" role="group">
+                        <button type="button" class="btn active" data-pace="9999">全部</button>
+                        <button type="button" class="btn" data-pace="360">&lt; 6'00"</button>
+                        <button type="button" class="btn" data-pace="330">&lt; 5'30"</button>
+                        <button type="button" class="btn" data-pace="300">&lt; 5'00"</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -573,7 +584,7 @@
                         <table class="table table-hover table-borderless align-middle mb-0">
                             <tbody>
                             {% for r in year_data.all_runs %}
-                                <tr data-distance="{{ r.distance }}">
+                                <tr data-distance="{{ r.distance }}" data-pace-seconds="{{ r.pace_seconds }}">
                                     <td>
                                         <code>{{ r.date.strftime('%m/%d') }}</code>
                                     </td>
@@ -613,7 +624,7 @@
                         <table class="table table-hover table-borderless align-middle mb-0">
                             <tbody>
                             {% for r in month_data.runs %}
-                            <tr data-distance="{{ r.distance }}">
+                            <tr data-distance="{{ r.distance }}" data-pace-seconds="{{ r.pace_seconds }}">
                                 <td>
                                     <code>{{ r.date.strftime('%d') }}</code>
                                     {% if r.streak and r.streak > 1 %}
@@ -1033,9 +1044,35 @@
     const dataPane = document.getElementById('data-pane');
     if (dataPane) {
         const viewToggle = dataPane.querySelector('#data-view-toggle');
-        const filterToggle = dataPane.querySelector('#data-filter-toggle');
+        const distFilterToggle = dataPane.querySelector('#data-dist-filter-toggle');
+        const paceFilterToggle = dataPane.querySelector('#data-pace-filter-toggle');
         const standardView = dataPane.querySelector('#standard-view');
         const conciseView = dataPane.querySelector('#concise-view');
+        const summaries = dataPane.querySelectorAll('.summary-info');
+
+        const applyFilters = () => {
+            const minDist = parseFloat(distFilterToggle.querySelector('.active').dataset.dist);
+            const maxPace = parseFloat(paceFilterToggle.querySelector('.active').dataset.pace);
+
+            const currentView = standardView.style.display === 'none' ? conciseView : standardView;
+            const rows = currentView.querySelectorAll('tr[data-distance]');
+
+            rows.forEach(row => {
+                const runDist = parseFloat(row.dataset.distance);
+                const runPace = parseFloat(row.dataset.paceSeconds);
+                if (runDist >= minDist && runPace <= maxPace) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            // Hide summaries if any filter is active
+            const isFilterActive = minDist > 0 || maxPace < 9999;
+            summaries.forEach(summary => {
+                summary.style.display = isFilterActive ? 'none' : '';
+            });
+        };
 
         // View Toggling
         viewToggle.addEventListener('click', (e) => {
@@ -1048,36 +1085,23 @@
             standardView.style.display = view === 'standard' ? '' : 'none';
             conciseView.style.display = view === 'concise' ? '' : 'none';
             
-            // Re-apply current filter to the new view
-            const activeFilterBtn = filterToggle.querySelector('.active');
-            if(activeFilterBtn) activeFilterBtn.click();
+            applyFilters();
         });
 
-        // Filtering
-        filterToggle.addEventListener('click', (e) => {
+        // Distance Filtering
+        distFilterToggle.addEventListener('click', (e) => {
             if (e.target.tagName !== 'BUTTON') return;
-            const minDist = parseFloat(e.target.dataset.dist);
-
-            filterToggle.querySelector('.active').classList.remove('active');
+            distFilterToggle.querySelector('.active').classList.remove('active');
             e.target.classList.add('active');
+            applyFilters();
+        });
 
-            const currentView = standardView.style.display === 'none' ? conciseView : standardView;
-            const rows = currentView.querySelectorAll('tr[data-distance]');
-            const summaries = dataPane.querySelectorAll('.summary-info');
-
-            rows.forEach(row => {
-                const runDist = parseFloat(row.dataset.distance);
-                if (runDist >= minDist) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-
-            // Hide summaries if a filter is active
-            summaries.forEach(summary => {
-                summary.style.display = minDist > 0 ? 'none' : '';
-            });
+        // Pace Filtering
+        paceFilterToggle.addEventListener('click', (e) => {
+            if (e.target.tagName !== 'BUTTON') return;
+            paceFilterToggle.querySelector('.active').classList.remove('active');
+            e.target.classList.add('active');
+            applyFilters();
         });
     }
 
@@ -1088,7 +1112,6 @@
         const imgUrl = this.getAttribute('data-img');
         if(imgUrl) {
           document.getElementById('certificateImage').src = imgUrl;
-          //document.getElementById('downloadCertificate').href = imgUrl;
           new bootstrap.Modal(document.getElementById('certificateModal')).show();
         }
       });
@@ -1096,7 +1119,6 @@
 
     document.getElementById('certificateModal').addEventListener('hidden.bs.modal', function() {
       document.getElementById('certificateImage').src = '';
-      //document.getElementById('downloadCertificate').href = '#';
     });
   });
 
