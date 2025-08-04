@@ -545,8 +545,8 @@
             <div>
                 <span class="small me-2 text-body-secondary">视图模式:</span>
                 <div class="btn-group btn-group-sm" id="data-view-toggle" role="group">
-                    <button type="button" class="btn active" data-view="standard">标准</button>
-                    <button type="button" class="btn" data-view="concise">简洁</button>
+                    <button type="button" class="btn active" data-view="concise">简洁</button>
+                    <button type="button" class="btn" data-view="standard">标准</button>                  
                 </div>
             </div>
             <div>
@@ -559,8 +559,36 @@
                 </div>
             </div>
         </div>
-        
-        <div id="standard-view">
+        <div id="concise-view">
+            {% for year, year_data in summarized_by_year.items() %}
+            <div class="content-card mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="mb-0">{{ year }}</h4>
+                    <span class="small-muted small summary-info">
+                    {{ "%.2f"|format(year_data.summary.dist_km) }} km
+                    </span>
+                </div>
+                <table class="table table-hover table-borderless align-middle mb-0">
+                    <tbody>
+                    {% for r in year_data.all_runs %}
+                        <tr data-distance="{{ r.distance }}">
+                            <td>
+                                <code>{{ r.date.strftime('%m/%d') }}</code>
+                                {% if r.streak and r.streak > 1 %}
+                                <span class="streak-badge">{{ r.streak }}连</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ "%.2f"|format(r.distance / 1000) }} <span class="text-muted small">km</span></td>
+                            <td>{{ r.pace }}</td>
+                            <td>{{ r.city[:-1] if r.city.endswith("市") else r.city }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endfor %}
+        </div>
+        <div id="standard-view" style="display: none;">
             <div class="row">
             {% for year, year_data in summarized_by_year.items() %}
                 <div class="col-md-6 mb-4">
@@ -606,37 +634,7 @@
                 </div>
             {% endfor %}
             </div>
-        </div>
-
-        <div id="concise-view" style="display: none;">
-            {% for year, year_data in summarized_by_year.items() %}
-            <div class="content-card mb-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="mb-0">{{ year }}</h4>
-                    <span class="small-muted small summary-info">
-                    {{ "%.2f"|format(year_data.summary.dist_km) }} km
-                    </span>
-                </div>
-                <table class="table table-hover table-borderless align-middle mb-0">
-                    <tbody>
-                    {% for r in year_data.all_runs %}
-                        <tr data-distance="{{ r.distance }}">
-                            <td>
-                                <code>{{ r.date.strftime('%m/%d') }}</code>
-                                {% if r.streak and r.streak > 1 %}
-                                <span class="streak-badge">{{ r.streak }}连</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ "%.2f"|format(r.distance / 1000) }} <span class="text-muted small">km</span></td>
-                            <td>{{ r.pace }}</td>
-                            <td>{{ r.city[:-1] if r.city.endswith("市") else r.city }}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% endfor %}
-        </div>
+        </div>      
     </div>
 
     <div class="tab-pane fade" id="events-pane" role="tabpanel" aria-labelledby="events-tab" tabindex="0">
