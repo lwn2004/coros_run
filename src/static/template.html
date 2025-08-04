@@ -586,9 +586,9 @@
                             {% for r in month_data.runs %}
                             <tr data-distance="{{ r.distance }}">
                                 <td>
-                                    <code>{{ r.date.strftime('%m-%d') }}</code>
+                                    <code>{{ r.date.strftime('%m/%d') }}</code>
                                     {% if r.streak and r.streak > 1 %}
-                                    <span class="streak-badge">{{ r.streak }}连击</span>
+                                    <span class="streak-badge">{{ r.streak }}连</span>
                                     {% endif %}
                                 </td>
                                 <td>{{ "%.2f"|format(r.distance / 1000) }} <span class="text-muted small">km</span></td>
@@ -631,15 +631,15 @@
                     {% for r in year_data.all_runs %}
                         <tr data-distance="{{ r.distance }}">
                             <td>
-                                <code>{{ r.date.strftime('%Y-%m-%d') }}</code>
+                                <code>{{ r.date.strftime('%m/%d') }}</code>
                                 {% if r.streak and r.streak > 1 %}
-                                <span class="streak-badge">{{ r.streak }}连击</span>
+                                <span class="streak-badge">{{ r.streak }}连</span>
                                 {% endif %}
                             </td>
                             <td>{{ "%.2f"|format(r.distance / 1000) }} <span class="text-muted small">km</span></td>
                             <td>{{ format_duration(r.duration) }}</td>
                             <td>{{ r.pace }}</td>
-                            <td>{{ r.city }}</td>
+                            <td>{{ r.city[:-1] if r.city.endswith("市") else r.city }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
