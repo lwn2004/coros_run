@@ -612,7 +612,7 @@
             {% for year, year_data in summarized_by_year.items() %}
             <div class="content-card mb-4">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="mb-0">{{ year }} 年</h4>
+                    <h4 class="mb-0">{{ year }}</h4>
                     <span class="small-muted small summary-info">
                     {{ year_data.summary.count }}次 | {{ "%.2f"|format(year_data.summary.dist_km) }} km | {{ year_data.summary.duration_str }} |  {{ year_data.summary.pace }}
                     </span>
