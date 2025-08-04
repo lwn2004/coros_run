@@ -621,7 +621,7 @@
                     <thead>
                         <tr class="text-body-secondary">
                             <th>日期</th>
-                            <th>距离</th>
+                            <th>KM</th>
                             <th>用时</th>
                             <th>配速</th>
                             <th>城市</th>
@@ -636,7 +636,7 @@
                                 <span class="streak-badge">{{ r.streak }}连</span>
                                 {% endif %}
                             </td>
-                            <td>{{ "%.2f"|format(r.distance / 1000) }} <span class="text-muted small">km</span></td>
+                            <td>{{ "%.2f"|format(r.distance / 1000) }}</td>
                             <td>{{ format_duration(r.duration) }}</td>
                             <td>{{ r.pace }}</td>
                             <td>{{ r.city[:-1] if r.city.endswith("市") else r.city }}</td>
