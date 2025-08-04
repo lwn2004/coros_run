@@ -574,9 +574,6 @@
                         <tr data-distance="{{ r.distance }}">
                             <td>
                                 <code>{{ r.date.strftime('%m/%d') }}</code>
-                                {% if r.streak and r.streak > 1 %}
-                                <span class="streak-badge">{{ r.streak }}连</span>
-                                {% endif %}
                             </td>
                             <td>{{ "%.2f"|format(r.distance / 1000) }} <span class="text-muted small">km</span></td>
                             <td>{{ r.pace }}</td>
