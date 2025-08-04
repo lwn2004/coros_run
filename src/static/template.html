@@ -378,6 +378,15 @@
         background-color: var(--hover-bg);
         color: var(--text-primary);
     }
+    @media (max-width: 576px) {
+      .stat-card-wrapper {
+        height: 100%;
+      }
+      .stat-card-wrapper .stat-card-flip-container {
+        height: 100%;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -407,90 +416,102 @@
 
   <div class="tab-content" id="mainTabContent">
     <div class="tab-pane fade show active" id="summary-pane" role="tabpanel" aria-labelledby="summary-tab" tabindex="0">
-		<div class="row g-2 mb-3 d-flex">
-		  <div class="col-md-6 d-flex">
-			<div class="stat-card-flip-container flex-fill w-100" id="dist-card-container" style="min-height: 100%;">
-			  <div class="stat-card-flipper">
-				<div class="stat-card-front">
-				  <div class="stat-card-content">
-					<div>
-					  <div class="stat-label">当前跑量</div>
-					  <div class="stat-value">{{ "%.2f"|format(overall_stats.dist_km) }} <small class="small-muted">km</small></div>
-					</div>
-					<div class="stat-details">
-					  <div class="stat-label">赤道进度</div>
-					  <div class="progress mt-1" style="height: 4px;">
-						<div class="progress-bar" role="progressbar" style="width: {{ '%.4f'|format(progress_around_earth) }}%;"></div>
-					  </div>
-					  <small class="small-muted">{{ "%.4f"|format(progress_around_earth) }}%</small>
-					</div>
-				  </div>
-				  <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
-				</div>
-				<div class="stat-card-back">
-				  <div class="stat-card-content">
-					<div>
-					  <div class="stat-label">继续坚持</div>
-					  <div class="stat-value">{{ estimated_info.days_left }}</div>
-					</div>
-					<div class="stat-details">
-					  <div class="stat-label"><small class="small-muted">预计</small>{{ estimated_info.date_str }}<small>绕地球一圈</small></div>
-					</div>
-				  </div>
-				  <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
-				</div>
-			  </div>
-			</div>
-		  </div>
+      <div class="row g-2 mb-3 d-flex flex-wrap">
+        <!-- 卡片1：当前跑量 -->
+        <div class="col-12 col-md-6 d-flex">
+          <div class="stat-card-wrapper flex-fill w-100">
+            <div class="stat-card-flip-container" id="dist-card-container">
+              <div class="stat-card-flipper">
+                <div class="stat-card-front">
+                  <div class="stat-card-content">
+                    <div>
+                      <div class="stat-label">当前跑量</div>
+                      <div class="stat-value">{{ "%.2f"|format(overall_stats.dist_km) }} <small class="small-muted">km</small></div>
+                    </div>
+                    <div class="stat-details">
+                      <div class="stat-label">赤道进度</div>
+                      <div class="progress mt-1" style="height: 4px;">
+                        <div class="progress-bar" role="progressbar" style="width: {{ '%.4f'|format(progress_around_earth) }}%;"></div>
+                      </div>
+                      <small class="small-muted">{{ "%.4f"|format(progress_around_earth) }}%</small>
+                    </div>
+                  </div>
+                  <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
+                </div>
+                <div class="stat-card-back">
+                  <div class="stat-card-content">
+                    <div>
+                      <div class="stat-label">继续坚持</div>
+                      <div class="stat-value">{{ estimated_info.days_left }}</div>
+                    </div>
+                    <div class="stat-details">
+                      <div class="stat-label"><small class="small-muted">预计</small>{{ estimated_info.date_str }}<small>绕地球一圈</small></div>
+                    </div>
+                  </div>
+                  <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      
+        <!-- 卡片2：跑步次数 -->
+        <div class="col-6 col-md-3 d-flex">
+          <div class="stat-card-wrapper flex-fill w-100">
+            <div class="stat-card-flip-container">
+              <div class="stat-card-flipper">
+                <div class="stat-card-front">
+                  <div class="stat-card-content">
+                    <div>
+                      <div class="stat-label">跑步次数</div>
+                      <div class="stat-value">{{ overall_stats.count }}</div>
+                    </div>
+                  </div>
+                  <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
+                </div>
+                <div class="stat-card-back">
+                  <div class="stat-card-content">
+                    <div>
+                      <div class="stat-label">总耗时</div>
+                      <div class="stat-value">{{ overall_stats.duration_str }}</div>
+                    </div>
+                  </div>
+                  <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      
+        <!-- 卡片3：平均配速 -->
+        <div class="col-6 col-md-3 d-flex">
+          <div class="stat-card-wrapper flex-fill w-100">
+            <div class="stat-card-flip-container">
+              <div class="stat-card-flipper">
+                <div class="stat-card-front">
+                  <div class="stat-card-content">
+                    <div>
+                      <div class="stat-label">平均配速</div>
+                      <div class="stat-value">{{ overall_stats.pace }}</div>
+                    </div>
+                  </div>
+                  <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
+                </div>
+                <div class="stat-card-back">
+                  <div class="stat-card-content">
+                    <div>
+                      <div class="stat-label">最快配速</div>
+                      <div class="stat-value">{{ fastest_pace_info.pace }}</div>
+                    </div>
+                  </div>
+                  <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-		  <div class="col-md-6 d-flex flex-column gap-2">
-			<div class="stat-card-flip-container flex-fill" style="min-height: 0;">
-			  <div class="stat-card-flipper">
-				<div class="stat-card-front">
-				  <div class="stat-card-content">
-					<div>
-					  <div class="stat-label">跑步次数</div>
-					  <div class="stat-value">{{ overall_stats.count }}</div>
-					</div>
-				  </div>
-				  <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
-				</div>
-				<div class="stat-card-back">
-				  <div class="stat-card-content">
-					<div>
-					  <div class="stat-label">总耗时</div>
-					  <div class="stat-value">{{ overall_stats.duration_str }}</div>
-					</div>
-				  </div>
-				  <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
-				</div>
-			  </div>
-			</div>
-
-			<div class="stat-card-flip-container flex-fill" style="min-height: 0;">
-			  <div class="stat-card-flipper">
-				<div class="stat-card-front">
-				  <div class="stat-card-content">
-					<div>
-					  <div class="stat-label">平均配速</div>
-					  <div class="stat-value">{{ overall_stats.pace }}</div>
-					</div>
-				  </div>
-				  <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
-				</div>
-				<div class="stat-card-back">
-				  <div class="stat-card-content">
-					<div>
-					  <div class="stat-label">最快配速</div>
-					  <div class="stat-value">{{ fastest_pace_info.pace }}</div>
-					</div>
-				  </div>
-				  <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
-				</div>
-			  </div>
-			</div>
-		  </div>
-		</div>
 
         {% if recent_runs %}
         <div class="card mb-4" style="background-color: var(--card-bg); border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
