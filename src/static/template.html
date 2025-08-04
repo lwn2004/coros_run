@@ -560,30 +560,34 @@
             </div>
         </div>
         <div id="concise-view">
-            {% for year, year_data in summarized_by_year.items() %}
-            <div class="content-card mb-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="mb-0">{{ year }}</h4>
-                    <span class="small-muted small summary-info">
-                    {{ "%.2f"|format(year_data.summary.dist_km) }} km
-                    </span>
+            <div class="row">
+                {% for year, year_data in summarized_by_year.items() %}
+                <div class="col-md-6 mb-4">
+                    <div class="content-card mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="mb-0">{{ year }}</h4>
+                            <span class="small-muted small summary-info">
+                            {{ "%.2f"|format(year_data.summary.dist_km) }} km
+                            </span>
+                        </div>
+                        <table class="table table-hover table-borderless align-middle mb-0">
+                            <tbody>
+                            {% for r in year_data.all_runs %}
+                                <tr data-distance="{{ r.distance }}">
+                                    <td>
+                                        <code>{{ r.date.strftime('%m/%d') }}</code>
+                                    </td>
+                                    <td>{{ "%.2f"|format(r.distance / 1000) }} <span class="text-muted small">km</span></td>
+                                    <td>{{ r.pace }}</td>
+                                    <td>{{ r.city[:-1] if r.city.endswith("市") else r.city }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <table class="table table-hover table-borderless align-middle mb-0">
-                    <tbody>
-                    {% for r in year_data.all_runs %}
-                        <tr data-distance="{{ r.distance }}">
-                            <td>
-                                <code>{{ r.date.strftime('%m/%d') }}</code>
-                            </td>
-                            <td>{{ "%.2f"|format(r.distance / 1000) }} <span class="text-muted small">km</span></td>
-                            <td>{{ r.pace }}</td>
-                            <td>{{ r.city[:-1] if r.city.endswith("市") else r.city }}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+                {% endfor %}
             </div>
-            {% endfor %}
         </div>
         <div id="standard-view" style="display: none;">
             <div class="row">
