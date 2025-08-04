@@ -394,7 +394,6 @@
   <div class="tab-content" id="mainTabContent">
     <div class="tab-pane fade show active" id="summary-pane" role="tabpanel" aria-labelledby="summary-tab" tabindex="0">
 		<div class="row g-2 mb-3 d-flex">
-		  <!-- 左侧：单张高卡片 -->
 		  <div class="col-md-6 d-flex">
 			<div class="stat-card-flip-container flex-fill w-100" id="dist-card-container" style="min-height: 100%;">
 			  <div class="stat-card-flipper">
@@ -421,7 +420,7 @@
 					  <div class="stat-value">17年210天</div>
 					</div>
 					<div class="stat-details">
-					  <div class="stat-label"><small class="small-muted">预计</small>2043年02月25日<small>绕地球一圈</small></div>
+					  <div class="stat-label"><small class="small-muted">预计</small>2043年02月26日<small>绕地球一圈</small></div>
 					</div>
 				  </div>
 				  <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
@@ -430,7 +429,6 @@
 			</div>
 		  </div>
 
-		  <!-- 右侧：上下两个卡片 -->
 		  <div class="col-md-6 d-flex flex-column gap-2">
 			<div class="stat-card-flip-container flex-fill" style="min-height: 0;">
 			  <div class="stat-card-flipper">
@@ -480,30 +478,111 @@
 		  </div>
 		</div>
 
-
-      <div class="card mb-4" style="background-color: var(--card-bg); border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-        <div class="card-header bg-transparent border-0 pt-3">
-            <div class="card-title-container">
-                <h5 class="card-title">跑量分析</h5>
-                <div class="btn-group btn-group-sm" role="group" id="chart-toggle">
-                    <button type="button" class="btn active" data-chart="daily">近30天</button>
-                    <button type="button" class="btn" data-chart="monthly">近12月</button>
-                    <button type="button" class="btn" data-chart="yearly">年度汇总</button>
+        
+        <div class="card mb-4" style="background-color: var(--card-bg); border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <div class="card-header bg-transparent border-0 pt-3 ps-4">
+                <h5 class="card-title mb-0"><i class="bi bi-stopwatch-fill me-2"></i>最近三次跑步</h5>
+            </div>
+            <div class="card-body pt-2">
+                <div class="row g-3">
+                
+                <div class="col-lg-4">
+                    <div class="p-3 rounded" style="background-color: var(--hover-bg);">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="fw-bold text-primary-emphasis">10.01 km</span>
+                        <span class="small text-body-secondary">2025-08-03 06:05</span>
+                    </div>
+                    <div class="d-flex justify-content-around text-center mt-3">
+                        <div>
+                        <div class="stat-label mb-1">配速</div>
+                        <div class="fw-bold">4&#39;52&#34;</div>
+                        </div>
+                        <div>
+                        <div class="stat-label mb-1">用时</div>
+                        <div class="fw-bold">0:48:47</div>
+                        </div>
+                        <div>
+                        <div class="stat-label mb-1">城市</div>
+                        <div class="fw-bold">广州市</div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="p-3 rounded" style="background-color: var(--hover-bg);">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="fw-bold text-primary-emphasis">13.66 km</span>
+                        <span class="small text-body-secondary">2025-08-02 05:58</span>
+                    </div>
+                    <div class="d-flex justify-content-around text-center mt-3">
+                        <div>
+                        <div class="stat-label mb-1">配速</div>
+                        <div class="fw-bold">5&#39;50&#34;</div>
+                        </div>
+                        <div>
+                        <div class="stat-label mb-1">用时</div>
+                        <div class="fw-bold">1:19:51</div>
+                        </div>
+                        <div>
+                        <div class="stat-label mb-1">城市</div>
+                        <div class="fw-bold">广州市</div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="p-3 rounded" style="background-color: var(--hover-bg);">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="fw-bold text-primary-emphasis">8.01 km</span>
+                        <span class="small text-body-secondary">2025-08-01 05:53</span>
+                    </div>
+                    <div class="d-flex justify-content-around text-center mt-3">
+                        <div>
+                        <div class="stat-label mb-1">配速</div>
+                        <div class="fw-bold">5&#39;55&#34;</div>
+                        </div>
+                        <div>
+                        <div class="stat-label mb-1">用时</div>
+                        <div class="fw-bold">0:47:22</div>
+                        </div>
+                        <div>
+                        <div class="stat-label mb-1">城市</div>
+                        <div class="fw-bold">广州市</div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                
                 </div>
             </div>
         </div>
-        <div class="card-body">
-          <div id="dailyChartContainer" style="display: block; height: 300px;">
-            <canvas id="dailyDistanceChart" aria-label="最近30天跑步距离统计图表"></canvas>
-          </div>
-          <div id="monthlyChartContainer" style="display: none; height: 300px;">
-            <canvas id="monthlyDistanceChart" aria-label="最近12个月跑步距离统计图表"></canvas>
-          </div>
-          <div id="yearlyChartContainer" style="display: none; height: 300px;">
-            <canvas id="yearlyDistanceChart" aria-label="年度跑步距离统计图表"></canvas>
-          </div>
+        
+
+        <div class="card mb-4" style="background-color: var(--card-bg); border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <div class="card-header bg-transparent border-0 pt-3">
+                <div class="card-title-container">
+                    <h5 class="card-title">跑量分析</h5>
+                    <div class="btn-group btn-group-sm" role="group" id="chart-toggle">
+                        <button type="button" class="btn active" data-chart="daily">近30天</button>
+                        <button type="button" class="btn" data-chart="monthly">近12月</button>
+                        <button type="button" class="btn" data-chart="yearly">年度汇总</button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+            <div id="dailyChartContainer" style="display: block; height: 300px;">
+                <canvas id="dailyDistanceChart" aria-label="最近30天跑步距离统计图表"></canvas>
+            </div>
+            <div id="monthlyChartContainer" style="display: none; height: 300px;">
+                <canvas id="monthlyDistanceChart" aria-label="最近12个月跑步距离统计图表"></canvas>
+            </div>
+            <div id="yearlyChartContainer" style="display: none; height: 300px;">
+                <canvas id="yearlyDistanceChart" aria-label="年度跑步距离统计图表"></canvas>
+            </div>
+            </div>
         </div>
-      </div>
     </div>
     
     <div class="tab-pane fade" id="data-pane" role="tabpanel" aria-labelledby="data-tab" tabindex="0">
@@ -4683,7 +4762,6 @@
         <img id="certificateImage" src="" class="img-fluid" style="max-height: 70vh;" alt="跑步等级证书">
       </div>
       <div class="modal-footer">
-        <!--<a id="downloadCertificate" href="#" class="btn btn-sm btn-primary" download>下载证书</a>-->
         <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">关闭</button>
       </div>
     </div>
@@ -4816,7 +4894,7 @@
 	const monthlyTotal = monthlyData.reduce((a, b) => a + b, 0);
 	const monthlyAvg = monthlyRunningMonths > 0 ? (monthlyTotal / monthlyRunningMonths) : 0;
 
-	const dailyData = [21.21, 0.0, 11.21, 12.01, 13.94, 0.0, 10.01, 21.25, 0.0, 10.1, 0.0, 12.21, 13.4, 0.0, 23.45, 0.0, 0.0, 0.0, 10.16, 0.0, 11.0, 21.6, 0.0, 10.05, 0.0, 0.0, 6.44, 8.01, 13.66, 10.01];
+	const dailyData = [0.0, 11.21, 12.01, 13.94, 0.0, 10.01, 21.25, 0.0, 10.1, 0.0, 12.21, 13.4, 0.0, 23.45, 0.0, 0.0, 0.0, 10.16, 0.0, 11.0, 21.6, 0.0, 10.05, 0.0, 0.0, 6.44, 8.01, 13.66, 10.01, 0.0];
 	const runningDays = dailyData.filter(d => d > 0).length;
 	const dailyTotal = dailyData.reduce((a, b) => a + b, 0);
 	const dailyAvg = runningDays > 0 ? (dailyTotal / runningDays) : 0; 
@@ -4851,7 +4929,7 @@
 	dailyDistanceChart = new Chart(dailyCtx, {
 		type: 'bar',
 		data: {
-		  labels: ["07-05", "07-06", "07-07", "07-08", "07-09", "07-10", "07-11", "07-12", "07-13", "07-14", "07-15", "07-16", "07-17", "07-18", "07-19", "07-20", "07-21", "07-22", "07-23", "07-24", "07-25", "07-26", "07-27", "07-28", "07-29", "07-30", "07-31", "08-01", "08-02", "08-03"],
+		  labels: ["07-06", "07-07", "07-08", "07-09", "07-10", "07-11", "07-12", "07-13", "07-14", "07-15", "07-16", "07-17", "07-18", "07-19", "07-20", "07-21", "07-22", "07-23", "07-24", "07-25", "07-26", "07-27", "07-28", "07-29", "07-30", "07-31", "08-01", "08-02", "08-03", "08-04"],
 		  datasets: [{
 			label: '距离 (km)',
 			data: dailyData,
