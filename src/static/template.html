@@ -584,7 +584,7 @@
                         <table class="table table-hover table-borderless align-middle mb-0">
                             <tbody>
                             {% for r in year_data.all_runs %}
-                                <tr data-distance="{{ r.distance }}" data-pace-seconds="{{ r.pace_seconds }}">
+                                <tr data-distance="{{ r.distance }}" data-pace-str="{{ r.pace }}">
                                     <td>
                                         <code>{{ r.date.strftime('%m/%d') }}</code>
                                     </td>
@@ -624,7 +624,7 @@
                         <table class="table table-hover table-borderless align-middle mb-0">
                             <tbody>
                             {% for r in month_data.runs %}
-                            <tr data-distance="{{ r.distance }}" data-pace-seconds="{{ r.pace_seconds }}">
+                            <tr data-distance="{{ r.distance }}" data-pace-str="{{ r.pace }}">
                                 <td>
                                     <code>{{ r.date.strftime('%d') }}</code>
                                     {% if r.streak and r.streak > 1 %}
@@ -815,6 +815,29 @@
 	let yearlyDistanceChart = null;
 	let cityMap = null;
 	document.documentElement.setAttribute('data-bs-theme', 'dark');
+
+    /**
+     * Parses a pace string like "5'30\"" into total seconds.
+     * @param {string} paceStr The pace string to parse.
+     * @returns {number} Total seconds, or 0 if parsing fails.
+     */
+    function parsePaceToSeconds(paceStr) {
+        if (!paceStr || !paceStr.includes("'")) {
+            return 0; // Return a default value that will always pass the pace filter
+        }
+        try {
+            const parts = paceStr.replace('"', '').split("'");
+            const minutes = parseInt(parts[0], 10);
+            const seconds = parseInt(parts[1], 10);
+            if (isNaN(minutes) || isNaN(seconds)) {
+            return 0;
+            }
+            return (minutes * 60) + seconds;
+        } catch (e) {
+            return 0; // Return default on any parsing error
+        }
+    }
+
 
 	document.addEventListener('DOMContentLoaded', function() {
 		// 移除了隐藏 loadingElement 的代码
@@ -1059,8 +1082,13 @@
 
             rows.forEach(row => {
                 const runDist = parseFloat(row.dataset.distance);
-                const runPace = parseFloat(row.dataset.paceSeconds);
-                if (runDist >= minDist && runPace <= maxPace) {
+                const runPace = parsePaceToSeconds(row.dataset.paceStr);
+                
+                // If runPace is 0, it means parsing failed or no pace data was available.
+                // In that case, we should let it pass the pace filter.
+                const paceMatch = (runPace === 0) || (runPace <= maxPace);
+
+                if (runDist >= minDist && paceMatch) {
                     row.style.display = '';
                 } else {
                     row.style.display = 'none';
@@ -1077,11 +1105,10 @@
         // View Toggling
         viewToggle.addEventListener('click', (e) => {
             if (e.target.tagName !== 'BUTTON') return;
-            const view = e.target.dataset.view;
-
             viewToggle.querySelector('.active').classList.remove('active');
             e.target.classList.add('active');
 
+            const view = e.target.dataset.view;
             standardView.style.display = view === 'standard' ? '' : 'none';
             conciseView.style.display = view === 'concise' ? '' : 'none';
             
@@ -1092,7 +1119,7 @@
         distFilterToggle.addEventListener('click', (e) => {
             if (e.target.tagName !== 'BUTTON') return;
             distFilterToggle.querySelector('.active').classList.remove('active');
-            e.target.classList.add('active');
+e.target.classList.add('active');
             applyFilters();
         });
 
