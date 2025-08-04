@@ -586,7 +586,7 @@
                             {% for r in month_data.runs %}
                             <tr data-distance="{{ r.distance }}">
                                 <td>
-                                    <code>{{ r.date.strftime('%m/%d') }}</code>
+                                    <code>{{ r.date.strftime('%d') }}</code>
                                     {% if r.streak and r.streak > 1 %}
                                     <span class="streak-badge">{{ r.streak }}连</span>
                                     {% endif %}
@@ -614,19 +614,10 @@
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h4 class="mb-0">{{ year }}</h4>
                     <span class="small-muted small summary-info">
-                    {{ year_data.summary.count }}次 | {{ "%.2f"|format(year_data.summary.dist_km) }} km | {{ year_data.summary.duration_str }} |  {{ year_data.summary.pace }}
+                    {{ "%.2f"|format(year_data.summary.dist_km) }} km
                     </span>
                 </div>
                 <table class="table table-hover table-borderless align-middle mb-0">
-                    <thead>
-                        <tr class="text-body-secondary">
-                            <th>日期</th>
-                            <th>KM</th>
-                            <th>用时</th>
-                            <th>配速</th>
-                            <th>城市</th>
-                        </tr>
-                    </thead>
                     <tbody>
                     {% for r in year_data.all_runs %}
                         <tr data-distance="{{ r.distance }}">
@@ -636,8 +627,7 @@
                                 <span class="streak-badge">{{ r.streak }}连</span>
                                 {% endif %}
                             </td>
-                            <td>{{ "%.2f"|format(r.distance / 1000) }}</td>
-                            <td>{{ format_duration(r.duration) }}</td>
+                            <td>{{ "%.2f"|format(r.distance / 1000) }} <span class="text-muted small">km</span></td>
                             <td>{{ r.pace }}</td>
                             <td>{{ r.city[:-1] if r.city.endswith("市") else r.city }}</td>
                         </tr>
