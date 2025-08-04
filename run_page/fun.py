@@ -135,6 +135,7 @@ def load_run_data(file_path: str):
             "average_speed": float(run.get("average_speed", 0)),
             "city": run.get("city", "未知"),
             "heart_rate": int(hr) if (hr := run.get("average_heartrate")) else "未知",
+            "streak": run.get("streak", 1),
         }
         processed_run["pace"] = format_pace_from_mps(processed_run["average_speed"])
         processed_run["start_time"] = processed_run["date"].strftime('%H:%M:%S')
@@ -221,10 +222,8 @@ def prepare_template_context(all_runs, fastest_run, pb_file, events_file):
 
     events = load_events_data(events_file)
     
-    # --- Get recent 3 runs for display ---
     recent_runs = list(reversed(all_runs[-3:]))
     
-    # --- City Statistics (from all runs) ---
     city_stats_agg = defaultdict(lambda: {'count': 0, 'distance': 0.0})
     for run in all_runs:
         city = run['city']
@@ -239,7 +238,6 @@ def prepare_template_context(all_runs, fastest_run, pb_file, events_file):
     ]
     city_stats.sort(key=lambda x: (x['count'], x['distance']), reverse=True)
 
-    # --- Chart: Last 30 Days ---
     today = datetime.now().date()
     thirty_days_ago = today - timedelta(days=29)
     last_30_days_data = { (thirty_days_ago + timedelta(days=i)): 0.0 for i in range(30) }
@@ -255,7 +253,6 @@ def prepare_template_context(all_runs, fastest_run, pb_file, events_file):
     
     chart_30_days = {'labels': chart_30_days_labels, 'data': chart_30_days_values}
 
-    # --- Other Statistics ---
     overall_stats = summarize_runs(all_runs)
     one_year_ago = datetime.now() - timedelta(days=365)
     recent_runs_1_year = [r for r in all_runs if r['date'] >= one_year_ago]
@@ -268,7 +265,11 @@ def prepare_template_context(all_runs, fastest_run, pb_file, events_file):
     summarized_by_year = {}
     for year, months in sorted(by_year.items(), reverse=True):
         year_runs = [run for month_runs in months.values() for run in month_runs]
-        summarized_by_year[year] = {"summary": summarize_runs(year_runs), "months": {}}
+        summarized_by_year[year] = {
+            "summary": summarize_runs(year_runs), 
+            "months": {},
+            "all_runs": sorted(year_runs, key=lambda r: r['date'], reverse=True)
+        }
         for month, runs in months.items():
             summarized_by_year[year]["months"][month] = {
                 "summary": summarize_runs(runs),
@@ -303,7 +304,6 @@ def prepare_template_context(all_runs, fastest_run, pb_file, events_file):
             if m_dist not in milestone_dates and cumulative_dist_km >= m_dist:
                 milestone_dates[m_dist] = run['date']
 
-    # --- Yearly Chart Data ---
     years_for_chart = sorted(summarized_by_year.keys())
     chart_yearly_labels = [str(y) for y in years_for_chart]
     chart_yearly_data = [round(summarized_by_year[y]["summary"]["dist_km"], 2) for y in years_for_chart]
