@@ -178,7 +178,7 @@
       align-items: center;
     }
 
-    .btn-group .btn {
+    .btn-group .btn, .btn-secondary {
         --bs-btn-bg: var(--hover-bg);
         --bs-btn-border-color: var(--border-color);
         --bs-btn-hover-bg: var(--accent-color);
@@ -213,7 +213,7 @@
     }
     
     .collapsing {
-      transition: height 0.2s ease;
+      transition: height 0.2s ease !important;
     }
     .accordion-button {
       background-color: var(--card-bg);
@@ -364,6 +364,19 @@
       vertical-align: middle;
       display: inline-block;
       line-height: 1;
+    }
+    .form-select {
+        background-color: var(--hover-bg);
+        border-color: var(--border-color);
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23a8b3cf' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    }
+    .form-select:focus {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 0.25rem rgba(var(--accent-color), .25);
+        background-color: var(--hover-bg);
+        color: var(--text-primary);
     }
   </style>
 </head>
@@ -541,35 +554,53 @@
     </div>
     
     <div class="tab-pane fade" id="data-pane" role="tabpanel" aria-labelledby="data-tab" tabindex="0">
-        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-            <div>
-                <span class="small me-2 text-body-secondary">视图模式:</span>
-                <div class="btn-group btn-group-sm" id="data-view-toggle" role="group">
-                    <button type="button" class="btn active" data-view="concise">简洁</button>
-                    <button type="button" class="btn" data-view="standard">标准</button>                  
-                </div>
-            </div>
-            <div class="d-flex flex-wrap gap-3">
-                <div>
-                    <span class="small me-2 text-body-secondary">按距离筛选:</span>
-                    <div class="btn-group btn-group-sm" id="data-dist-filter-toggle" role="group">
-                        <button type="button" class="btn active" data-dist="0">全部</button>
-                        <button type="button" class="btn" data-dist="5000">&gt; 5km</button>
-                        <button type="button" class="btn" data-dist="10000">&gt; 10km</button>
-                        <button type="button" class="btn" data-dist="21097">&gt; 半马</button>
+        <div class="d-flex justify-content-end mb-3">
+            <button class="btn btn-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapseContainer" aria-expanded="false" aria-controls="filterCollapseContainer">
+                <i class="bi bi-funnel me-1"></i> 筛选选项
+            </button>
+        </div>
+
+        <div class="collapse" id="filterCollapseContainer">
+            <div class="content-card p-3 mb-4">
+                <div class="row g-3 align-items-center">
+                    <div class="col-md-auto">
+                        <span class="small me-2 text-body-secondary">视图模式:</span>
+                        <div class="btn-group btn-group-sm" id="data-view-toggle" role="group">
+                            <button type="button" class="btn active" data-view="concise">简洁</button>
+                            <button type="button" class="btn" data-view="standard">标准</button>                  
+                        </div>
                     </div>
-                </div>
-                <div>
-                    <span class="small me-2 text-body-secondary">按配速筛选:</span>
-                    <div class="btn-group btn-group-sm" id="data-pace-filter-toggle" role="group">
-                        <button type="button" class="btn active" data-pace="9999">全部</button>
-                        <button type="button" class="btn" data-pace="360">&lt; 6'00"</button>
-                        <button type="button" class="btn" data-pace="330">&lt; 5'30"</button>
-                        <button type="button" class="btn" data-pace="300">&lt; 5'00"</button>
+                    <div class="col-md-auto">
+                        <span class="small me-2 text-body-secondary">按距离:</span>
+                        <div class="btn-group btn-group-sm" id="data-dist-filter-toggle" role="group">
+                            <button type="button" class="btn active" data-dist="0">全部</button>
+                            <button type="button" class="btn" data-dist="5000">&gt; 5km</button>
+                            <button type="button" class="btn" data-dist="10000">&gt; 10km</button>
+                            <button type="button" class="btn" data-dist="21097">&gt; 半马</button>
+                        </div>
+                    </div>
+                    <div class="col-md-auto">
+                        <span class="small me-2 text-body-secondary">按配速:</span>
+                        <div class="btn-group btn-group-sm" id="data-pace-filter-toggle" role="group">
+                            <button type="button" class="btn active" data-pace="9999">全部</button>
+                            <button type="button" class="btn" data-pace="360">&lt; 6'00"</button>
+                            <button type="button" class="btn" data-pace="330">&lt; 5'30"</button>
+                            <button type="button" class="btn" data-pace="300">&lt; 5'00"</button>
+                        </div>
+                    </div>
+                    <div class="col-md-auto">
+                        <span class="small me-2 text-body-secondary">按城市:</span>
+                        <select class="form-select form-select-sm d-inline-block" id="data-city-filter" style="width: auto;">
+                            <option value="all" selected>全部城市</option>
+                            {% for city in city_stats %}
+                            <option value="{{ city.name }}">{{ city.name }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                 </div>
             </div>
         </div>
+
         <div id="concise-view">
             <div class="row">
                 {% for year, year_data in summarized_by_year.items() %}
@@ -584,7 +615,7 @@
                         <table class="table table-hover table-borderless align-middle mb-0">
                             <tbody>
                             {% for r in year_data.all_runs %}
-                                <tr data-distance="{{ r.distance }}" data-pace-str="{{ r.pace }}">
+                                <tr data-distance="{{ r.distance }}" data-pace-str="{{ r.pace }}" data-city="{{ r.city }}">
                                     <td>
                                         <code>{{ r.date.strftime('%m/%d') }}</code>
                                     </td>
@@ -624,7 +655,7 @@
                         <table class="table table-hover table-borderless align-middle mb-0">
                             <tbody>
                             {% for r in month_data.runs %}
-                            <tr data-distance="{{ r.distance }}" data-pace-str="{{ r.pace }}">
+                            <tr data-distance="{{ r.distance }}" data-pace-str="{{ r.pace }}" data-city="{{ r.city }}">
                                 <td>
                                     <code>{{ r.date.strftime('%d') }}</code>
                                     {% if r.streak and r.streak > 1 %}
@@ -756,7 +787,7 @@
               <div class="content-card h-100">
                 <h5 class="mb-3">城市统计</h5>
                 <p class="small-muted">足迹已遍布 {{ city_stats|length }} 个城市</p>
-                <div class="city-list">
+                <div class="city-list" style="max-height: 420px; overflow-y: auto;">
                   {% for city in city_stats %}
                     <div class="d-flex justify-content-between py-2 border-bottom">
                       <span>{{ loop.index }}. {{ city.name }}</span>
@@ -990,7 +1021,7 @@
 		  responsive: true,
           maintainAspectRatio: false,
 		  scales: {
-			y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km' }},
+			y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}},
 			x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 }}
 		  },
 		  plugins: {
@@ -1027,7 +1058,7 @@
 		  responsive: true,
           maintainAspectRatio: false,
 		  scales: {
-			y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km' }},
+			y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}},
 			x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 } }
 		  },
 		  plugins: {
@@ -1066,52 +1097,60 @@
     // --- DATA TAB: VIEW TOGGLE & FILTERING LOGIC ---
     const dataPane = document.getElementById('data-pane');
     if (dataPane) {
+        // Filter Controls
         const viewToggle = dataPane.querySelector('#data-view-toggle');
         const distFilterToggle = dataPane.querySelector('#data-dist-filter-toggle');
         const paceFilterToggle = dataPane.querySelector('#data-pace-filter-toggle');
+        const cityFilter = dataPane.querySelector('#data-city-filter');
+        
+        // Data Views
         const standardView = dataPane.querySelector('#standard-view');
         const conciseView = dataPane.querySelector('#concise-view');
         const summaries = dataPane.querySelectorAll('.summary-info');
 
         const applyFilters = () => {
+            // Get current filter values
             const minDist = parseFloat(distFilterToggle.querySelector('.active').dataset.dist);
             const maxPace = parseFloat(paceFilterToggle.querySelector('.active').dataset.pace);
+            const selectedCity = cityFilter.value;
 
             const currentView = standardView.style.display === 'none' ? conciseView : standardView;
             const rows = currentView.querySelectorAll('tr[data-distance]');
 
             rows.forEach(row => {
+                // Get data from the current row
                 const runDist = parseFloat(row.dataset.distance);
-                const runPace = parsePaceToSeconds(row.dataset.paceStr);
-                
-                // If runPace is 0, it means parsing failed or no pace data was available.
-                // In that case, we should let it pass the pace filter.
-                const paceMatch = (runPace === 0) || (runPace <= maxPace);
+                const runPaceInSeconds = parsePaceToSeconds(row.dataset.paceStr);
+                const runCity = row.dataset.city;
 
-                if (runDist >= minDist && paceMatch) {
+                // Check if row matches all filters
+                const paceMatch = (runPaceInSeconds === 0) || (runPaceInSeconds <= maxPace);
+                const cityMatch = (selectedCity === 'all') || (runCity === selectedCity);
+
+                if (runDist >= minDist && paceMatch && cityMatch) {
                     row.style.display = '';
                 } else {
                     row.style.display = 'none';
                 }
             });
 
-            // Hide summaries if any filter is active
-            const isFilterActive = minDist > 0 || maxPace < 9999;
+            // Hide year/month summaries if any filter is active
+            const isFilterActive = minDist > 0 || maxPace < 9999 || selectedCity !== 'all';
             summaries.forEach(summary => {
                 summary.style.display = isFilterActive ? 'none' : '';
             });
         };
+
+        // --- Event Listeners ---
 
         // View Toggling
         viewToggle.addEventListener('click', (e) => {
             if (e.target.tagName !== 'BUTTON') return;
             viewToggle.querySelector('.active').classList.remove('active');
             e.target.classList.add('active');
-
             const view = e.target.dataset.view;
             standardView.style.display = view === 'standard' ? '' : 'none';
             conciseView.style.display = view === 'concise' ? '' : 'none';
-            
             applyFilters();
         });
 
@@ -1119,7 +1158,7 @@
         distFilterToggle.addEventListener('click', (e) => {
             if (e.target.tagName !== 'BUTTON') return;
             distFilterToggle.querySelector('.active').classList.remove('active');
-e.target.classList.add('active');
+            e.target.classList.add('active');
             applyFilters();
         });
 
@@ -1130,6 +1169,9 @@ e.target.classList.add('active');
             e.target.classList.add('active');
             applyFilters();
         });
+
+        // City Filtering
+        cityFilter.addEventListener('change', applyFilters);
     }
 
     // --- CERTIFICATE MODAL LOGIC ---
