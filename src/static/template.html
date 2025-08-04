@@ -541,52 +541,112 @@
     </div>
     
     <div class="tab-pane fade" id="data-pane" role="tabpanel" aria-labelledby="data-tab" tabindex="0">
-		<div class="row">
-		  {% for year, year_data in summarized_by_year.items() %}
-			<div class="col-md-6 mb-4">
-			  <div class="d-flex justify-content-between align-items-center mt-2">
-				<h4 class="mb-0">{{ year }} 年</h4>
-				<span class="small-muted small">
-				  {{ year_data.summary.count }}次 | {{ "%.2f"|format(year_data.summary.dist_km) }} km | {{ year_data.summary.duration_str }} |  {{ year_data.summary.pace }}
-				</span>
-			  </div>
-			  <div class='accordion mt-2' id='accordion{{ year }}'>
-				{% for month_num, month_data in year_data.months.items()|sort(reverse=True) %}
-				<div class="accordion-item">
-				  <h2 class="accordion-header">
-					<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m{{ year }}{{ month_num }}" aria-expanded="false" aria-controls="collapse-m{{ year }}{{ month_num }}">
-					  {{ months_map[month_num] }} &nbsp; 
-					  <span class="small-muted small">({{ month_data.summary.count }}次 | {{ "%.2f"|format(month_data.summary.dist_km) }} km | {{ month_data.summary.duration_str }} | {{ month_data.summary.pace }})</span>
-					</button>
-				  </h2>
-				  <div id="collapse-m{{ year }}{{ month_num }}" class="accordion-collapse collapse" data-bs-parent="#accordion{{ year }}">
-					<div class="accordion-body">
-					  <table class="table table-hover table-borderless align-middle mb-0">
-						<tbody>
-						  {% for r in month_data.runs %}
-						  <tr data-bs-toggle="collapse" data-bs-target="#details-{{ r.id }}" style="cursor: pointer;">
-							<td>
-                                <code>{{ r.date.strftime('%m-%d') }}</code>
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+            <div>
+                <span class="small me-2 text-body-secondary">视图模式:</span>
+                <div class="btn-group btn-group-sm" id="data-view-toggle" role="group">
+                    <button type="button" class="btn active" data-view="standard">标准</button>
+                    <button type="button" class="btn" data-view="concise">简洁</button>
+                </div>
+            </div>
+            <div>
+                <span class="small me-2 text-body-secondary">按距离筛选:</span>
+                <div class="btn-group btn-group-sm" id="data-filter-toggle" role="group">
+                    <button type="button" class="btn active" data-dist="0">全部</button>
+                    <button type="button" class="btn" data-dist="5000">&gt; 5km</button>
+                    <button type="button" class="btn" data-dist="10000">&gt; 10km</button>
+                    <button type="button" class="btn" data-dist="21097">&gt; 半马</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="standard-view">
+            <div class="row">
+            {% for year, year_data in summarized_by_year.items() %}
+                <div class="col-md-6 mb-4">
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                    <h4 class="mb-0">{{ year }} 年</h4>
+                    <span class="small-muted small summary-info">
+                    {{ year_data.summary.count }}次 | {{ "%.2f"|format(year_data.summary.dist_km) }} km | {{ year_data.summary.duration_str }} |  {{ year_data.summary.pace }}
+                    </span>
+                </div>
+                <div class='accordion mt-2' id='accordion{{ year }}'>
+                    {% for month_num, month_data in year_data.months.items()|sort(reverse=True) %}
+                    <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m{{ year }}{{ month_num }}" aria-expanded="false" aria-controls="collapse-m{{ year }}{{ month_num }}">
+                        {{ months_map[month_num] }} &nbsp; 
+                        <span class="small-muted small summary-info">({{ month_data.summary.count }}次 | {{ "%.2f"|format(month_data.summary.dist_km) }} km | {{ month_data.summary.duration_str }} | {{ month_data.summary.pace }})</span>
+                        </button>
+                    </h2>
+                    <div id="collapse-m{{ year }}{{ month_num }}" class="accordion-collapse collapse" data-bs-parent="#accordion{{ year }}">
+                        <div class="accordion-body">
+                        <table class="table table-hover table-borderless align-middle mb-0">
+                            <tbody>
+                            {% for r in month_data.runs %}
+                            <tr data-distance="{{ r.distance }}">
+                                <td>
+                                    <code>{{ r.date.strftime('%m-%d') }}</code>
+                                    {% if r.streak and r.streak > 1 %}
+                                    <span class="streak-badge">{{ r.streak }}连击</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ "%.2f"|format(r.distance / 1000) }} <span class="text-muted small">km</span></td>
+                                <td><span class="text-body">{{ format_duration(r.duration) }}</span></td>
+                                <td><span class="text-body">{{ r.pace }}</span></td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                        </div>
+                    </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                </div>
+            {% endfor %}
+            </div>
+        </div>
+
+        <div id="concise-view" style="display: none;">
+            {% for year, year_data in summarized_by_year.items() %}
+            <div class="content-card mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="mb-0">{{ year }} 年</h4>
+                    <span class="small-muted small summary-info">
+                    {{ year_data.summary.count }}次 | {{ "%.2f"|format(year_data.summary.dist_km) }} km | {{ year_data.summary.duration_str }} |  {{ year_data.summary.pace }}
+                    </span>
+                </div>
+                <table class="table table-hover table-borderless align-middle mb-0">
+                    <thead>
+                        <tr class="text-body-secondary">
+                            <th>日期</th>
+                            <th>距离</th>
+                            <th>用时</th>
+                            <th>配速</th>
+                            <th>城市</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for r in year_data.all_runs %}
+                        <tr data-distance="{{ r.distance }}">
+                            <td>
+                                <code>{{ r.date.strftime('%Y-%m-%d') }}</code>
                                 {% if r.streak and r.streak > 1 %}
-                                  <span class="streak-badge">{{ r.streak }}连击</span>
+                                <span class="streak-badge">{{ r.streak }}连击</span>
                                 {% endif %}
                             </td>
-							<td>{{ "%.2f"|format(r.distance / 1000) }} <span class="text-muted small">km</span></td>
-							<td><span class="text-body">{{ format_duration(r.duration) }}</span></td>
-							<td><span class="text-body">{{ r.pace }}</span></td>
-						  </tr>
-						  {% endfor %}
-						</tbody>
-					  </table>
-					</div>
-				  </div>
-				</div>
-				{% endfor %}
-			  </div>
-			</div>
-		  {% endfor %}
-		</div>
-
+                            <td>{{ "%.2f"|format(r.distance / 1000) }} <span class="text-muted small">km</span></td>
+                            <td>{{ format_duration(r.duration) }}</td>
+                            <td>{{ r.pace }}</td>
+                            <td>{{ r.city }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endfor %}
+        </div>
     </div>
 
     <div class="tab-pane fade" id="events-pane" role="tabpanel" aria-labelledby="events-tab" tabindex="0">
@@ -979,6 +1039,58 @@
             chartContainers[chartType].style.display = 'block';
         });
     });
+
+    // --- DATA TAB: VIEW TOGGLE & FILTERING LOGIC ---
+    const dataPane = document.getElementById('data-pane');
+    if (dataPane) {
+        const viewToggle = dataPane.querySelector('#data-view-toggle');
+        const filterToggle = dataPane.querySelector('#data-filter-toggle');
+        const standardView = dataPane.querySelector('#standard-view');
+        const conciseView = dataPane.querySelector('#concise-view');
+
+        // View Toggling
+        viewToggle.addEventListener('click', (e) => {
+            if (e.target.tagName !== 'BUTTON') return;
+            const view = e.target.dataset.view;
+
+            viewToggle.querySelector('.active').classList.remove('active');
+            e.target.classList.add('active');
+
+            standardView.style.display = view === 'standard' ? '' : 'none';
+            conciseView.style.display = view === 'concise' ? '' : 'none';
+            
+            // Re-apply current filter to the new view
+            const activeFilterBtn = filterToggle.querySelector('.active');
+            if(activeFilterBtn) activeFilterBtn.click();
+        });
+
+        // Filtering
+        filterToggle.addEventListener('click', (e) => {
+            if (e.target.tagName !== 'BUTTON') return;
+            const minDist = parseFloat(e.target.dataset.dist);
+
+            filterToggle.querySelector('.active').classList.remove('active');
+            e.target.classList.add('active');
+
+            const currentView = standardView.style.display === 'none' ? conciseView : standardView;
+            const rows = currentView.querySelectorAll('tr[data-distance]');
+            const summaries = dataPane.querySelectorAll('.summary-info');
+
+            rows.forEach(row => {
+                const runDist = parseFloat(row.dataset.distance);
+                if (runDist >= minDist) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            // Hide summaries if a filter is active
+            summaries.forEach(summary => {
+                summary.style.display = minDist > 0 ? 'none' : '';
+            });
+        });
+    }
 
     // --- CERTIFICATE MODAL LOGIC ---
     document.querySelectorAll('.certificate-link').forEach(link => {
