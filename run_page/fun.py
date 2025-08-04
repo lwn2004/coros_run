@@ -221,6 +221,9 @@ def prepare_template_context(all_runs, fastest_run, pb_file, events_file):
 
     events = load_events_data(events_file)
     
+    # --- Get recent 3 runs for display ---
+    recent_runs = list(reversed(all_runs[-3:]))
+    
     # --- City Statistics (from all runs) ---
     city_stats_agg = defaultdict(lambda: {'count': 0, 'distance': 0.0})
     for run in all_runs:
@@ -306,6 +309,7 @@ def prepare_template_context(all_runs, fastest_run, pb_file, events_file):
     chart_yearly_data = [round(summarized_by_year[y]["summary"]["dist_km"], 2) for y in years_for_chart]
 
     return {
+        "recent_runs": recent_runs,
         "overall_stats": overall_stats,
         "recent_stats": recent_stats,
         "summarized_by_year": summarized_by_year,
