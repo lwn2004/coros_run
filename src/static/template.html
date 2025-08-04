@@ -353,6 +353,18 @@
         padding: 1.5rem;
         border: 1px solid var(--border-color);
     }
+    .streak-badge {
+      font-size: 0.7em;
+      font-weight: bold;
+      padding: 0.2em 0.5em;
+      border-radius: 0.35rem;
+      background-color: #fd7e14;
+      color: #fff;
+      margin-left: 8px;
+      vertical-align: middle;
+      display: inline-block;
+      line-height: 1;
+    }
   </style>
 </head>
 <body>
@@ -553,7 +565,12 @@
 						<tbody>
 						  {% for r in month_data.runs %}
 						  <tr data-bs-toggle="collapse" data-bs-target="#details-{{ r.id }}" style="cursor: pointer;">
-							<td><code>{{ r.date.strftime('%m-%d') }}</code></td>
+							<td>
+                                <code>{{ r.date.strftime('%m-%d') }}</code>
+                                {% if r.streak and r.streak > 1 %}
+                                  <span class="streak-badge">{{ r.streak }}连击</span>
+                                {% endif %}
+                            </td>
 							<td>{{ "%.2f"|format(r.distance / 1000) }} <span class="text-muted small">km</span></td>
 							<td><span class="text-body">{{ format_duration(r.duration) }}</span></td>
 							<td><span class="text-body">{{ r.pace }}</span></td>
