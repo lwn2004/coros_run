@@ -434,7 +434,7 @@
 					  <div class="stat-value">17年210天</div>
 					</div>
 					<div class="stat-details">
-					  <div class="stat-label"><small class="small-muted">预计</small>2043年02月26日<small>绕地球一圈</small></div>
+					  <div class="stat-label"><small class="small-muted">预计</small>2043年02月27日<small>绕地球一圈</small></div>
 					</div>
 				  </div>
 				  <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
@@ -10481,7 +10481,7 @@
 	const monthlyTotal = monthlyData.reduce((a, b) => a + b, 0);
 	const monthlyAvg = monthlyRunningMonths > 0 ? (monthlyTotal / monthlyRunningMonths) : 0;
 
-	const dailyData = [0.0, 11.21, 12.01, 13.94, 0.0, 10.01, 21.25, 0.0, 10.1, 0.0, 12.21, 13.4, 0.0, 23.45, 0.0, 0.0, 0.0, 10.16, 0.0, 11.0, 21.6, 0.0, 10.05, 0.0, 0.0, 6.44, 8.01, 13.66, 10.01, 0.0];
+	const dailyData = [11.21, 12.01, 13.94, 0.0, 10.01, 21.25, 0.0, 10.1, 0.0, 12.21, 13.4, 0.0, 23.45, 0.0, 0.0, 0.0, 10.16, 0.0, 11.0, 21.6, 0.0, 10.05, 0.0, 0.0, 6.44, 8.01, 13.66, 10.01, 0.0, 0.0];
 	const runningDays = dailyData.filter(d => d > 0).length;
 	const dailyTotal = dailyData.reduce((a, b) => a + b, 0);
 	const dailyAvg = runningDays > 0 ? (dailyTotal / runningDays) : 0; 
@@ -10516,7 +10516,7 @@
 	dailyDistanceChart = new Chart(dailyCtx, {
 		type: 'bar',
 		data: {
-		  labels: ["07-06", "07-07", "07-08", "07-09", "07-10", "07-11", "07-12", "07-13", "07-14", "07-15", "07-16", "07-17", "07-18", "07-19", "07-20", "07-21", "07-22", "07-23", "07-24", "07-25", "07-26", "07-27", "07-28", "07-29", "07-30", "07-31", "08-01", "08-02", "08-03", "08-04"],
+		  labels: ["07-07", "07-08", "07-09", "07-10", "07-11", "07-12", "07-13", "07-14", "07-15", "07-16", "07-17", "07-18", "07-19", "07-20", "07-21", "07-22", "07-23", "07-24", "07-25", "07-26", "07-27", "07-28", "07-29", "07-30", "07-31", "08-01", "08-02", "08-03", "08-04", "08-05"],
 		  datasets: [{
 			label: '距离 (km)',
 			data: dailyData,
