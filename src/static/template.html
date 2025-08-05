@@ -191,7 +191,6 @@
 	}
     @media (max-width: 767.98px) {
       .stat-card-flip-container { min-height: 110px; }
-      #dist-card-container { min-height: 180px; }
       .stat-value { font-size: 1.8rem; }
     }
 
@@ -383,13 +382,26 @@
         color: var(--text-secondary);
         margin-bottom: 0.25rem;
     }
-    .sort-icon {
-        opacity: 0.4;
-        transition: opacity 0.2s ease-in-out;
+    .sortable-header {
+      cursor: pointer;
+      user-select: none;
     }
-    .sortable.active .sort-icon {
+    .sortable-header .sort-icon {
+      opacity: 0.5;
+      transition: opacity 0.2s;
+      vertical-align: middle;
+    }
+    .sortable-header:hover .sort-icon {
+      opacity: 1;
+    }
+    .sortable-header[aria-sort] .sort-icon {
         opacity: 1;
     }
+    .sortable-header .bi-arrow-down-up { display: inline-block; }
+    .sortable-header .bi-arrow-down, .sortable-header .bi-arrow-up { display: none; }
+    .sortable-header[aria-sort="ascending"] .bi-arrow-up { display: inline-block; }
+    .sortable-header[aria-sort="descending"] .bi-arrow-down { display: inline-block; }
+    .sortable-header[aria-sort] .bi-arrow-down-up { display: none; }
 
   </style>
 </head>
@@ -420,9 +432,9 @@
 
   <div class="tab-content" id="mainTabContent">
     <div class="tab-pane fade show active" id="summary-pane" role="tabpanel" aria-labelledby="summary-tab" tabindex="0">
-        <div class="row g-2 mb-3">
-          <div class="col-12 col-md-6 d-flex">
-            <div class="stat-card-flip-container w-100 flex-fill" id="dist-card-container">
+        <div class="row g-2 mb-3 align-items-stretch">
+          <div class="col-12 col-md-6">
+            <div class="stat-card-flip-container h-100" id="dist-card-container">
               <div class="stat-card-flipper h-100">
                 <div class="stat-card-front">
                   <div class="stat-card-content">
@@ -457,47 +469,49 @@
           </div>
     
           <div class="col-12 col-md-6">
-            <div class="row g-2 h-100">
-              <div class="col-6 col-md-12 d-flex">
-                <div class="stat-card-flip-container h-100 w-100 flex-fill">
-                  <div class="stat-card-flipper h-100">
-                    <div class="stat-card-front">
-                      <div class="stat-card-content">
-                        <div class="stat-label">跑步次数</div>
-                        <div class="stat-value">{{ overall_stats.count }}</div>
-                      </div>
-                      <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
+            <div class="d-flex flex-column h-100">
+                <div class="row g-2 flex-grow-1">
+                    <div class="col-6 col-md-12">
+                        <div class="stat-card-flip-container h-100">
+                          <div class="stat-card-flipper h-100">
+                            <div class="stat-card-front">
+                              <div class="stat-card-content">
+                                <div class="stat-label">跑步次数</div>
+                                <div class="stat-value">{{ overall_stats.count }}</div>
+                              </div>
+                              <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
+                            </div>
+                            <div class="stat-card-back">
+                              <div class="stat-card-content">
+                                <div class="stat-label">总耗时</div>
+                                <div class="stat-value">{{ overall_stats.duration_str }}</div>
+                              </div>
+                              <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
+                            </div>
+                          </div>
+                        </div>
                     </div>
-                    <div class="stat-card-back">
-                      <div class="stat-card-content">
-                        <div class="stat-label">总耗时</div>
-                        <div class="stat-value">{{ overall_stats.duration_str }}</div>
-                      </div>
-                      <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
+                    <div class="col-6 col-md-12">
+                        <div class="stat-card-flip-container h-100">
+                            <div class="stat-card-flipper h-100">
+                              <div class="stat-card-front">
+                                <div class="stat-card-content">
+                                  <div class="stat-label">平均配速</div>
+                                  <div class="stat-value">{{ overall_stats.pace }}</div>
+                                </div>
+                                <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
+                              </div>
+                              <div class="stat-card-back">
+                                <div class="stat-card-content">
+                                  <div class="stat-label">最快配速</div>
+                                  <div class="stat-value">{{ fastest_pace_info.pace }}</div>
+                                </div>
+                                <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
+                              </div>
+                            </div>
+                        </div>
                     </div>
-                  </div>
                 </div>
-              </div>
-              <div class="col-6 col-md-12 d-flex mt-md-2">
-                <div class="stat-card-flip-container h-100 w-100 flex-fill">
-                  <div class="stat-card-flipper h-100">
-                    <div class="stat-card-front">
-                      <div class="stat-card-content">
-                        <div class="stat-label">平均配速</div>
-                        <div class="stat-value">{{ overall_stats.pace }}</div>
-                      </div>
-                      <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
-                    </div>
-                    <div class="stat-card-back">
-                      <div class="stat-card-content">
-                        <div class="stat-label">最快配速</div>
-                        <div class="stat-value">{{ fastest_pace_info.pace }}</div>
-                      </div>
-                      <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -575,21 +589,12 @@
                         </div>
                     </div>
 
-                    <button class="btn btn-secondary d-lg-none w-100 mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#data-controls-collapse" aria-expanded="false" aria-controls="data-controls-collapse">
-                        <i class="bi bi-funnel"></i> 显示/隐藏排序和筛选
-                    </button>
-
-                    <div class="collapse d-lg-block" id="data-controls-collapse">
-                        <div id="summary-controls">
-                            <div class="content-card p-3 mb-3">
-                                <h6 class="mb-2 small-muted">排序</h6>
-                                <div class="d-grid gap-2">
-                                    <button class="btn btn-sm btn-secondary text-start sortable active" data-sort="date" data-order="desc">日期 <i class="bi bi-arrow-down float-end sort-icon"></i></button>
-                                    <button class="btn btn-sm btn-secondary text-start sortable" data-sort="distance" data-order="desc">距离 <i class="bi bi-arrow-down float-end sort-icon"></i></button>
-                                    <button class="btn btn-sm btn-secondary text-start sortable" data-sort="pace" data-order="asc">配速 <i class="bi bi-arrow-up float-end sort-icon"></i></button>
-                                </div>
-                            </div>
+                    <div id="summary-controls-wrapper">
+                        <button class="btn btn-secondary d-lg-none w-100 mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#data-controls-collapse" aria-expanded="false" aria-controls="data-controls-collapse">
+                            <i class="bi bi-funnel"></i> 显示/隐藏筛选
+                        </button>
     
+                        <div class="collapse d-lg-block" id="data-controls-collapse">
                             <div class="content-card p-3 mb-3">
                                 <h6 class="mb-3 small-muted">筛选选项</h6>
                                 <div class="mb-3">
@@ -638,14 +643,20 @@
 
             <div class="col-lg-9">
                 <div id="summary-data-view">
-                    <div class="content-card">
+                    <div class="content-card table-responsive">
                         <table class="table table-hover align-middle">
                             <thead class="table-light">
                                 <tr>
-                                    <th>日期</th>
-                                    <th>距离</th>
-                                    <th>用时</th>
-                                    <th>配速</th>
+                                    <th class="sortable-header" data-sort="date" aria-sort="descending">
+                                        日期 <span class="sort-icon"><i class="bi bi-arrow-down-up"></i><i class="bi bi-arrow-down"></i><i class="bi bi-arrow-up"></i></span>
+                                    </th>
+                                    <th class="sortable-header" data-sort="distance">
+                                        距离 <span class="sort-icon"><i class="bi bi-arrow-down-up"></i><i class="bi bi-arrow-down"></i><i class="bi bi-arrow-up"></i></span>
+                                    </th>
+                                    <th class="d-none d-sm-table-cell">用时</th>
+                                    <th class="sortable-header" data-sort="pace">
+                                        配速 <span class="sort-icon"><i class="bi bi-arrow-down-up"></i><i class="bi bi-arrow-down"></i><i class="bi bi-arrow-up"></i></span>
+                                    </th>
                                     <th>城市</th>
                                 </tr>
                             </thead>
@@ -658,7 +669,7 @@
                                         data-city="{{ r.city }}">
                                         <td><code>{{ r.date.strftime('%Y-%m-%d') }}</code></td>
                                         <td>{{ "%.2f"|format(r.distance / 1000) }} <span class="small-muted">km</span></td>
-                                        <td>{{ format_duration(r.duration) }}</td>
+                                        <td class="d-none d-sm-table-cell">{{ format_duration(r.duration) }}</td>
                                         <td>{{ r.pace }}</td>
                                         <td>{{ r.city[:-1] if r.city and r.city.endswith("市") else r.city }}</td>
                                     </tr>
@@ -1019,16 +1030,16 @@
         const viewToggle = dataPane.querySelector('#data-view-toggle');
         const summaryView = dataPane.querySelector('#summary-data-view');
         const yearlyView = dataPane.querySelector('#yearly-data-view');
-        const summaryControlsContainer = dataPane.querySelector('#data-controls-collapse');
+        const summaryControlsWrapper = dataPane.querySelector('#summary-controls-wrapper');
         
         const distFilterToggle = dataPane.querySelector('#data-dist-filter-toggle');
         const paceFilterToggle = dataPane.querySelector('#data-pace-filter-toggle');
         const cityFilter = dataPane.querySelector('#data-city-filter');
         const startDateFilter = dataPane.querySelector('#date-filter-start');
         const endDateFilter = dataPane.querySelector('#date-filter-end');
-        const sortButtons = dataPane.querySelectorAll('.sortable');
         const summaryTableBody = dataPane.querySelector('#summary-table-body');
-        
+        const sortableHeaders = dataPane.querySelectorAll('.sortable-header');
+
         allRunRows = Array.from(summaryTableBody.querySelectorAll('tr'));
 
         const updateDataView = () => {
@@ -1037,12 +1048,12 @@
             const maxPace = parseFloat(paceFilterToggle.querySelector('.active').dataset.pace);
             const selectedCity = cityFilter.value;
             const startDate = startDateFilter.value;
-            const endDate = endDateFilter.value; // CORRECTED THIS LINE
+            const endDate = endDateFilter.value;
 
-            // Get sort values
-            const activeSortButton = dataPane.querySelector('.sortable.active');
-            const sortProp = activeSortButton.dataset.sort;
-            const sortOrder = activeSortButton.dataset.order;
+            // Get sort values from table header
+            const activeSortHeader = dataPane.querySelector('.sortable-header[aria-sort]');
+            const sortProp = activeSortHeader ? activeSortHeader.dataset.sort : 'date';
+            const sortOrder = activeSortHeader ? activeSortHeader.getAttribute('aria-sort') === 'ascending' ? 'asc' : 'desc' : 'desc';
 
             // 1. Filter
             let filteredRows = allRunRows.filter(row => {
@@ -1092,28 +1103,32 @@
             viewToggle.querySelector('.active').classList.remove('active');
             e.target.classList.add('active');
 
-            const controlsToggleButton = dataPane.querySelector('button[data-bs-target="#data-controls-collapse"]');
-
             if (view === 'summary') {
                 summaryView.style.display = '';
                 yearlyView.style.display = 'none';
-                summaryControlsContainer.style.display = '';
-                if(controlsToggleButton) controlsToggleButton.style.display = '';
-
-                // Ensure controls are visible on lg screens and collapsed on smaller screens
-                if (window.innerWidth < 992) {
-                    bootstrap.Collapse.getOrCreateInstance(summaryControlsContainer).hide();
-                } else {
-                    bootstrap.Collapse.getOrCreateInstance(summaryControlsContainer).show();
-                }
-
+                summaryControlsWrapper.style.display = '';
                 updateDataView();
             } else {
                 summaryView.style.display = 'none';
                 yearlyView.style.display = '';
-                bootstrap.Collapse.getOrCreateInstance(summaryControlsContainer).hide();
-                if(controlsToggleButton) controlsToggleButton.style.display = 'none';
+                summaryControlsWrapper.style.display = 'none';
             }
+        });
+
+        sortableHeaders.forEach(header => {
+            header.addEventListener('click', () => {
+                const currentSort = header.getAttribute('aria-sort');
+                let newSort;
+                if (currentSort === 'descending') {
+                    newSort = 'ascending';
+                } else {
+                    newSort = 'descending';
+                }
+
+                sortableHeaders.forEach(h => h.removeAttribute('aria-sort'));
+                header.setAttribute('aria-sort', newSort);
+                updateDataView();
+            });
         });
 
         const filterElements = [distFilterToggle, paceFilterToggle, cityFilter, startDateFilter, endDateFilter];
@@ -1128,34 +1143,7 @@
             });
         });
         
-        sortButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const currentSort = button.dataset.sort;
-                const currentOrder = button.dataset.order;
-
-                if(button.classList.contains('active')) {
-                    // Toggle order
-                    const newOrder = currentOrder === 'desc' ? 'asc' : 'desc';
-                    button.dataset.order = newOrder;
-                    const icon = button.querySelector('.sort-icon');
-                    icon.classList.toggle('bi-arrow-down', newOrder === 'desc');
-                    icon.classList.toggle('bi-arrow-up', newOrder === 'asc');
-                } else {
-                    sortButtons.forEach(btn => btn.classList.remove('active'));
-                    button.classList.add('active');
-                }
-                updateDataView();
-            });
-        });
-        
-        // Initial call to sort the data by default (date desc) and hide controls if needed
-        const initialViewButton = viewToggle.querySelector('.active');
-        if (initialViewButton && initialViewButton.dataset.view === 'yearly') {
-            const controlsToggleButton = dataPane.querySelector('button[data-bs-target="#data-controls-collapse"]');
-             if(controlsToggleButton) controlsToggleButton.style.display = 'none';
-        } else {
-             updateDataView();
-        }
+        updateDataView();
     }
 
 
