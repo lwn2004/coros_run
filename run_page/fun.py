@@ -1,5 +1,5 @@
 import json
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta, date, timezone
 from collections import defaultdict
 from jinja2 import Environment, FileSystemLoader
 import sys
@@ -308,6 +308,10 @@ def prepare_template_context(all_runs, fastest_run, pb_file, events_file):
     chart_yearly_labels = [str(y) for y in years_for_chart]
     chart_yearly_data = [round(summarized_by_year[y]["summary"]["dist_km"], 2) for y in years_for_chart]
 
+    # Get current time in Beijing time (UTC+8) and add to context
+    beijing_tz = timezone(timedelta(hours=8))
+    last_build_time = datetime.now(beijing_tz).strftime('%Y-%m-%d %H:%M:%S')
+
     return {
         "recent_runs": recent_runs,
         "overall_stats": overall_stats,
@@ -331,6 +335,7 @@ def prepare_template_context(all_runs, fastest_run, pb_file, events_file):
         "first_run_date": all_runs[0]['date'],
         "first_run_distance": all_runs[0]['distance'] / 1000,
         "city_stats": city_stats,
+        "last_build_time": last_build_time,
     }
 
 def main():
