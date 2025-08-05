@@ -104,9 +104,6 @@
     .stat-card-flip-container {
         perspective: 1000px;
     }
-    #dist-card-container {
-        min-height: 200px;
-    }
 
     .stat-card-flipper {
 		text-align: center;
@@ -193,13 +190,12 @@
 		font-weight: 500;
 	}
     @media (max-width: 767.98px) {
-      .stat-card-flip-container { min-height: 95px; }
+      .stat-card-flip-container { min-height: 110px; }
       #dist-card-container { min-height: 180px; }
       .stat-value { font-size: 1.8rem; }
     }
 
     @media (max-width: 576px) {
-      #dist-card-container { min-height: 160px; }
       .stat-value { font-size: 1.5rem; }
       .main-title { font-size: 1.5rem; }
       .main-subtitle { font-size: 0.9rem; }
@@ -425,8 +421,8 @@
   <div class="tab-content" id="mainTabContent">
     <div class="tab-pane fade show active" id="summary-pane" role="tabpanel" aria-labelledby="summary-tab" tabindex="0">
         <div class="row g-2 mb-3">
-          <div class="col-12 col-md-6">
-            <div class="stat-card-flip-container w-100" id="dist-card-container">
+          <div class="col-12 col-md-6 d-flex">
+            <div class="stat-card-flip-container w-100 flex-fill" id="dist-card-container">
               <div class="stat-card-flipper h-100">
                 <div class="stat-card-front">
                   <div class="stat-card-content">
@@ -462,8 +458,8 @@
     
           <div class="col-12 col-md-6">
             <div class="row g-2 h-100">
-              <div class="col-6 col-md-12">
-                <div class="stat-card-flip-container h-100">
+              <div class="col-6 col-md-12 d-flex">
+                <div class="stat-card-flip-container h-100 w-100 flex-fill">
                   <div class="stat-card-flipper h-100">
                     <div class="stat-card-front">
                       <div class="stat-card-content">
@@ -482,8 +478,8 @@
                   </div>
                 </div>
               </div>
-              <div class="col-6 col-md-12 mt-2 mt-md-2">
-                <div class="stat-card-flip-container h-100">
+              <div class="col-6 col-md-12 d-flex mt-md-2">
+                <div class="stat-card-flip-container h-100 w-100 flex-fill">
                   <div class="stat-card-flipper h-100">
                     <div class="stat-card-front">
                       <div class="stat-card-content">
@@ -579,55 +575,61 @@
                         </div>
                     </div>
 
-                    <div id="summary-controls">
-                        <div class="content-card p-3 mb-3">
-                            <h6 class="mb-2 small-muted">排序</h6>
-                            <div class="d-grid gap-2">
-                                <button class="btn btn-sm btn-secondary text-start sortable active" data-sort="date" data-order="desc">日期 <i class="bi bi-arrow-down float-end sort-icon"></i></button>
-                                <button class="btn btn-sm btn-secondary text-start sortable" data-sort="distance" data-order="desc">距离 <i class="bi bi-arrow-down float-end sort-icon"></i></button>
-                                <button class="btn btn-sm btn-secondary text-start sortable" data-sort="pace" data-order="asc">配速 <i class="bi bi-arrow-up float-end sort-icon"></i></button>
-                            </div>
-                        </div>
+                    <button class="btn btn-secondary d-lg-none w-100 mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#data-controls-collapse" aria-expanded="false" aria-controls="data-controls-collapse">
+                        <i class="bi bi-funnel"></i> 显示/隐藏排序和筛选
+                    </button>
 
-                        <div class="content-card p-3 mb-3">
-                            <h6 class="mb-3 small-muted">筛选选项</h6>
-                            <div class="mb-3">
-                                <label class="form-label">按日期</label>
-                                <div class="row g-2">
-                                    <div class="col">
-                                        <input type="date" id="date-filter-start" class="form-control form-control-sm" placeholder="起始">
+                    <div class="collapse d-lg-block" id="data-controls-collapse">
+                        <div id="summary-controls">
+                            <div class="content-card p-3 mb-3">
+                                <h6 class="mb-2 small-muted">排序</h6>
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-sm btn-secondary text-start sortable active" data-sort="date" data-order="desc">日期 <i class="bi bi-arrow-down float-end sort-icon"></i></button>
+                                    <button class="btn btn-sm btn-secondary text-start sortable" data-sort="distance" data-order="desc">距离 <i class="bi bi-arrow-down float-end sort-icon"></i></button>
+                                    <button class="btn btn-sm btn-secondary text-start sortable" data-sort="pace" data-order="asc">配速 <i class="bi bi-arrow-up float-end sort-icon"></i></button>
+                                </div>
+                            </div>
+    
+                            <div class="content-card p-3 mb-3">
+                                <h6 class="mb-3 small-muted">筛选选项</h6>
+                                <div class="mb-3">
+                                    <label class="form-label">按日期</label>
+                                    <div class="row g-2">
+                                        <div class="col">
+                                            <input type="date" id="date-filter-start" class="form-control form-control-sm" placeholder="起始">
+                                        </div>
+                                        <div class="col">
+                                            <input type="date" id="date-filter-end" class="form-control form-control-sm" placeholder="结束">
+                                        </div>
                                     </div>
-                                    <div class="col">
-                                        <input type="date" id="date-filter-end" class="form-control form-control-sm" placeholder="结束">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">按距离</label>
+                                    <div class="btn-group btn-group-sm w-100" id="data-dist-filter-toggle">
+                                        <button type="button" class="btn active" data-dist="0">全部</button>
+                                        <button type="button" class="btn" data-dist="5000">&gt;5km</button>
+                                        <button type="button" class="btn" data-dist="10000">&gt;10km</button>
+                                        <button type="button" class="btn" data-dist="21097">&gt;半马</button>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">按距离</label>
-                                <div class="btn-group btn-group-sm w-100" id="data-dist-filter-toggle">
-                                    <button type="button" class="btn active" data-dist="0">全部</button>
-                                    <button type="button" class="btn" data-dist="5000">&gt;5km</button>
-                                    <button type="button" class="btn" data-dist="10000">&gt;10km</button>
-                                    <button type="button" class="btn" data-dist="21097">&gt;半马</button>
+                                <div class="mb-3">
+                                    <label class="form-label">按配速</label>
+                                    <div class="btn-group btn-group-sm w-100" id="data-pace-filter-toggle">
+                                        <button type="button" class="btn active" data-pace="9999">全部</button>
+                                        <button type="button" class="btn" data-pace="360">&lt;6'</button>
+                                        <button type="button" class="btn" data-pace="330">&lt;5'30</button>
+                                        <button type="button" class="btn" data-pace="300">&lt;5'</button>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">按配速</label>
-                                <div class="btn-group btn-group-sm w-100" id="data-pace-filter-toggle">
-                                    <button type="button" class="btn active" data-pace="9999">全部</button>
-                                    <button type="button" class="btn" data-pace="360">&lt;6'</button>
-                                    <button type="button" class="btn" data-pace="330">&lt;5'30</button>
-                                    <button type="button" class="btn" data-pace="300">&lt;5'</button>
+                                <div>
+                                    <label for="data-city-filter" class="form-label">按城市</label>
+                                    <select class="form-select form-select-sm" id="data-city-filter">
+                                        <option value="all" selected>全部城市</option>
+                                        {% for city in city_stats %}
+                                        <option value="{{ city.name }}">{{ city.name }}</option>
+                                        {% endfor %}
+                                    </select>
                                 </div>
-                            </div>
-                            <div>
-                                <label for="data-city-filter" class="form-label">按城市</label>
-                                <select class="form-select form-select-sm" id="data-city-filter">
-                                    <option value="all" selected>全部城市</option>
-                                    {% for city in city_stats %}
-                                    <option value="{{ city.name }}">{{ city.name }}</option>
-                                    {% endfor %}
-                                </select>
                             </div>
                         </div>
                     </div>
@@ -1017,7 +1019,7 @@
         const viewToggle = dataPane.querySelector('#data-view-toggle');
         const summaryView = dataPane.querySelector('#summary-data-view');
         const yearlyView = dataPane.querySelector('#yearly-data-view');
-        const summaryControls = dataPane.querySelector('#summary-controls');
+        const summaryControlsContainer = dataPane.querySelector('#data-controls-collapse');
         
         const distFilterToggle = dataPane.querySelector('#data-dist-filter-toggle');
         const paceFilterToggle = dataPane.querySelector('#data-pace-filter-toggle');
@@ -1035,7 +1037,7 @@
             const maxPace = parseFloat(paceFilterToggle.querySelector('.active').dataset.pace);
             const selectedCity = cityFilter.value;
             const startDate = startDateFilter.value;
-            const endDate = endDate.value;
+            const endDate = endDateFilter.value; // CORRECTED THIS LINE
 
             // Get sort values
             const activeSortButton = dataPane.querySelector('.sortable.active');
@@ -1090,15 +1092,27 @@
             viewToggle.querySelector('.active').classList.remove('active');
             e.target.classList.add('active');
 
+            const controlsToggleButton = dataPane.querySelector('button[data-bs-target="#data-controls-collapse"]');
+
             if (view === 'summary') {
                 summaryView.style.display = '';
                 yearlyView.style.display = 'none';
-                summaryControls.style.display = '';
+                summaryControlsContainer.style.display = '';
+                if(controlsToggleButton) controlsToggleButton.style.display = '';
+
+                // Ensure controls are visible on lg screens and collapsed on smaller screens
+                if (window.innerWidth < 992) {
+                    bootstrap.Collapse.getOrCreateInstance(summaryControlsContainer).hide();
+                } else {
+                    bootstrap.Collapse.getOrCreateInstance(summaryControlsContainer).show();
+                }
+
                 updateDataView();
             } else {
                 summaryView.style.display = 'none';
                 yearlyView.style.display = '';
-                summaryControls.style.display = 'none';
+                bootstrap.Collapse.getOrCreateInstance(summaryControlsContainer).hide();
+                if(controlsToggleButton) controlsToggleButton.style.display = 'none';
             }
         });
 
@@ -1134,8 +1148,14 @@
             });
         });
         
-        // Initial call to sort the data by default (date desc)
-        updateDataView();
+        // Initial call to sort the data by default (date desc) and hide controls if needed
+        const initialViewButton = viewToggle.querySelector('.active');
+        if (initialViewButton && initialViewButton.dataset.view === 'yearly') {
+            const controlsToggleButton = dataPane.querySelector('button[data-bs-target="#data-controls-collapse"]');
+             if(controlsToggleButton) controlsToggleButton.style.display = 'none';
+        } else {
+             updateDataView();
+        }
     }
 
 
