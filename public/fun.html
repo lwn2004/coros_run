@@ -456,10 +456,10 @@
                   <div class="stat-card-content">
                     <div>
                       <div class="stat-label">继续坚持</div>
-                      <div class="stat-value">17年210天</div>
+                      <div class="stat-value">17年236天</div>
                     </div>
                     <div class="stat-details">
-                      <div class="stat-label"><small class="small-muted">预计</small>2043年02月28日<small>绕地球一圈</small></div>
+                      <div class="stat-label"><small class="small-muted">预计</small>2043年03月26日<small>绕地球一圈</small></div>
                     </div>
                   </div>
                   <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
@@ -11219,7 +11219,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-08-06 14:31:10 
+         | Last updated: 2025-08-06 16:06:36 
     </small>
 </footer>
 
@@ -11299,6 +11299,9 @@
     }, false);
     
     tabContent.addEventListener('touchend', function(e) {
+      if (e.target.closest('#cityMap')) {
+        return; // 如果在地图上操作，则不触发Tab切换
+      }
       const endX = e.changedTouches[0].clientX;
       const endY = e.changedTouches[0].clientY;
       
@@ -11331,6 +11334,9 @@
     
     // 添加滑动时防止页面滚动
     tabContent.addEventListener('touchmove', function(e) {
+      if (e.target.closest('#cityMap')) {
+        return; // 在地图上滑动时，允许默认的地图拖动行为
+      }
       const currentX = e.touches[0].clientX;
       const currentY = e.touches[0].clientY;
       
@@ -11419,26 +11425,6 @@
                       }).addTo(cityMap).bindPopup(`<b>深圳市</b><br>跑步次数: 1<br>总距离: 5.01km`);
                   
                   
-  
-                  // 解决足迹页面地图上划动时切换tab的问题
-                  const mapContainer = document.getElementById('cityMap');
-                  if (mapContainer) {
-                      // 阻止触摸事件冒泡，避免触发标签切换
-                      mapContainer.addEventListener('touchstart', function(e) {
-                          e.stopPropagation();
-                      }, { passive: true });
-  
-                      mapContainer.addEventListener('touchmove', function(e) {
-                          e.stopPropagation();
-                      }, { passive: true });
-                      
-                      // 阻止点击事件冒泡
-                      mapContainer.addEventListener('click', function(e) {
-                          e.stopPropagation();
-                      }, { passive: true });
-                  }
-                
-
   
                 } else {
                   cityMap.invalidateSize();
