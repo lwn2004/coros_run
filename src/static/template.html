@@ -723,7 +723,7 @@
 
     <div class="tab-pane fade" id="events-pane" role="tabpanel" aria-labelledby="events-tab" tabindex="0">
         <div class="row">
-			<div class="col-lg-4 mb-4">
+			<div class="col-lg-6 mb-4">
                 <div class="content-card h-100">
                     <h5 class="card-title mb-3"><i class="bi bi-flag"></i> 里程碑</h5>
                     {% set milestones = [
@@ -759,7 +759,7 @@
                     {% endfor %}
                 </div>
             </div>
-            <div class="col-lg-4 mb-4">
+            <div class="col-lg-6 mb-4">
                 <div class="content-card h-100">
                     <h5 class="card-title mb-3"><i class="bi bi-award"></i> 个人最佳 (PB)</h5>
                     {% for label, pb in personal_bests.items() %}
@@ -777,7 +777,43 @@
                 </div>
             </div>
             
-            <div class="col-lg-4 mb-4">
+            <div class="col-lg-6 mb-4">
+                <div class="content-card h-100">
+                    <h5 class="card-title mb-3"><i class="bi bi-calendar-check"></i> 连续记录</h5>
+                    {% if streak_records %}
+                    <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
+                        <div>
+                            <div class="fw-bold">最长连续周</div>
+                            {% if streak_records.longest_streak.weeks > 0 %}
+                            <small class="small-muted">{{ streak_records.longest_streak.start_date }} ~ {{ streak_records.longest_streak.end_date }}</small>
+                            {% else %}
+                            <small class="small-muted">暂无记录</small>
+                            {% endif %}
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-bold">{{ streak_records.longest_streak.weeks }} 周</div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
+                        <div>
+                            <div class="fw-bold">当前连续周</div>
+                            {% if streak_records.current_streak.weeks > 0 %}
+                            <small class="small-muted">{{ streak_records.current_streak.start_date }} ~ {{ streak_records.current_streak.end_date }}</small>
+                            {% else %}
+                            <small class="small-muted">本周还未跑</small>
+                            {% endif %}
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-bold">{{ streak_records.current_streak.weeks }} 周</div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 text-body-secondary">暂无数据</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="col-lg-6 mb-4">
                 <div class="content-card h-100">
                     <h5 class="card-title mb-3"><i class="bi bi-trophy"></i> 比赛记录</h5>
                     <div style="flex: 1; overflow-y: auto;">
@@ -832,7 +868,10 @@
                   {% for city in city_stats %}
                     <div class="d-flex justify-content-between py-2 border-bottom">
                       <span>{{ loop.index }}. {{ city.name }}</span>
-                      <span class="text-end text-nowrap">{{ city.count }}次 ({{ city.distance }}km)</span>
+                      <div class="text-end">
+                        <span class="text-nowrap">{{ city.count }}次 ({{ city.distance }}km)</span>
+                        {% if city.first_date %}<div class="small-muted" style="line-height:1.2; margin-top: 2px;">首次: {{ city.first_date }}</div>{% endif %}
+                      </div>
                     </div>
                   {% endfor %}
                 </div>
