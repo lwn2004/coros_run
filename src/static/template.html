@@ -402,6 +402,33 @@
     .sortable-header[aria-sort="ascending"] .bi-arrow-up { display: inline-block; }
     .sortable-header[aria-sort="descending"] .bi-arrow-down { display: inline-block; }
     .sortable-header[aria-sort] .bi-arrow-down-up { display: none; }
+    .timeline {
+        position: relative;
+        padding-left: 2rem;
+        margin-left: 1rem;
+        border-left: 2px solid var(--border-color);
+    }
+    .timeline-item {
+        position: relative;
+        padding-bottom: 1.5rem;
+    }
+    .timeline-item:last-child {
+        padding-bottom: 0;
+    }
+    .timeline-marker {
+        position: absolute;
+        top: 5px;
+        left: calc(-2rem - 1px - 0.6rem);
+        width: 1.2rem;
+        height: 1.2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        background-color: var(--bg-color);
+    }
+    .trophy-color-text { color: var(--trophy-color); }
+    .accent-color-text { color: var(--accent-color); }
 
   </style>
 </head>
@@ -722,134 +749,198 @@
     </div>
 
     <div class="tab-pane fade" id="events-pane" role="tabpanel" aria-labelledby="events-tab" tabindex="0">
-        <div class="row">
-			<div class="col-lg-6 mb-4">
-                <div class="content-card h-100">
-                    <h5 class="card-title mb-3"><i class="bi bi-flag"></i> 里程碑</h5>
-                    {% set milestones = [
-                    {'name': '踏出第一步', 'distance': first_run_distance, 'date': first_run_date, 'is_first': True},
-                    {'name': '1000公里', 'distance': 1000, 'date': milestone_dates.get(1000)},
-                    {'name': '10000公里', 'distance': 10000, 'date': milestone_dates.get(10000)},
-                    {'name': '20000公里', 'distance': 20000, 'date': milestone_dates.get(20000)},
-                    {'name': '30000公里', 'distance': 30000, 'date': milestone_dates.get(30000)},
-                    {'name': '40000公里', 'distance': 40000, 'date': milestone_dates.get(40000)}
-                    ] %}
-                    
-                    {% for m in milestones %}
-                    <div class="d-flex justify-content-between align-items-center py-2 pb-entry 
-                                {% if m.date %}border-success border-2{% endif %}">
-                        <div>
-                        <div class="fw-bold {% if m.date %}text-success{% endif %}">
-                            {{ m.name }}
-                            {% if m.date %}<span class="badge bg-success ms-2">已完成</span>{% endif %}
-                        </div>
-                        <small class="{% if m.date %}text-success{% else %}small-muted{% endif %}">
-                            {% if m.date %}{{ m.date.strftime('%Y年%m月%d日') }}{% else %}{% if m.is_first %}初次跑步{% else %}未达成{% endif %}{% endif %}
-                        </small>
-                        </div>
-                        <div class="text-end">
-                        <div class="fw-bold {% if m.date %}text-success{% elif not m.date and not m.is_first %}text-muted{% endif %}">
-                            {% if m.is_first %}{{ "%.2f"|format(m.distance) }} km{% else %}{{ "%.0f"|format(m.distance) }} km{% endif %}
-                        </div>
-                        <small class="{% if m.date %}text-success{% else %}small-muted{% endif %}">
-                            {% if m.is_first %}首跑{% elif m.date %}里程碑达成{% else %}进行中{% endif %}
-                        </small>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
+        <div class="d-flex justify-content-end mb-4">
+            <div class="btn-group btn-group-sm" id="events-view-toggle" role="group" aria-label="Events View Toggle">
+                <button type="button" class="btn active" data-view="category">按类别</button>
+                <button type="button" class="btn" data-view="timeline">按时间线</button>
             </div>
-            <div class="col-lg-6 mb-4">
-                <div class="content-card h-100">
-                    <h5 class="card-title mb-3"><i class="bi bi-award"></i> 个人最佳 (PB)</h5>
-                    {% for label, pb in personal_bests.items() %}
-                    <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
-                        <div>
-                        <div class="fw-bold">{{ label }}</div>
-                        <small class="small-muted">{{ pb.date }}</small>
-                        </div>
-                        <div class="text-end">
-                        <div class="fw-bold">{{ pb.time }}</div>
-                        <small class="small-muted">配速: {{ pb.pace }}</small>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-            
-            <div class="col-lg-6 mb-4">
-                <div class="content-card h-100">
-                    <h5 class="card-title mb-3"><i class="bi bi-calendar-check"></i> 连续记录</h5>
-                    {% if streak_records %}
-                    <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
-                        <div>
-                            <div class="fw-bold">最长连续周</div>
-                            {% if streak_records.longest_streak.weeks > 0 %}
-                            <small class="small-muted">{{ streak_records.longest_streak.start_date }} ~ {{ streak_records.longest_streak.end_date }}</small>
-                            {% else %}
-                            <small class="small-muted">暂无记录</small>
-                            {% endif %}
-                        </div>
-                        <div class="text-end">
-                            <div class="fw-bold">{{ streak_records.longest_streak.weeks }} 周</div>
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
-                        <div>
-                            <div class="fw-bold">当前连续周</div>
-                            {% if streak_records.current_streak.weeks > 0 %}
-                            <small class="small-muted">{{ streak_records.current_streak.start_date }} ~ {{ streak_records.current_streak.end_date }}</small>
-                            {% else %}
-                            <small class="small-muted">本周还未跑</small>
-                            {% endif %}
-                        </div>
-                        <div class="text-end">
-                            <div class="fw-bold">{{ streak_records.current_streak.weeks }} 周</div>
-                        </div>
-                    </div>
-                    {% else %}
-                    <div class="text-center py-4 text-body-secondary">暂无数据</div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="col-lg-6 mb-4">
-                <div class="content-card h-100">
-                    <h5 class="card-title mb-3"><i class="bi bi-trophy"></i> 比赛记录</h5>
-                    <div style="flex: 1; overflow-y: auto;">
-                        {% if events %}
-                        {% for event in events %}
-                            <div class="border-bottom py-2 pb-entry">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="fw-bold text-primary-emphasis">
-                                {{ event.name }}
-                                <small class="text-body-secondary">{{ event.category }}</small>
-                                </div>
-                                <div class="flex-grow-1 text-center px-2">
-                                {% if event.certified %}
-                                    <abbr title="点击查看证书" class="certificate-link text-decoration-none" 
-                                        data-img="{{ event.certificate }}" style="cursor: pointer; border-bottom: 1px dotted var(--text-secondary)">
-                                    <span class="classification-text">{{ event.certified }}</span>
-                                    </abbr>
-                                {% endif %}
-                                </div>
-                                <div class="text-nowrap text-primary-emphasis">{{ format_duration(event.duration) }}</div>
+        </div>
+        
+        <div id="events-category-view">
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <div class="content-card h-100 d-flex flex-column">
+                        <h5 class="card-title mb-3"><i class="bi bi-flag-fill text-success"></i> 里程碑</h5>
+                        {% set milestones = [
+                        {'name': '踏出第一步', 'distance': first_run_distance, 'date': first_run_date, 'is_first': True},
+                        {'name': '1000公里', 'distance': 1000, 'date': milestone_dates.get(1000)},
+                        {'name': '10000公里', 'distance': 10000, 'date': milestone_dates.get(10000)},
+                        {'name': '20000公里', 'distance': 20000, 'date': milestone_dates.get(20000)},
+                        {'name': '30000公里', 'distance': 30000, 'date': milestone_dates.get(30000)},
+                        {'name': '40000公里', 'distance': 40000, 'date': milestone_dates.get(40000)}
+                        ] %}
+                        
+                        {% for m in milestones %}
+                        <div class="d-flex justify-content-between align-items-center py-2 pb-entry 
+                                    {% if m.date %}border-success border-2{% endif %}">
+                            <div>
+                            <div class="fw-bold {% if m.date %}text-success{% endif %}">
+                                {{ m.name }}
+                                {% if m.date %}<span class="badge bg-success ms-2">已完成</span>{% endif %}
                             </div>
-                            <div class="d-flex justify-content-between align-items-center mt-1">
-                                <div>
-                                <small class="text-body-secondary">
-                                    {% if event.date %}{{ event.date.strftime('%Y.%m.%d') }}{% else %}日期未知{% endif %}
-                                </small>
-                                <small class="text-body-secondary ms-2">{{ event.city }}</small>
-                                </div>
-                                <div class="text-end"><small class="text-body-secondary">配速: {{ event.pace }}</small></div>
+                            <small class="{% if m.date %}text-success{% else %}small-muted{% endif %}">
+                                {% if m.date %}{{ m.date.strftime('%Y年%m月%d日') }}{% else %}{% if m.is_first %}初次跑步{% else %}未达成{% endif %}{% endif %}
+                            </small>
                             </div>
+                            <div class="text-end">
+                            <div class="fw-bold {% if m.date %}text-success{% elif not m.date and not m.is_first %}text-muted{% endif %}">
+                                {% if m.is_first %}{{ "%.2f"|format(m.distance) }} km{% else %}{{ "%.0f"|format(m.distance) }} km{% endif %}
                             </div>
+                            <small class="{% if m.date %}text-success{% else %}small-muted{% endif %}">
+                                {% if m.is_first %}首跑{% elif m.date %}里程碑达成{% else %}进行中{% endif %}
+                            </small>
+                            </div>
+                        </div>
                         {% endfor %}
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="content-card h-100 d-flex flex-column">
+                        <h5 class="card-title mb-3"><i class="bi bi-award-fill trophy-color-text"></i> 个人最佳 (PB)</h5>
+                        <div class="flex-grow-1">
+                            {% for label, pb in personal_bests.items() %}
+                            <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
+                                <div>
+                                <div class="fw-bold">{{ label }}</div>
+                                <small class="small-muted">{{ pb.date }}</small>
+                                </div>
+                                <div class="text-end">
+                                <div class="fw-bold">{{ pb.time }}</div>
+                                <small class="small-muted">配速: {{ pb.pace }}</small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6 mb-4">
+                    <div class="content-card h-100 d-flex flex-column">
+                        <h5 class="card-title mb-3"><i class="bi bi-trophy-fill accent-color-text"></i> 比赛记录</h5>
+                        <div class="flex-grow-1" style="overflow-y: auto;">
+                            {% if events %}
+                            {% for event in events %}
+                                <div class="border-bottom py-2 pb-entry">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="fw-bold text-primary-emphasis">
+                                    {{ event.name }}
+                                    <small class="text-body-secondary">{{ event.category }}</small>
+                                    </div>
+                                    <div class="flex-grow-1 text-center px-2">
+                                    {% if event.certified %}
+                                        <abbr title="点击查看证书" class="certificate-link text-decoration-none" 
+                                            data-img="{{ event.certificate }}" style="cursor: pointer; border-bottom: 1px dotted var(--text-secondary)">
+                                        <span class="classification-text">{{ event.certified }}</span>
+                                        </abbr>
+                                    {% endif %}
+                                    </div>
+                                    <div class="text-nowrap text-primary-emphasis">{{ format_duration(event.duration) }}</div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-1">
+                                    <div>
+                                    <small class="text-body-secondary">
+                                        {% if event.date %}{{ event.date.strftime('%Y.%m.%d') }}{% else %}日期未知{% endif %}
+                                    </small>
+                                    <small class="text-body-secondary ms-2">{{ event.city }}</small>
+                                    </div>
+                                    <div class="text-end"><small class="text-body-secondary">配速: {{ event.pace }}</small></div>
+                                </div>
+                                </div>
+                            {% endfor %}
+                            {% else %}
+                            <div class="text-center py-4 text-body-secondary">暂无比赛记录</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="content-card h-100 d-flex flex-column">
+                        <h5 class="card-title mb-3"><i class="bi bi-geo-alt-fill text-primary"></i> 解锁新城市</h5>
+                        <div class="flex-grow-1" style="overflow-y: auto;">
+                            {% if city_stats %}
+                                {% for city in city_stats|sort(attribute='first_date', reverse=True) %}
+                                    {% if city.first_date %}
+                                    <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
+                                        <div>
+                                            <div class="fw-bold">{{ city.name }}</div>
+                                            <small class="small-muted">首次抵达</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="fw-bold">{{ city.first_date }}</div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <div class="text-center py-4 text-body-secondary">暂无城市记录</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="content-card h-100 d-flex flex-column">
+                        <h5 class="card-title mb-3"><i class="bi bi-calendar-check-fill text-warning"></i> 连续记录</h5>
+                        {% if streak_records %}
+                        <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
+                            <div>
+                                <div class="fw-bold">最长连续周</div>
+                                {% if streak_records.longest_streak.weeks > 0 %}
+                                <small class="small-muted">{{ streak_records.longest_streak.start_date }} ~ {{ streak_records.longest_streak.end_date }}</small>
+                                {% else %}
+                                <small class="small-muted">暂无记录</small>
+                                {% endif %}
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold">{{ streak_records.longest_streak.weeks }} 周</div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
+                            <div>
+                                <div class="fw-bold">当前连续周</div>
+                                {% if streak_records.current_streak.weeks > 0 %}
+                                <small class="small-muted">{{ streak_records.current_streak.start_date }} ~ {{ streak_records.current_streak.end_date }}</small>
+                                {% else %}
+                                <small class="small-muted">本周还未跑</small>
+                                {% endif %}
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold">{{ streak_records.current_streak.weeks }} 周</div>
+                            </div>
+                        </div>
                         {% else %}
-                        <div class="text-center py-4 text-body-secondary">暂无比赛记录</div>
+                        <div class="text-center py-4 text-body-secondary">暂无数据</div>
                         {% endif %}
                     </div>
+                </div>
+            </div>
+        </div>
+
+        {% set all_events = [] %}
+        {% for m in milestones %}{% if m.date %}{% set dist_str = ("%.0f"|format(m.distance)) if not m.is_first else ("%.2f"|format(m.distance)) %}{% set details_str = '达成 ' ~ dist_str ~ 'km 里程碑' if not m.is_first else '首跑距离 ' ~ dist_str ~ 'km' %}{% set _ = all_events.append({'date': m.date.strftime('%Y-%m-%d'), 'type': '里程碑', 'icon': 'bi-flag-fill', 'color': 'text-success', 'title': m.name, 'details': details_str}) %}{% endif %}{% endfor %}
+        {% for label, pb in personal_bests.items() %}{% set _ = all_events.append({'date': pb.date, 'type': '个人最佳', 'icon': 'bi-award-fill', 'color': 'trophy-color-text', 'title': 'PB: ' ~ label, 'details': '时间 ' ~ pb.time ~ ' (配速 ' ~ pb.pace ~ ')'}) %}{% endfor %}
+        {% for event in events %}{% if event.date %}{% set _ = all_events.append({'date': event.date.strftime('%Y-%m-%d'), 'type': '比赛记录', 'icon': 'bi-trophy-fill', 'color': 'accent-color-text', 'title': event.name, 'details': event.category ~ ' - 完赛时间: ' ~ format_duration(event.duration)}) %}{% endif %}{% endfor %}
+        {% for city in city_stats %}{% if city.first_date %}{% set _ = all_events.append({'date': city.first_date, 'type': '解锁新城市', 'icon': 'bi-geo-alt-fill', 'color': 'text-primary', 'title': '解锁: ' ~ city.name, 'details': '于 ' ~ city.first_date ~ ' 首次在该城市跑步'}) %}{% endif %}{% endfor %}
+        {% set sorted_events = all_events|sort(attribute='date', reverse=True) %}
+
+        <div id="events-timeline-view" style="display: none;">
+            <div class="content-card">
+                <div class="timeline">
+                    {% if not sorted_events %}
+                        <div class="text-center py-4 text-body-secondary">暂无事件记录</div>
+                    {% else %}
+                        {% for event in sorted_events %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker">
+                                <i class="bi {{ event.icon }} {{ event.color }}"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="small text-body-secondary mb-1">{{ event.date }} &middot; {{ event.type }}</div>
+                                <h6 class="mb-1 fw-bold">{{ event.title }}</h6>
+                                <p class="mb-0 small text-body-secondary">{{ event.details }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -1271,6 +1362,34 @@
         });
         
         updateDataView();
+    }
+    
+    // --- EVENTS TAB LOGIC ---
+    const eventsPane = document.getElementById('events-pane');
+    if (eventsPane) {
+        const viewToggle = eventsPane.querySelector('#events-view-toggle');
+        const categoryView = eventsPane.querySelector('#events-category-view');
+        const timelineView = eventsPane.querySelector('#events-timeline-view');
+
+        if (viewToggle && categoryView && timelineView) {
+            viewToggle.addEventListener('click', (e) => {
+                const button = e.target.closest('button');
+                if (!button) return;
+
+                const view = button.dataset.view;
+
+                viewToggle.querySelector('.active').classList.remove('active');
+                button.classList.add('active');
+
+                if (view === 'category') {
+                    categoryView.style.display = '';
+                    timelineView.style.display = 'none';
+                } else { // timeline
+                    categoryView.style.display = 'none';
+                    timelineView.style.display = 'block';
+                }
+            });
+        }
     }
 
 
