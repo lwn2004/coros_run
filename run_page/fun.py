@@ -216,6 +216,99 @@ def summarize_runs(runs_list):
         "avg_dist_per_run": dist_km / count
     }
 
+def get_week_start(year, week):
+    """Returns the date of the Monday for a given ISO week."""
+    return datetime.fromisocalendar(year, week, 1).date()
+
+def calculate_streaks(all_runs):
+    """
+    Calculates the longest and current weekly running streaks.
+    A week is defined as Monday to Sunday (ISO week).
+    """
+    if not all_runs:
+        return {
+            'current_streak': {'weeks': 0, 'start_date': '', 'end_date': ''},
+            'longest_streak': {'weeks': 0, 'start_date': '', 'end_date': ''}
+        }
+
+    run_weeks = sorted(list(set(run['date'].isocalendar()[:2] for run in all_runs)))
+
+    if not run_weeks:
+        return {
+            'current_streak': {'weeks': 0, 'start_date': '', 'end_date': ''},
+            'longest_streak': {'weeks': 0, 'start_date': '', 'end_date': ''}
+        }
+
+    longest_streak = 0
+    current_streak = 0
+    longest_streak_start_week = None
+    longest_streak_end_week = None
+
+    for i in range(len(run_weeks)):
+        if i == 0:
+            current_streak = 1
+        else:
+            prev_year, prev_week = run_weeks[i-1]
+            curr_year, curr_week = run_weeks[i]
+            
+            is_consecutive = False
+            if curr_year == prev_year and curr_week == prev_week + 1:
+                is_consecutive = True
+            elif curr_year == prev_year + 1 and curr_week == 1:
+                 last_week_of_prev_year = date(prev_year, 12, 28).isocalendar()[1]
+                 if prev_week == last_week_of_prev_year:
+                     is_consecutive = True
+            
+            if is_consecutive:
+                current_streak += 1
+            else:
+                current_streak = 1
+        
+        if current_streak > longest_streak:
+            longest_streak = current_streak
+            longest_streak_end_week = run_weeks[i]
+            longest_streak_start_week = run_weeks[i - current_streak + 1]
+
+    today = date.today()
+    current_iso_week = today.isocalendar()[:2]
+    last_run_iso_week = run_weeks[-1]
+    last_week_date = today - timedelta(days=7)
+    last_iso_week = last_week_date.isocalendar()[:2]
+    
+    is_current = (last_run_iso_week == current_iso_week or last_run_iso_week == last_iso_week)
+
+    final_current_streak_weeks = 0
+    current_streak_start_date_str, current_streak_end_date_str = '', ''
+    if is_current:
+        final_current_streak_weeks = current_streak
+        current_streak_start_week = run_weeks[len(run_weeks) - current_streak]
+        
+        start_date = get_week_start(current_streak_start_week[0], current_streak_start_week[1])
+        end_date = get_week_start(last_run_iso_week[0], last_run_iso_week[1]) + timedelta(days=6)
+        current_streak_start_date_str = start_date.strftime('%Y-%m-%d')
+        current_streak_end_date_str = end_date.strftime('%Y-%m-%d')
+
+    longest_streak_start_date_str, longest_streak_end_date_str = '', ''
+    if longest_streak_start_week:
+        start_date = get_week_start(longest_streak_start_week[0], longest_streak_start_week[1])
+        end_date = get_week_start(longest_streak_end_week[0], longest_streak_end_week[1]) + timedelta(days=6)
+        longest_streak_start_date_str = start_date.strftime('%Y-%m-%d')
+        longest_streak_end_date_str = end_date.strftime('%Y-%m-%d')
+
+    return {
+        'current_streak': {
+            'weeks': final_current_streak_weeks,
+            'start_date': current_streak_start_date_str,
+            'end_date': current_streak_end_date_str
+        },
+        'longest_streak': {
+            'weeks': longest_streak,
+            'start_date': longest_streak_start_date_str,
+            'end_date': longest_streak_end_date_str
+        }
+    }
+
+
 def prepare_template_context(all_runs, fastest_run, pb_file, events_file):
     if not all_runs:
         return {}
@@ -224,16 +317,20 @@ def prepare_template_context(all_runs, fastest_run, pb_file, events_file):
     
     recent_runs = list(reversed(all_runs[-3:]))
     
-    city_stats_agg = defaultdict(lambda: {'count': 0, 'distance': 0.0})
+    city_stats_agg = defaultdict(lambda: {'count': 0, 'distance': 0.0, 'first_date': None})
     for run in all_runs:
         city = run['city']
         if city and city != '未知':
-            city_stats_agg[city]['count'] += 1
-            city_stats_agg[city]['distance'] += run['distance'] / 1000
+            city_data = city_stats_agg[city]
+            city_data['count'] += 1
+            city_data['distance'] += run['distance'] / 1000
+            if city_data['first_date'] is None or run['date'] < city_data['first_date']:
+                city_data['first_date'] = run['date']
 
     city_stats = [
         {'name': city, 'count': data['count'], 'distance': round(data['distance'], 2), 
-         'coordinates': CONFIG["city_coordinates"].get(city, [])}
+         'coordinates': CONFIG["city_coordinates"].get(city, []),
+         'first_date': data['first_date'].strftime('%Y-%m-%d') if data['first_date'] else ''}
         for city, data in city_stats_agg.items()
     ]
     city_stats.sort(key=lambda x: (x['count'], x['distance']), reverse=True)
@@ -308,7 +405,6 @@ def prepare_template_context(all_runs, fastest_run, pb_file, events_file):
     chart_yearly_labels = [str(y) for y in years_for_chart]
     chart_yearly_data = [round(summarized_by_year[y]["summary"]["dist_km"], 2) for y in years_for_chart]
 
-    # Get current time in Beijing time (UTC+8) and add to context
     beijing_tz = timezone(timedelta(hours=8))
     last_build_time = datetime.now(beijing_tz).strftime('%Y-%m-%d %H:%M:%S')
 
@@ -335,6 +431,7 @@ def prepare_template_context(all_runs, fastest_run, pb_file, events_file):
         "first_run_date": all_runs[0]['date'],
         "first_run_distance": all_runs[0]['distance'] / 1000,
         "city_stats": city_stats,
+        "streak_records": calculate_streaks(all_runs),
         "last_build_time": last_build_time,
     }
 
@@ -354,7 +451,7 @@ def main():
 
     context = prepare_template_context(all_runs, fastest_run, pb_file, events_file)
 
-    env = Environment(loader=FileSystemLoader('src/static'), autoescape=True)
+    env = Environment(loader=FileSystemLoader(os.path.join(current, '..', 'src', 'static')), autoescape=True)
     env.globals['format_duration'] = format_duration
     
     try:
@@ -365,10 +462,15 @@ def main():
         
     html_output = template.render(context)
 
+    os.makedirs(os.path.dirname(output_file), exist_ok=True)
     with open(output_file, "w", encoding="utf-8") as f:
         f.write(html_output)
     
     print(f"Successfully generated report: '{output_file}'")
 
 if __name__ == "__main__":
+    # Correcting path for main execution if necessary
+    # Assuming fun.py is in a 'scripts' or similar directory
+    # To find the project root (parent), we might need to adjust
+    parent = os.path.dirname(current) # This should be correct if fun.py is in a child dir of project root
     main()
