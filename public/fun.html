@@ -11142,10 +11142,9 @@
                                     <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
                                         <div>
                                             <div class="fw-bold">清远市</div>
-                                            <small class="small-muted">首次抵达</small>
                                         </div>
                                         <div class="text-end">
-                                            <div class="fw-bold">2025-03-16</div>
+                                            <div class="text-nowrap text-primary-emphasis">2025-03-16</div>
                                         </div>
                                     </div>
                                     
@@ -11154,10 +11153,9 @@
                                     <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
                                         <div>
                                             <div class="fw-bold">澳门</div>
-                                            <small class="small-muted">首次抵达</small>
                                         </div>
                                         <div class="text-end">
-                                            <div class="fw-bold">2024-11-10</div>
+                                            <div class="text-nowrap text-primary-emphasis">2024-11-10</div>
                                         </div>
                                     </div>
                                     
@@ -11166,10 +11164,9 @@
                                     <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
                                         <div>
                                             <div class="fw-bold">深圳市</div>
-                                            <small class="small-muted">首次抵达</small>
                                         </div>
                                         <div class="text-end">
-                                            <div class="fw-bold">2023-05-01</div>
+                                            <div class="text-nowrap text-primary-emphasis">2023-05-01</div>
                                         </div>
                                     </div>
                                     
@@ -11178,10 +11175,9 @@
                                     <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
                                         <div>
                                             <div class="fw-bold">茂名市</div>
-                                            <small class="small-muted">首次抵达</small>
                                         </div>
                                         <div class="text-end">
-                                            <div class="fw-bold">2022-01-31</div>
+                                            <div class="text-nowrap text-primary-emphasis">2022-01-31</div>
                                         </div>
                                     </div>
                                     
@@ -11190,10 +11186,9 @@
                                     <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
                                         <div>
                                             <div class="fw-bold">广州市</div>
-                                            <small class="small-muted">首次抵达</small>
                                         </div>
                                         <div class="text-end">
-                                            <div class="fw-bold">2021-03-24</div>
+                                            <div class="text-nowrap text-primary-emphasis">2021-03-24</div>
                                         </div>
                                     </div>
                                     
@@ -11432,7 +11427,6 @@
                       <span>1. 广州市</span>
                       <div class="text-end">
                         <span class="text-nowrap">415次 (3448.75km)</span>
-                        <div><small class="small-muted" style="line-height:1.2; margin-top: 2px;">首次: 2021-03-24</small></div>
                       </div>
                     </div>
                   
@@ -11440,7 +11434,6 @@
                       <span>2. 茂名市</span>
                       <div class="text-end">
                         <span class="text-nowrap">11次 (81.6km)</span>
-                        <div><small class="small-muted" style="line-height:1.2; margin-top: 2px;">首次: 2022-01-31</small></div>
                       </div>
                     </div>
                   
@@ -11448,7 +11441,6 @@
                       <span>3. 清远市</span>
                       <div class="text-end">
                         <span class="text-nowrap">1次 (21.3km)</span>
-                        <div><small class="small-muted" style="line-height:1.2; margin-top: 2px;">首次: 2025-03-16</small></div>
                       </div>
                     </div>
                   
@@ -11456,7 +11448,6 @@
                       <span>4. 澳门</span>
                       <div class="text-end">
                         <span class="text-nowrap">1次 (10.12km)</span>
-                        <div><small class="small-muted" style="line-height:1.2; margin-top: 2px;">首次: 2024-11-10</small></div>
                       </div>
                     </div>
                   
@@ -11464,7 +11455,6 @@
                       <span>5. 深圳市</span>
                       <div class="text-end">
                         <span class="text-nowrap">1次 (5.01km)</span>
-                        <div><small class="small-muted" style="line-height:1.2; margin-top: 2px;">首次: 2023-05-01</small></div>
                       </div>
                     </div>
                   
@@ -11508,7 +11498,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-08-06 17:08:43 
+         | Last updated: 2025-08-06 18:19:09 
     </small>
 </footer>
 
@@ -11842,8 +11832,8 @@
                     valA = parseFloat(a.dataset.distance);
                     valB = parseFloat(b.dataset.distance);
                 } else if (sortProp === 'pace') {
-                    valA = parsePaceToSeconds(a.dataset.paceStr);
-                    valB = parsePaceToSeconds(b.dataset.paceStr);
+                    valA = (-1)*parsePaceToSeconds(a.dataset.paceStr);
+                    valB = (-1)*parsePaceToSeconds(b.dataset.paceStr);
                 } else { // date
                     valA = a.dataset.date;
                     valB = b.dataset.date;
