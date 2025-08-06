@@ -994,6 +994,9 @@
     }, false);
     
     tabContent.addEventListener('touchend', function(e) {
+      if (e.target.closest('#cityMap')) {
+        return; // 如果在地图上操作，则不触发Tab切换
+      }
       const endX = e.changedTouches[0].clientX;
       const endY = e.changedTouches[0].clientY;
       
@@ -1026,6 +1029,9 @@
     
     // 添加滑动时防止页面滚动
     tabContent.addEventListener('touchmove', function(e) {
+      if (e.target.closest('#cityMap')) {
+        return; // 在地图上滑动时，允许默认的地图拖动行为
+      }
       const currentX = e.touches[0].clientX;
       const currentY = e.touches[0].clientY;
       
@@ -1070,26 +1076,6 @@
                       }).addTo(cityMap).bindPopup(`<b>{{ city.name }}</b><br>跑步次数: {{ city.count }}<br>总距离: {{ city.distance }}km`);
                   {% endif %}
                   {% endfor %}
-  
-                  // 解决足迹页面地图上划动时切换tab的问题
-                  const mapContainer = document.getElementById('cityMap');
-                  if (mapContainer) {
-                      // 阻止触摸事件冒泡，避免触发标签切换
-                      mapContainer.addEventListener('touchstart', function(e) {
-                          e.stopPropagation();
-                      }, { passive: true });
-  
-                      mapContainer.addEventListener('touchmove', function(e) {
-                          e.stopPropagation();
-                      }, { passive: true });
-                      
-                      // 阻止点击事件冒泡
-                      mapContainer.addEventListener('click', function(e) {
-                          e.stopPropagation();
-                      }, { passive: true });
-                  }
-                
-
   
                 } else {
                   cityMap.invalidateSize();
