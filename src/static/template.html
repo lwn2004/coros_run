@@ -1293,8 +1293,8 @@
                     valA = parseFloat(a.dataset.distance);
                     valB = parseFloat(b.dataset.distance);
                 } else if (sortProp === 'pace') {
-                    valA = parsePaceToSeconds(a.dataset.paceStr);
-                    valB = parsePaceToSeconds(b.dataset.paceStr);
+                    valA = (-1)*parsePaceToSeconds(a.dataset.paceStr);
+                    valB = (-1)*parsePaceToSeconds(b.dataset.paceStr);
                 } else { // date
                     valA = a.dataset.date;
                     valB = b.dataset.date;
