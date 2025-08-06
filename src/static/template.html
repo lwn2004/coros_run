@@ -870,7 +870,7 @@
                       <span>{{ loop.index }}. {{ city.name }}</span>
                       <div class="text-end">
                         <span class="text-nowrap">{{ city.count }}次 ({{ city.distance }}km)</span>
-                        {% if city.first_date %}<div class="small-muted" style="line-height:1.2; margin-top: 2px;">首次: {{ city.first_date }}</div>{% endif %}
+                        {% if city.first_date %}<div><small class="small-muted" style="line-height:1.2; margin-top: 2px;">首次: {{ city.first_date }}</small></div>{% endif %}
                       </div>
                     </div>
                   {% endfor %}
