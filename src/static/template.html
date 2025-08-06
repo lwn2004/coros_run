@@ -1044,34 +1044,55 @@
         if(footprintsTab) {
             footprintsTab.addEventListener('shown.bs.tab', function() {
                 if (!cityMap) {
-                cityMap = L.map('cityMap', {
-                    center: [36, 108], // Centered on China
-                    zoom: 4,
-                    zoomControl: false,
-                });
-
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
-                    attribution: '',
-                    subdomains: 'abcd',
-                    minZoom: 3,
-                    maxZoom: 18
-                }).addTo(cityMap);
-                cityMap.attributionControl.setPrefix('')
+                  cityMap = L.map('cityMap', {
+                      center: [36, 108], // Centered on China
+                      zoom: 4,
+                      zoomControl: false,
+                  });
+  
+                  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
+                      attribution: '',
+                      subdomains: 'abcd',
+                      minZoom: 3,
+                      maxZoom: 18
+                  }).addTo(cityMap);
+                  cityMap.attributionControl.setPrefix('')
+                  
+                  {% for city in city_stats %}
+                  {% if city.coordinates and city.coordinates|length == 2 %}
+                      L.circleMarker([{{ city.coordinates[0] }}, {{ city.coordinates[1] }}], {
+                          radius: Math.log({{ city.count }}) + 3, // Scale radius based on run count
+                          fillColor: "var(--accent-color)",
+                          color: "var(--bg-color)",
+                          weight: 1.5,
+                          opacity: 1,
+                          fillOpacity: 0.7
+                      }).addTo(cityMap).bindPopup(`<b>{{ city.name }}</b><br>跑步次数: {{ city.count }}<br>总距离: {{ city.distance }}km`);
+                  {% endif %}
+                  {% endfor %}
+  
+                  // 解决足迹页面地图上划动时切换tab的问题
+                  const mapContainer = document.getElementById('cityMap');
+                  if (mapContainer) {
+                      // 阻止触摸事件冒泡，避免触发标签切换
+                      mapContainer.addEventListener('touchstart', function(e) {
+                          e.stopPropagation();
+                      }, { passive: true });
+  
+                      mapContainer.addEventListener('touchmove', function(e) {
+                          e.stopPropagation();
+                      }, { passive: true });
+                      
+                      // 阻止点击事件冒泡
+                      mapContainer.addEventListener('click', function(e) {
+                          e.stopPropagation();
+                      }, { passive: true });
+                  }
                 
-                {% for city in city_stats %}
-                {% if city.coordinates and city.coordinates|length == 2 %}
-                    L.circleMarker([{{ city.coordinates[0] }}, {{ city.coordinates[1] }}], {
-                        radius: Math.log({{ city.count }}) + 3, // Scale radius based on run count
-                        fillColor: "var(--accent-color)",
-                        color: "var(--bg-color)",
-                        weight: 1.5,
-                        opacity: 1,
-                        fillOpacity: 0.7
-                    }).addTo(cityMap).bindPopup(`<b>{{ city.name }}</b><br>跑步次数: {{ city.count }}<br>总距离: {{ city.distance }}km`);
-                {% endif %}
-                {% endfor %}
+
+  
                 } else {
-                cityMap.invalidateSize();
+                  cityMap.invalidateSize();
                 }
             });
         }
