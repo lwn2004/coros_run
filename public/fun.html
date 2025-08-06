@@ -11143,7 +11143,7 @@
                       <span>1. 广州市</span>
                       <div class="text-end">
                         <span class="text-nowrap">415次 (3448.75km)</span>
-                        <div class="small-muted" style="line-height:1.2; margin-top: 2px;">首次: 2021-03-24</div>
+                        <div><small class="small-muted" style="line-height:1.2; margin-top: 2px;">首次: 2021-03-24</small></div>
                       </div>
                     </div>
                   
@@ -11151,7 +11151,7 @@
                       <span>2. 茂名市</span>
                       <div class="text-end">
                         <span class="text-nowrap">11次 (81.6km)</span>
-                        <div class="small-muted" style="line-height:1.2; margin-top: 2px;">首次: 2022-01-31</div>
+                        <div><small class="small-muted" style="line-height:1.2; margin-top: 2px;">首次: 2022-01-31</small></div>
                       </div>
                     </div>
                   
@@ -11159,7 +11159,7 @@
                       <span>3. 清远市</span>
                       <div class="text-end">
                         <span class="text-nowrap">1次 (21.3km)</span>
-                        <div class="small-muted" style="line-height:1.2; margin-top: 2px;">首次: 2025-03-16</div>
+                        <div><small class="small-muted" style="line-height:1.2; margin-top: 2px;">首次: 2025-03-16</small></div>
                       </div>
                     </div>
                   
@@ -11167,7 +11167,7 @@
                       <span>4. 澳门</span>
                       <div class="text-end">
                         <span class="text-nowrap">1次 (10.12km)</span>
-                        <div class="small-muted" style="line-height:1.2; margin-top: 2px;">首次: 2024-11-10</div>
+                        <div><small class="small-muted" style="line-height:1.2; margin-top: 2px;">首次: 2024-11-10</small></div>
                       </div>
                     </div>
                   
@@ -11175,7 +11175,7 @@
                       <span>5. 深圳市</span>
                       <div class="text-end">
                         <span class="text-nowrap">1次 (5.01km)</span>
-                        <div class="small-muted" style="line-height:1.2; margin-top: 2px;">首次: 2023-05-01</div>
+                        <div><small class="small-muted" style="line-height:1.2; margin-top: 2px;">首次: 2023-05-01</small></div>
                       </div>
                     </div>
                   
@@ -11219,7 +11219,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-08-06 14:06:50 
+         | Last updated: 2025-08-06 14:31:10 
     </small>
 </footer>
 
@@ -11349,78 +11349,99 @@
         if(footprintsTab) {
             footprintsTab.addEventListener('shown.bs.tab', function() {
                 if (!cityMap) {
-                cityMap = L.map('cityMap', {
-                    center: [36, 108], // Centered on China
-                    zoom: 4,
-                    zoomControl: false,
-                });
+                  cityMap = L.map('cityMap', {
+                      center: [36, 108], // Centered on China
+                      zoom: 4,
+                      zoomControl: false,
+                  });
+  
+                  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
+                      attribution: '',
+                      subdomains: 'abcd',
+                      minZoom: 3,
+                      maxZoom: 18
+                  }).addTo(cityMap);
+                  cityMap.attributionControl.setPrefix('')
+                  
+                  
+                  
+                      L.circleMarker([23.129, 113.264], {
+                          radius: Math.log(415) + 3, // Scale radius based on run count
+                          fillColor: "var(--accent-color)",
+                          color: "var(--bg-color)",
+                          weight: 1.5,
+                          opacity: 1,
+                          fillOpacity: 0.7
+                      }).addTo(cityMap).bindPopup(`<b>广州市</b><br>跑步次数: 415<br>总距离: 3448.75km`);
+                  
+                  
+                  
+                      L.circleMarker([21.663, 110.925], {
+                          radius: Math.log(11) + 3, // Scale radius based on run count
+                          fillColor: "var(--accent-color)",
+                          color: "var(--bg-color)",
+                          weight: 1.5,
+                          opacity: 1,
+                          fillOpacity: 0.7
+                      }).addTo(cityMap).bindPopup(`<b>茂名市</b><br>跑步次数: 11<br>总距离: 81.6km`);
+                  
+                  
+                  
+                      L.circleMarker([23.682, 113.056], {
+                          radius: Math.log(1) + 3, // Scale radius based on run count
+                          fillColor: "var(--accent-color)",
+                          color: "var(--bg-color)",
+                          weight: 1.5,
+                          opacity: 1,
+                          fillOpacity: 0.7
+                      }).addTo(cityMap).bindPopup(`<b>清远市</b><br>跑步次数: 1<br>总距离: 21.3km`);
+                  
+                  
+                  
+                      L.circleMarker([22.179, 113.549], {
+                          radius: Math.log(1) + 3, // Scale radius based on run count
+                          fillColor: "var(--accent-color)",
+                          color: "var(--bg-color)",
+                          weight: 1.5,
+                          opacity: 1,
+                          fillOpacity: 0.7
+                      }).addTo(cityMap).bindPopup(`<b>澳门</b><br>跑步次数: 1<br>总距离: 10.12km`);
+                  
+                  
+                  
+                      L.circleMarker([22.543, 114.058], {
+                          radius: Math.log(1) + 3, // Scale radius based on run count
+                          fillColor: "var(--accent-color)",
+                          color: "var(--bg-color)",
+                          weight: 1.5,
+                          opacity: 1,
+                          fillOpacity: 0.7
+                      }).addTo(cityMap).bindPopup(`<b>深圳市</b><br>跑步次数: 1<br>总距离: 5.01km`);
+                  
+                  
+  
+                  // 解决足迹页面地图上划动时切换tab的问题
+                  const mapContainer = document.getElementById('cityMap');
+                  if (mapContainer) {
+                      // 阻止触摸事件冒泡，避免触发标签切换
+                      mapContainer.addEventListener('touchstart', function(e) {
+                          e.stopPropagation();
+                      }, { passive: true });
+  
+                      mapContainer.addEventListener('touchmove', function(e) {
+                          e.stopPropagation();
+                      }, { passive: true });
+                      
+                      // 阻止点击事件冒泡
+                      mapContainer.addEventListener('click', function(e) {
+                          e.stopPropagation();
+                      }, { passive: true });
+                  }
+                
 
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
-                    attribution: '',
-                    subdomains: 'abcd',
-                    minZoom: 3,
-                    maxZoom: 18
-                }).addTo(cityMap);
-                cityMap.attributionControl.setPrefix('')
-                
-                
-                
-                    L.circleMarker([23.129, 113.264], {
-                        radius: Math.log(415) + 3, // Scale radius based on run count
-                        fillColor: "var(--accent-color)",
-                        color: "var(--bg-color)",
-                        weight: 1.5,
-                        opacity: 1,
-                        fillOpacity: 0.7
-                    }).addTo(cityMap).bindPopup(`<b>广州市</b><br>跑步次数: 415<br>总距离: 3448.75km`);
-                
-                
-                
-                    L.circleMarker([21.663, 110.925], {
-                        radius: Math.log(11) + 3, // Scale radius based on run count
-                        fillColor: "var(--accent-color)",
-                        color: "var(--bg-color)",
-                        weight: 1.5,
-                        opacity: 1,
-                        fillOpacity: 0.7
-                    }).addTo(cityMap).bindPopup(`<b>茂名市</b><br>跑步次数: 11<br>总距离: 81.6km`);
-                
-                
-                
-                    L.circleMarker([23.682, 113.056], {
-                        radius: Math.log(1) + 3, // Scale radius based on run count
-                        fillColor: "var(--accent-color)",
-                        color: "var(--bg-color)",
-                        weight: 1.5,
-                        opacity: 1,
-                        fillOpacity: 0.7
-                    }).addTo(cityMap).bindPopup(`<b>清远市</b><br>跑步次数: 1<br>总距离: 21.3km`);
-                
-                
-                
-                    L.circleMarker([22.179, 113.549], {
-                        radius: Math.log(1) + 3, // Scale radius based on run count
-                        fillColor: "var(--accent-color)",
-                        color: "var(--bg-color)",
-                        weight: 1.5,
-                        opacity: 1,
-                        fillOpacity: 0.7
-                    }).addTo(cityMap).bindPopup(`<b>澳门</b><br>跑步次数: 1<br>总距离: 10.12km`);
-                
-                
-                
-                    L.circleMarker([22.543, 114.058], {
-                        radius: Math.log(1) + 3, // Scale radius based on run count
-                        fillColor: "var(--accent-color)",
-                        color: "var(--bg-color)",
-                        weight: 1.5,
-                        opacity: 1,
-                        fillOpacity: 0.7
-                    }).addTo(cityMap).bindPopup(`<b>深圳市</b><br>跑步次数: 1<br>总距离: 5.01km`);
-                
-                
+  
                 } else {
-                cityMap.invalidateSize();
+                  cityMap.invalidateSize();
                 }
             });
         }
