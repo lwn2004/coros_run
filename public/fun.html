@@ -11174,7 +11174,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-08-06 10:05:26 
+         | Last updated: 2025-08-06 11:33:56 
     </small>
 </footer>
 
@@ -11242,7 +11242,66 @@
 		// Adjust card heights on load and resize
         adjustCardHeights();
         window.addEventListener('resize', adjustCardHeights);
-
+  document.addEventListener('DOMContentLoaded', function() {
+    // ... 原有代码 ...
+    
+    // --- 手机滑动切换标签页功能 ---
+    let startX = 0;
+    let startY = 0;
+    const tabContent = document.querySelector('.tab-content');
+    const minSwipeDistance = 50; // 最小滑动距离（像素）
+    
+    tabContent.addEventListener('touchstart', function(e) {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    }, false);
+    
+    tabContent.addEventListener('touchend', function(e) {
+      const endX = e.changedTouches[0].clientX;
+      const endY = e.changedTouches[0].clientY;
+      
+      const diffX = endX - startX;
+      const diffY = endY - startY;
+      const absDiffX = Math.abs(diffX);
+      const absDiffY = Math.abs(diffY);
+      
+      // 确保是水平滑动而不是垂直滑动
+      if (absDiffX > minSwipeDistance && absDiffX > absDiffY) {
+        const activeTab = document.querySelector('#main-nav-tabs .nav-link.active');
+        const tabs = Array.from(document.querySelectorAll('#main-nav-tabs .nav-link'));
+        const currentIndex = tabs.indexOf(activeTab);
+        
+        if (diffX > 0) {
+          // 向右滑动 - 切换到前一个标签页
+          if (currentIndex > 0) {
+            const prevTab = tabs[currentIndex - 1];
+            bootstrap.Tab.getOrCreateInstance(prevTab).show();
+          }
+        } else {
+          // 向左滑动 - 切换到后一个标签页
+          if (currentIndex < tabs.length - 1) {
+            const nextTab = tabs[currentIndex + 1];
+            bootstrap.Tab.getOrCreateInstance(nextTab).show();
+          }
+        }
+      }
+    }, false);
+    
+    // 添加滑动时防止页面滚动
+    tabContent.addEventListener('touchmove', function(e) {
+      const currentX = e.touches[0].clientX;
+      const currentY = e.touches[0].clientY;
+      
+      const diffX = currentX - startX;
+      const diffY = currentY - startY;
+      const absDiffX = Math.abs(diffX);
+      const absDiffY = Math.abs(diffY);
+      
+      // 如果是水平滑动，阻止默认行为（页面滚动）
+      if (absDiffX > absDiffY && absDiffX > 10) {
+        e.preventDefault();
+      }
+    }, { passive: false });
 		// --- MAP LOGIC ---
         const footprintsTab = document.querySelector('#footprints-tab');
         if(footprintsTab) {
