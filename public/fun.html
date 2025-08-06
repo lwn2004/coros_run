@@ -402,6 +402,33 @@
     .sortable-header[aria-sort="ascending"] .bi-arrow-up { display: inline-block; }
     .sortable-header[aria-sort="descending"] .bi-arrow-down { display: inline-block; }
     .sortable-header[aria-sort] .bi-arrow-down-up { display: none; }
+    .timeline {
+        position: relative;
+        padding-left: 2rem;
+        margin-left: 1rem;
+        border-left: 2px solid var(--border-color);
+    }
+    .timeline-item {
+        position: relative;
+        padding-bottom: 1.5rem;
+    }
+    .timeline-item:last-child {
+        padding-bottom: 0;
+    }
+    .timeline-marker {
+        position: absolute;
+        top: 5px;
+        left: calc(-2rem - 1px - 0.6rem);
+        width: 1.2rem;
+        height: 1.2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        background-color: var(--bg-color);
+    }
+    .trophy-color-text { color: var(--trophy-color); }
+    .accent-color-text { color: var(--accent-color); }
 
   </style>
 </head>
@@ -10828,301 +10855,563 @@
     </div>
 
     <div class="tab-pane fade" id="events-pane" role="tabpanel" aria-labelledby="events-tab" tabindex="0">
-        <div class="row">
-			<div class="col-lg-6 mb-4">
-                <div class="content-card h-100">
-                    <h5 class="card-title mb-3"><i class="bi bi-flag"></i> 里程碑</h5>
-                    
-                    
-                    
-                    <div class="d-flex justify-content-between align-items-center py-2 pb-entry 
-                                border-success border-2">
-                        <div>
-                        <div class="fw-bold text-success">
-                            踏出第一步
-                            <span class="badge bg-success ms-2">已完成</span>
+        <div class="d-flex justify-content-end mb-4">
+            <div class="btn-group btn-group-sm" id="events-view-toggle" role="group" aria-label="Events View Toggle">
+                <button type="button" class="btn active" data-view="category">按类别</button>
+                <button type="button" class="btn" data-view="timeline">按时间线</button>
+            </div>
+        </div>
+        
+        <div id="events-category-view">
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <div class="content-card h-100 d-flex flex-column">
+                        <h5 class="card-title mb-3"><i class="bi bi-flag-fill text-success"></i> 里程碑</h5>
+                        
+                        
+                        
+                        <div class="d-flex justify-content-between align-items-center py-2 pb-entry 
+                                    border-success border-2">
+                            <div>
+                            <div class="fw-bold text-success">
+                                踏出第一步
+                                <span class="badge bg-success ms-2">已完成</span>
+                            </div>
+                            <small class="text-success">
+                                2021年03月24日
+                            </small>
+                            </div>
+                            <div class="text-end">
+                            <div class="fw-bold text-success">
+                                0.37 km
+                            </div>
+                            <small class="text-success">
+                                首跑
+                            </small>
+                            </div>
                         </div>
-                        <small class="text-success">
-                            2021年03月24日
-                        </small>
+                        
+                        <div class="d-flex justify-content-between align-items-center py-2 pb-entry 
+                                    border-success border-2">
+                            <div>
+                            <div class="fw-bold text-success">
+                                1000公里
+                                <span class="badge bg-success ms-2">已完成</span>
+                            </div>
+                            <small class="text-success">
+                                2024年02月11日
+                            </small>
+                            </div>
+                            <div class="text-end">
+                            <div class="fw-bold text-success">
+                                1000 km
+                            </div>
+                            <small class="text-success">
+                                里程碑达成
+                            </small>
+                            </div>
                         </div>
-                        <div class="text-end">
-                        <div class="fw-bold text-success">
-                            0.37 km
+                        
+                        <div class="d-flex justify-content-between align-items-center py-2 pb-entry 
+                                    ">
+                            <div>
+                            <div class="fw-bold ">
+                                10000公里
+                                
+                            </div>
+                            <small class="small-muted">
+                                未达成
+                            </small>
+                            </div>
+                            <div class="text-end">
+                            <div class="fw-bold text-muted">
+                                10000 km
+                            </div>
+                            <small class="small-muted">
+                                进行中
+                            </small>
+                            </div>
                         </div>
-                        <small class="text-success">
-                            首跑
-                        </small>
+                        
+                        <div class="d-flex justify-content-between align-items-center py-2 pb-entry 
+                                    ">
+                            <div>
+                            <div class="fw-bold ">
+                                20000公里
+                                
+                            </div>
+                            <small class="small-muted">
+                                未达成
+                            </small>
+                            </div>
+                            <div class="text-end">
+                            <div class="fw-bold text-muted">
+                                20000 km
+                            </div>
+                            <small class="small-muted">
+                                进行中
+                            </small>
+                            </div>
                         </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center py-2 pb-entry 
+                                    ">
+                            <div>
+                            <div class="fw-bold ">
+                                30000公里
+                                
+                            </div>
+                            <small class="small-muted">
+                                未达成
+                            </small>
+                            </div>
+                            <div class="text-end">
+                            <div class="fw-bold text-muted">
+                                30000 km
+                            </div>
+                            <small class="small-muted">
+                                进行中
+                            </small>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center py-2 pb-entry 
+                                    ">
+                            <div>
+                            <div class="fw-bold ">
+                                40000公里
+                                
+                            </div>
+                            <small class="small-muted">
+                                未达成
+                            </small>
+                            </div>
+                            <div class="text-end">
+                            <div class="fw-bold text-muted">
+                                40000 km
+                            </div>
+                            <small class="small-muted">
+                                进行中
+                            </small>
+                            </div>
+                        </div>
+                        
                     </div>
-                    
-                    <div class="d-flex justify-content-between align-items-center py-2 pb-entry 
-                                border-success border-2">
-                        <div>
-                        <div class="fw-bold text-success">
-                            1000公里
-                            <span class="badge bg-success ms-2">已完成</span>
-                        </div>
-                        <small class="text-success">
-                            2024年02月11日
-                        </small>
-                        </div>
-                        <div class="text-end">
-                        <div class="fw-bold text-success">
-                            1000 km
-                        </div>
-                        <small class="text-success">
-                            里程碑达成
-                        </small>
-                        </div>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between align-items-center py-2 pb-entry 
-                                ">
-                        <div>
-                        <div class="fw-bold ">
-                            10000公里
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="content-card h-100 d-flex flex-column">
+                        <h5 class="card-title mb-3"><i class="bi bi-award-fill trophy-color-text"></i> 个人最佳 (PB)</h5>
+                        <div class="flex-grow-1">
+                            
+                            <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
+                                <div>
+                                <div class="fw-bold">1公里</div>
+                                <small class="small-muted">2025年03月16日</small>
+                                </div>
+                                <div class="text-end">
+                                <div class="fw-bold">0:04:07</div>
+                                <small class="small-muted">配速: 4&#39;07&#34;</small>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
+                                <div>
+                                <div class="fw-bold">3公里</div>
+                                <small class="small-muted">2025年03月16日</small>
+                                </div>
+                                <div class="text-end">
+                                <div class="fw-bold">0:13:06</div>
+                                <small class="small-muted">配速: 4&#39;22&#34;</small>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
+                                <div>
+                                <div class="fw-bold">5公里</div>
+                                <small class="small-muted">2025年03月16日</small>
+                                </div>
+                                <div class="text-end">
+                                <div class="fw-bold">0:22:17</div>
+                                <small class="small-muted">配速: 4&#39;27&#34;</small>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
+                                <div>
+                                <div class="fw-bold">10公里</div>
+                                <small class="small-muted">2025年03月16日</small>
+                                </div>
+                                <div class="text-end">
+                                <div class="fw-bold">0:45:45</div>
+                                <small class="small-muted">配速: 4&#39;35&#34;</small>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
+                                <div>
+                                <div class="fw-bold">半马</div>
+                                <small class="small-muted">2025年03月16日</small>
+                                </div>
+                                <div class="text-end">
+                                <div class="fw-bold">1:43:26</div>
+                                <small class="small-muted">配速: 4&#39;54&#34;</small>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
+                                <div>
+                                <div class="fw-bold">全马</div>
+                                <small class="small-muted">无记录</small>
+                                </div>
+                                <div class="text-end">
+                                <div class="fw-bold">--</div>
+                                <small class="small-muted">配速: --</small>
+                                </div>
+                            </div>
                             
                         </div>
-                        <small class="small-muted">
-                            未达成
-                        </small>
-                        </div>
-                        <div class="text-end">
-                        <div class="fw-bold text-muted">
-                            10000 km
-                        </div>
-                        <small class="small-muted">
-                            进行中
-                        </small>
-                        </div>
                     </div>
-                    
-                    <div class="d-flex justify-content-between align-items-center py-2 pb-entry 
-                                ">
-                        <div>
-                        <div class="fw-bold ">
-                            20000公里
+                </div>
+                
+                <div class="col-lg-6 mb-4">
+                    <div class="content-card h-100 d-flex flex-column">
+                        <h5 class="card-title mb-3"><i class="bi bi-trophy-fill accent-color-text"></i> 比赛记录</h5>
+                        <div class="flex-grow-1" style="overflow-y: auto;">
+                            
+                            
+                                <div class="border-bottom py-2 pb-entry">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="fw-bold text-primary-emphasis">
+                                    清远马拉松
+                                    <small class="text-body-secondary">半马</small>
+                                    </div>
+                                    <div class="flex-grow-1 text-center px-2">
+                                    
+                                        <abbr title="点击查看证书" class="certificate-link text-decoration-none" 
+                                            data-img="images/certificates/AmateurLevel2HalfMarathon.jpg" style="cursor: pointer; border-bottom: 1px dotted var(--text-secondary)">
+                                        <span class="classification-text">大众二级</span>
+                                        </abbr>
+                                    
+                                    </div>
+                                    <div class="text-nowrap text-primary-emphasis">1:44:34</div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-1">
+                                    <div>
+                                    <small class="text-body-secondary">
+                                        2025.03.16
+                                    </small>
+                                    <small class="text-body-secondary ms-2">清远市</small>
+                                    </div>
+                                    <div class="text-end"><small class="text-body-secondary">配速: 4&#39;57&#34;</small></div>
+                                </div>
+                                </div>
+                            
+                                <div class="border-bottom py-2 pb-entry">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="fw-bold text-primary-emphasis">
+                                    茂名马拉松
+                                    <small class="text-body-secondary">半马</small>
+                                    </div>
+                                    <div class="flex-grow-1 text-center px-2">
+                                    
+                                    </div>
+                                    <div class="text-nowrap text-primary-emphasis">2:15:47</div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-1">
+                                    <div>
+                                    <small class="text-body-secondary">
+                                        2024.03.24
+                                    </small>
+                                    <small class="text-body-secondary ms-2">茂名市</small>
+                                    </div>
+                                    <div class="text-end"><small class="text-body-secondary">配速: 6&#39;26&#34;</small></div>
+                                </div>
+                                </div>
+                            
                             
                         </div>
-                        <small class="small-muted">
-                            未达成
-                        </small>
-                        </div>
-                        <div class="text-end">
-                        <div class="fw-bold text-muted">
-                            20000 km
-                        </div>
-                        <small class="small-muted">
-                            进行中
-                        </small>
-                        </div>
                     </div>
-                    
-                    <div class="d-flex justify-content-between align-items-center py-2 pb-entry 
-                                ">
-                        <div>
-                        <div class="fw-bold ">
-                            30000公里
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="content-card h-100 d-flex flex-column">
+                        <h5 class="card-title mb-3"><i class="bi bi-geo-alt-fill text-primary"></i> 解锁新城市</h5>
+                        <div class="flex-grow-1" style="overflow-y: auto;">
+                            
+                                
+                                    
+                                    <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
+                                        <div>
+                                            <div class="fw-bold">清远市</div>
+                                            <small class="small-muted">首次抵达</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="fw-bold">2025-03-16</div>
+                                        </div>
+                                    </div>
+                                    
+                                
+                                    
+                                    <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
+                                        <div>
+                                            <div class="fw-bold">澳门</div>
+                                            <small class="small-muted">首次抵达</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="fw-bold">2024-11-10</div>
+                                        </div>
+                                    </div>
+                                    
+                                
+                                    
+                                    <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
+                                        <div>
+                                            <div class="fw-bold">深圳市</div>
+                                            <small class="small-muted">首次抵达</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="fw-bold">2023-05-01</div>
+                                        </div>
+                                    </div>
+                                    
+                                
+                                    
+                                    <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
+                                        <div>
+                                            <div class="fw-bold">茂名市</div>
+                                            <small class="small-muted">首次抵达</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="fw-bold">2022-01-31</div>
+                                        </div>
+                                    </div>
+                                    
+                                
+                                    
+                                    <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
+                                        <div>
+                                            <div class="fw-bold">广州市</div>
+                                            <small class="small-muted">首次抵达</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="fw-bold">2021-03-24</div>
+                                        </div>
+                                    </div>
+                                    
+                                
                             
                         </div>
-                        <small class="small-muted">
-                            未达成
-                        </small>
-                        </div>
-                        <div class="text-end">
-                        <div class="fw-bold text-muted">
-                            30000 km
-                        </div>
-                        <small class="small-muted">
-                            进行中
-                        </small>
-                        </div>
                     </div>
-                    
-                    <div class="d-flex justify-content-between align-items-center py-2 pb-entry 
-                                ">
-                        <div>
-                        <div class="fw-bold ">
-                            40000公里
-                            
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="content-card h-100 d-flex flex-column">
+                        <h5 class="card-title mb-3"><i class="bi bi-calendar-check-fill text-warning"></i> 连续记录</h5>
+                        
+                        <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
+                            <div>
+                                <div class="fw-bold">最长连续周</div>
+                                
+                                <small class="small-muted">2023-04-03 ~ 2024-05-26</small>
+                                
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold">60 周</div>
+                            </div>
                         </div>
-                        <small class="small-muted">
-                            未达成
-                        </small>
+                        <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
+                            <div>
+                                <div class="fw-bold">当前连续周</div>
+                                
+                                <small class="small-muted">2024-06-10 ~ 2025-08-03</small>
+                                
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold">60 周</div>
+                            </div>
                         </div>
-                        <div class="text-end">
-                        <div class="fw-bold text-muted">
-                            40000 km
-                        </div>
-                        <small class="small-muted">
-                            进行中
-                        </small>
-                        </div>
+                        
                     </div>
-                    
                 </div>
             </div>
-            <div class="col-lg-6 mb-4">
-                <div class="content-card h-100">
-                    <h5 class="card-title mb-3"><i class="bi bi-award"></i> 个人最佳 (PB)</h5>
-                    
-                    <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
-                        <div>
-                        <div class="fw-bold">1公里</div>
-                        <small class="small-muted">2025年03月16日</small>
-                        </div>
-                        <div class="text-end">
-                        <div class="fw-bold">0:04:07</div>
-                        <small class="small-muted">配速: 4&#39;07&#34;</small>
-                        </div>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
-                        <div>
-                        <div class="fw-bold">3公里</div>
-                        <small class="small-muted">2025年03月16日</small>
-                        </div>
-                        <div class="text-end">
-                        <div class="fw-bold">0:13:06</div>
-                        <small class="small-muted">配速: 4&#39;22&#34;</small>
-                        </div>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
-                        <div>
-                        <div class="fw-bold">5公里</div>
-                        <small class="small-muted">2025年03月16日</small>
-                        </div>
-                        <div class="text-end">
-                        <div class="fw-bold">0:22:17</div>
-                        <small class="small-muted">配速: 4&#39;27&#34;</small>
-                        </div>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
-                        <div>
-                        <div class="fw-bold">10公里</div>
-                        <small class="small-muted">2025年03月16日</small>
-                        </div>
-                        <div class="text-end">
-                        <div class="fw-bold">0:45:45</div>
-                        <small class="small-muted">配速: 4&#39;35&#34;</small>
-                        </div>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
-                        <div>
-                        <div class="fw-bold">半马</div>
-                        <small class="small-muted">2025年03月16日</small>
-                        </div>
-                        <div class="text-end">
-                        <div class="fw-bold">1:43:26</div>
-                        <small class="small-muted">配速: 4&#39;54&#34;</small>
-                        </div>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
-                        <div>
-                        <div class="fw-bold">全马</div>
-                        <small class="small-muted">无记录</small>
-                        </div>
-                        <div class="text-end">
-                        <div class="fw-bold">--</div>
-                        <small class="small-muted">配速: --</small>
-                        </div>
-                    </div>
-                    
-                </div>
-            </div>
-            
-            <div class="col-lg-6 mb-4">
-                <div class="content-card h-100">
-                    <h5 class="card-title mb-3"><i class="bi bi-calendar-check"></i> 连续记录</h5>
-                    
-                    <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
-                        <div>
-                            <div class="fw-bold">最长连续周</div>
-                            
-                            <small class="small-muted">2023-04-03 ~ 2024-05-26</small>
-                            
-                        </div>
-                        <div class="text-end">
-                            <div class="fw-bold">60 周</div>
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
-                        <div>
-                            <div class="fw-bold">当前连续周</div>
-                            
-                            <small class="small-muted">2024-06-10 ~ 2025-08-03</small>
-                            
-                        </div>
-                        <div class="text-end">
-                            <div class="fw-bold">60 周</div>
-                        </div>
-                    </div>
-                    
-                </div>
-            </div>
+        </div>
 
-            <div class="col-lg-6 mb-4">
-                <div class="content-card h-100">
-                    <h5 class="card-title mb-3"><i class="bi bi-trophy"></i> 比赛记录</h5>
-                    <div style="flex: 1; overflow-y: auto;">
+        
+        
+        
+        
+        
+        
+
+        <div id="events-timeline-view" style="display: none;">
+            <div class="content-card">
+                <div class="timeline">
+                    
                         
+                        <div class="timeline-item">
+                            <div class="timeline-marker">
+                                <i class="bi bi-award-fill trophy-color-text"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="small text-body-secondary mb-1">无记录 &middot; 个人最佳</div>
+                                <h6 class="mb-1 fw-bold">PB: 全马</h6>
+                                <p class="mb-0 small text-body-secondary">时间 -- (配速 --)</p>
+                            </div>
+                        </div>
                         
-                            <div class="border-bottom py-2 pb-entry">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="fw-bold text-primary-emphasis">
-                                清远马拉松
-                                <small class="text-body-secondary">半马</small>
-                                </div>
-                                <div class="flex-grow-1 text-center px-2">
-                                
-                                    <abbr title="点击查看证书" class="certificate-link text-decoration-none" 
-                                        data-img="images/certificates/AmateurLevel2HalfMarathon.jpg" style="cursor: pointer; border-bottom: 1px dotted var(--text-secondary)">
-                                    <span class="classification-text">大众二级</span>
-                                    </abbr>
-                                
-                                </div>
-                                <div class="text-nowrap text-primary-emphasis">1:44:34</div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker">
+                                <i class="bi bi-award-fill trophy-color-text"></i>
                             </div>
-                            <div class="d-flex justify-content-between align-items-center mt-1">
-                                <div>
-                                <small class="text-body-secondary">
-                                    2025.03.16
-                                </small>
-                                <small class="text-body-secondary ms-2">清远市</small>
-                                </div>
-                                <div class="text-end"><small class="text-body-secondary">配速: 4&#39;57&#34;</small></div>
+                            <div class="timeline-content">
+                                <div class="small text-body-secondary mb-1">2025年03月16日 &middot; 个人最佳</div>
+                                <h6 class="mb-1 fw-bold">PB: 1公里</h6>
+                                <p class="mb-0 small text-body-secondary">时间 0:04:07 (配速 4&#39;07&#34;)</p>
                             </div>
-                            </div>
+                        </div>
                         
-                            <div class="border-bottom py-2 pb-entry">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="fw-bold text-primary-emphasis">
-                                茂名马拉松
-                                <small class="text-body-secondary">半马</small>
-                                </div>
-                                <div class="flex-grow-1 text-center px-2">
-                                
-                                </div>
-                                <div class="text-nowrap text-primary-emphasis">2:15:47</div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker">
+                                <i class="bi bi-award-fill trophy-color-text"></i>
                             </div>
-                            <div class="d-flex justify-content-between align-items-center mt-1">
-                                <div>
-                                <small class="text-body-secondary">
-                                    2024.03.24
-                                </small>
-                                <small class="text-body-secondary ms-2">茂名市</small>
-                                </div>
-                                <div class="text-end"><small class="text-body-secondary">配速: 6&#39;26&#34;</small></div>
+                            <div class="timeline-content">
+                                <div class="small text-body-secondary mb-1">2025年03月16日 &middot; 个人最佳</div>
+                                <h6 class="mb-1 fw-bold">PB: 3公里</h6>
+                                <p class="mb-0 small text-body-secondary">时间 0:13:06 (配速 4&#39;22&#34;)</p>
                             </div>
-                            </div>
+                        </div>
                         
+                        <div class="timeline-item">
+                            <div class="timeline-marker">
+                                <i class="bi bi-award-fill trophy-color-text"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="small text-body-secondary mb-1">2025年03月16日 &middot; 个人最佳</div>
+                                <h6 class="mb-1 fw-bold">PB: 5公里</h6>
+                                <p class="mb-0 small text-body-secondary">时间 0:22:17 (配速 4&#39;27&#34;)</p>
+                            </div>
+                        </div>
                         
-                    </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker">
+                                <i class="bi bi-award-fill trophy-color-text"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="small text-body-secondary mb-1">2025年03月16日 &middot; 个人最佳</div>
+                                <h6 class="mb-1 fw-bold">PB: 10公里</h6>
+                                <p class="mb-0 small text-body-secondary">时间 0:45:45 (配速 4&#39;35&#34;)</p>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item">
+                            <div class="timeline-marker">
+                                <i class="bi bi-award-fill trophy-color-text"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="small text-body-secondary mb-1">2025年03月16日 &middot; 个人最佳</div>
+                                <h6 class="mb-1 fw-bold">PB: 半马</h6>
+                                <p class="mb-0 small text-body-secondary">时间 1:43:26 (配速 4&#39;54&#34;)</p>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item">
+                            <div class="timeline-marker">
+                                <i class="bi bi-trophy-fill accent-color-text"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="small text-body-secondary mb-1">2025-03-16 &middot; 比赛记录</div>
+                                <h6 class="mb-1 fw-bold">清远马拉松</h6>
+                                <p class="mb-0 small text-body-secondary">半马 - 完赛时间: 1:44:34</p>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item">
+                            <div class="timeline-marker">
+                                <i class="bi bi-geo-alt-fill text-primary"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="small text-body-secondary mb-1">2025-03-16 &middot; 解锁新城市</div>
+                                <h6 class="mb-1 fw-bold">解锁: 清远市</h6>
+                                <p class="mb-0 small text-body-secondary">于 2025-03-16 首次在该城市跑步</p>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item">
+                            <div class="timeline-marker">
+                                <i class="bi bi-geo-alt-fill text-primary"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="small text-body-secondary mb-1">2024-11-10 &middot; 解锁新城市</div>
+                                <h6 class="mb-1 fw-bold">解锁: 澳门</h6>
+                                <p class="mb-0 small text-body-secondary">于 2024-11-10 首次在该城市跑步</p>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item">
+                            <div class="timeline-marker">
+                                <i class="bi bi-trophy-fill accent-color-text"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="small text-body-secondary mb-1">2024-03-24 &middot; 比赛记录</div>
+                                <h6 class="mb-1 fw-bold">茂名马拉松</h6>
+                                <p class="mb-0 small text-body-secondary">半马 - 完赛时间: 2:15:47</p>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item">
+                            <div class="timeline-marker">
+                                <i class="bi bi-flag-fill text-success"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="small text-body-secondary mb-1">2024-02-11 &middot; 里程碑</div>
+                                <h6 class="mb-1 fw-bold">1000公里</h6>
+                                <p class="mb-0 small text-body-secondary">达成 1000km 里程碑</p>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item">
+                            <div class="timeline-marker">
+                                <i class="bi bi-geo-alt-fill text-primary"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="small text-body-secondary mb-1">2023-05-01 &middot; 解锁新城市</div>
+                                <h6 class="mb-1 fw-bold">解锁: 深圳市</h6>
+                                <p class="mb-0 small text-body-secondary">于 2023-05-01 首次在该城市跑步</p>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item">
+                            <div class="timeline-marker">
+                                <i class="bi bi-geo-alt-fill text-primary"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="small text-body-secondary mb-1">2022-01-31 &middot; 解锁新城市</div>
+                                <h6 class="mb-1 fw-bold">解锁: 茂名市</h6>
+                                <p class="mb-0 small text-body-secondary">于 2022-01-31 首次在该城市跑步</p>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item">
+                            <div class="timeline-marker">
+                                <i class="bi bi-flag-fill text-success"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="small text-body-secondary mb-1">2021-03-24 &middot; 里程碑</div>
+                                <h6 class="mb-1 fw-bold">踏出第一步</h6>
+                                <p class="mb-0 small text-body-secondary">首跑距离 0.37km</p>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item">
+                            <div class="timeline-marker">
+                                <i class="bi bi-geo-alt-fill text-primary"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="small text-body-secondary mb-1">2021-03-24 &middot; 解锁新城市</div>
+                                <h6 class="mb-1 fw-bold">解锁: 广州市</h6>
+                                <p class="mb-0 small text-body-secondary">于 2021-03-24 首次在该城市跑步</p>
+                            </div>
+                        </div>
+                        
+                    
                 </div>
             </div>
         </div>
@@ -11219,7 +11508,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-08-06 16:06:36 
+         | Last updated: 2025-08-06 17:08:43 
     </small>
 </footer>
 
@@ -11291,7 +11580,7 @@
     let startX = 0;
     let startY = 0;
     const tabContent = document.querySelector('.tab-content');
-    const minSwipeDistance = 50; // 最小滑动距离（像素）
+    const minSwipeDistance = 100; // 最小滑动距离（像素）
     
     tabContent.addEventListener('touchstart', function(e) {
       startX = e.touches[0].clientX;
@@ -11620,6 +11909,34 @@
         });
         
         updateDataView();
+    }
+    
+    // --- EVENTS TAB LOGIC ---
+    const eventsPane = document.getElementById('events-pane');
+    if (eventsPane) {
+        const viewToggle = eventsPane.querySelector('#events-view-toggle');
+        const categoryView = eventsPane.querySelector('#events-category-view');
+        const timelineView = eventsPane.querySelector('#events-timeline-view');
+
+        if (viewToggle && categoryView && timelineView) {
+            viewToggle.addEventListener('click', (e) => {
+                const button = e.target.closest('button');
+                if (!button) return;
+
+                const view = button.dataset.view;
+
+                viewToggle.querySelector('.active').classList.remove('active');
+                button.classList.add('active');
+
+                if (view === 'category') {
+                    categoryView.style.display = '';
+                    timelineView.style.display = 'none';
+                } else { // timeline
+                    categoryView.style.display = 'none';
+                    timelineView.style.display = 'block';
+                }
+            });
+        }
     }
 
 
