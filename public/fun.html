@@ -459,7 +459,7 @@
                       <div class="stat-value">17年210天</div>
                     </div>
                     <div class="stat-details">
-                      <div class="stat-label"><small class="small-muted">预计</small>2043年02月27日<small>绕地球一圈</small></div>
+                      <div class="stat-label"><small class="small-muted">预计</small>2043年02月28日<small>绕地球一圈</small></div>
                     </div>
                   </div>
                   <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
@@ -11174,7 +11174,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-08-05 16:41:43 
+         | Last updated: 2025-08-06 10:05:26 
     </small>
 </footer>
 
@@ -11347,7 +11347,7 @@
 	const monthlyTotal = monthlyData.reduce((a, b) => a + b, 0);
 	const monthlyAvg = monthlyRunningMonths > 0 ? (monthlyTotal / monthlyRunningMonths) : 0;
 
-	const dailyData = [11.21, 12.01, 13.94, 0.0, 10.01, 21.25, 0.0, 10.1, 0.0, 12.21, 13.4, 0.0, 23.45, 0.0, 0.0, 0.0, 10.16, 0.0, 11.0, 21.6, 0.0, 10.05, 0.0, 0.0, 6.44, 8.01, 13.66, 10.01, 0.0, 0.0];
+	const dailyData = [12.01, 13.94, 0.0, 10.01, 21.25, 0.0, 10.1, 0.0, 12.21, 13.4, 0.0, 23.45, 0.0, 0.0, 0.0, 10.16, 0.0, 11.0, 21.6, 0.0, 10.05, 0.0, 0.0, 6.44, 8.01, 13.66, 10.01, 0.0, 0.0, 0.0];
 	const runningDays = dailyData.filter(d => d > 0).length;
 	const dailyTotal = dailyData.reduce((a, b) => a + b, 0);
 	const dailyAvg = runningDays > 0 ? (dailyTotal / runningDays) : 0; 
@@ -11378,7 +11378,7 @@
     });
 	
     const dailyCtx = document.getElementById('dailyDistanceChart').getContext('2d');
-	dailyDistanceChart = new Chart(dailyCtx, { type: 'bar', data: { labels: ["07-07", "07-08", "07-09", "07-10", "07-11", "07-12", "07-13", "07-14", "07-15", "07-16", "07-17", "07-18", "07-19", "07-20", "07-21", "07-22", "07-23", "07-24", "07-25", "07-26", "07-27", "07-28", "07-29", "07-30", "07-31", "08-01", "08-02", "08-03", "08-04", "08-05"], datasets: [{ label: '距离 (km)', data: dailyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 2, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 }}}, plugins: { legend: { display: false }, title: { display: true, text: `总 ${dailyTotal.toFixed(1)}km / 日均 ${dailyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(dailyAvg, dailyTotal, '日均') } } } } });
+	dailyDistanceChart = new Chart(dailyCtx, { type: 'bar', data: { labels: ["07-08", "07-09", "07-10", "07-11", "07-12", "07-13", "07-14", "07-15", "07-16", "07-17", "07-18", "07-19", "07-20", "07-21", "07-22", "07-23", "07-24", "07-25", "07-26", "07-27", "07-28", "07-29", "07-30", "07-31", "08-01", "08-02", "08-03", "08-04", "08-05", "08-06"], datasets: [{ label: '距离 (km)', data: dailyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 2, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 }}}, plugins: { legend: { display: false }, title: { display: true, text: `总 ${dailyTotal.toFixed(1)}km / 日均 ${dailyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(dailyAvg, dailyTotal, '日均') } } } } });
     const monthlyCtx = document.getElementById('monthlyDistanceChart').getContext('2d');
 	monthlyDistanceChart = new Chart(monthlyCtx, { type: 'bar', data: { labels: ["24-09", "24-10", "24-11", "24-12", "25-01", "25-02", "25-03", "25-04", "25-05", "25-06", "25-07", "25-08"], datasets: [{ label: '距离 (km)', data: monthlyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 4, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 }}}, plugins: { legend: { display: false }, title: { display: true, text: `总 ${monthlyTotal.toFixed(1)}km / 月均 ${monthlyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(monthlyAvg, monthlyTotal, '月均') } } } } });
     const yearlyCtx = document.getElementById('yearlyDistanceChart').getContext('2d');
