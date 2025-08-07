@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>步履不停 - 已绕地球0.09圈儿</title>
+  <link rel="icon"  href="favicon2.ico" type="image/x-icon"/>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -569,6 +570,9 @@
                         <div class="fw-bold">广州市</div>
                         </div>
                     </div>
+                    <div class="mt-3 text-end">
+            				  <a href="#" class="comment-link small text-body-secondary" data-run-id="1754517332000">💬 说点什么 (<span class="comment-count" data-run-id="1754517332000">0</span>)</a>
+            				</div>
                     </div>
                 </div>
                 
@@ -592,6 +596,9 @@
                         <div class="fw-bold">广州市</div>
                         </div>
                     </div>
+                    <div class="mt-3 text-end">
+            				  <a href="#" class="comment-link small text-body-secondary" data-run-id="1754172330000">💬 说点什么 (<span class="comment-count" data-run-id="1754172330000">0</span>)</a>
+            				</div>
                     </div>
                 </div>
                 
@@ -615,6 +622,9 @@
                         <div class="fw-bold">广州市</div>
                         </div>
                     </div>
+                    <div class="mt-3 text-end">
+            				  <a href="#" class="comment-link small text-body-secondary" data-run-id="1754085488000">💬 说点什么 (<span class="comment-count" data-run-id="1754085488000">0</span>)</a>
+            				</div>
                     </div>
                 </div>
                 
@@ -622,7 +632,35 @@
             </div>
         </div>
         
-
+                <div class="col-lg-6 mb-4">
+                    <div class="content-card h-100 d-flex flex-column">
+                        <h5 class="card-title mb-3"><i class="bi bi-calendar-check-fill text-warning"></i> 连续记录</h5>
+                        
+                        <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
+                            <div>
+                                <div class="fw-bold">最长连续周</div>
+                                
+                                <small class="small-muted">2024-06-10 ~ 2025-08-10</small>
+                                
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold">61 周</div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
+                            <div>
+                                <div class="fw-bold">当前连续周</div>
+                                
+                                <small class="small-muted">2024-06-10 ~ 2025-08-10</small>
+                                
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold">61 周</div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
         <div class="card mb-4" style="background-color: var(--card-bg); border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
             <div class="card-header bg-transparent border-0 pt-3">
                 <div class="card-title-container">
@@ -11218,35 +11256,6 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-6 mb-4">
-                    <div class="content-card h-100 d-flex flex-column">
-                        <h5 class="card-title mb-3"><i class="bi bi-calendar-check-fill text-warning"></i> 连续记录</h5>
-                        
-                        <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
-                            <div>
-                                <div class="fw-bold">最长连续周</div>
-                                
-                                <small class="small-muted">2024-06-10 ~ 2025-08-10</small>
-                                
-                            </div>
-                            <div class="text-end">
-                                <div class="fw-bold">61 周</div>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
-                            <div>
-                                <div class="fw-bold">当前连续周</div>
-                                
-                                <small class="small-muted">2024-06-10 ~ 2025-08-10</small>
-                                
-                            </div>
-                            <div class="text-end">
-                                <div class="fw-bold">61 周</div>
-                            </div>
-                        </div>
-                        
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -11519,10 +11528,32 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-08-07 10:05:53 
+         | Last updated: 2025-08-07 13:49:50 
     </small>
 </footer>
 
+
+
+<!-- 评论弹窗 -->
+<div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">跑步评论</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+      </div>
+      <div class="modal-body">
+        <div id="commentList" class="mb-3" style="max-height: 250px; overflow-y: auto;"></div>
+        <textarea class="form-control" id="commentText" rows="3" placeholder="写下你的感想吧..."></textarea>
+        <input type="hidden" id="commentRunId">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary btn-sm" id="submitComment">提交</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 </body>
 <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
@@ -11952,6 +11983,64 @@
 
 
     // --- CERTIFICATE MODAL LOGIC ---
+
+const commentApiBase = 'https://kv.linwn.net';
+
+document.querySelectorAll('.comment-link').forEach(link => {
+  link.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const runId = link.dataset.runId;
+    document.getElementById('commentRunId').value = runId;
+    document.getElementById('commentText').value = '';
+    const listContainer = document.getElementById('commentList');
+    listContainer.innerHTML = '<div class="text-muted">加载中...</div>';
+    try {
+      const res = await fetch(`${commentApiBase}/comments?runId=${encodeURIComponent(runId)}`);
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        listContainer.innerHTML = data.map(c => `<div class="border-bottom py-1"><small>${new Date(c.ts).toLocaleString()}</small><br>${c.text}</div>`).join('');
+      } else {
+        listContainer.innerHTML = '<div class="text-muted">暂无评论</div>';
+      }
+    } catch {
+      listContainer.innerHTML = '<div class="text-danger">评论加载失败</div>';
+    }
+    new bootstrap.Modal(document.getElementById('commentModal')).show();
+  });
+});
+
+document.getElementById('submitComment').addEventListener('click', async () => {
+  const runId = document.getElementById('commentRunId').value;
+  const text = document.getElementById('commentText').value.trim();
+  if (!text) return;
+  const res = await fetch(`${commentApiBase}/comment`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ runId, text })
+  });
+  if (res.ok) {
+    document.getElementById('commentText').value = '';
+    document.querySelector(`.comment-count[data-run-id="${runId}"]`).textContent++;
+    bootstrap.Modal.getInstance(document.getElementById('commentModal')).hide();
+  } else {
+    alert('提交失败');
+  }
+});
+
+async function loadCommentCounts() {
+  document.querySelectorAll('.comment-count').forEach(async (el) => {
+    const runId = el.dataset.runId;
+    try {
+      const res = await fetch(`${commentApiBase}/count?runId=${encodeURIComponent(runId)}`);
+      const data = await res.json();
+      el.textContent = data.count ?? 0;
+    } catch {
+      el.textContent = 0;
+    }
+  });
+}
+document.addEventListener('DOMContentLoaded', loadCommentCounts);
+
     document.querySelectorAll('.certificate-link').forEach(link => {
       link.addEventListener('click', function(e) {
         e.preventDefault();
