@@ -7,7 +7,7 @@
 	<!-- Open Graph / 社交分享卡片 -->
 	<meta property="og:title" content="步履不停 - 我的四万公里跑量挑战" />
 	<meta property="og:description" content="一个跑者的跑步记录网站，记录跑量与坚持。你也可以挑战地球一圈！" />
-	<meta property="og:image" content="https://run.linwn.net/images/card.png" />
+  <meta property="og:image" content="https://run.linwn.net/images/card.png" />
 	<meta property="og:url" content="https://run.linwn.net/fun" />
 	<meta property="og:type" content="website" />
 
@@ -15,8 +15,8 @@
 	<meta name="twitter:card" content="https://run.linwn.net/images/card.png" />
 	<meta name="twitter:title" content="步履不停 - 我的四万公里跑量挑战" />
 	<meta name="twitter:description" content="一个跑者的跑步记录网站，记录跑量与坚持。你也可以挑战地球一圈！" />
-	<meta name="twitter:image" content="https://run.linwn.net/images/card.png" />
-
+  <meta name="twitter:image" content="https://run.linwn.net/images/card.png" />
+  
   <meta name="viewport" content="width=device-width, initial-scale=1">
   
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -316,12 +316,6 @@
       text-decoration: none;
       transform: scale(1.05);
     }
-    
-    .trend-icon {
-        font-size: 0.9em;
-        vertical-align: middle;
-        margin-left: 4px;
-    }
 
     .leaflet-popup-content-wrapper {
         background: var(--card-bg);
@@ -571,80 +565,28 @@
                 {% for run in recent_runs %}
                 <div class="col-lg-4">
                     <div class="p-3 rounded h-100 d-flex flex-column" style="background-color: var(--hover-bg);">
-                        
-                        {# --- Trend Logic for the MOST RECENT run --- #}
-                        {% set show_trends = loop.first and recent_runs|length > 1 %}
-                        {% if show_trends %}
-                            {% set prev = recent_runs[1] %}
-                        {% endif %}
-
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="fw-bold text-primary-emphasis">
-                                {{ "%.2f"|format(run.distance / 1000) }} km
-                                {% if show_trends and run.distance != prev.distance %}
-                                    <span class="trend-icon">
-                                    {% if run.distance > prev.distance %}
-                                        <i class="bi bi-arrow-up-right-circle-fill text-success" title="距离增加"></i>
-                                    {% else %}
-                                        <i class="bi bi-arrow-down-right-circle-fill text-danger" title="距离减少"></i>
-                                    {% endif %}
-                                    </span>
-                                {% endif %}
-                            </span>
+                            <span class="fw-bold text-primary-emphasis">{{ "%.2f"|format(run.distance / 1000) }} km</span>
                             <span class="small text-body-secondary">{{ run.date.strftime('%Y-%m-%d %H:%M') }}</span>
                         </div>
-
-                        <div class="row g-3 text-center mt-2 flex-grow-1">
-                            <div class="col-6">
+                        
+                        <div class="d-flex justify-content-around text-center mt-3 flex-grow-1 align-items-center">
+                            <div>
                                 <div class="stat-label mb-1">配速</div>
-                                <div class="fw-bold">
-                                    {{ run.pace }}
-                                    {# Pace: Lower is better #}
-                                    {% if show_trends and run.pace_seconds and prev.pace_seconds and run.pace_seconds != prev.pace_seconds %}
-                                         <span class="trend-icon">
-                                         {% if run.pace_seconds < prev.pace_seconds %}
-                                            <i class="bi bi-arrow-up-right-circle-fill text-success" title="配速加快"></i>
-                                         {% else %}
-                                            <i class="bi bi-arrow-down-right-circle-fill text-danger" title="配速变慢"></i>
-                                         {% endif %}
-                                         </span>
-                                    {% endif %}
-                                </div>
+                                <div class="fw-bold">{{ run.pace }}</div>
                             </div>
-                            <div class="col-6">
+                            <div>
                                 <div class="stat-label mb-1">用时</div>
-                                <div class="fw-bold">
-                                    {{ format_duration(run.duration) }}
-                                     {% if show_trends and run.duration != prev.duration %}
-                                         <span class="trend-icon">
-                                         {# Duration: Lower is better (assuming similar distance) #}
-                                         {% if run.duration < prev.duration %}
-                                            <i class="bi bi-arrow-up-right-circle-fill text-success" title="用时减少"></i>
-                                         {% else %}
-                                            <i class="bi bi-arrow-down-right-circle-fill text-danger" title="用时增加"></i>
-                                         {% endif %}
-                                         </span>
-                                    {% endif %}
-                                </div>
+                                <div class="fw-bold">{{ format_duration(run.duration) }}</div>
                             </div>
-                            <div class="col-6">
+                            <div>
                                 <div class="stat-label mb-1"><i class="bi bi-heart-pulse-fill text-danger small"></i> 心率</div>
                                 <div class="fw-bold">
-                                    {{ run.avg_heart_rate or 'N/A' }}
-                                    {% if run.avg_heart_rate %} <small>bpm</small>{% endif %}
-                                    {# Heart Rate: Lower is better (assuming similar effort) #}
-                                    {% if show_trends and run.avg_heart_rate and prev.avg_heart_rate and run.avg_heart_rate != prev.avg_heart_rate %}
-                                        <span class="trend-icon">
-                                        {% if run.avg_heart_rate < prev.avg_heart_rate %}
-                                           <i class="bi bi-arrow-up-right-circle-fill text-success" title="心率降低"></i>
-                                        {% else %}
-                                           <i class="bi bi-arrow-down-right-circle-fill text-danger" title="心率升高"></i>
-                                        {% endif %}
-                                        </span>
-                                    {% endif %}
+                                    {{ run.heart_rate or 'N/A' }}
+                                    {% if run.heart_rate %}<small>bpm</small>{% endif %}
                                 </div>
                             </div>
-                            <div class="col-6">
+                            <div>
                                 <div class="stat-label mb-1">城市</div>
                                 <div class="fw-bold">{{ run.city or 'N/A' }}</div>
                             </div>
