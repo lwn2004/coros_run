@@ -1435,6 +1435,7 @@ const commentApiBase = 'https://kv.linwn.net';
 document.querySelectorAll('.comment-link').forEach(link => {
   link.addEventListener('click', async (e) => {
     e.preventDefault();
+    new bootstrap.Modal(document.getElementById('commentModal')).show();
     const runId = link.dataset.runId;
     document.getElementById('commentRunId').value = runId;
     document.getElementById('commentText').value = '';
@@ -1451,7 +1452,6 @@ document.querySelectorAll('.comment-link').forEach(link => {
     } catch {
       listContainer.innerHTML = '<div class="text-danger">评论加载失败</div>';
     }
-    new bootstrap.Modal(document.getElementById('commentModal')).show();
   });
 });
 
