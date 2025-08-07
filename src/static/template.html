@@ -1044,6 +1044,8 @@
 	let yearlyDistanceChart = null;
 	let cityMap = null;
     let allRunRows = [];
+  const commentApiBase = 'https://kv.linwn.net';
+
 	document.documentElement.setAttribute('data-bs-theme', 'dark');
 
     /**
@@ -1430,7 +1432,6 @@ async function loadCommentCounts() {
 
     // --- CERTIFICATE MODAL LOGIC ---
 
-const commentApiBase = 'https://kv.linwn.net';
 
 document.querySelectorAll('.comment-link').forEach(link => {
   link.addEventListener('click', async (e) => {
