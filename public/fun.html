@@ -11528,7 +11528,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-08-07 13:49:50 
+         | Last updated: 2025-08-07 14:26:35 
     </small>
 </footer>
 
@@ -11611,7 +11611,18 @@
             distCard.style.height = `${totalHeight}px`;
         }
     }
-
+async function loadCommentCounts() {
+  document.querySelectorAll('.comment-count').forEach(async (el) => {
+    const runId = el.dataset.runId;
+    try {
+      const res = await fetch(`${commentApiBase}/count?runId=${encodeURIComponent(runId)}`);
+      const data = await res.json();
+      el.textContent = data.count ?? 0;
+    } catch {
+      el.textContent = 0;
+    }
+  });
+}
 
 	document.addEventListener('DOMContentLoaded', function() {
 		
@@ -11681,6 +11692,7 @@
         e.preventDefault();
       }
     }, { passive: false });
+    loadCommentCounts();
 		// --- MAP LOGIC ---
         const footprintsTab = document.querySelector('#footprints-tab');
         if(footprintsTab) {
@@ -12027,19 +12039,7 @@ document.getElementById('submitComment').addEventListener('click', async () => {
   }
 });
 
-async function loadCommentCounts() {
-  document.querySelectorAll('.comment-count').forEach(async (el) => {
-    const runId = el.dataset.runId;
-    try {
-      const res = await fetch(`${commentApiBase}/count?runId=${encodeURIComponent(runId)}`);
-      const data = await res.json();
-      el.textContent = data.count ?? 0;
-    } catch {
-      el.textContent = 0;
-    }
-  });
-}
-document.addEventListener('DOMContentLoaded', loadCommentCounts);
+
 
     document.querySelectorAll('.certificate-link').forEach(link => {
       link.addEventListener('click', function(e) {
