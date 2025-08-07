@@ -11528,7 +11528,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-08-07 14:26:35 
+         | Last updated: 2025-08-07 14:47:03 
     </small>
 </footer>
 
@@ -11566,6 +11566,8 @@
 	let yearlyDistanceChart = null;
 	let cityMap = null;
     let allRunRows = [];
+  const commentApiBase = 'https://kv.linwn.net';
+
 	document.documentElement.setAttribute('data-bs-theme', 'dark');
 
     /**
@@ -11996,11 +11998,11 @@ async function loadCommentCounts() {
 
     // --- CERTIFICATE MODAL LOGIC ---
 
-const commentApiBase = 'https://kv.linwn.net';
 
 document.querySelectorAll('.comment-link').forEach(link => {
   link.addEventListener('click', async (e) => {
     e.preventDefault();
+    new bootstrap.Modal(document.getElementById('commentModal')).show();
     const runId = link.dataset.runId;
     document.getElementById('commentRunId').value = runId;
     document.getElementById('commentText').value = '';
@@ -12017,7 +12019,6 @@ document.querySelectorAll('.comment-link').forEach(link => {
     } catch {
       listContainer.innerHTML = '<div class="text-danger">评论加载失败</div>';
     }
-    new bootstrap.Modal(document.getElementById('commentModal')).show();
   });
 });
 
