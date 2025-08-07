@@ -580,10 +580,9 @@
                                 <div class="fw-bold">{{ format_duration(run.duration) }}</div>
                             </div>
                             <div>
-                                <div class="stat-label mb-1"><i class="bi bi-heart-pulse-fill text-danger small"></i> 心率</div>
+                                <div class="stat-label mb-1">心率</div>
                                 <div class="fw-bold">
                                     {{ run.heart_rate or 'N/A' }}
-                                    {% if run.heart_rate %}<small>bpm</small>{% endif %}
                                 </div>
                             </div>
                             <div>
