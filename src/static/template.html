@@ -570,13 +570,13 @@
                         <div class="fw-bold">{{ run.city or 'N/A' }}</div>
                         </div>
                     </div>
+                    <div class="mt-3 text-end">
+            				  <a href="#" class="comment-link small text-body-secondary" data-run-id="{{ run.id }}">💬 说点什么 (<span class="comment-count" data-run-id="{{ run.id }}">0</span>)</a>
+            				</div>
                     </div>
                 </div>
                 {% endfor %}
                 </div>
-        				<div class="mt-3 text-end">
-        				  <a href="#" class="comment-link small text-body-secondary" data-run-id="{{ run.id }}">💬 说点什么 (<span class="comment-count" data-run-id="{{ run.id }}">0</span>)</a>
-        				</div>
             </div>
         </div>
         {% endif %}
