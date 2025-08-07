@@ -1135,6 +1135,25 @@ async function loadCommentCounts() {
     }
   });
 }
+function getOrGenerateNickname() {
+  const adminKey = localStorage.getItem('run_admin_key');
+  const secretKey = 'runpage123';  // 管理员口令
+
+  if (adminKey === secretKey) {
+    return '👑 我说';
+  }
+
+  let nick = localStorage.getItem("run_nick");
+  if (nick) return nick;
+
+  const adjectives = ['快乐', '坚定', '闪亮', '迷路', '温柔'];
+  const nouns = ['小鹿', '绿豆芽', '星星', '猫咪', '纸飞机'];
+  const icons = ['🌱','🌸','🌟','🍃','🌊','🐾','🌀','🌼'];
+
+  nick = `${icons[Math.floor(Math.random() * icons.length)]} 匿名${adjectives[Math.floor(Math.random() * adjectives.length)]}${nouns[Math.floor(Math.random() * nouns.length)]}`;
+  localStorage.setItem("run_nick", nick);
+  return nick;
+}
 
 	document.addEventListener('DOMContentLoaded', function() {
 		
@@ -1204,6 +1223,10 @@ async function loadCommentCounts() {
         e.preventDefault();
       }
     }, { passive: false });
+      const params = new URLSearchParams(window.location.search);
+  if (params.has('admin_key')) {
+    localStorage.setItem('run_admin_key', params.get('admin_key'));
+  }
     loadCommentCounts();
 		// --- MAP LOGIC ---
         const footprintsTab = document.querySelector('#footprints-tab');
@@ -1478,7 +1501,13 @@ document.querySelectorAll('.comment-link').forEach(link => {
       const res = await fetch(`${commentApiBase}/comments?runId=${encodeURIComponent(runId)}`);
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
-        listContainer.innerHTML = data.map(c => `<div class="border-bottom py-1"><small>${new Date(c.ts).toLocaleString()}</small><br>${c.text}</div>`).join('');
+        listContainer.innerHTML = data.map(c => {
+  const nick = c.nickname || '🌱 匿名';
+  const date = new Date(c.ts).toLocaleString();
+  return `<div class="border-bottom py-1">
+            <small class="text-muted">${nick} · ${date}</small><br>${c.text}
+          </div>`;
+}).join('');
       } else {
         listContainer.innerHTML = '<div class="text-muted">暂无评论</div>';
       }
@@ -1492,11 +1521,12 @@ document.getElementById('submitComment').addEventListener('click', async () => {
   const runId = document.getElementById('commentRunId').value;
   const text = document.getElementById('commentText').value.trim();
   if (!text) return;
-  const res = await fetch(`${commentApiBase}/comment`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ runId, text })
-  });
+const nickname = getOrGenerateNickname();
+const res = await fetch(`${commentApiBase}/comment`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ runId, text, nickname })
+});
   if (res.ok) {
     document.getElementById('commentText').value = '';
     document.querySelector(`.comment-count[data-run-id="${runId}"]`).textContent++;
