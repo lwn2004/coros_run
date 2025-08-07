@@ -1089,7 +1089,18 @@
             distCard.style.height = `${totalHeight}px`;
         }
     }
-
+async function loadCommentCounts() {
+  document.querySelectorAll('.comment-count').forEach(async (el) => {
+    const runId = el.dataset.runId;
+    try {
+      const res = await fetch(`${commentApiBase}/count?runId=${encodeURIComponent(runId)}`);
+      const data = await res.json();
+      el.textContent = data.count ?? 0;
+    } catch {
+      el.textContent = 0;
+    }
+  });
+}
 
 	document.addEventListener('DOMContentLoaded', function() {
 		
@@ -1159,6 +1170,7 @@
         e.preventDefault();
       }
     }, { passive: false });
+    loadCommentCounts();
 		// --- MAP LOGIC ---
         const footprintsTab = document.querySelector('#footprints-tab');
         if(footprintsTab) {
@@ -1461,19 +1473,7 @@ document.getElementById('submitComment').addEventListener('click', async () => {
   }
 });
 
-async function loadCommentCounts() {
-  document.querySelectorAll('.comment-count').forEach(async (el) => {
-    const runId = el.dataset.runId;
-    try {
-      const res = await fetch(`${commentApiBase}/count?runId=${encodeURIComponent(runId)}`);
-      const data = await res.json();
-      el.textContent = data.count ?? 0;
-    } catch {
-      el.textContent = 0;
-    }
-  });
-}
-document.addEventListener('DOMContentLoaded', loadCommentCounts);
+
 
     document.querySelectorAll('.certificate-link').forEach(link => {
       link.addEventListener('click', function(e) {
