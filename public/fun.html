@@ -66,6 +66,41 @@
       font-size: 1.1rem;
     }
     
+    #user-profile {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        z-index: 10;
+        cursor: pointer;
+        padding: 0.4rem 0.8rem;
+        background-color: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 50px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: background-color 0.2s;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    #user-profile:hover {
+        background-color: var(--hover-bg);
+    }
+    #user-icon { 
+        font-size: 1.2rem;
+        line-height: 1;
+    }
+    #user-nickname { 
+        font-weight: 500;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+    @media (max-width: 576px) {
+        #user-nickname {
+            display: none;
+        }
+    }
+
+
     .stat-card-base {
         background-color: var(--card-bg);
         border-radius: 0.75rem;
@@ -187,7 +222,7 @@
       align-items: center;
     }
 
-    .btn-group .btn, .btn-secondary, .btn-sm {
+    .btn-group .btn, .btn-secondary, .btn-sm, #saveProfileButton {
         --bs-btn-bg: var(--hover-bg);
         --bs-btn-border-color: var(--border-color);
         --bs-btn-hover-bg: var(--accent-color);
@@ -198,6 +233,14 @@
         font-size: 0.8rem;
 		color: var(--text-secondary);
     }
+    #saveProfileButton {
+        --bs-btn-bg: var(--accent-color);
+        --bs-btn-border-color: var(--accent-color);
+        --bs-btn-hover-bg: #63baff;
+        --bs-btn-hover-border-color: #63baff;
+        color: var(--text-primary);
+    }
+
     .btn-group .btn.active {
 		color: var(--text-primary);
 		font-weight: 500;
@@ -387,7 +430,6 @@
         background-color: var(--hover-bg);
         border-color: var(--border-color);
         color: var(--text-secondary);
-        font-size: 0.8rem;
     }
     .form-select {
         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23a8b3cf' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
@@ -403,7 +445,7 @@
         opacity: 0.7;
     }
     label.form-label {
-        font-size: 0.8rem;
+        font-size: 0.9rem;
         color: var(--text-secondary);
         margin-bottom: 0.25rem;
     }
@@ -531,29 +573,34 @@
 </head>
 <body>
 
-<div class="container">
+<div class="container position-relative">
+    <div id="user-profile" data-bs-toggle="modal" data-bs-target="#profileModal" title="编辑个人信息">
+        <span id="user-icon"></span>
+        <span id="user-nickname"></span>
+    </div>
+
   <div class="main-title-container">
     <h1 class="main-title">步履不停 <small class="main-subtitle text-body-secondary"> — 我的四万公里跑量挑战</small></h1>
   </div>
 
   <ul class="nav nav-tabs mb-4" id="main-nav-tabs" role="tablist">
     <li class="nav-item" role="presentation">
-      <button class="nav-link active" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary-pane" type="button" role="tab" aria-controls="summary-pane" aria-selected="true">概要</button>
+      <button class="nav-link active" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary-pane" type="button" role="tab" aria-controls="summary-pane" aria-selected="true" data-hash="summary">概要</button>
     </li>
     <li class="nav-item" role="presentation">
-      <button class="nav-link" id="data-tab" data-bs-toggle="tab" data-bs-target="#data-pane" type="button" role="tab" aria-controls="data-pane" aria-selected="false">数据</button>
+      <button class="nav-link" id="data-tab" data-bs-toggle="tab" data-bs-target="#data-pane" type="button" role="tab" aria-controls="data-pane" aria-selected="false" data-hash="data">数据</button>
     </li>
     <li class="nav-item" role="presentation">
-        <button class="nav-link" id="marathon-tab" data-bs-toggle="tab" data-bs-target="#marathon-pane" type="button" role="tab" aria-controls="marathon-pane" aria-selected="false">马赛</button>
+        <button class="nav-link" id="marathon-tab" data-bs-toggle="tab" data-bs-target="#marathon-pane" type="button" role="tab" aria-controls="marathon-pane" aria-selected="false" data-hash="marathon">马赛</button>
     </li>
     <li class="nav-item" role="presentation">
-      <button class="nav-link" id="events-tab" data-bs-toggle="tab" data-bs-target="#events-pane" type="button" role="tab" aria-controls="events-pane" aria-selected="false">事件</button>
+      <button class="nav-link" id="events-tab" data-bs-toggle="tab" data-bs-target="#events-pane" type="button" role="tab" aria-controls="events-pane" aria-selected="false" data-hash="events">事件</button>
     </li>
     <li class="nav-item" role="presentation">
-      <button class="nav-link" id="footprints-tab" data-bs-toggle="tab" data-bs-target="#footprints-pane" type="button" role="tab" aria-controls="footprints-pane" aria-selected="false">足迹</button>
+      <button class="nav-link" id="footprints-tab" data-bs-toggle="tab" data-bs-target="#footprints-pane" type="button" role="tab" aria-controls="footprints-pane" aria-selected="false" data-hash="footprints">足迹</button>
     </li>
     <li class="nav-item" role="presentation">
-      <button class="nav-link" id="about-tab" data-bs-toggle="tab" data-bs-target="#about-pane" type="button" role="tab" aria-controls="about-pane" aria-selected="false">关于</button>
+      <button class="nav-link" id="about-tab" data-bs-toggle="tab" data-bs-target="#about-pane" type="button" role="tab" aria-controls="about-pane" aria-selected="false" data-hash="about">关于</button>
     </li>
   </ul>
 
@@ -583,10 +630,10 @@
                   <div class="stat-card-content">
                     <div>
                       <div class="stat-label">继续坚持</div>
-                      <div class="stat-value">17年176天</div>
+                      <div class="stat-value">17年196天</div>
                     </div>
                     <div class="stat-details">
-                      <div class="stat-label"><small class="small-muted">预计</small>2043年01月27日<small>绕地球一圈</small></div>
+                      <div class="stat-label"><small class="small-muted">预计</small>2043年02月16日<small>绕地球一圈</small></div>
                     </div>
                   </div>
                   <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
@@ -11679,7 +11726,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-08-08 13:57:14 
+         | Last updated: 2025-08-08 14:34:52 
     </small>
 </footer>
 
@@ -11698,11 +11745,32 @@
         <input type="hidden" id="commentRunId">
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">取消</button>
         <button type="button" class="btn btn-primary btn-sm" id="submitComment">提交</button>
       </div>
     </div>
   </div>
+</div>
+
+<div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="profileModalLabel">编辑个人信息</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="nicknameInput" class="form-label">昵称</label>
+                    <input type="text" class="form-control" id="nicknameInput" placeholder="请输入你的昵称">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-sm" id="saveProfileButton">保存</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 </body>
@@ -11719,6 +11787,57 @@
   const commentApiBase = 'https://kv.linwn.net';
 
 	document.documentElement.setAttribute('data-bs-theme', 'dark');
+
+    // --- USER PROFILE LOGIC ---
+    function generateRandomProfile() {
+        const adjectives = ['快乐', '坚定', '闪亮', '迷路', '温柔'];
+        const nouns = ['小鹿', '绿豆芽', '星星', '猫咪', '纸飞机'];
+        const icons = ['🌱','🌸','🌟','🍃','🌊','🐾','🌀','🌼'];
+        
+        const profile = {
+            icon: icons[Math.floor(Math.random() * icons.length)],
+            nickname: `匿名${adjectives[Math.floor(Math.random() * adjectives.length)]}${nouns[Math.floor(Math.random() * nouns.length)]}`
+        };
+        return profile;
+    }
+
+    function displayUserProfile() {
+        try {
+            const profile = JSON.parse(localStorage.getItem('run_profile'));
+            if (profile) {
+                document.getElementById('user-icon').textContent = profile.icon;
+                document.getElementById('user-nickname').textContent = profile.nickname;
+                document.getElementById('nicknameInput').value = profile.nickname;
+            }
+        } catch(e) {
+            // In case of corrupted data, reset to a new random profile
+            const profile = generateRandomProfile();
+            localStorage.setItem('run_profile', JSON.stringify(profile));
+            displayUserProfile();
+        }
+    }
+
+    function initializeUserProfile() {
+        let profile = localStorage.getItem('run_profile');
+        if (!profile) {
+            profile = generateRandomProfile();
+            localStorage.setItem('run_profile', JSON.stringify(profile));
+        }
+        displayUserProfile();
+
+        document.getElementById('saveProfileButton').addEventListener('click', () => {
+            const newNickname = document.getElementById('nicknameInput').value.trim();
+            if (newNickname) {
+                const currentProfile = JSON.parse(localStorage.getItem('run_profile'));
+                currentProfile.nickname = newNickname;
+                localStorage.setItem('run_profile', JSON.stringify(currentProfile));
+                displayUserProfile();
+                const modal = bootstrap.Modal.getInstance(document.getElementById('profileModal'));
+                modal.hide();
+            }
+        });
+    }
+
 
     /**
      * Parses a pace string like "5'30\"" into total seconds.
@@ -11775,31 +11894,13 @@ async function loadCommentCounts() {
     }
   });
 }
-function getOrGenerateNickname() {
-  const adminKey = localStorage.getItem('run_admin_key');
-  const secretKey = 'runpage123';  // 管理员口令
-
-  if (adminKey === secretKey) {
-    return '👑 我说';
-  }
-
-  let nick = localStorage.getItem("run_nick");
-  if (nick) return nick;
-
-  const adjectives = ['快乐', '坚定', '闪亮', '迷路', '温柔'];
-  const nouns = ['小鹿', '绿豆芽', '星星', '猫咪', '纸飞机'];
-  const icons = ['🌱','🌸','🌟','🍃','🌊','🐾','🌀','🌼'];
-
-  nick = `${icons[Math.floor(Math.random() * icons.length)]} 匿名${adjectives[Math.floor(Math.random() * adjectives.length)]}${nouns[Math.floor(Math.random() * nouns.length)]}`;
-  localStorage.setItem("run_nick", nick);
-  return nick;
-}
 
 	document.addEventListener('DOMContentLoaded', function() {
 		
 		// Adjust card heights on load and resize
-        adjustCardHeights();
-        window.addEventListener('resize', adjustCardHeights);
+    adjustCardHeights();
+    window.addEventListener('resize', adjustCardHeights);
+
     // --- 手机滑动切换标签页功能 ---
     let startX = 0;
     let startY = 0;
@@ -11863,24 +11964,62 @@ function getOrGenerateNickname() {
         e.preventDefault();
       }
     }, { passive: false });
-      const params = new URLSearchParams(window.location.search);
-  if (params.has('admin_key')) {
-    localStorage.setItem('run_admin_key', params.get('admin_key'));
-  }
+
+    // --- 页面初始化逻辑 ---
+    initializeUserProfile();
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('admin_key')) {
+        localStorage.setItem('run_admin_key', params.get('admin_key'));
+    }
     loadCommentCounts();
+
+    // --- URL锚点与选项卡同步逻辑 ---
+
+    // 1. 页面加载时：根据URL锚点激活选项卡
+    const activateTabFromHash = () => {
+      const hash = window.location.hash.substring(1);
+      if (hash) {
+        const tabTrigger = document.querySelector(`.nav-link[data-hash="${hash}"]`);
+        if (tabTrigger) {
+          const tab = new bootstrap.Tab(tabTrigger);
+          tab.show();
+        }
+      }
+    };
+    
+    // 2. 切换选项卡时：更新URL锚点
+    const allTabs = document.querySelectorAll('#main-nav-tabs .nav-link');
+    allTabs.forEach(tabEl => {
+      tabEl.addEventListener('shown.bs.tab', event => {
+        const hash = event.target.dataset.hash;
+        if (hash) {
+          const newHash = '#' + hash;
+          if (window.location.hash !== newHash) {
+            history.pushState(null, '', newHash);
+          }
+        }
+      });
+    });
+
+    // 3. 监听浏览器后退/前进事件
+    window.addEventListener('popstate', activateTabFromHash);
+
+    // 4. 首次加载页面时执行
+    activateTabFromHash();
+
 
     // --- MARATHON CALENDAR LOGIC ---
     const marathonEvents = [
         {"date": "2025-10-26", "name": "长沙", "category": "半马", "status": "待抽签 (8/27)"},
-        {"date": "2025-11-09", "name": "南昌", "category": "半马", "status": "待抽签"},
+        {"date": "2025-11-09", "name": "南昌", "category": "半马", "status": "待抽签 (8/22)"},
         {"date": "2025-11-16", "name": "南京", "category": "全马", "status": "待抽签 (8/18)"},
         {"date": "2025-11-30", "name": "上海", "category": "全马", "status": "待抽签 (8/25)"},
-        {"date": "2025-11-30", "name": "顺德半程", "category": "半马", "status": "报名未开始"},
+        {"date": "2025-11-30", "name": "顺德", "category": "半马", "status": "报名未开始"},
         {"date": "2025-12-07", "name": "深圳", "category": "全马", "status": "报名未开始"},
         {"date": "2025-12-14", "name": "汕头", "category": "半马", "status": "报名未开始"},
-        {"date": "2025-12-14", "name": "深圳南山半程", "category": "半马", "status": "报名未开始"},
+        {"date": "2025-12-14", "name": "南山", "category": "半马", "status": "报名未开始"},
         {"date": "2025-12-21", "name": "广州", "category": "全马", "status": "报名未开始"},
-        {"date": "2026-01-03", "name": "顺德容桂", "category": "全马", "status": "报名未开始"},
+        {"date": "2026-01-03", "name": "容桂", "category": "全马", "status": "报名未开始"},
         {"date": "2026-01-11", "name": "厦门", "category": "全马", "status": "报名未开始"}
     ];
 
@@ -11952,11 +12091,7 @@ function getOrGenerateNickname() {
                         dayNumber.textContent = date;
                         cell.appendChild(dayNumber);
                         
-                        // *** FIX STARTS HERE ***
-                        // Correctly filter events for the current day by parsing the day from the string,
-                        // avoiding timezone issues.
                         const eventsOnThisDay = monthEvents.filter(e => parseInt(e.date.substring(8, 10), 10) === date);
-                        // *** FIX ENDS HERE ***
 
                         if (eventsOnThisDay.length > 0) {
                             cell.classList.add('event');
@@ -11996,7 +12131,7 @@ function getOrGenerateNickname() {
             if (container && container.innerHTML.trim() === '') {
                 generateMarathonCalendar();
             }
-        }, { once: false }); // allow re-checking, but generation is idempotent
+        }, { once: false });
     }
 
 
@@ -12334,22 +12469,35 @@ document.querySelectorAll('.comment-link').forEach(link => {
 });
 
 document.getElementById('submitComment').addEventListener('click', async () => {
-  const runId = document.getElementById('commentRunId').value;
-  const text = document.getElementById('commentText').value.trim();
-  if (!text) return;
-const nickname = getOrGenerateNickname();
-const res = await fetch(`${commentApiBase}/comment`, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ runId, text, nickname })
-});
-  if (res.ok) {
-    document.getElementById('commentText').value = '';
-    document.querySelector(`.comment-count[data-run-id="${runId}"]`).textContent++;
-    bootstrap.Modal.getInstance(document.getElementById('commentModal')).hide();
-  } else {
-    alert('提交失败');
-  }
+    const runId = document.getElementById('commentRunId').value;
+    const text = document.getElementById('commentText').value.trim();
+    if (!text) return;
+
+    let nicknameForComment;
+    const adminKey = localStorage.getItem('run_admin_key');
+    const secretKey = 'runpage123';
+
+    if (adminKey === secretKey) {
+        nicknameForComment = '👑 我说';
+    } else {
+        const profile = JSON.parse(localStorage.getItem('run_profile'));
+        nicknameForComment = `${profile.icon} ${profile.nickname}`;
+    }
+
+    const res = await fetch(`${commentApiBase}/comment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ runId, text, nickname: nicknameForComment })
+    });
+
+    if (res.ok) {
+        document.getElementById('commentText').value = '';
+        const countEl = document.querySelector(`.comment-count[data-run-id="${runId}"]`);
+        countEl.textContent = parseInt(countEl.textContent, 10) + 1;
+        bootstrap.Modal.getInstance(document.getElementById('commentModal')).hide();
+    } else {
+        alert('提交失败');
+    }
 });
 
 
@@ -12376,4 +12524,3 @@ const res = await fetch(`${commentApiBase}/comment`, {
     if(yearlyDistanceChart) yearlyDistanceChart.destroy();
   });
 </script>
-</html>
