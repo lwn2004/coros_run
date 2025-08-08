@@ -11797,7 +11797,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-08-08 16:36:27 
+         | Last updated: 2025-08-08 18:35:11 
     </small>
 </footer>
 
@@ -11873,12 +11873,16 @@
 
     function displayUserProfile() {
         try {
+          let profile.icon = "👑";
+          let profile.nickname = "我说";  
+          if (localStorage.getItem('run_admin_key') !== 'runpage123') {
             const profile = JSON.parse(localStorage.getItem('run_profile'));
-            if (profile) {
+          }
+          if (profile) {
                 document.getElementById('user-icon').textContent = profile.icon;
                 document.getElementById('user-nickname').textContent = profile.nickname;
                 document.getElementById('nicknameInput').value = profile.nickname;
-            }
+          }
         } catch(e) {
             const profile = generateRandomProfile();
             localStorage.setItem('run_profile', JSON.stringify(profile));
