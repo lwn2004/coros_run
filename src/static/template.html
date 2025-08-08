@@ -70,7 +70,7 @@
         position: absolute;
         top: 1rem;
         right: 1rem;
-        z-index: 10;
+        z-index: 1021; /* Higher than nav-tabs */
         cursor: pointer;
         padding: 0.4rem 0.8rem;
         background-color: var(--card-bg);
@@ -137,20 +137,19 @@
       line-height: 1.2;
 	  min-height: 2.4rem;
     }
+
+    .stat-value-small {
+        font-size: 1.5rem;
+    }
     
     .stat-details {
 	  margin-top: auto;
 	  width: 100%;
 	}
 
-    .remaining-time {
-      font-feature-settings: "tnum";
-      font-variant-numeric: tabular-nums;
-      color: var(--text-secondary);
-    }
-
     .stat-card-flip-container {
         perspective: 1000px;
+        min-height: 140px;
     }
 
     .stat-card-flipper {
@@ -358,19 +357,19 @@
       text-decoration: none;
       transform: scale(1.05);
     }
-.comment-link {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  text-decoration: none;
-  border-bottom: 1px dotted var(--text-secondary);
-  transition: all 0.2s ease;
-  cursor: pointer;
-}
+    .comment-link {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-bottom: 1px dotted var(--text-secondary);
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
 
-.comment-link:hover {
-  color: var(--accent-color);
-  border-bottom: 1px solid var(--accent-color);
-}
+    .comment-link:hover {
+      color: var(--accent-color);
+      border-bottom: 1px solid var(--accent-color);
+    }
     .leaflet-popup-content-wrapper {
         background: var(--card-bg);
         color: var(--text-primary);
@@ -386,21 +385,36 @@
         color: var(--text-primary) !important;
         padding: 4px 4px 0 0 !important;
     }
-
+    
+    /* Responsive Nav Tabs */
+    .nav-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* Firefox */
+    }
+    .nav-wrapper::-webkit-scrollbar {
+        display: none; /* Safari and Chrome */
+    }
     .nav-tabs {
         --bs-nav-tabs-border-color: var(--border-color);
         --bs-nav-tabs-link-hover-border-color: var(--border-color);
+        flex-wrap: nowrap;
+        white-space: nowrap;
+        border-bottom: none; /* The wrapper will have the border */
+    }
+    .nav-wrapper .nav-item {
+        flex-shrink: 0;
     }
     .nav-tabs .nav-link {
         color: var(--text-secondary);
         background: none;
-        border-bottom-color: var(--border-color);
     }
     .nav-tabs .nav-link.active {
         color: var(--text-primary);
         background-color: var(--hover-bg);
         border-color: var(--border-color) var(--border-color) var(--hover-bg);
     }
+
     #cityMap {
       width: 100%;
       height: 500px;
@@ -500,7 +514,7 @@
     /* Marathon Calendar Styles */
     .marathon-calendar-container .month-grid {
         background-color: var(--card-bg);
-        padding: 1rem;
+        padding: 1.5rem;
         border-radius: 0.75rem;
         margin-bottom: 2rem;
     }
@@ -568,6 +582,57 @@
         font-size: 0.7rem;
         color: var(--text-secondary);
     }
+    /* Mobile list view for calendar */
+    .calendar-list-view {
+        display: none;
+    }
+    .calendar-list-item {
+        display: flex;
+        gap: 1rem;
+        padding: 0.75rem 0.25rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .calendar-list-item:last-child {
+        border-bottom: none;
+    }
+    .list-date {
+        flex-shrink: 0;
+        text-align: center;
+    }
+    .list-date .day {
+        font-size: 1.5rem;
+        font-weight: 700;
+        line-height: 1;
+        color: var(--marathon-color);
+    }
+    .list-date .weekday {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+    .list-details {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .list-details .name {
+        font-weight: 500;
+    }
+    .list-details .status {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+
+    @media (max-width: 767.98px) {
+        .calendar-table {
+            display: none;
+        }
+        .calendar-list-view {
+            display: block;
+        }
+        .marathon-calendar-container .month-grid {
+            padding: 1rem;
+        }
+    }
 
   </style>
 </head>
@@ -583,109 +648,148 @@
     <h1 class="main-title">步履不停 <small class="main-subtitle text-body-secondary"> — 我的四万公里跑量挑战</small></h1>
   </div>
 
-  <ul class="nav nav-tabs mb-4" id="main-nav-tabs" role="tablist">
-    <li class="nav-item" role="presentation">
-      <button class="nav-link active" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary-pane" type="button" role="tab" aria-controls="summary-pane" aria-selected="true" data-hash="summary">概要</button>
-    </li>
-    <li class="nav-item" role="presentation">
-      <button class="nav-link" id="data-tab" data-bs-toggle="tab" data-bs-target="#data-pane" type="button" role="tab" aria-controls="data-pane" aria-selected="false" data-hash="data">数据</button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="marathon-tab" data-bs-toggle="tab" data-bs-target="#marathon-pane" type="button" role="tab" aria-controls="marathon-pane" aria-selected="false" data-hash="marathon">马赛</button>
-    </li>
-    <li class="nav-item" role="presentation">
-      <button class="nav-link" id="events-tab" data-bs-toggle="tab" data-bs-target="#events-pane" type="button" role="tab" aria-controls="events-pane" aria-selected="false" data-hash="events">事件</button>
-    </li>
-    <li class="nav-item" role="presentation">
-      <button class="nav-link" id="footprints-tab" data-bs-toggle="tab" data-bs-target="#footprints-pane" type="button" role="tab" aria-controls="footprints-pane" aria-selected="false" data-hash="footprints">足迹</button>
-    </li>
-    <li class="nav-item" role="presentation">
-      <button class="nav-link" id="about-tab" data-bs-toggle="tab" data-bs-target="#about-pane" type="button" role="tab" aria-controls="about-pane" aria-selected="false" data-hash="about">关于</button>
-    </li>
-  </ul>
+  <div class="nav-wrapper border-bottom border-secondary-subtle mb-4">
+    <ul class="nav nav-tabs" id="main-nav-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary-pane" type="button" role="tab" aria-controls="summary-pane" aria-selected="true" data-hash="summary">概要</button>
+        </li>
+        <li class="nav-item" role="presentation">
+        <button class="nav-link" id="data-tab" data-bs-toggle="tab" data-bs-target="#data-pane" type="button" role="tab" aria-controls="data-pane" aria-selected="false" data-hash="data">数据</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="marathon-tab" data-bs-toggle="tab" data-bs-target="#marathon-pane" type="button" role="tab" aria-controls="marathon-pane" aria-selected="false" data-hash="marathon">马赛</button>
+        </li>
+        <li class="nav-item" role="presentation">
+        <button class="nav-link" id="events-tab" data-bs-toggle="tab" data-bs-target="#events-pane" type="button" role="tab" aria-controls="events-pane" aria-selected="false" data-hash="events">事件</button>
+        </li>
+        <li class="nav-item" role="presentation">
+        <button class="nav-link" id="footprints-tab" data-bs-toggle="tab" data-bs-target="#footprints-pane" type="button" role="tab" aria-controls="footprints-pane" aria-selected="false" data-hash="footprints">足迹</button>
+        </li>
+        <li class="nav-item" role="presentation">
+        <button class="nav-link" id="about-tab" data-bs-toggle="tab" data-bs-target="#about-pane" type="button" role="tab" aria-controls="about-pane" aria-selected="false" data-hash="about">关于</button>
+        </li>
+    </ul>
+  </div>
 
   <div class="tab-content" id="mainTabContent">
     <div class="tab-pane fade show active" id="summary-pane" role="tabpanel" aria-labelledby="summary-tab" tabindex="0">
-        <div class="row g-2 mb-3">
-          <div class="col-12 col-md-6" style="min-height: 140px;">
-            <div class="stat-card-flip-container h-100" id="dist-card-container">
-              <div class="stat-card-flipper h-100">
-                <div class="stat-card-front">
-                  <div class="stat-card-content">
-                    <div>
-                      <div class="stat-label">当前跑量</div>
-                      <div class="stat-value">{{ "%.2f"|format(overall_stats.dist_km) }} <small class="small-muted">km</small></div>
-                    </div>
-                    <div class="stat-details">
-                      <div class="stat-label">赤道进度</div>
-                      <div class="progress mt-1" style="height: 4px;">
-                        <div class="progress-bar" role="progressbar" style="width: {{ '%.4f'|format(progress_around_earth) }}%;"></div>
-                      </div>
-                      <small class="small-muted">{{ "%.4f"|format(progress_around_earth) }}%</small>
-                    </div>
-                  </div>
-                  <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
-                </div>
-                <div class="stat-card-back">
-                  <div class="stat-card-content">
-                    <div>
-                      <div class="stat-label">继续坚持</div>
-                      <div class="stat-value">{{ estimated_info.days_left }}</div>
-                    </div>
-                    <div class="stat-details">
-                      <div class="stat-label"><small class="small-muted">预计</small>{{ estimated_info.date_str }}<small>绕地球一圈</small></div>
-                    </div>
-                  </div>
-                  <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
-                </div>
-              </div>
-            </div>
-          </div>
-    
-          <div class="col-12 col-md-6">
-            <div class="row g-2 h-100">
-                <div class="col-6 col-md-12">
-                    <div class="stat-card-flip-container h-100" id="count-card-container">
-                      <div class="stat-card-flipper h-100">
-                        <div class="stat-card-front">
-                          <div class="stat-card-content">
-                            <div class="stat-label">跑步次数</div>
-                            <div class="stat-value">{{ overall_stats.count }}</div>
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="stat-card-flip-container h-100" id="dist-card-container">
+                    <div class="stat-card-flipper h-100">
+                      <div class="stat-card-front">
+                        <div class="stat-card-content">
+                          <div>
+                            <div class="stat-label">当前跑量</div>
+                            <div class="stat-value">{{ "%.2f"|format(overall_stats.dist_km) }} <small class="small-muted">km</small></div>
                           </div>
-                          <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
+                          <div class="stat-details">
+                            <div class="stat-label">赤道进度</div>
+                            <div class="progress mt-1" style="height: 4px;">
+                              <div class="progress-bar" role="progressbar" style="width: {{ '%.4f'|format(progress_around_earth) }}%;"></div>
+                            </div>
+                            <small class="small-muted">{{ "%.4f"|format(progress_around_earth) }}%</small>
+                          </div>
+                        </div>
+                        <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
+                      </div>
+                      <div class="stat-card-back">
+                        <div class="stat-card-content">
+                          <div>
+                            <div class="stat-label">继续坚持</div>
+                            <div class="stat-value">{{ estimated_info.days_left }}</div>
+                          </div>
+                          <div class="stat-details">
+                            <div class="stat-label"><small class="small-muted">预计</small>{{ estimated_info.date_str }}<small>绕地球一圈</small></div>
+                          </div>
+                        </div>
+                        <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="stat-card-flip-container h-100" id="streak-card-container">
+                    <div class="stat-card-flipper h-100">
+                        <div class="stat-card-front">
+                            <div class="stat-card-content">
+                                <div>
+                                    <div class="stat-label">当前连续周</div>
+                                    <div class="stat-value stat-value-small">{{ streak_records.current_streak.weeks }} <small class="small-muted">周</small></div>
+                                </div>
+                                <div class="stat-details">
+                                    <small class="small-muted">
+                                    {% if streak_records.current_streak.weeks > 0 %}
+                                        {{ streak_records.current_streak.start_date }} ~ {{ streak_records.current_streak.end_date }}
+                                    {% else %}
+                                        本周还未跑
+                                    {% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
                         </div>
                         <div class="stat-card-back">
-                          <div class="stat-card-content">
-                            <div class="stat-label">总耗时</div>
-                            <div class="stat-value">{{ overall_stats.duration_str }}</div>
-                          </div>
-                          <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
-                        </div>
-                      </div>
-                    </div>
-                </div>
-                <div class="col-6 col-md-12">
-                    <div class="stat-card-flip-container h-100" id="pace-card-container">
-                        <div class="stat-card-flipper h-100">
-                          <div class="stat-card-front">
                             <div class="stat-card-content">
-                              <div class="stat-label">平均配速</div>
-                              <div class="stat-value">{{ overall_stats.pace }}</div>
+                                <div>
+                                    <div class="stat-label">最长连续周</div>
+                                    <div class="stat-value stat-value-small">{{ streak_records.longest_streak.weeks }} <small class="small-muted">周</small></div>
+                                </div>
+                                <div class="stat-details">
+                                    <small class="small-muted">
+                                    {% if streak_records.longest_streak.weeks > 0 %}
+                                        {{ streak_records.longest_streak.start_date }} ~ {{ streak_records.longest_streak.end_date }}
+                                    {% else %}
+                                        暂无记录
+                                    {% endif %}
+                                    </small>
+                                </div>
                             </div>
                             <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
-                          </div>
-                          <div class="stat-card-back">
-                            <div class="stat-card-content">
-                              <div class="stat-label">最快配速</div>
-                              <div class="stat-value">{{ fastest_pace_info.pace }}</div>
-                            </div>
-                            <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
-                          </div>
                         </div>
                     </div>
                 </div>
             </div>
-          </div>
+            <div class="col-12 col-md-6 col-lg-2">
+                <div class="stat-card-flip-container h-100" id="count-card-container">
+                    <div class="stat-card-flipper h-100">
+                      <div class="stat-card-front">
+                        <div class="stat-card-content">
+                          <div class="stat-label">跑步次数</div>
+                          <div class="stat-value">{{ overall_stats.count }}</div>
+                        </div>
+                        <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
+                      </div>
+                      <div class="stat-card-back">
+                        <div class="stat-card-content">
+                          <div class="stat-label">总耗时</div>
+                          <div class="stat-value stat-value-small">{{ overall_stats.duration_str }}</div>
+                        </div>
+                        <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
+                      </div>
+                    </div>
+                  </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-2">
+                <div class="stat-card-flip-container h-100" id="pace-card-container">
+                    <div class="stat-card-flipper h-100">
+                      <div class="stat-card-front">
+                        <div class="stat-card-content">
+                          <div class="stat-label">平均配速</div>
+                          <div class="stat-value">{{ overall_stats.pace }}</div>
+                        </div>
+                        <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
+                      </div>
+                      <div class="stat-card-back">
+                        <div class="stat-card-content">
+                          <div class="stat-label">最快配速</div>
+                          <div class="stat-value">{{ fastest_pace_info.pace }}</div>
+                        </div>
+                        <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         {% if recent_runs %}
@@ -734,41 +838,7 @@
             </div>
         </div>
         {% endif %}
-                <div class="col-lg-6 mb-4">
-                    <div class="content-card h-100 d-flex flex-column">
-                        <h5 class="card-title mb-3"><i class="bi bi-calendar-check-fill text-warning"></i> 连续记录</h5>
-                        {% if streak_records %}
-                        <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
-                            <div>
-                                <div class="fw-bold">最长连续周</div>
-                                {% if streak_records.longest_streak.weeks > 0 %}
-                                <small class="small-muted">{{ streak_records.longest_streak.start_date }} ~ {{ streak_records.longest_streak.end_date }}</small>
-                                {% else %}
-                                <small class="small-muted">暂无记录</small>
-                                {% endif %}
-                            </div>
-                            <div class="text-end">
-                                <div class="fw-bold">{{ streak_records.longest_streak.weeks }} 周</div>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
-                            <div>
-                                <div class="fw-bold">当前连续周</div>
-                                {% if streak_records.current_streak.weeks > 0 %}
-                                <small class="small-muted">{{ streak_records.current_streak.start_date }} ~ {{ streak_records.current_streak.end_date }}</small>
-                                {% else %}
-                                <small class="small-muted">本周还未跑</small>
-                                {% endif %}
-                            </div>
-                            <div class="text-end">
-                                <div class="fw-bold">{{ streak_records.current_streak.weeks }} 周</div>
-                            </div>
-                        </div>
-                        {% else %}
-                        <div class="text-center py-4 text-body-secondary">暂无数据</div>
-                        {% endif %}
-                    </div>
-                </div>
+
         <div class="card mb-4" style="background-color: var(--card-bg); border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
             <div class="card-header bg-transparent border-0 pt-3">
                 <div class="card-title-container">
@@ -1223,7 +1293,7 @@
 	let yearlyDistanceChart = null;
 	let cityMap = null;
     let allRunRows = [];
-  const commentApiBase = 'https://kv.linwn.net';
+    const commentApiBase = 'https://kv.linwn.net';
 
 	document.documentElement.setAttribute('data-bs-theme', 'dark');
 
@@ -1233,11 +1303,10 @@
         const nouns = ['小鹿', '绿豆芽', '星星', '猫咪', '纸飞机'];
         const icons = ['🌱','🌸','🌟','🍃','🌊','🐾','🌀','🌼'];
         
-        const profile = {
+        return {
             icon: icons[Math.floor(Math.random() * icons.length)],
             nickname: `匿名${adjectives[Math.floor(Math.random() * adjectives.length)]}${nouns[Math.floor(Math.random() * nouns.length)]}`
         };
-        return profile;
     }
 
     function displayUserProfile() {
@@ -1249,7 +1318,6 @@
                 document.getElementById('nicknameInput').value = profile.nickname;
             }
         } catch(e) {
-            // In case of corrupted data, reset to a new random profile
             const profile = generateRandomProfile();
             localStorage.setItem('run_profile', JSON.stringify(profile));
             displayUserProfile();
@@ -1271,8 +1339,7 @@
                 currentProfile.nickname = newNickname;
                 localStorage.setItem('run_profile', JSON.stringify(currentProfile));
                 displayUserProfile();
-                const modal = bootstrap.Modal.getInstance(document.getElementById('profileModal'));
-                modal.hide();
+                bootstrap.Modal.getInstance(document.getElementById('profileModal')).hide();
             }
         });
     }
@@ -1300,46 +1367,21 @@
         }
     }
 
-    /**
-     * Adjusts summary card heights for wide screens.
-     */
-    function adjustCardHeights() {
-        const distCard = document.getElementById('dist-card-container');
-        const countCard = document.getElementById('count-card-container');
-        const paceCard = document.getElementById('pace-card-container');
-
-        if (!distCard || !countCard || !paceCard) return;
-
-        // Reset height for mobile view first
-        distCard.style.height = 'auto';
-
-        // Apply logic only for desktop view
-        if (window.innerWidth >= 768) {
-            const rightCol = countCard.parentElement.parentElement;
-            const gap = parseFloat(window.getComputedStyle(rightCol).gap);
-            const totalHeight = countCard.offsetHeight + paceCard.offsetHeight + gap;
-            distCard.style.height = `${totalHeight}px`;
-        }
+    async function loadCommentCounts() {
+        document.querySelectorAll('.comment-count').forEach(async (el) => {
+            const runId = el.dataset.runId;
+            try {
+            const res = await fetch(`${commentApiBase}/count?runId=${encodeURIComponent(runId)}`);
+            const data = await res.json();
+            el.textContent = data.count ?? 0;
+            } catch {
+            el.textContent = 0;
+            }
+        });
     }
-async function loadCommentCounts() {
-  document.querySelectorAll('.comment-count').forEach(async (el) => {
-    const runId = el.dataset.runId;
-    try {
-      const res = await fetch(`${commentApiBase}/count?runId=${encodeURIComponent(runId)}`);
-      const data = await res.json();
-      el.textContent = data.count ?? 0;
-    } catch {
-      el.textContent = 0;
-    }
-  });
-}
 
 	document.addEventListener('DOMContentLoaded', function() {
 		
-		// Adjust card heights on load and resize
-    adjustCardHeights();
-    window.addEventListener('resize', adjustCardHeights);
-
     // --- 手机滑动切换标签页功能 ---
     let startX = 0;
     let startY = 0;
@@ -1353,7 +1395,7 @@ async function loadCommentCounts() {
     
     tabContent.addEventListener('touchend', function(e) {
       if (e.target.closest('#cityMap') || e.target.closest('.calendar-table')) {
-        return; // 如果在地图或日历上操作，则不触发Tab切换
+        return;
       }
       const endX = e.changedTouches[0].clientX;
       const endY = e.changedTouches[0].clientY;
@@ -1363,42 +1405,32 @@ async function loadCommentCounts() {
       const absDiffX = Math.abs(diffX);
       const absDiffY = Math.abs(diffY);
       
-      // 确保是水平滑动而不是垂直滑动
       if (absDiffX > minSwipeDistance && absDiffX > absDiffY) {
         const activeTab = document.querySelector('#main-nav-tabs .nav-link.active');
         const tabs = Array.from(document.querySelectorAll('#main-nav-tabs .nav-link'));
         const currentIndex = tabs.indexOf(activeTab);
         
         if (diffX > 0) {
-          // 向右滑动 - 切换到前一个标签页
           if (currentIndex > 0) {
-            const prevTab = tabs[currentIndex - 1];
-            bootstrap.Tab.getOrCreateInstance(prevTab).show();
+            bootstrap.Tab.getOrCreateInstance(tabs[currentIndex - 1]).show();
           }
         } else {
-          // 向左滑动 - 切换到后一个标签页
           if (currentIndex < tabs.length - 1) {
-            const nextTab = tabs[currentIndex + 1];
-            bootstrap.Tab.getOrCreateInstance(nextTab).show();
+            bootstrap.Tab.getOrCreateInstance(tabs[currentIndex + 1]).show();
           }
         }
       }
     }, false);
     
-    // 添加滑动时防止页面滚动
     tabContent.addEventListener('touchmove', function(e) {
       if (e.target.closest('#cityMap')) {
-        return; // 在地图上滑动时，允许默认的地图拖动行为
+        return;
       }
       const currentX = e.touches[0].clientX;
       const currentY = e.touches[0].clientY;
+      const absDiffX = Math.abs(currentX - startX);
+      const absDiffY = Math.abs(currentY - startY);
       
-      const diffX = currentX - startX;
-      const diffY = currentY - startY;
-      const absDiffX = Math.abs(diffX);
-      const absDiffY = Math.abs(diffY);
-      
-      // 如果是水平滑动，阻止默认行为（页面滚动）
       if (absDiffX > absDiffY && absDiffX > 10) {
         e.preventDefault();
       }
@@ -1413,22 +1445,17 @@ async function loadCommentCounts() {
     loadCommentCounts();
 
     // --- URL锚点与选项卡同步逻辑 ---
-
-    // 1. 页面加载时：根据URL锚点激活选项卡
     const activateTabFromHash = () => {
       const hash = window.location.hash.substring(1);
       if (hash) {
         const tabTrigger = document.querySelector(`.nav-link[data-hash="${hash}"]`);
         if (tabTrigger) {
-          const tab = new bootstrap.Tab(tabTrigger);
-          tab.show();
+          bootstrap.Tab.getOrCreateInstance(tabTrigger).show();
         }
       }
     };
     
-    // 2. 切换选项卡时：更新URL锚点
-    const allTabs = document.querySelectorAll('#main-nav-tabs .nav-link');
-    allTabs.forEach(tabEl => {
+    document.querySelectorAll('#main-nav-tabs .nav-link').forEach(tabEl => {
       tabEl.addEventListener('shown.bs.tab', event => {
         const hash = event.target.dataset.hash;
         if (hash) {
@@ -1440,10 +1467,7 @@ async function loadCommentCounts() {
       });
     });
 
-    // 3. 监听浏览器后退/前进事件
     window.addEventListener('popstate', activateTabFromHash);
-
-    // 4. 首次加载页面时执行
     activateTabFromHash();
 
 
@@ -1453,24 +1477,23 @@ async function loadCommentCounts() {
         {"date": "2025-11-09", "name": "南昌", "category": "半马", "status": "待抽签 (8/22)"},
         {"date": "2025-11-16", "name": "南京", "category": "全马", "status": "待抽签 (8/18)"},
         {"date": "2025-11-30", "name": "上海", "category": "全马", "status": "待抽签 (8/25)"},
-        {"date": "2025-11-30", "name": "顺德", "category": "半马", "status": "报名未开始"},
+        {"date": "2025-11-30", "name": "顺德半程", "category": "半马", "status": "报名未开始"},
         {"date": "2025-12-07", "name": "深圳", "category": "全马", "status": "报名未开始"},
         {"date": "2025-12-14", "name": "汕头", "category": "半马", "status": "报名未开始"},
-        {"date": "2025-12-14", "name": "南山", "category": "半马", "status": "报名未开始"},
+        {"date": "2025-12-14", "name": "深圳南山半程", "category": "半马", "status": "报名未开始"},
         {"date": "2025-12-21", "name": "广州", "category": "全马", "status": "报名未开始"},
-        {"date": "2026-01-03", "name": "容桂", "category": "全马", "status": "报名未开始"},
+        {"date": "2026-01-03", "name": "顺德容桂", "category": "全马", "status": "报名未开始"},
         {"date": "2026-01-11", "name": "厦门", "category": "全马", "status": "报名未开始"}
     ];
 
     function generateMarathonCalendar() {
         const container = document.getElementById('marathon-calendar-container');
         if (!container) return;
+        const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
 
         const eventsByMonth = marathonEvents.reduce((acc, event) => {
-            const month = event.date.substring(0, 7); // YYYY-MM
-            if (!acc[month]) {
-                acc[month] = [];
-            }
+            const month = event.date.substring(0, 7);
+            if (!acc[month]) acc[month] = [];
             acc[month].push(event);
             return acc;
         }, {});
@@ -1482,91 +1505,80 @@ async function loadCommentCounts() {
             return;
         }
 
+        let calendarHTML = '';
         sortedMonths.forEach(monthStr => {
             const [year, month] = monthStr.split('-').map(Number);
             const monthEvents = eventsByMonth[monthStr];
-
-            const monthGrid = document.createElement('div');
-            monthGrid.className = 'month-grid';
             
-            const title = document.createElement('h4');
-            title.className = 'mb-3';
-            title.textContent = `${year}年 ${month}月`;
-            monthGrid.appendChild(title);
-
-            const table = document.createElement('table');
-            table.className = 'calendar-table';
-
-            // Table Header
-            const thead = table.createTHead();
-            const headerRow = thead.insertRow();
-            const daysOfWeek = ['日', '一', '二', '三', '四', '五', '六'];
-            daysOfWeek.forEach(day => {
-                const th = document.createElement('th');
-                th.textContent = day;
-                headerRow.appendChild(th);
+            calendarHTML += `<div class="month-grid">`;
+            calendarHTML += `<h4 class="mb-3">${year}年 ${month}月</h4>`;
+            
+            // Mobile List View
+            calendarHTML += `<div class="calendar-list-view">`;
+            monthEvents.forEach(event => {
+                const eventDate = new Date(event.date.replace(/-/g, '/')); // Use / for better compatibility
+                calendarHTML += `
+                    <div class="calendar-list-item">
+                        <div class="list-date">
+                            <div class="day">${eventDate.getDate()}</div>
+                            <div class="weekday">${weekdays[eventDate.getDay()]}</div>
+                        </div>
+                        <div class="list-details">
+                            <div class="name">${event.name} <span class="category">${event.category}</span></div>
+                            <div class="status">${event.status}</div>
+                        </div>
+                    </div>
+                `;
             });
+            calendarHTML += `</div>`;
 
-            // Table Body
-            const tbody = table.createTBody();
+            // Desktop Grid View
+            calendarHTML += `<table class="calendar-table d-none d-md-table">`;
+            calendarHTML += `<thead><tr>${['日', '一', '二', '三', '四', '五', '六'].map(d => `<th>${d}</th>`).join('')}</tr></thead>`;
+            
+            let tbodyHtml = '<tbody>';
             const firstDay = new Date(year, month - 1, 1);
-            const lastDay = new Date(year, month, 0);
-            const daysInMonth = lastDay.getDate();
+            const daysInMonth = new Date(year, month, 0).getDate();
             const startingDay = firstDay.getDay();
-
             let date = 1;
-            for (let i = 0; i < 6; i++) { // Max 6 rows
+
+            for (let i = 0; i < 6; i++) {
                 if (date > daysInMonth) break;
-                const row = tbody.insertRow();
+                tbodyHtml += '<tr>';
                 for (let j = 0; j < 7; j++) {
-                    const cell = row.insertCell();
-                    if (i === 0 && j < startingDay) {
-                        cell.classList.add('empty');
-                    } else if (date > daysInMonth) {
-                        cell.classList.add('empty');
+                    if ((i === 0 && j < startingDay) || date > daysInMonth) {
+                        tbodyHtml += '<td class="empty"></td>';
                     } else {
-                        const dayNumber = document.createElement('div');
-                        dayNumber.className = 'day-number';
-                        dayNumber.textContent = date;
-                        cell.appendChild(dayNumber);
-                        
                         const eventsOnThisDay = monthEvents.filter(e => parseInt(e.date.substring(8, 10), 10) === date);
-
-                        if (eventsOnThisDay.length > 0) {
-                            cell.classList.add('event');
-                            dayNumber.classList.add('has-event');
-                            const detailsContainer = document.createElement('div');
-                            detailsContainer.className = 'event-details';
-
+                        let cellClass = eventsOnThisDay.length > 0 ? 'event' : '';
+                        let dayClass = eventsOnThisDay.length > 0 ? 'has-event' : '';
+                        
+                        tbodyHtml += `<td class="${cellClass}">`;
+                        tbodyHtml += `<div class="day-number ${dayClass}">${date}</div>`;
+                        if(eventsOnThisDay.length > 0) {
+                            tbodyHtml += '<div class="event-details">';
                             eventsOnThisDay.forEach(event => {
-                                const item = document.createElement('div');
-                                item.className = 'event-item';
-                                item.innerHTML = `${event.name} <span class="category">${event.category}</span>`;
-
-                                const status = document.createElement('div');
-                                status.className = 'event-status';
-                                status.textContent = event.status;
-                                
-                                detailsContainer.appendChild(item);
-                                detailsContainer.appendChild(status);
+                                tbodyHtml += `<div class="event-item" title="${event.name} (${event.category}) - ${event.status}">${event.name} <span class="category">${event.category}</span></div>`;
+                                tbodyHtml += `<div class="event-status">${event.status}</div>`;
                             });
-                            cell.appendChild(detailsContainer);
+                            tbodyHtml += '</div>';
                         }
+                        tbodyHtml += '</td>';
                         date++;
                     }
                 }
+                tbodyHtml += '</tr>';
             }
-            monthGrid.appendChild(table);
-            container.appendChild(monthGrid);
+            tbodyHtml += '</tbody></table></div>';
+            calendarHTML += tbodyHtml;
         });
+        container.innerHTML = calendarHTML;
     }
     
-    // Generate calendar when the tab is shown
     const marathonTab = document.querySelector('#marathon-tab');
     if (marathonTab) {
-        marathonTab.addEventListener('shown.bs.tab', function (event) {
+        marathonTab.addEventListener('shown.bs.tab', function () {
             const container = document.getElementById('marathon-calendar-container');
-            // Generate only if it hasn't been generated before
             if (container && container.innerHTML.trim() === '') {
                 generateMarathonCalendar();
             }
@@ -1579,30 +1591,13 @@ async function loadCommentCounts() {
         if(footprintsTab) {
             footprintsTab.addEventListener('shown.bs.tab', function() {
                 if (!cityMap) {
-                  cityMap = L.map('cityMap', {
-                      center: [36, 108], // Centered on China
-                      zoom: 4,
-                      zoomControl: false,
-                  });
-  
-                  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
-                      attribution: '',
-                      subdomains: 'abcd',
-                      minZoom: 3,
-                      maxZoom: 18
-                  }).addTo(cityMap);
-                  cityMap.attributionControl.setPrefix('')
+                  cityMap = L.map('cityMap', { center: [36, 108], zoom: 4, zoomControl: false });
+                  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', { attribution: '', subdomains: 'abcd', minZoom: 3, maxZoom: 18 }).addTo(cityMap);
+                  cityMap.attributionControl.setPrefix('');
                   
                   {% for city in city_stats %}
                   {% if city.coordinates and city.coordinates|length == 2 %}
-                      L.circleMarker([{{ city.coordinates[0] }}, {{ city.coordinates[1] }}], {
-                          radius: Math.log({{ city.count }}) + 3, // Scale radius based on run count
-                          fillColor: "var(--accent-color)",
-                          color: "var(--bg-color)",
-                          weight: 1.5,
-                          opacity: 1,
-                          fillOpacity: 0.7
-                      }).addTo(cityMap).bindPopup(`<b>{{ city.name }}</b><br>跑步次数: {{ city.count }}<br>总距离: {{ city.distance }}km`);
+                      L.circleMarker([{{ city.coordinates[0] }}, {{ city.coordinates[1] }}], { radius: Math.log({{ city.count }}) + 3, fillColor: "var(--accent-color)", color: "var(--bg-color)", weight: 1.5, opacity: 1, fillOpacity: 0.7 }).addTo(cityMap).bindPopup(`<b>{{ city.name }}</b><br>跑步次数: {{ city.count }}<br>总距离: {{ city.distance }}km`);
                   {% endif %}
                   {% endfor %}
   
@@ -1616,10 +1611,7 @@ async function loadCommentCounts() {
     document.querySelectorAll('.flip-icon-container').forEach(icon => {
         icon.addEventListener('click', (event) => {
             event.stopPropagation();
-            const flipper = icon.closest('.stat-card-flipper');
-            if (flipper) {
-                flipper.classList.toggle('flipped');
-            }
+            icon.closest('.stat-card-flipper').classList.toggle('flipped');
         });
     });
 
@@ -1628,175 +1620,96 @@ async function loadCommentCounts() {
     const tickColor = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim();
     const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
     const annotationColor = getComputedStyle(document.documentElement).getPropertyValue('--bs-code-color').trim();
-    const annotationLabelBg = 'rgba(255, 107, 107, 0.7)';
-
 	const monthlyData = {{ chart_monthly_data|tojson }};
-	const monthlyRunningMonths = monthlyData.filter(d => d > 0).length;
 	const monthlyTotal = monthlyData.reduce((a, b) => a + b, 0);
-	const monthlyAvg = monthlyRunningMonths > 0 ? (monthlyTotal / monthlyRunningMonths) : 0;
-
+	const monthlyAvg = monthlyData.filter(d => d > 0).length > 0 ? (monthlyTotal / monthlyData.filter(d => d > 0).length) : 0;
 	const dailyData = {{ chart_30_days.data|tojson }};
-	const runningDays = dailyData.filter(d => d > 0).length;
 	const dailyTotal = dailyData.reduce((a, b) => a + b, 0);
-	const dailyAvg = runningDays > 0 ? (dailyTotal / runningDays) : 0; 
-	
+	const dailyAvg = dailyData.filter(d => d > 0).length > 0 ? (dailyTotal / dailyData.filter(d => d > 0).length) : 0; 
 	const yearlyData = {{ chart_yearly_data|tojson }};
-	const runningYears = yearlyData.filter(d => d > 0).length;
 	const yearlyTotal = yearlyData.reduce((a, b) => a + b, 0);
-	const yearlyAvg = runningYears > 0 ? (yearlyTotal / runningYears) : 0;
+	const yearlyAvg = yearlyData.filter(d => d > 0).length > 0 ? (yearlyTotal / yearlyData.filter(d => d > 0).length) : 0;
 	Chart.defaults.font.family = "'Noto Sans SC', sans-serif";
-    const annotationDefaults = (avg, total, labelPrefix) => ({
-      type: 'line',
-      yMin: avg,
-      yMax: avg,
-      borderColor: annotationColor,
-      borderWidth: 1.5,
-      borderDash: [6, 6],
-      label: {
-        content: `总跑量 ${total.toFixed(1)}km / ${labelPrefix} ${avg.toFixed(1)}km`,
-        display: false,
-        position: 'end',
-		yAdjust: 10,
-        backgroundColor: annotationLabelBg,
-        color: '#fff',
-        font: { size: 11, weight: 'bold' },
-        padding: { x: 5, y: 3 },
-        borderRadius: 4
-      }
-    });
+    const annotationDefaults = (avg, total, labelPrefix) => ({ type: 'line', yMin: avg, yMax: avg, borderColor: annotationColor, borderWidth: 1.5, borderDash: [6, 6] });
 	
     const dailyCtx = document.getElementById('dailyDistanceChart').getContext('2d');
-	dailyDistanceChart = new Chart(dailyCtx, { type: 'bar', data: { labels: {{ chart_30_days.labels|tojson }}, datasets: [{ label: '距离 (km)', data: dailyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 2, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 }}}, plugins: { legend: { display: false }, title: { display: true, text: `总 ${dailyTotal.toFixed(1)}km / 日均 ${dailyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(dailyAvg, dailyTotal, '日均') } } } } });
+	dailyDistanceChart = new Chart(dailyCtx, { type: 'bar', data: { labels: {{ chart_30_days.labels|tojson }}, datasets: [{ label: '距离 (km)', data: dailyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 2, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 }}}, plugins: { legend: { display: false }, title: { display: true, text: `总 ${dailyTotal.toFixed(1)}km / 日均 ${dailyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(dailyAvg) } } } } });
     const monthlyCtx = document.getElementById('monthlyDistanceChart').getContext('2d');
-	monthlyDistanceChart = new Chart(monthlyCtx, { type: 'bar', data: { labels: {{ chart_monthly_labels|tojson }}, datasets: [{ label: '距离 (km)', data: monthlyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 4, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 }}}, plugins: { legend: { display: false }, title: { display: true, text: `总 ${monthlyTotal.toFixed(1)}km / 月均 ${monthlyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(monthlyAvg, monthlyTotal, '月均') } } } } });
+	monthlyDistanceChart = new Chart(monthlyCtx, { type: 'bar', data: { labels: {{ chart_monthly_labels|tojson }}, datasets: [{ label: '距离 (km)', data: monthlyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 4, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 }}}, plugins: { legend: { display: false }, title: { display: true, text: `总 ${monthlyTotal.toFixed(1)}km / 月均 ${monthlyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(monthlyAvg) } } } } });
     const yearlyCtx = document.getElementById('yearlyDistanceChart').getContext('2d');
-	yearlyDistanceChart = new Chart(yearlyCtx, { type: 'bar', data: { labels: {{ chart_yearly_labels|tojson }}, datasets: [{ label: '距离 (km)', data: yearlyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 4, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 } } }, plugins: { legend: { display: false }, title: { display: true, text: `总 ${yearlyTotal.toFixed(1)}km / 年均 ${yearlyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(yearlyAvg, yearlyTotal, '年均') } } } } });
+	yearlyDistanceChart = new Chart(yearlyCtx, { type: 'bar', data: { labels: {{ chart_yearly_labels|tojson }}, datasets: [{ label: '距离 (km)', data: yearlyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 4, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 } } }, plugins: { legend: { display: false }, title: { display: true, text: `总 ${yearlyTotal.toFixed(1)}km / 年均 ${yearlyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(yearlyAvg) } } } } });
 
-    const chartToggleButtons = document.querySelectorAll('#chart-toggle .btn');
-    const chartContainers = { monthly: document.getElementById('monthlyChartContainer'), daily: document.getElementById('dailyChartContainer'), yearly: document.getElementById('yearlyChartContainer') };
-    chartToggleButtons.forEach(button => { button.addEventListener('click', function() { chartToggleButtons.forEach(btn => btn.classList.remove('active')); this.classList.add('active'); const chartType = this.dataset.chart; Object.values(chartContainers).forEach(c => c.style.display = 'none'); chartContainers[chartType].style.display = 'block'; }); });
+    document.querySelectorAll('#chart-toggle .btn').forEach(button => { button.addEventListener('click', function() { document.querySelectorAll('#chart-toggle .btn').forEach(btn => btn.classList.remove('active')); this.classList.add('active'); const chartType = this.dataset.chart; Object.values({ monthly: document.getElementById('monthlyChartContainer'), daily: document.getElementById('dailyChartContainer'), yearly: document.getElementById('yearlyChartContainer') }).forEach(c => c.style.display = 'none'); document.getElementById(`${chartType}ChartContainer`).style.display = 'block'; }); });
 
     // --- DATA TAB LOGIC ---
     const dataPane = document.getElementById('data-pane');
     if (dataPane) {
-        const viewToggle = dataPane.querySelector('#data-view-toggle');
-        const summaryView = dataPane.querySelector('#summary-data-view');
-        const yearlyView = dataPane.querySelector('#yearly-data-view');
-        const summaryControlsCollapse = dataPane.querySelector('#data-controls-collapse');
-        const summaryControlsToggleButton = dataPane.querySelector('#summary-controls-toggle');
-        
-        const distFilterToggle = dataPane.querySelector('#data-dist-filter-toggle');
-        const paceFilterToggle = dataPane.querySelector('#data-pace-filter-toggle');
-        const cityFilter = dataPane.querySelector('#data-city-filter');
-        const startDateFilter = dataPane.querySelector('#date-filter-start');
-        const endDateFilter = dataPane.querySelector('#date-filter-end');
-        const summaryTableBody = dataPane.querySelector('#summary-table-body');
-        const sortableHeaders = dataPane.querySelectorAll('.sortable-header');
-
-        allRunRows = Array.from(summaryTableBody.querySelectorAll('tr'));
-
+        allRunRows = Array.from(document.querySelectorAll('#summary-table-body tr'));
         const updateDataView = () => {
-            // Get filter values
-            const minDist = parseFloat(distFilterToggle.querySelector('.active').dataset.dist);
-            const maxPace = parseFloat(paceFilterToggle.querySelector('.active').dataset.pace);
-            const selectedCity = cityFilter.value;
-            const startDate = startDateFilter.value;
-            const endDate = endDateFilter.value;
-
-            // Get sort values from table header
-            const activeSortHeader = dataPane.querySelector('.sortable-header[aria-sort]');
+            const minDist = parseFloat(document.querySelector('#data-dist-filter-toggle .active').dataset.dist);
+            const maxPace = parseFloat(document.querySelector('#data-pace-filter-toggle .active').dataset.pace);
+            const selectedCity = document.getElementById('data-city-filter').value;
+            const startDate = document.getElementById('date-filter-start').value;
+            const endDate = document.getElementById('date-filter-end').value;
+            const activeSortHeader = document.querySelector('.sortable-header[aria-sort]');
             const sortProp = activeSortHeader ? activeSortHeader.dataset.sort : 'date';
             const sortOrder = activeSortHeader ? activeSortHeader.getAttribute('aria-sort') : 'descending';
 
-            // 1. Filter
             let filteredRows = allRunRows.filter(row => {
-                const runDist = parseFloat(row.dataset.distance);
-                const runPaceSecs = parsePaceToSeconds(row.dataset.paceStr);
-                const runCity = row.dataset.city;
-                const runDate = row.dataset.date;
-
-                const distMatch = runDist >= minDist;
-                const paceMatch = runPaceSecs <= maxPace;
-                const cityMatch = (selectedCity === 'all') || (runCity === selectedCity);
-                const startDateMatch = (!startDate || runDate >= startDate);
-                const endDateMatch = (!endDate || runDate <= endDate);
-                
-                const isVisible = distMatch && paceMatch && cityMatch && startDateMatch && endDateMatch;
+                const isVisible = (parseFloat(row.dataset.distance) >= minDist) &&
+                                (parsePaceToSeconds(row.dataset.paceStr) <= maxPace) &&
+                                (selectedCity === 'all' || row.dataset.city === selectedCity) &&
+                                (!startDate || row.dataset.date >= startDate) &&
+                                (!endDate || row.dataset.date <= endDate);
                 row.style.display = isVisible ? '' : 'none';
                 return isVisible;
             });
             
-            // 2. Sort
             filteredRows.sort((a, b) => {
                 let valA, valB;
-                if (sortProp === 'distance') {
-                    valA = parseFloat(a.dataset.distance);
-                    valB = parseFloat(b.dataset.distance);
-                } else if (sortProp === 'pace') {
-                    valA = (-1)*parsePaceToSeconds(a.dataset.paceStr);
-                    valB = (-1)*parsePaceToSeconds(b.dataset.paceStr);
-                } else { // date
-                    valA = a.dataset.date;
-                    valB = b.dataset.date;
-                }
-
+                if (sortProp === 'distance') { [valA, valB] = [parseFloat(a.dataset.distance), parseFloat(b.dataset.distance)]; } 
+                else if (sortProp === 'pace') { [valA, valB] = [(-1)*parsePaceToSeconds(a.dataset.paceStr), (-1)*parsePaceToSeconds(b.dataset.paceStr)]; } 
+                else { [valA, valB] = [a.dataset.date, b.dataset.date]; }
                 if (valA < valB) return sortOrder === 'ascending' ? -1 : 1;
                 if (valA > valB) return sortOrder === 'ascending' ? 1 : -1;
                 return 0;
             });
-            
-            // 3. Re-append to DOM
-            summaryTableBody.append(...filteredRows);
+            document.getElementById('summary-table-body').append(...filteredRows);
         };
 
-        viewToggle.addEventListener('click', (e) => {
+        document.getElementById('data-view-toggle').addEventListener('click', (e) => {
             if (!e.target.matches('button')) return;
-            const view = e.target.dataset.view;
-
-            viewToggle.querySelector('.active').classList.remove('active');
+            document.querySelector('#data-view-toggle .active').classList.remove('active');
             e.target.classList.add('active');
-
-            if (view === 'summary') {
-                summaryView.style.display = '';
-                yearlyView.style.display = 'none';
-                summaryControlsCollapse.classList.add('d-lg-block');
-                summaryControlsToggleButton.style.display = '';
-                updateDataView();
-            } else {
-                summaryView.style.display = 'none';
-                yearlyView.style.display = '';
-                summaryControlsCollapse.classList.remove('show');
-                summaryControlsCollapse.classList.remove('d-lg-block');
-                summaryControlsToggleButton.style.display = 'none';
-            }
+            const isSummary = e.target.dataset.view === 'summary';
+            document.getElementById('summary-data-view').style.display = isSummary ? '' : 'none';
+            document.getElementById('yearly-data-view').style.display = isSummary ? 'none' : '';
+            document.getElementById('data-controls-collapse').classList.toggle('d-lg-block', isSummary);
+            document.getElementById('summary-controls-toggle').style.display = isSummary ? '' : 'none';
+            if(isSummary) updateDataView();
         });
 
-        sortableHeaders.forEach(header => {
+        document.querySelectorAll('.sortable-header').forEach(header => {
             header.addEventListener('click', () => {
                 const currentSort = header.getAttribute('aria-sort');
-                let newSort;
-                if (currentSort === 'descending') {
-                    newSort = 'ascending';
-                } else {
-                    newSort = 'descending';
-                }
-
-                sortableHeaders.forEach(h => h.removeAttribute('aria-sort'));
+                let newSort = (currentSort === 'descending') ? 'ascending' : 'descending';
+                document.querySelectorAll('.sortable-header').forEach(h => h.removeAttribute('aria-sort'));
                 header.setAttribute('aria-sort', newSort);
                 updateDataView();
             });
         });
 
-        const filterElements = [distFilterToggle, paceFilterToggle, cityFilter, startDateFilter, endDateFilter];
-        filterElements.forEach(el => {
-            const eventType = el.tagName === 'SELECT' || el.tagName === 'INPUT' ? 'change' : 'click';
-            el.addEventListener(eventType, (e) => {
-                if(e.currentTarget.id.includes('filter-toggle') && e.target.tagName === 'BUTTON') {
-                    e.currentTarget.querySelector('.active').classList.remove('active');
+        [...document.querySelectorAll('#data-dist-filter-toggle, #data-pace-filter-toggle')].forEach(group => {
+            group.addEventListener('click', e => {
+                if(e.target.tagName === 'BUTTON') {
+                    group.querySelector('.active').classList.remove('active');
                     e.target.classList.add('active');
+                    updateDataView();
                 }
-                updateDataView();
             });
+        });
+        ['data-city-filter', 'date-filter-start', 'date-filter-end'].forEach(id => {
+            document.getElementById(id).addEventListener('change', updateDataView);
         });
         
         updateDataView();
@@ -1805,111 +1718,66 @@ async function loadCommentCounts() {
     // --- EVENTS TAB LOGIC ---
     const eventsPane = document.getElementById('events-pane');
     if (eventsPane) {
-        const viewToggle = eventsPane.querySelector('#events-view-toggle');
-        const categoryView = eventsPane.querySelector('#events-category-view');
-        const timelineView = eventsPane.querySelector('#events-timeline-view');
+        eventsPane.querySelector('#events-view-toggle').addEventListener('click', (e) => {
+            if (!e.target.matches('button')) return;
+            eventsPane.querySelector('#events-view-toggle .active').classList.remove('active');
+            e.target.classList.add('active');
+            const isCategory = e.target.dataset.view === 'category';
+            eventsPane.querySelector('#events-category-view').style.display = isCategory ? '' : 'none';
+            eventsPane.querySelector('#events-timeline-view').style.display = isCategory ? 'none' : 'block';
+        });
+    }
 
-        if (viewToggle && categoryView && timelineView) {
-            viewToggle.addEventListener('click', (e) => {
-                const button = e.target.closest('button');
-                if (!button) return;
-
-                const view = button.dataset.view;
-
-                viewToggle.querySelector('.active').classList.remove('active');
-                button.classList.add('active');
-
-                if (view === 'category') {
-                    categoryView.style.display = '';
-                    timelineView.style.display = 'none';
-                } else { // timeline
-                    categoryView.style.display = 'none';
-                    timelineView.style.display = 'block';
-                }
-            });
+    // --- CERTIFICATE & COMMENT MODAL LOGIC ---
+    document.addEventListener('click', async e => {
+        if (e.target.closest('.certificate-link')) {
+            e.preventDefault();
+            const imgUrl = e.target.closest('.certificate-link').dataset.img;
+            if(imgUrl) {
+                document.getElementById('certificateImage').src = imgUrl;
+                new bootstrap.Modal(document.getElementById('certificateModal')).show();
+            }
         }
-    }
-
-
-    // --- CERTIFICATE MODAL LOGIC ---
-
-
-document.querySelectorAll('.comment-link').forEach(link => {
-  link.addEventListener('click', async (e) => {
-    e.preventDefault();
-    new bootstrap.Modal(document.getElementById('commentModal')).show();
-    const runId = link.dataset.runId;
-    document.getElementById('commentRunId').value = runId;
-    document.getElementById('commentText').value = '';
-    const listContainer = document.getElementById('commentList');
-    listContainer.innerHTML = '<div class="text-muted">加载中...</div>';
-    try {
-      const res = await fetch(`${commentApiBase}/comments?runId=${encodeURIComponent(runId)}`);
-      const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        listContainer.innerHTML = data.map(c => {
-  const nick = c.nickname || '🌱 匿名';
-  const date = new Date(c.ts).toLocaleString();
-  return `<div class="border-bottom py-1">
-            <small class="text-muted">${nick} · ${date}</small><br>${c.text}
-          </div>`;
-}).join('');
-      } else {
-        listContainer.innerHTML = '<div class="text-muted">暂无评论</div>';
-      }
-    } catch {
-      listContainer.innerHTML = '<div class="text-danger">评论加载失败</div>';
-    }
-  });
-});
-
-document.getElementById('submitComment').addEventListener('click', async () => {
-    const runId = document.getElementById('commentRunId').value;
-    const text = document.getElementById('commentText').value.trim();
-    if (!text) return;
-
-    let nicknameForComment;
-    const adminKey = localStorage.getItem('run_admin_key');
-    const secretKey = 'runpage123';
-
-    if (adminKey === secretKey) {
-        nicknameForComment = '👑 我说';
-    } else {
-        const profile = JSON.parse(localStorage.getItem('run_profile'));
-        nicknameForComment = `${profile.icon} ${profile.nickname}`;
-    }
-
-    const res = await fetch(`${commentApiBase}/comment`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ runId, text, nickname: nicknameForComment })
+        if (e.target.closest('.comment-link')) {
+            e.preventDefault();
+            const link = e.target.closest('.comment-link');
+            const runId = link.dataset.runId;
+            const commentModalEl = document.getElementById('commentModal');
+            document.getElementById('commentRunId').value = runId;
+            document.getElementById('commentText').value = '';
+            const listContainer = document.getElementById('commentList');
+            listContainer.innerHTML = '<div class="text-muted">加载中...</div>';
+            new bootstrap.Modal(commentModalEl).show();
+            try {
+                const res = await fetch(`${commentApiBase}/comments?runId=${encodeURIComponent(runId)}`);
+                const data = await res.json();
+                listContainer.innerHTML = (Array.isArray(data) && data.length > 0) 
+                    ? data.map(c => `<div class="border-bottom py-1"><small class="text-muted">${c.nickname || '🌱 匿名'} · ${new Date(c.ts).toLocaleString()}</small><br>${c.text}</div>`).join('')
+                    : '<div class="text-muted">暂无评论</div>';
+            } catch {
+                listContainer.innerHTML = '<div class="text-danger">评论加载失败</div>';
+            }
+        }
     });
 
-    if (res.ok) {
-        document.getElementById('commentText').value = '';
-        const countEl = document.querySelector(`.comment-count[data-run-id="${runId}"]`);
-        countEl.textContent = parseInt(countEl.textContent, 10) + 1;
-        bootstrap.Modal.getInstance(document.getElementById('commentModal')).hide();
-    } else {
-        alert('提交失败');
-    }
-});
-
-
-
-    document.querySelectorAll('.certificate-link').forEach(link => {
-      link.addEventListener('click', function(e) {
-        e.preventDefault();
-        const imgUrl = this.getAttribute('data-img');
-        if(imgUrl) {
-          document.getElementById('certificateImage').src = imgUrl;
-          new bootstrap.Modal(document.getElementById('certificateModal')).show();
+    document.getElementById('submitComment').addEventListener('click', async () => {
+        const runId = document.getElementById('commentRunId').value;
+        const text = document.getElementById('commentText').value.trim();
+        if (!text) return;
+        let nicknameForComment = '👑 我说';
+        if (localStorage.getItem('run_admin_key') !== 'runpage123') {
+            const profile = JSON.parse(localStorage.getItem('run_profile'));
+            nicknameForComment = `${profile.icon} ${profile.nickname}`;
         }
-      });
-    });
-
-    document.getElementById('certificateModal').addEventListener('hidden.bs.modal', function() {
-      document.getElementById('certificateImage').src = '';
+        const res = await fetch(`${commentApiBase}/comment`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ runId, text, nickname: nicknameForComment }) });
+        if (res.ok) {
+            document.getElementById('commentText').value = '';
+            const countEl = document.querySelector(`.comment-count[data-run-id="${runId}"]`);
+            countEl.textContent = parseInt(countEl.textContent, 10) + 1;
+            bootstrap.Modal.getInstance(document.getElementById('commentModal')).hide();
+        } else {
+            alert('提交失败');
+        }
     });
   });
 
@@ -1919,3 +1787,4 @@ document.getElementById('submitComment').addEventListener('click', async () => {
     if(yearlyDistanceChart) yearlyDistanceChart.destroy();
   });
 </script>
+</html>
