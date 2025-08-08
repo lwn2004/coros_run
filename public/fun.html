@@ -11797,7 +11797,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-08-08 18:35:11 
+         | Last updated: 2025-08-08 22:22:42 
     </small>
 </footer>
 
@@ -11873,8 +11873,9 @@
 
     function displayUserProfile() {
         try {
-          let profile.icon = "👑";
-          let profile.nickname = "我说";  
+          let profile = {icon: "👑", nickname: "我说"};
+          //let profile.icon = "👑";
+          //let profile.nickname = "我说";  
           if (localStorage.getItem('run_admin_key') !== 'runpage123') {
             const profile = JSON.parse(localStorage.getItem('run_profile'));
           }
@@ -12045,6 +12046,7 @@
         {"date": "2025-11-30", "name": "上海", "category": "全马", "status": "待抽签 (8/25)"},
         {"date": "2025-11-30", "name": "顺德", "category": "半马", "status": "报名未开始"},
         {"date": "2025-12-07", "name": "深圳", "category": "全马", "status": "报名未开始"},
+        {"date": "2025-12-07", "name": "珠海", "category": "全马", "status": "报名未开始"},
         {"date": "2025-12-14", "name": "汕头", "category": "半马", "status": "报名未开始"},
         {"date": "2025-12-14", "name": "南山", "category": "半马", "status": "报名未开始"},
         {"date": "2025-12-21", "name": "广州", "category": "全马", "status": "报名未开始"},
