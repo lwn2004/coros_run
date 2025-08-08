@@ -1310,8 +1310,9 @@
 
     function displayUserProfile() {
         try {
-          let profile.icon = "👑";
-          let profile.nickname = "我说";  
+          let profile = {icon: "👑", nickname: "我说"};
+          //let profile.icon = "👑";
+          //let profile.nickname = "我说";  
           if (localStorage.getItem('run_admin_key') !== 'runpage123') {
             const profile = JSON.parse(localStorage.getItem('run_profile'));
           }
