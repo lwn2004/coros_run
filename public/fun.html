@@ -11679,7 +11679,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-08-08 13:30:04 
+         | Last updated: 2025-08-08 13:57:14 
     </small>
 </footer>
 
@@ -11951,8 +11951,12 @@ function getOrGenerateNickname() {
                         dayNumber.className = 'day-number';
                         dayNumber.textContent = date;
                         cell.appendChild(dayNumber);
-
-                        const eventsOnThisDay = monthEvents.filter(e => new Date(e.date).getDate() + 1 === date);
+                        
+                        // *** FIX STARTS HERE ***
+                        // Correctly filter events for the current day by parsing the day from the string,
+                        // avoiding timezone issues.
+                        const eventsOnThisDay = monthEvents.filter(e => parseInt(e.date.substring(8, 10), 10) === date);
+                        // *** FIX ENDS HERE ***
 
                         if (eventsOnThisDay.length > 0) {
                             cell.classList.add('event');
