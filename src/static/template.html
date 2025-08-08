@@ -1390,8 +1390,12 @@ function getOrGenerateNickname() {
                         dayNumber.className = 'day-number';
                         dayNumber.textContent = date;
                         cell.appendChild(dayNumber);
-
-                        const eventsOnThisDay = monthEvents.filter(e => new Date(e.date).getDate() + 1 === date);
+                        
+                        // *** FIX STARTS HERE ***
+                        // Correctly filter events for the current day by parsing the day from the string,
+                        // avoiding timezone issues.
+                        const eventsOnThisDay = monthEvents.filter(e => parseInt(e.date.substring(8, 10), 10) === date);
+                        // *** FIX ENDS HERE ***
 
                         if (eventsOnThisDay.length > 0) {
                             cell.classList.add('event');
