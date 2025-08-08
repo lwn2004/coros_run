@@ -4,14 +4,12 @@
   <meta charset="UTF-8">
   <title>步履不停 - 已绕地球{{ "%.2f"|format(overall_stats.dist_km/40075.017) }}圈儿</title>
   <link rel="icon" type="image/png" href="https://run.linwn.net/images/favicon.png">
-	<!-- Open Graph / 社交分享卡片 -->
 	<meta property="og:title" content="步履不停 - 我的四万公里跑量挑战" />
 	<meta property="og:description" content="一个跑者的跑步记录网站，记录跑量与坚持。你也可以挑战地球一圈！" />
   <meta property="og:image" content="https://run.linwn.net/images/card.png" />
 	<meta property="og:url" content="https://run.linwn.net/fun" />
 	<meta property="og:type" content="website" />
 
-	<!-- 微信/QQ 兼容 -->
 	<meta name="twitter:card" content="https://run.linwn.net/images/card.png" />
 	<meta name="twitter:title" content="步履不停 - 我的四万公里跑量挑战" />
 	<meta name="twitter:description" content="一个跑者的跑步记录网站，记录跑量与坚持。你也可以挑战地球一圈！" />
@@ -41,6 +39,7 @@
       --success-color: #20c997;
       --trophy-color: #fcc419;
       --hover-bg: #3a3b3c;
+      --marathon-color: #ff8700;
     }
     html {
       scrollbar-gutter: stable;
@@ -456,6 +455,78 @@
     .trophy-color-text { color: var(--trophy-color); }
     .accent-color-text { color: var(--accent-color); }
 
+    /* Marathon Calendar Styles */
+    .marathon-calendar-container .month-grid {
+        background-color: var(--card-bg);
+        padding: 1rem;
+        border-radius: 0.75rem;
+        margin-bottom: 2rem;
+    }
+    .calendar-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+    .calendar-table th {
+        text-align: center;
+        color: var(--text-secondary);
+        font-weight: 500;
+        font-size: 0.8rem;
+        padding-bottom: 0.5rem;
+    }
+    .calendar-table td {
+        border: 1px solid var(--border-color);
+        height: 110px;
+        vertical-align: top;
+        padding: 5px;
+        transition: background-color 0.2s;
+        overflow: hidden;
+    }
+    .calendar-table td:not(.empty) {
+        background-color: var(--hover-bg);
+    }
+    .day-number {
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+    .calendar-table td.event {
+        background-color: #3b2f21;
+        border: 1px solid var(--marathon-color);
+        position: relative;
+    }
+    .day-number.has-event {
+        color: var(--marathon-color);
+    }
+    .event-details {
+      padding-top: 2px;
+    }
+    .event-item {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        background-color: rgba(0,0,0,0.2);
+        border-radius: 4px;
+        padding: 2px 4px;
+        margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .event-item .category {
+      font-size: 0.8em;
+      padding: 1px 4px;
+      border-radius: 3px;
+      background-color: var(--marathon-color);
+      color: var(--bg-color);
+      margin-left: 4px;
+      font-weight: bold;
+    }
+    .event-status {
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+    }
+
   </style>
 </head>
 <body>
@@ -471,6 +542,9 @@
     </li>
     <li class="nav-item" role="presentation">
       <button class="nav-link" id="data-tab" data-bs-toggle="tab" data-bs-target="#data-pane" type="button" role="tab" aria-controls="data-pane" aria-selected="false">数据</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="marathon-tab" data-bs-toggle="tab" data-bs-target="#marathon-pane" type="button" role="tab" aria-controls="marathon-pane" aria-selected="false">马赛</button>
     </li>
     <li class="nav-item" role="presentation">
       <button class="nav-link" id="events-tab" data-bs-toggle="tab" data-bs-target="#events-pane" type="button" role="tab" aria-controls="events-pane" aria-selected="false">事件</button>
@@ -817,6 +891,11 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <div class="tab-pane fade" id="marathon-pane" role="tabpanel" aria-labelledby="marathon-tab" tabindex="0">
+        <div id="marathon-calendar-container">
+            </div>
     </div>
 
     <div class="tab-pane fade" id="events-pane" role="tabpanel" aria-labelledby="events-tab" tabindex="0">
@@ -1172,8 +1251,8 @@ function getOrGenerateNickname() {
     }, false);
     
     tabContent.addEventListener('touchend', function(e) {
-      if (e.target.closest('#cityMap')) {
-        return; // 如果在地图上操作，则不触发Tab切换
+      if (e.target.closest('#cityMap') || e.target.closest('.calendar-table')) {
+        return; // 如果在地图或日历上操作，则不触发Tab切换
       }
       const endX = e.changedTouches[0].clientX;
       const endY = e.changedTouches[0].clientY;
@@ -1228,6 +1307,134 @@ function getOrGenerateNickname() {
     localStorage.setItem('run_admin_key', params.get('admin_key'));
   }
     loadCommentCounts();
+
+    // --- MARATHON CALENDAR LOGIC ---
+    const marathonEvents = [
+        {"date": "2025-10-26", "name": "长沙", "category": "半马", "status": "待抽签 (8/27)"},
+        {"date": "2025-11-09", "name": "南昌", "category": "半马", "status": "待抽签"},
+        {"date": "2025-11-16", "name": "南京", "category": "全马", "status": "待抽签 (8/18)"},
+        {"date": "2025-11-30", "name": "上海", "category": "全马", "status": "待抽签 (8/25)"},
+        {"date": "2025-11-30", "name": "顺德半程", "category": "半马", "status": "报名未开始"},
+        {"date": "2025-12-07", "name": "深圳", "category": "全马", "status": "报名未开始"},
+        {"date": "2025-12-14", "name": "汕头", "category": "半马", "status": "报名未开始"},
+        {"date": "2025-12-14", "name": "深圳南山半程", "category": "半马", "status": "报名未开始"},
+        {"date": "2025-12-21", "name": "广州", "category": "全马", "status": "报名未开始"},
+        {"date": "2026-01-03", "name": "顺德容桂", "category": "全马", "status": "报名未开始"},
+        {"date": "2026-01-11", "name": "厦门", "category": "全马", "status": "报名未开始"}
+    ];
+
+    function generateMarathonCalendar() {
+        const container = document.getElementById('marathon-calendar-container');
+        if (!container) return;
+
+        const eventsByMonth = marathonEvents.reduce((acc, event) => {
+            const month = event.date.substring(0, 7); // YYYY-MM
+            if (!acc[month]) {
+                acc[month] = [];
+            }
+            acc[month].push(event);
+            return acc;
+        }, {});
+
+        const sortedMonths = Object.keys(eventsByMonth).sort();
+        
+        if (sortedMonths.length === 0) {
+            container.innerHTML = '<div class="content-card text-center text-body-secondary">暂无赛事计划</div>';
+            return;
+        }
+
+        sortedMonths.forEach(monthStr => {
+            const [year, month] = monthStr.split('-').map(Number);
+            const monthEvents = eventsByMonth[monthStr];
+
+            const monthGrid = document.createElement('div');
+            monthGrid.className = 'month-grid';
+            
+            const title = document.createElement('h4');
+            title.className = 'mb-3';
+            title.textContent = `${year}年 ${month}月`;
+            monthGrid.appendChild(title);
+
+            const table = document.createElement('table');
+            table.className = 'calendar-table';
+
+            // Table Header
+            const thead = table.createTHead();
+            const headerRow = thead.insertRow();
+            const daysOfWeek = ['日', '一', '二', '三', '四', '五', '六'];
+            daysOfWeek.forEach(day => {
+                const th = document.createElement('th');
+                th.textContent = day;
+                headerRow.appendChild(th);
+            });
+
+            // Table Body
+            const tbody = table.createTBody();
+            const firstDay = new Date(year, month - 1, 1);
+            const lastDay = new Date(year, month, 0);
+            const daysInMonth = lastDay.getDate();
+            const startingDay = firstDay.getDay();
+
+            let date = 1;
+            for (let i = 0; i < 6; i++) { // Max 6 rows
+                if (date > daysInMonth) break;
+                const row = tbody.insertRow();
+                for (let j = 0; j < 7; j++) {
+                    const cell = row.insertCell();
+                    if (i === 0 && j < startingDay) {
+                        cell.classList.add('empty');
+                    } else if (date > daysInMonth) {
+                        cell.classList.add('empty');
+                    } else {
+                        const dayNumber = document.createElement('div');
+                        dayNumber.className = 'day-number';
+                        dayNumber.textContent = date;
+                        cell.appendChild(dayNumber);
+
+                        const eventsOnThisDay = monthEvents.filter(e => new Date(e.date).getDate() + 1 === date);
+
+                        if (eventsOnThisDay.length > 0) {
+                            cell.classList.add('event');
+                            dayNumber.classList.add('has-event');
+                            const detailsContainer = document.createElement('div');
+                            detailsContainer.className = 'event-details';
+
+                            eventsOnThisDay.forEach(event => {
+                                const item = document.createElement('div');
+                                item.className = 'event-item';
+                                item.innerHTML = `${event.name} <span class="category">${event.category}</span>`;
+
+                                const status = document.createElement('div');
+                                status.className = 'event-status';
+                                status.textContent = event.status;
+                                
+                                detailsContainer.appendChild(item);
+                                detailsContainer.appendChild(status);
+                            });
+                            cell.appendChild(detailsContainer);
+                        }
+                        date++;
+                    }
+                }
+            }
+            monthGrid.appendChild(table);
+            container.appendChild(monthGrid);
+        });
+    }
+    
+    // Generate calendar when the tab is shown
+    const marathonTab = document.querySelector('#marathon-tab');
+    if (marathonTab) {
+        marathonTab.addEventListener('shown.bs.tab', function (event) {
+            const container = document.getElementById('marathon-calendar-container');
+            // Generate only if it hasn't been generated before
+            if (container && container.innerHTML.trim() === '') {
+                generateMarathonCalendar();
+            }
+        }, { once: false }); // allow re-checking, but generation is idempotent
+    }
+
+
 		// --- MAP LOGIC ---
         const footprintsTab = document.querySelector('#footprints-tab');
         if(footprintsTab) {
