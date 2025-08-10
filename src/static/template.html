@@ -416,7 +416,7 @@
 
     #cityMap {
       width: 100%;
-      height: 500px;
+      height: 400px;
       background-color: var(--card-bg);
       border-radius: .75rem;
     }
@@ -515,7 +515,6 @@
         background-color: var(--card-bg);
         padding: 1.5rem;
         border-radius: 0.75rem;
-        margin-bottom: 2rem;
     }
     .calendar-table {
         width: 100%;
@@ -536,6 +535,10 @@
         padding: 5px;
         transition: background-color 0.2s;
         overflow: hidden;
+    }
+    .calendar-table td.empty {
+       background-color: transparent;
+       border: 1px solid transparent;
     }
     .calendar-table td:not(.empty) {
         background-color: var(--hover-bg);
@@ -581,10 +584,6 @@
         font-size: 0.7rem;
         color: var(--text-secondary);
     }
-    /* Mobile list view for calendar */
-    .calendar-list-view {
-        display: none;
-    }
     .calendar-list-item {
         display: flex;
         gap: 1rem;
@@ -621,16 +620,20 @@
         color: var(--text-secondary);
     }
 
+    /* Logic for showing/hiding calendar views */
+    @media (min-width: 768px) {
+      .calendar-list-view { display: none; }
+      .calendar-grid-view { display: block; }
+    }
     @media (max-width: 767.98px) {
-        .calendar-table {
-            display: none;
-        }
-        .calendar-list-view {
-            display: block;
-        }
-        .marathon-calendar-container .month-grid {
-            padding: 1rem;
-        }
+      #marathon-pane.view-grid .calendar-list-view,
+      #marathon-pane.view-list .calendar-grid-view {
+          display: none;
+      }
+      #marathon-pane.view-list .calendar-list-view,
+      #marathon-pane.view-grid .calendar-grid-view {
+          display: block;
+      }
     }
 
   </style>
@@ -656,13 +659,10 @@
         <button class="nav-link" id="data-tab" data-bs-toggle="tab" data-bs-target="#data-pane" type="button" role="tab" aria-controls="data-pane" aria-selected="false" data-hash="data">数据</button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="marathon-tab" data-bs-toggle="tab" data-bs-target="#marathon-pane" type="button" role="tab" aria-controls="marathon-pane" aria-selected="false" data-hash="marathon">马赛</button>
+            <button class="nav-link" id="marathon-tab" data-bs-toggle="tab" data-bs-target="#marathon-pane" type="button" role="tab" aria-controls="marathon-pane" aria-selected="false" data-hash="marathon">赛历</button>
         </li>
         <li class="nav-item" role="presentation">
         <button class="nav-link" id="events-tab" data-bs-toggle="tab" data-bs-target="#events-pane" type="button" role="tab" aria-controls="events-pane" aria-selected="false" data-hash="events">事件</button>
-        </li>
-        <li class="nav-item" role="presentation">
-        <button class="nav-link" id="footprints-tab" data-bs-toggle="tab" data-bs-target="#footprints-pane" type="button" role="tab" aria-controls="footprints-pane" aria-selected="false" data-hash="footprints">足迹</button>
         </li>
         <li class="nav-item" role="presentation">
         <button class="nav-link" id="about-tab" data-bs-toggle="tab" data-bs-target="#about-pane" type="button" role="tab" aria-controls="about-pane" aria-selected="false" data-hash="about">关于</button>
@@ -1010,8 +1010,106 @@
     </div>
 
     <div class="tab-pane fade" id="marathon-pane" role="tabpanel" aria-labelledby="marathon-tab" tabindex="0">
-        <div id="marathon-calendar-container">
+        {% set marathonEvents = [
+            {"date": "2025-10-26", "name": "长沙", "category": "半马", "status": "待抽签 (8/27)"},
+            {"date": "2025-11-09", "name": "南昌", "category": "半马", "status": "待抽签 (8/22)"},
+            {"date": "2025-11-16", "name": "南京", "category": "全马", "status": "待抽签 (8/18)"},
+            {"date": "2025-11-30", "name": "上海", "category": "全马", "status": "待抽签 (8/25)"},
+            {"date": "2025-11-30", "name": "顺德", "category": "半马", "status": "报名未开始"},
+            {"date": "2025-12-07", "name": "深圳", "category": "全马", "status": "报名未开始"},
+            {"date": "2025-12-14", "name": "汕头", "category": "半马", "status": "报名未开始"},
+            {"date": "2025-12-14", "name": "南山", "category": "半马", "status": "报名未开始"},
+            {"date": "2025-12-21", "name": "广州", "category": "全马", "status": "报名未开始"},
+            {"date": "2026-01-03", "name": "容桂", "category": "全马", "status": "报名未开始"},
+            {"date": "2026-01-11", "name": "厦门", "category": "全马", "status": "报名未开始"}
+        ] %}
+        {% set events_by_month = {} %}
+        {% for event in marathonEvents %}
+            {% set month_key = event.date[:7] %}
+            {% if month_key not in events_by_month %}
+                {% set _ = events_by_month.update({month_key: []}) %}
+            {% endif %}
+            {% set _ = events_by_month[month_key].append(event) %}
+        {% endfor %}
+
+        <div class="d-flex justify-content-end mb-3 d-md-none">
+            <div class="btn-group btn-group-sm" id="calendar-view-toggle" role="group">
+                <button type="button" class="btn active" data-view="list">列表模式</button>
+                <button type="button" class="btn" data-view="grid">表格模式</button>
             </div>
+        </div>
+
+        {% if not events_by_month %}
+            <div class="content-card text-center text-body-secondary">暂无赛事计划</div>
+        {% else %}
+            {% for month_str, month_events in events_by_month.items()|sort %}
+            <div class="month-grid mb-4">
+                <h4 class="mb-3">{{ month_str[:4] }}年 {{ month_str[5:7]|int }}月</h4>
+                
+                <div class="calendar-list-view">
+                    {% for event in month_events|sort(attribute='date') %}
+                        <div class="calendar-list-item">
+                            <div class="list-date">
+                                <div class="day">{{ event.date[8:]|int }}</div>
+                                <div class="weekday">{{ weekdays[event.date] }}</div>
+                            </div>
+                            <div class="list-details">
+                                <div class="name">{{ event.name }} <span class="category">{{ event.category }}</span></div>
+                                <div class="status">{{ event.status }}</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="calendar-grid-view">
+                     <table class="calendar-table">
+                        <thead><tr><th>日</th><th>一</th><th>二</th><th>三</th><th>四</th><th>五</th><th>六</th></tr></thead>
+                        <tbody>
+                            {% set year = month_str[:4]|int %}
+                            {% set month = month_str[5:7]|int %}
+                            {% set first_day_weekday = first_day_of_month(year, month) %}
+                            {% set days_in_month = days_in_month(year, month) %}
+                            {% set date_counter = namespace(d=1) %}
+                            {% for i in range(6) %}
+                                {% if date_counter.d <= days_in_month %}
+                                <tr>
+                                    {% for j in range(7) %}
+                                        {% if i == 0 and j < first_day_weekday %}
+                                            <td class="empty"></td>
+                                        {% elif date_counter.d > days_in_month %}
+                                            <td class="empty"></td>
+                                        {% else %}
+                                            {% set day_events = [] %}
+                                            {% for event in month_events %}
+                                                {% if event.date[8:]|int == date_counter.d %}
+                                                    {% set _ = day_events.append(event) %}
+                                                {% endif %}
+                                            {% endfor %}
+                                            <td class="{% if day_events %}event{% endif %}">
+                                                <div class="day-number {% if day_events %}has-event{% endif %}">{{ date_counter.d }}</div>
+                                                {% if day_events %}
+                                                <div class="event-details">
+                                                    {% for event in day_events %}
+                                                    <div class="event-item" title="{{ event.name }} ({{ event.category }}) - {{ event.status }}">
+                                                        {{ event.name }} <span class="category">{{ event.category }}</span>
+                                                    </div>
+                                                    <div class="event-status">{{ event.status }}</div>
+                                                    {% endfor %}
+                                                </div>
+                                                {% endif %}
+                                            </td>
+                                            {% set date_counter.d = date_counter.d + 1 %}
+                                        {% endif %}
+                                    {% endfor %}
+                                </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                     </table>
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
     </div>
 
     <div class="tab-pane fade" id="events-pane" role="tabpanel" aria-labelledby="events-tab" tabindex="0">
@@ -1122,7 +1220,7 @@
                 <div class="col-lg-6 mb-4">
                     <div class="content-card h-100 d-flex flex-column">
                         <h5 class="card-title mb-3"><i class="bi bi-geo-alt-fill text-primary"></i> 解锁新城市</h5>
-                        <div class="flex-grow-1" style="overflow-y: auto;">
+                        <div class="flex-grow-1" style="overflow-y: auto; max-height: 250px;">
                             {% if city_stats %}
                                 {% for city in city_stats|sort(attribute='first_date', reverse=True) %}
                                     {% if city.first_date %}
@@ -1139,6 +1237,14 @@
                             {% else %}
                                 <div class="text-center py-4 text-body-secondary">暂无城市记录</div>
                             {% endif %}
+                        </div>
+                        <div class="mt-4">
+                            <h6 class="card-title mb-3 small-muted"><i class="bi bi-map-fill"></i> 足迹地图</h6>
+                            <div class="row">
+                                <div class="col-12">
+                                  <div id="cityMap"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1174,30 +1280,6 @@
                 </div>
             </div>
         </div>
-    </div>
-    
-    <div class="tab-pane fade" id="footprints-pane" role="tabpanel" aria-labelledby="footprints-tab" tabindex="0">
-        <div class="row">
-            <div class="col-md-9 mb-4">
-              <div id="cityMap"></div>
-            </div>
-            <div class="col-md-3 mb-4">
-              <div class="content-card h-100">
-                <h5 class="mb-3">城市统计</h5>
-                <p class="small-muted">足迹已遍布 {{ city_stats|length }} 个城市</p>
-                <div class="city-list" style="max-height: 420px; overflow-y: auto;">
-                  {% for city in city_stats %}
-                    <div class="d-flex justify-content-between py-2 border-bottom">
-                      <span>{{ loop.index }}. {{ city.name }}</span>
-                      <div class="text-end">
-                        <span class="text-nowrap">{{ city.count }}次 ({{ city.distance }}km)</span>
-                      </div>
-                    </div>
-                  {% endfor %}
-                </div>
-              </div>
-            </div>
-          </div>
     </div>
     
     <div class="tab-pane fade" id="about-pane" role="tabpanel" aria-labelledby="about-tab" tabindex="0">
@@ -1309,32 +1391,49 @@
     }
 
     function displayUserProfile() {
-        try {
-            const profile = JSON.parse(localStorage.getItem('run_profile'));
-            if (profile) {
-                document.getElementById('user-icon').textContent = profile.icon;
-                document.getElementById('user-nickname').textContent = profile.nickname;
-                document.getElementById('nicknameInput').value = profile.nickname;
+        let profile;
+        const isAdmin = localStorage.getItem('run_role') === 'admin';
+
+        if (isAdmin) {
+            profile = { icon: '👑', nickname: '管理员' };
+        } else {
+            try {
+                profile = JSON.parse(localStorage.getItem('run_profile'));
+                if (!profile || !profile.icon || !profile.nickname) {
+                    throw new Error("Invalid profile");
+                }
+            } catch (e) {
+                profile = generateRandomProfile();
+                localStorage.setItem('run_profile', JSON.stringify(profile));
             }
-        } catch(e) {
-            const profile = generateRandomProfile();
-            localStorage.setItem('run_profile', JSON.stringify(profile));
-            displayUserProfile();
         }
+        
+        document.getElementById('user-icon').textContent = profile.icon;
+        document.getElementById('user-nickname').textContent = profile.nickname;
+        document.getElementById('nicknameInput').value = profile.nickname;
+        
+        // Disable editing for admin
+        document.getElementById('nicknameInput').disabled = isAdmin;
+        document.getElementById('saveProfileButton').style.display = isAdmin ? 'none' : 'inline-block';
     }
 
     function initializeUserProfile() {
-        let profile = localStorage.getItem('run_profile');
-        if (!profile) {
-            profile = generateRandomProfile();
-            localStorage.setItem('run_profile', JSON.stringify(profile));
+        const params = new URLSearchParams(window.location.search);
+        const adminKey = params.get('admin_key');
+        
+        if (adminKey === 'runpage123') {
+            localStorage.setItem('run_role', 'admin');
+            // Clean up URL and reload to ensure key is not exposed
+            const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + window.location.hash;
+            window.history.replaceState({path: newUrl}, '', newUrl);
         }
+
         displayUserProfile();
 
         document.getElementById('saveProfileButton').addEventListener('click', () => {
             const newNickname = document.getElementById('nicknameInput').value.trim();
             if (newNickname) {
-                const currentProfile = JSON.parse(localStorage.getItem('run_profile'));
+                const currentProfile = JSON.parse(localStorage.getItem('run_profile')) || generateRandomProfile();
                 currentProfile.nickname = newNickname;
                 localStorage.setItem('run_profile', JSON.stringify(currentProfile));
                 displayUserProfile();
@@ -1437,10 +1536,6 @@
 
     // --- 页面初始化逻辑 ---
     initializeUserProfile();
-    const params = new URLSearchParams(window.location.search);
-    if (params.has('admin_key')) {
-        localStorage.setItem('run_admin_key', params.get('admin_key'));
-    }
     loadCommentCounts();
 
     // --- URL锚点与选项卡同步逻辑 ---
@@ -1470,125 +1565,28 @@
     activateTabFromHash();
 
 
-    // --- MARATHON CALENDAR LOGIC ---
-    const marathonEvents = [
-        {"date": "2025-10-26", "name": "长沙", "category": "半马", "status": "待抽签 (8/27)"},
-        {"date": "2025-11-09", "name": "南昌", "category": "半马", "status": "待抽签 (8/22)"},
-        {"date": "2025-11-16", "name": "南京", "category": "全马", "status": "待抽签 (8/18)"},
-        {"date": "2025-11-30", "name": "上海", "category": "全马", "status": "待抽签 (8/25)"},
-        {"date": "2025-11-30", "name": "顺德", "category": "半马", "status": "报名未开始"},
-        {"date": "2025-12-07", "name": "深圳", "category": "全马", "status": "报名未开始"},
-        {"date": "2025-12-14", "name": "汕头", "category": "半马", "status": "报名未开始"},
-        {"date": "2025-12-14", "name": "南山", "category": "半马", "status": "报名未开始"},
-        {"date": "2025-12-21", "name": "广州", "category": "全马", "status": "报名未开始"},
-        {"date": "2026-01-03", "name": "容桂", "category": "全马", "status": "报名未开始"},
-        {"date": "2026-01-11", "name": "厦门", "category": "全马", "status": "报名未开始"}
-    ];
-
-    function generateMarathonCalendar() {
-        const container = document.getElementById('marathon-calendar-container');
-        if (!container) return;
-        const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-
-        const eventsByMonth = marathonEvents.reduce((acc, event) => {
-            const month = event.date.substring(0, 7);
-            if (!acc[month]) acc[month] = [];
-            acc[month].push(event);
-            return acc;
-        }, {});
-
-        const sortedMonths = Object.keys(eventsByMonth).sort();
-        
-        if (sortedMonths.length === 0) {
-            container.innerHTML = '<div class="content-card text-center text-body-secondary">暂无赛事计划</div>';
-            return;
-        }
-
-        let calendarHTML = '';
-        sortedMonths.forEach(monthStr => {
-            const [year, month] = monthStr.split('-').map(Number);
-            const monthEvents = eventsByMonth[monthStr];
-            
-            calendarHTML += `<div class="month-grid">`;
-            calendarHTML += `<h4 class="mb-3">${year}年 ${month}月</h4>`;
-            
-            // Mobile List View
-            calendarHTML += `<div class="calendar-list-view">`;
-            monthEvents.forEach(event => {
-                const eventDate = new Date(event.date.replace(/-/g, '/')); // Use / for better compatibility
-                calendarHTML += `
-                    <div class="calendar-list-item">
-                        <div class="list-date">
-                            <div class="day">${eventDate.getDate()}</div>
-                            <div class="weekday">${weekdays[eventDate.getDay()]}</div>
-                        </div>
-                        <div class="list-details">
-                            <div class="name">${event.name} <span class="category">${event.category}</span></div>
-                            <div class="status">${event.status}</div>
-                        </div>
-                    </div>
-                `;
-            });
-            calendarHTML += `</div>`;
-
-            // Desktop Grid View
-            calendarHTML += `<table class="calendar-table d-none d-md-table">`;
-            calendarHTML += `<thead><tr>${['日', '一', '二', '三', '四', '五', '六'].map(d => `<th>${d}</th>`).join('')}</tr></thead>`;
-            
-            let tbodyHtml = '<tbody>';
-            const firstDay = new Date(year, month - 1, 1);
-            const daysInMonth = new Date(year, month, 0).getDate();
-            const startingDay = firstDay.getDay();
-            let date = 1;
-
-            for (let i = 0; i < 6; i++) {
-                if (date > daysInMonth) break;
-                tbodyHtml += '<tr>';
-                for (let j = 0; j < 7; j++) {
-                    if ((i === 0 && j < startingDay) || date > daysInMonth) {
-                        tbodyHtml += '<td class="empty"></td>';
-                    } else {
-                        const eventsOnThisDay = monthEvents.filter(e => parseInt(e.date.substring(8, 10), 10) === date);
-                        let cellClass = eventsOnThisDay.length > 0 ? 'event' : '';
-                        let dayClass = eventsOnThisDay.length > 0 ? 'has-event' : '';
-                        
-                        tbodyHtml += `<td class="${cellClass}">`;
-                        tbodyHtml += `<div class="day-number ${dayClass}">${date}</div>`;
-                        if(eventsOnThisDay.length > 0) {
-                            tbodyHtml += '<div class="event-details">';
-                            eventsOnThisDay.forEach(event => {
-                                tbodyHtml += `<div class="event-item" title="${event.name} (${event.category}) - ${event.status}">${event.name} <span class="category">${event.category}</span></div>`;
-                                tbodyHtml += `<div class="event-status">${event.status}</div>`;
-                            });
-                            tbodyHtml += '</div>';
-                        }
-                        tbodyHtml += '</td>';
-                        date++;
-                    }
-                }
-                tbodyHtml += '</tr>';
-            }
-            tbodyHtml += '</tbody></table></div>';
-            calendarHTML += tbodyHtml;
+    // --- MARATHON CALENDAR LOGIC (TOGGLE ONLY) ---
+    const marathonPane = document.getElementById('marathon-pane');
+    if (marathonPane) {
+      marathonPane.classList.add('view-list'); // Default for mobile
+      const calendarToggle = document.getElementById('calendar-view-toggle');
+      if (calendarToggle) {
+        calendarToggle.addEventListener('click', (e) => {
+          if (e.target.matches('button')) {
+            const view = e.target.dataset.view;
+            marathonPane.classList.remove('view-list', 'view-grid');
+            marathonPane.classList.add(`view-${view}`);
+            calendarToggle.querySelector('.active').classList.remove('active');
+            e.target.classList.add('active');
+          }
         });
-        container.innerHTML = calendarHTML;
+      }
     }
-    
-    const marathonTab = document.querySelector('#marathon-tab');
-    if (marathonTab) {
-        marathonTab.addEventListener('shown.bs.tab', function () {
-            const container = document.getElementById('marathon-calendar-container');
-            if (container && container.innerHTML.trim() === '') {
-                generateMarathonCalendar();
-            }
-        }, { once: false });
-    }
-
 
 		// --- MAP LOGIC ---
-        const footprintsTab = document.querySelector('#footprints-tab');
-        if(footprintsTab) {
-            footprintsTab.addEventListener('shown.bs.tab', function() {
+        const eventsTab = document.querySelector('#events-tab');
+        if(eventsTab) {
+            eventsTab.addEventListener('shown.bs.tab', function() {
                 if (!cityMap) {
                   cityMap = L.map('cityMap', { center: [36, 108], zoom: 4, zoomControl: false });
                   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', { attribution: '', subdomains: 'abcd', minZoom: 3, maxZoom: 18 }).addTo(cityMap);
@@ -1763,11 +1761,15 @@
         const runId = document.getElementById('commentRunId').value;
         const text = document.getElementById('commentText').value.trim();
         if (!text) return;
-        let nicknameForComment = '👑 我说';
-        if (localStorage.getItem('run_admin_key') !== 'runpage123') {
+        
+        let nicknameForComment;
+        if (localStorage.getItem('run_role') === 'admin') {
+            nicknameForComment = '👑 我说';
+        } else {
             const profile = JSON.parse(localStorage.getItem('run_profile'));
             nicknameForComment = `${profile.icon} ${profile.nickname}`;
         }
+        
         const res = await fetch(`${commentApiBase}/comment`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ runId, text, nickname: nicknameForComment }) });
         if (res.ok) {
             document.getElementById('commentText').value = '';
