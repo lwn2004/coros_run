@@ -1310,17 +1310,12 @@
 
     function displayUserProfile() {
         try {
-          let profile = {icon: "👑", nickname: "我说"};
-          //let profile.icon = "👑";
-          //let profile.nickname = "我说";  
-          if (localStorage.getItem('run_admin_key') !== 'runpage123') {
             const profile = JSON.parse(localStorage.getItem('run_profile'));
-          }
-          if (profile) {
+            if (profile) {
                 document.getElementById('user-icon').textContent = profile.icon;
                 document.getElementById('user-nickname').textContent = profile.nickname;
                 document.getElementById('nicknameInput').value = profile.nickname;
-          }
+            }
         } catch(e) {
             const profile = generateRandomProfile();
             localStorage.setItem('run_profile', JSON.stringify(profile));
@@ -1483,7 +1478,6 @@
         {"date": "2025-11-30", "name": "上海", "category": "全马", "status": "待抽签 (8/25)"},
         {"date": "2025-11-30", "name": "顺德", "category": "半马", "status": "报名未开始"},
         {"date": "2025-12-07", "name": "深圳", "category": "全马", "status": "报名未开始"},
-        {"date": "2025-12-07", "name": "珠海", "category": "全马", "status": "报名未开始"},
         {"date": "2025-12-14", "name": "汕头", "category": "半马", "status": "报名未开始"},
         {"date": "2025-12-14", "name": "南山", "category": "半马", "status": "报名未开始"},
         {"date": "2025-12-21", "name": "广州", "category": "全马", "status": "报名未开始"},
