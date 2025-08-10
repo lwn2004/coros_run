@@ -99,7 +99,55 @@
             display: none;
         }
     }
+/* --- START: 新增代码，用于日历内容弹出显示 --- */
 
+/* 1. 给有事件的单元格创建定位上下文，以便内容可以相对于它弹出 */
+.calendar-table td.event {
+  position: relative;
+}
+
+/* 2. 默认隐藏事件详情，并设置过渡效果 */
+.calendar-table td.event .event-details {
+  opacity: 1; /* 默认可见 */
+  transition: opacity 0.1s ease-in-out, transform 0.1s ease-in-out;
+}
+
+/* 3. 当鼠标悬停（或在手机上轻点）时，让详情内容“弹出” */
+.calendar-table td.event:hover .event-details {
+  /* 定位与层级 */
+  position: absolute;
+  z-index: 10;
+  top: 8px; /* 从单元格顶部稍微往下一点的位置开始 */
+  left: 50%; /* 从单元格中线开始 */
+  transform: translateX(-50%); /* 将弹窗自身向左移动50%的宽度，实现水平居中 */
+
+  /* 尺寸与外观 */
+  width: auto; /* 宽度由内容决定 */
+  min-width: 180%; /* 最小宽度为单元格的1.8倍，确保能覆盖左右 */
+  padding: 0.6rem;
+  background-color: var(--hover-bg); /* 使用深色背景以保证可读性 */
+  border: 1px solid var(--accent-color);
+  border-radius: 6px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); /* 增加阴影使其更突出 */
+  
+  /* 确保弹窗可见 */
+  opacity: 1;
+}
+
+/* 4. 弹出时，内部元素的样式也需要调整，以显示完整内容 */
+.calendar-table td.event:hover .event-item,
+.calendar-table td.event:hover .event-status {
+  overflow: visible; /* 取消内容截断 */
+  white-space: normal; /* 允许文本自动换行 */
+  text-overflow: initial; /* 移除省略号 */
+  color: var(--text-primary); /* 确保文本颜色清晰 */
+}
+
+.calendar-table td.event:hover .event-status {
+    margin-top: 4px; /* 在状态和项目之间增加一点间距 */
+}
+
+/* --- END: 新增代码 --- */
 
     .stat-card-base {
         background-color: var(--card-bg);
@@ -1591,7 +1639,7 @@
             calendarToggle.addEventListener('click', (e) => {
                 if (e.target.matches('button')) {
                     const view = e.target.dataset.view;
-                    marathonPane.className = 'tab-pane fade'; // Reset classes
+                    marathonPane.classList.remove('view-list', 'view-grid');
                     marathonPane.classList.add(`view-${view}`);
                     calendarToggle.querySelector('.active').classList.remove('active');
                     e.target.classList.add('active');
