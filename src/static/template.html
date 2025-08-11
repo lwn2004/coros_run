@@ -1438,7 +1438,7 @@
         {"date": "2026-01-11", "name": "厦门马拉松", "category": "全马", "status": "报名未开始"}
     ];
     */
-    function generateMarathonCalendar() {
+    async function generateMarathonCalendar() {
         const container = document.getElementById('marathon-calendar-container');
         if (!container) return;
         const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
