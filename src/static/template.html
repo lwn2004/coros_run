@@ -461,7 +461,9 @@
         background-color: var(--hover-bg);
         border-color: var(--border-color) var(--border-color) var(--hover-bg);
     }
-
+    .nav-wrapper .nav {
+      --bs-nav-link-padding-x: 0.5rem;
+    }
     #cityMap {
       width: 100%;
       height: 400px;
@@ -704,16 +706,16 @@
   <div class="nav-wrapper border-bottom border-secondary-subtle mb-4">
     <ul class="nav nav-tabs" id="main-nav-tabs" role="tablist">
         <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary-pane" type="button" role="tab" aria-controls="summary-pane" aria-selected="true" data-hash="summary">概要</button>
+        <button class="nav-link active" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary-pane" type="button" role="tab" aria-controls="summary-pane" aria-selected="true" data-hash="summary">概览</button>
         </li>
         <li class="nav-item" role="presentation">
-        <button class="nav-link" id="data-tab" data-bs-toggle="tab" data-bs-target="#data-pane" type="button" role="tab" aria-controls="data-pane" aria-selected="false" data-hash="data">数据</button>
+        <button class="nav-link" id="data-tab" data-bs-toggle="tab" data-bs-target="#data-pane" type="button" role="tab" aria-controls="data-pane" aria-selected="false" data-hash="data">跑步全记录</button>
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="marathon-tab" data-bs-toggle="tab" data-bs-target="#marathon-pane" type="button" role="tab" aria-controls="marathon-pane" aria-selected="false" data-hash="marathon">赛历</button>
         </li>
         <li class="nav-item" role="presentation">
-        <button class="nav-link" id="events-tab" data-bs-toggle="tab" data-bs-target="#events-pane" type="button" role="tab" aria-controls="events-pane" aria-selected="false" data-hash="events">事件</button>
+        <button class="nav-link" id="events-tab" data-bs-toggle="tab" data-bs-target="#events-pane" type="button" role="tab" aria-controls="events-pane" aria-selected="false" data-hash="events">重要时刻</button>
         </li>
         <li class="nav-item" role="presentation">
         <button class="nav-link" id="about-tab" data-bs-toggle="tab" data-bs-target="#about-pane" type="button" role="tab" aria-controls="about-pane" aria-selected="false" data-hash="about">关于</button>
@@ -734,11 +736,11 @@
                             <div class="stat-value">{{ "%.2f"|format(overall_stats.dist_km) }} <small class="small-muted">km</small></div>
                           </div>
                           <div class="stat-details">
-                            <div class="stat-label">赤道进度</div>
+                            <div class="stat-label">路漫漫其修远兮</div>
                             <div class="progress mt-1" style="height: 4px;">
                               <div class="progress-bar" role="progressbar" style="width: {{ '%.4f'|format(progress_around_earth) }}%;"></div>
                             </div>
-                            <small class="small-muted">{{ "%.4f"|format(progress_around_earth) }}%</small>
+                            <small class="small-muted">进度 {{ "%.4f"|format(progress_around_earth) }}%</small>
                           </div>
                         </div>
                         <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
@@ -1064,7 +1066,7 @@
         <div class="d-flex justify-content-end mb-3 d-md-none">
             <div class="btn-group btn-group-sm" id="calendar-view-toggle" role="group">
                 <button type="button" class="btn active" data-view="list">列表模式</button>
-                <button type="button" class="btn" data-view="grid">表格模式</button>
+                <button type="button" class="btn" data-view="grid">日历模式</button>
             </div>
         </div>
         <div id="marathon-calendar-container">
@@ -1249,7 +1251,7 @@
             <p>这个目标让我很受触动。四万公里，相当于每天跑<span style="text-decoration: line-through;text-decoration-color: #ff6b6b;text-decoration-thickness: 2px;">十公里</span>五公里，连续跑<span style="text-decoration: line-through;text-decoration-color: #ff6b6b;text-decoration-thickness: 2px;">十一年</span>二十二年。虽然看起来很远，但分解到每一天，就是坚持跑下去。</p>
             <p>我不是专业跑者，也不追求速度。对我来说，跑步更重要的是保持健康和坚持的习惯。这个网站记录我的跑步历程，看着数字一点点增长，就是最好的动力。</p>
             <p>如果你也有类似的跑步目标，欢迎一起坚持。跑步路上，我们都不孤单。</p>
-            <p class="text-end mt-4">2025年7月 广州</p>
+            <p class="text-end mt-4">2025年7月·广州</p>
         </div>
     </div>
   </div>
