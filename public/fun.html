@@ -526,14 +526,6 @@
     }
     .event-details {
       padding-top: 2px;
-      /* 让弹出层在鼠标悬停前不可交互，防止意外遮挡 */
-      pointer-events: none;
-      transition: opacity 0.2s ease, transform 0.2s ease;
-      opacity: 0;
-    }
-    .event-details.visible {
-        opacity: 1;
-        pointer-events: auto; /* 悬停时恢复交互 */
     }
     /* 默认状态下，事件标题是截断的 */
     .event-item {
@@ -560,16 +552,18 @@
     .event-status {
         font-size: 0.7rem;
         color: var(--text-secondary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     
     /* 弹出层的样式 */
-    td.event .event-details.popup {
+    .event-details.popup {
       position: absolute;
       z-index: 10;
       top: 8px;
       left: 50%; /* 默认居中 */
       transform: translateX(-50%);
-
       width: auto;
       min-width: 180%;
       padding: 0.6rem;
@@ -577,6 +571,16 @@
       border: 1px solid var(--accent-color);
       border-radius: 6px;
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+      /* 默认隐藏，通过JS添加visible类来显示 */
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s ease, visibility 0.2s ease;
+      pointer-events: none;
+    }
+    .event-details.popup.visible {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
     }
     /* 新增：边缘检测后的样式 */
     .event-details.popup.edge-left {
@@ -698,11 +702,11 @@
                             <div class="stat-value">3629.20 <small class="small-muted">km</small></div>
                           </div>
                           <div class="stat-details">
-                            <div class="stat-label">路漫漫其修远兮</div>
+                            <small class="small-muted">进度 9.0560%</small>
                             <div class="progress mt-1" style="height: 4px;">
                               <div class="progress-bar" role="progressbar" style="width: 9.0560%;"></div>
                             </div>
-                            <small class="small-muted">进度 9.0560%</small>
+                            <div class="stat-label" id="running-quote">路漫漫其修远兮</div>
                           </div>
                         </div>
                         <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
@@ -11843,7 +11847,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-08-11 15:48:01 
+         | Last updated: 2025-08-11 16:16:09 
     </small>
 </footer>
 
@@ -11912,6 +11916,18 @@
     const commentApiBase = 'https://kv.linwn.net';
 
 	document.documentElement.setAttribute('data-bs-theme', 'dark');
+
+    function setRandomQuote() {
+        const quotes = [
+            "路漫漫其修远兮",
+            "道阻且长",
+        ];
+        const quoteElement = document.getElementById('running-quote');
+        if (quoteElement) {
+            const randomIndex = Math.floor(Math.random() * quotes.length);
+            quoteElement.textContent = quotes[randomIndex];
+        }
+    }
 
     // --- USER PROFILE LOGIC ---
     function generateRandomProfile() {
@@ -12092,12 +12108,11 @@
                         tbodyHtml += `<td class="${cellClass}">`;
                         tbodyHtml += `<div class="day-number ${dayClass}">${date}</div>`;
                         if(eventsOnThisDay.length > 0) {
-                            // 使用两套div，一套用于默认显示，一套用于弹出
-                            tbodyHtml += '<div class="event-details default">';
+                            // 默认显示（截断）
                             eventsOnThisDay.forEach(event => {
-                                tbodyHtml += `<div class="event-item" title="${event.name}">${event.name} <span class="category">${event.category}</span></div>`;
+                                tbodyHtml += `<div class="event-item" title="${event.name}">${event.name}</div>`;
                             });
-                            tbodyHtml += '</div>';
+                            // 弹出层（完整内容）
                             tbodyHtml += '<div class="event-details popup">';
                              eventsOnThisDay.forEach(event => {
                                 tbodyHtml += `<div class="event-item">${event.name} <span class="category">${event.category}</span></div>`;
@@ -12126,17 +12141,17 @@
 
             cell.addEventListener('mouseenter', () => {
                 const rect = cell.getBoundingClientRect();
-                const popupRect = popup.getBoundingClientRect();
+                const popupWidth = popup.offsetWidth; //
                 const viewportWidth = window.innerWidth;
                 
                 popup.classList.remove('edge-left', 'edge-right');
 
-                // 检查是否会超出右边界 (给20px的缓冲)
-                if (rect.left + popupRect.width / 2 + rect.width / 2 > viewportWidth - 20) {
+                // 检查是否会超出右边界 (给10px的缓冲)
+                if (rect.left + rect.width / 2 + popupWidth / 2 > viewportWidth - 10) {
                     popup.classList.add('edge-right');
                 } 
                 // 检查是否会超出左边界
-                else if (rect.left + rect.width / 2 - popupRect.width / 2 < 20) {
+                else if (rect.left + rect.width / 2 - popupWidth / 2 < 10) {
                     popup.classList.add('edge-left');
                 }
                 popup.classList.add('visible');
@@ -12153,13 +12168,14 @@
         if (container && container.innerHTML.trim() === '') {
             generateMarathonCalendar();
         }
-        // 每次激活都重新绑定事件，以防万一
         setupCalendarHovers();
     }
 
 
 	document.addEventListener('DOMContentLoaded', function() {
 		
+    setRandomQuote();
+
     // --- 手机滑动切换标签页功能 ---
     let startX = 0;
     let startY = 0;
@@ -12217,7 +12233,6 @@
         const tabTrigger = document.querySelector(`.nav-link[data-hash="${hash}"]`);
         if (tabTrigger) {
           bootstrap.Tab.getOrCreateInstance(tabTrigger).show();
-          // 如果是marathon，手动初始化日历
           if (hash === 'marathon') {
             initMarathonView();
           }
@@ -12235,15 +12250,13 @@
     });
 
     window.addEventListener('popstate', activateTabFromHash);
-    activateTabFromHash(); // 页面加载时执行
+    activateTabFromHash();
     
-    // --- 赛历标签页逻辑 ---
     const marathonTab = document.querySelector('#marathon-tab');
     if (marathonTab) {
         const marathonPane = document.getElementById('marathon-pane');
         const calendarToggle = document.getElementById('calendar-view-toggle');
         
-        // 默认设置为日历模式
         marathonPane.classList.add('view-grid'); 
 
         if(calendarToggle) {
@@ -12258,7 +12271,6 @@
             });
         }
         
-        // 当标签页被显示时，初始化日历
         marathonTab.addEventListener('shown.bs.tab', initMarathonView);
     }
 
