@@ -66,89 +66,68 @@
       font-size: 1.1rem;
     }
     
-    #user-profile {
-        position: absolute;
-        top: 1rem;
-        right: 1rem;
-        z-index: 1021; /* Higher than nav-tabs */
-        cursor: pointer;
-        padding: 0.4rem 0.8rem;
-        background-color: var(--card-bg);
-        border: 1px solid var(--border-color);
-        border-radius: 50px;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: background-color 0.2s;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-    #user-profile:hover {
-        background-color: var(--hover-bg);
-    }
-    #user-icon { 
-        font-size: 1.2rem;
-        line-height: 1;
-    }
-    #user-nickname { 
-        font-weight: 500;
-        font-size: 0.9rem;
-        color: var(--text-secondary);
-    }
-    @media (max-width: 576px) {
-        #user-nickname {
-            display: none;
-        }
-    }
-/* --- START: 新增代码，用于日历内容弹出显示 --- */
+/* --- START: 优化后的日历弹出样式 --- */
 
-/* 1. 给有事件的单元格创建定位上下文，以便内容可以相对于它弹出 */
+/* 1. 移除td的overflow:hidden，这是关键步骤 */
+.calendar-table td {
+    border: 1px solid var(--border-color);
+    height: 110px;
+    vertical-align: top;
+    padding: 5px;
+    transition: background-color 0.2s;
+    /* overflow: hidden; 已移除 */
+}
+
+/* 2. 为有事件的单元格创建定位上下文 */
 .calendar-table td.event {
   position: relative;
 }
 
-/* 2. 默认隐藏事件详情，并设置过渡效果 */
+/* 3. 默认隐藏事件详情，并设置过渡效果 */
 .calendar-table td.event .event-details {
-  opacity: 1; /* 默认可见 */
-  transition: opacity 0.1s ease-in-out, transform 0.1s ease-in-out;
-}
-
-/* 3. 当鼠标悬停（或在手机上轻点）时，让详情内容“弹出” */
-.calendar-table td.event:hover .event-details {
   /* 定位与层级 */
   position: absolute;
   z-index: 10;
-  top: 8px; /* 从单元格顶部稍微往下一点的位置开始 */
-  left: 50%; /* 从单元格中线开始 */
-  transform: translateX(-50%); /* 将弹窗自身向左移动50%的宽度，实现水平居中 */
-
+  top: 10px; /* 从单元格顶部稍微往下一点的位置开始 */
+  left: 50%;
+  
   /* 尺寸与外观 */
   width: auto; /* 宽度由内容决定 */
-  min-width: 180%; /* 最小宽度为单元格的1.8倍，确保能覆盖左右 */
-  padding: 0.6rem;
-  background-color: var(--hover-bg); /* 使用深色背景以保证可读性 */
+  min-width: 200%; /* 最小宽度为单元格的2倍，确保能覆盖左右 */
+  padding: 0.75rem;
+  background-color: var(--hover-bg);
   border: 1px solid var(--accent-color);
-  border-radius: 6px;
+  border-radius: 8px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); /* 增加阴影使其更突出 */
   
-  /* 确保弹窗可见 */
-  opacity: 1;
+  /* 默认状态：隐藏、缩小、位置上移，为动画做准备 */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-50%) translateY(-10px);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
 }
 
-/* 4. 弹出时，内部元素的样式也需要调整，以显示完整内容 */
-.calendar-table td.event:hover .event-item,
-.calendar-table td.event:hover .event-status {
+/* 4. 当鼠标悬停时，让详情内容“弹出” */
+.calendar-table td.event:hover .event-details {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0); /* 恢复到正常位置 */
+}
+
+/* 5. 确保弹出时，内部元素的样式也正确显示 */
+.calendar-table td.event:hover .event-details .event-item,
+.calendar-table td.event:hover .event-details .event-status {
   overflow: visible; /* 取消内容截断 */
   white-space: normal; /* 允许文本自动换行 */
   text-overflow: initial; /* 移除省略号 */
-  color: var(--text-primary); /* 确保文本颜色清晰 */
+  color: var(--text-primary);
 }
 
-.calendar-table td.event:hover .event-status {
-    margin-top: 4px; /* 在状态和项目之间增加一点间距 */
+.calendar-table td.event:hover .event-details .event-status {
+    margin-top: 4px;
 }
 
-/* --- END: 新增代码 --- */
-
+/* --- END: 优化后的日历弹出样式 --- */
     .stat-card-base {
         background-color: var(--card-bg);
         border-radius: 0.75rem;
@@ -585,7 +564,6 @@
         vertical-align: top;
         padding: 5px;
         transition: background-color 0.2s;
-        overflow: hidden;
     }
     .calendar-table td.empty {
        background-color: transparent;
@@ -694,10 +672,6 @@
 <body>
 
 <div class="container position-relative">
-    <div id="user-profile" data-bs-toggle="modal" data-bs-target="#profileModal" title="编辑个人信息">
-        <span id="user-icon"></span>
-        <span id="user-nickname"></span>
-    </div>
 
   <div class="main-title-container">
     <h1 class="main-title">步履不停 <small class="main-subtitle text-body-secondary"> — 我的四万公里跑量挑战</small></h1>
@@ -1295,9 +1269,17 @@
         <textarea class="form-control" id="commentText" rows="3" placeholder="写下你的感想吧..."></textarea>
         <input type="hidden" id="commentRunId">
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">取消</button>
-        <button type="button" class="btn btn-primary btn-sm" id="submitComment">提交</button>
+      <div class="modal-footer d-flex justify-content-between align-items-center">
+        <div id="editProfileTrigger" style="cursor: pointer;" title="点击修改昵称">
+            <span class="small text-body-secondary">
+                发言身份: <span id="commentUserIcon"></span> <span id="commentUserNickname"></span>
+                <i class="bi bi-pencil-fill small ms-1"></i>
+            </span>
+        </div>
+        <div>
+            <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">取消</button>
+            <button type="button" class="btn btn-primary btn-sm" id="submitComment">提交</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1351,7 +1333,7 @@
         };
     }
 
-    function displayUserProfile() {
+    function loadProfileIntoModals() {
         let profile;
         const isAdmin = localStorage.getItem('run_role') === 'admin';
 
@@ -1369,14 +1351,20 @@
             }
         }
         
-        document.getElementById('user-icon').textContent = profile.icon;
-        document.getElementById('user-nickname').textContent = profile.nickname;
+        // Load into Comment Modal display
+        const commentIconEl = document.getElementById('commentUserIcon');
+        const commentNicknameEl = document.getElementById('commentUserNickname');
+        if(commentIconEl && commentNicknameEl) {
+            commentIconEl.textContent = profile.icon;
+            commentNicknameEl.textContent = profile.nickname;
+        }
+
+        // Load into Profile Modal input
         document.getElementById('nicknameInput').value = profile.nickname;
-        
-        // Disable editing for admin
         document.getElementById('nicknameInput').disabled = isAdmin;
         document.getElementById('saveProfileButton').style.display = isAdmin ? 'none' : 'inline-block';
     }
+
 
     function initializeUserProfile() {
         const params = new URLSearchParams(window.location.search);
@@ -1384,12 +1372,11 @@
         
         if (adminKey === 'runpage123') {
             localStorage.setItem('run_role', 'admin');
-            // Clean up URL and reload to ensure key is not exposed
             const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + window.location.hash;
             window.history.replaceState({path: newUrl}, '', newUrl);
         }
 
-        displayUserProfile();
+        loadProfileIntoModals();
 
         document.getElementById('saveProfileButton').addEventListener('click', () => {
             const newNickname = document.getElementById('nicknameInput').value.trim();
@@ -1397,7 +1384,7 @@
                 const currentProfile = JSON.parse(localStorage.getItem('run_profile')) || generateRandomProfile();
                 currentProfile.nickname = newNickname;
                 localStorage.setItem('run_profile', JSON.stringify(currentProfile));
-                displayUserProfile();
+                loadProfileIntoModals();
                 bootstrap.Modal.getInstance(document.getElementById('profileModal')).hide();
             }
         });
@@ -1498,6 +1485,15 @@
     // --- 页面初始化逻辑 ---
     initializeUserProfile();
     loadCommentCounts();
+
+    // Add event listeners for profile editing in comment modal
+    document.getElementById('commentModal').addEventListener('show.bs.modal', function () {
+        loadProfileIntoModals();
+    });
+    document.getElementById('editProfileTrigger').addEventListener('click', () => {
+        new bootstrap.Modal(document.getElementById('profileModal')).show();
+    });
+
 
     // --- URL锚点与选项卡同步逻辑 ---
     const activateTabFromHash = () => {
