@@ -702,11 +702,12 @@
                             <div class="stat-value">{{ "%.2f"|format(overall_stats.dist_km) }} <small class="small-muted">km</small></div>
                           </div>
                           <div class="stat-details">
-                            <small class="small-muted">进度 {{ "%.4f"|format(progress_around_earth) }}%</small>
+                            <div class="stat-label" id="running-quote"></div>
                             <div class="progress mt-1" style="height: 4px;">
                               <div class="progress-bar" role="progressbar" style="width: {{ '%.4f'|format(progress_around_earth) }}%;"></div>
                             </div>
-                            <div class="stat-label" id="running-quote">路漫漫其修远兮</div>
+                            <small class="small-muted">进度 {{ "%.4f"|format(progress_around_earth) }}%</small>
+                            
                           </div>
                         </div>
                         <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
@@ -1423,7 +1424,7 @@
     }
 
     // --- MARATHON CALENDAR LOGIC ---
-  /*
+  
     const marathonEvents = [
         {"date": "2025-10-26", "name": "长沙马拉松", "category": "半马", "status": "待抽签 (8/27)"},
         {"date": "2025-11-09", "name": "南昌马拉松", "category": "半马", "status": "待抽签 (8/22)"},
@@ -1437,14 +1438,12 @@
         {"date": "2026-01-03", "name": "容桂环岛马拉松", "category": "全马", "status": "报名未开始"},
         {"date": "2026-01-11", "name": "厦门马拉松", "category": "全马", "status": "报名未开始"}
     ];
-    */
-    async function generateMarathonCalendar() {
+    
+    function generateMarathonCalendar() {
         const container = document.getElementById('marathon-calendar-container');
         if (!container) return;
         const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-        const res = await fetch('https://run.linwn.net/data/upcoming.json');
-        const data = await res.json();
-        const eventsByMonth = data.reduce((acc, event) => {
+        const eventsByMonth = marathonEvents.reduce((acc, event) => {
             const month = event.date.substring(0, 7);
             if (!acc[month]) acc[month] = [];
             acc[month].push(event);
@@ -1572,7 +1571,7 @@
 
 	document.addEventListener('DOMContentLoaded', function() {
 		
-    setRandomQuote();
+    //setRandomQuote();
 
     // --- 手机滑动切换标签页功能 ---
     let startX = 0;
