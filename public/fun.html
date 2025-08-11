@@ -11847,7 +11847,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-08-11 17:26:52 
+         | Last updated: 2025-08-11 17:35:05 
     </small>
 </footer>
 
@@ -12042,7 +12042,7 @@
         {"date": "2026-01-11", "name": "厦门马拉松", "category": "全马", "status": "报名未开始"}
     ];
     */
-    function generateMarathonCalendar() {
+    async function generateMarathonCalendar() {
         const container = document.getElementById('marathon-calendar-container');
         if (!container) return;
         const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
