@@ -66,68 +66,6 @@
       font-size: 1.1rem;
     }
     
-/* --- START: 优化后的日历弹出样式 --- */
-
-/* 1. 移除td的overflow:hidden，这是关键步骤 */
-.calendar-table td {
-    border: 1px solid var(--border-color);
-    height: 110px;
-    vertical-align: top;
-    padding: 5px;
-    transition: background-color 0.2s;
-    /* overflow: hidden; 已移除 */
-}
-
-/* 2. 为有事件的单元格创建定位上下文 */
-.calendar-table td.event {
-  position: relative;
-}
-
-/* 3. 默认隐藏事件详情，并设置过渡效果 */
-.calendar-table td.event .event-details {
-  /* 定位与层级 */
-  position: absolute;
-  z-index: 10;
-  top: 10px; /* 从单元格顶部稍微往下一点的位置开始 */
-  left: 50%;
-  
-  /* 尺寸与外观 */
-  width: auto; /* 宽度由内容决定 */
-  min-width: 200%; /* 最小宽度为单元格的2倍，确保能覆盖左右 */
-  padding: 0.75rem;
-  background-color: var(--hover-bg);
-  border: 1px solid var(--accent-color);
-  border-radius: 8px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); /* 增加阴影使其更突出 */
-  
-  /* 默认状态：隐藏、缩小、位置上移，为动画做准备 */
-  opacity: 0;
-  visibility: hidden;
-  transform: translateX(-50%) translateY(-10px);
-  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
-}
-
-/* 4. 当鼠标悬停时，让详情内容“弹出” */
-.calendar-table td.event:hover .event-details {
-  opacity: 1;
-  visibility: visible;
-  transform: translateX(-50%) translateY(0); /* 恢复到正常位置 */
-}
-
-/* 5. 确保弹出时，内部元素的样式也正确显示 */
-.calendar-table td.event:hover .event-details .event-item,
-.calendar-table td.event:hover .event-details .event-status {
-  overflow: visible; /* 取消内容截断 */
-  white-space: normal; /* 允许文本自动换行 */
-  text-overflow: initial; /* 移除省略号 */
-  color: var(--text-primary);
-}
-
-.calendar-table td.event:hover .event-details .event-status {
-    margin-top: 4px;
-}
-
-/* --- END: 优化后的日历弹出样式 --- */
     .stat-card-base {
         background-color: var(--card-bg);
         border-radius: 0.75rem;
@@ -539,7 +477,7 @@
     .trophy-color-text { color: var(--trophy-color); }
     .accent-color-text { color: var(--accent-color); }
 
-    /* Marathon Calendar Styles */
+    /* --- START: 修正后的日历弹出样式 --- */
     .marathon-calendar-container .month-grid {
         background-color: var(--card-bg);
         padding: 1.5rem;
@@ -558,6 +496,7 @@
         font-size: 0.8rem;
         padding-bottom: 0.5rem;
     }
+    /* 关键改动：移除了 overflow: hidden */
     .calendar-table td {
         border: 1px solid var(--border-color);
         height: 110px;
@@ -580,14 +519,23 @@
     .calendar-table td.event {
         background-color: #3b2f21;
         border: 1px solid var(--marathon-color);
-        position: relative;
+        position: relative; /* 为弹出层提供定位锚点 */
     }
     .day-number.has-event {
         color: var(--marathon-color);
     }
     .event-details {
       padding-top: 2px;
+      /* 让弹出层在鼠标悬停前不可交互，防止意外遮挡 */
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      opacity: 0;
     }
+    .event-details.visible {
+        opacity: 1;
+        pointer-events: auto; /* 悬停时恢复交互 */
+    }
+    /* 默认状态下，事件标题是截断的 */
     .event-item {
         font-size: 0.75rem;
         font-weight: 500;
@@ -613,6 +561,46 @@
         font-size: 0.7rem;
         color: var(--text-secondary);
     }
+    
+    /* 弹出层的样式 */
+    td.event .event-details.popup {
+      position: absolute;
+      z-index: 10;
+      top: 8px;
+      left: 50%; /* 默认居中 */
+      transform: translateX(-50%);
+
+      width: auto;
+      min-width: 180%;
+      padding: 0.6rem;
+      background-color: var(--hover-bg);
+      border: 1px solid var(--accent-color);
+      border-radius: 6px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    }
+    /* 新增：边缘检测后的样式 */
+    .event-details.popup.edge-left {
+        left: 5px;
+        transform: translateX(0);
+    }
+    .event-details.popup.edge-right {
+        left: auto;
+        right: 5px;
+        transform: translateX(0);
+    }
+
+    /* 弹出层内部文本的样式 */
+    .event-details.popup .event-item,
+    .event-details.popup .event-status {
+      overflow: visible;
+      white-space: normal;
+      text-overflow: initial;
+    }
+    .event-details.popup .event-status {
+        margin-top: 4px;
+    }
+    /* --- END: 修正后的日历弹出样式 --- */
+
 
     /* Mobile list view for calendar */
     .calendar-list-view {
@@ -11276,8 +11264,8 @@
     <div class="tab-pane fade" id="marathon-pane" role="tabpanel" aria-labelledby="marathon-tab" tabindex="0">
         <div class="d-flex justify-content-end mb-3 d-md-none">
             <div class="btn-group btn-group-sm" id="calendar-view-toggle" role="group">
-                <button type="button" class="btn active" data-view="list">列表模式</button>
-                <button type="button" class="btn" data-view="grid">日历模式</button>
+                <button type="button" class="btn" data-view="list">列表模式</button>
+                <button type="button" class="btn active" data-view="grid">日历模式</button>
             </div>
         </div>
         <div id="marathon-calendar-container">
@@ -11855,7 +11843,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-08-11 15:07:52 
+         | Last updated: 2025-08-11 15:48:01 
     </small>
 </footer>
 
@@ -11955,7 +11943,6 @@
             }
         }
         
-        // Load into Comment Modal display
         const commentIconEl = document.getElementById('commentUserIcon');
         const commentNicknameEl = document.getElementById('commentUserNickname');
         if(commentIconEl && commentNicknameEl) {
@@ -11963,7 +11950,6 @@
             commentNicknameEl.textContent = profile.nickname;
         }
 
-        // Load into Profile Modal input
         document.getElementById('nicknameInput').value = profile.nickname;
         document.getElementById('nicknameInput').disabled = isAdmin;
         document.getElementById('saveProfileButton').style.display = isAdmin ? 'none' : 'inline-block';
@@ -11994,12 +11980,6 @@
         });
     }
 
-
-    /**
-     * Parses a pace string like "5'30\"" into total seconds.
-     * @param {string} paceStr The pace string to parse.
-     * @returns {number} Total seconds, or a large number if parsing fails.
-     */
     function parsePaceToSeconds(paceStr) {
         if (!paceStr || !paceStr.includes("'")) {
             return 9999; 
@@ -12030,117 +12010,21 @@
         });
     }
 
-	document.addEventListener('DOMContentLoaded', function() {
-		
-    // --- 手机滑动切换标签页功能 ---
-    let startX = 0;
-    let startY = 0;
-    const tabContent = document.querySelector('.tab-content');
-    const minSwipeDistance = 100; // 最小滑动距离（像素）
-    
-    tabContent.addEventListener('touchstart', function(e) {
-      startX = e.touches[0].clientX;
-      startY = e.touches[0].clientY;
-    }, false);
-    
-    tabContent.addEventListener('touchend', function(e) {
-      if (e.target.closest('#cityMap') || e.target.closest('.calendar-table')) {
-        return;
-      }
-      const endX = e.changedTouches[0].clientX;
-      const endY = e.changedTouches[0].clientY;
-      
-      const diffX = endX - startX;
-      const diffY = endY - startY;
-      const absDiffX = Math.abs(diffX);
-      const absDiffY = Math.abs(diffY);
-      
-      if (absDiffX > minSwipeDistance && absDiffX > absDiffY) {
-        const activeTab = document.querySelector('#main-nav-tabs .nav-link.active');
-        const tabs = Array.from(document.querySelectorAll('#main-nav-tabs .nav-link'));
-        const currentIndex = tabs.indexOf(activeTab);
-        
-        if (diffX > 0) {
-          if (currentIndex > 0) {
-            bootstrap.Tab.getOrCreateInstance(tabs[currentIndex - 1]).show();
-          }
-        } else {
-          if (currentIndex < tabs.length - 1) {
-            bootstrap.Tab.getOrCreateInstance(tabs[currentIndex + 1]).show();
-          }
-        }
-      }
-    }, false);
-    
-    tabContent.addEventListener('touchmove', function(e) {
-      if (e.target.closest('#cityMap')) {
-        return;
-      }
-      const currentX = e.touches[0].clientX;
-      const currentY = e.touches[0].clientY;
-      const absDiffX = Math.abs(currentX - startX);
-      const absDiffY = Math.abs(currentY - startY);
-      
-      if (absDiffX > absDiffY && absDiffX > 10) {
-        e.preventDefault();
-      }
-    }, { passive: false });
-
-    // --- 页面初始化逻辑 ---
-    initializeUserProfile();
-    loadCommentCounts();
-
-    // Add event listeners for profile editing in comment modal
-    document.getElementById('commentModal').addEventListener('show.bs.modal', function () {
-        loadProfileIntoModals();
-    });
-    document.getElementById('editProfileTrigger').addEventListener('click', () => {
-        new bootstrap.Modal(document.getElementById('profileModal')).show();
-    });
-
-
-    // --- URL锚点与选项卡同步逻辑 ---
-    const activateTabFromHash = () => {
-      const hash = window.location.hash.substring(1);
-      if (hash) {
-        const tabTrigger = document.querySelector(`.nav-link[data-hash="${hash}"]`);
-        if (tabTrigger) {
-          bootstrap.Tab.getOrCreateInstance(tabTrigger).show();
-        }
-      }
-    };
-    
-    document.querySelectorAll('#main-nav-tabs .nav-link').forEach(tabEl => {
-      tabEl.addEventListener('shown.bs.tab', event => {
-        const hash = event.target.dataset.hash;
-        if (hash) {
-          const newHash = '#' + hash;
-          if (window.location.hash !== newHash) {
-            history.pushState(null, '', newHash);
-          }
-        }
-      });
-    });
-
-    window.addEventListener('popstate', activateTabFromHash);
-    activateTabFromHash();
-
-
     // --- MARATHON CALENDAR LOGIC ---
     const marathonEvents = [
-        {"date": "2025-10-26", "name": "长沙", "category": "半马", "status": "待抽签 (8/27)"},
-        {"date": "2025-11-09", "name": "南昌", "category": "半马", "status": "待抽签 (8/22)"},
-        {"date": "2025-11-16", "name": "南京", "category": "全马", "status": "待抽签 (8/18)"},
-        {"date": "2025-11-30", "name": "上海", "category": "全马", "status": "待抽签 (8/25)"},
-        {"date": "2025-11-30", "name": "顺德", "category": "半马", "status": "报名未开始"},
-        {"date": "2025-12-07", "name": "深圳", "category": "全马", "status": "报名未开始"},
-        {"date": "2025-12-14", "name": "汕头", "category": "半马", "status": "报名未开始"},
-        {"date": "2025-12-14", "name": "南山", "category": "半马", "status": "报名未开始"},
-        {"date": "2025-12-21", "name": "广州", "category": "全马", "status": "报名未开始"},
-        {"date": "2026-01-03", "name": "容桂", "category": "全马", "status": "报名未开始"},
-        {"date": "2026-01-11", "name": "厦门", "category": "全马", "status": "报名未开始"}
+        {"date": "2025-10-26", "name": "长沙马拉松", "category": "半马", "status": "待抽签 (8/27)"},
+        {"date": "2025-11-09", "name": "南昌马拉松", "category": "半马", "status": "待抽签 (8/22)"},
+        {"date": "2025-11-16", "name": "南京马拉松", "category": "全马", "status": "待抽签 (8/18)"},
+        {"date": "2025-11-30", "name": "上海马拉松", "category": "全马", "status": "待抽签 (8/25)"},
+        {"date": "2025-11-30", "name": "顺德马拉松", "category": "半马", "status": "报名未开始"},
+        {"date": "2025-12-07", "name": "深圳马拉松", "category": "全马", "status": "报名未开始"},
+        {"date": "2025-12-14", "name": "汕头马拉松", "category": "半马", "status": "报名未开始"},
+        {"date": "2025-12-14", "name": "南山半程马拉松", "category": "半马", "status": "报名未开始"},
+        {"date": "2025-12-21", "name": "广州马拉松", "category": "全马", "status": "报名未开始"},
+        {"date": "2026-01-03", "name": "容桂环岛马拉松", "category": "全马", "status": "报名未开始"},
+        {"date": "2026-01-11", "name": "厦门马拉松", "category": "全马", "status": "报名未开始"}
     ];
-
+    
     function generateMarathonCalendar() {
         const container = document.getElementById('marathon-calendar-container');
         if (!container) return;
@@ -12168,7 +12052,6 @@
             calendarHTML += `<div class="month-grid">`;
             calendarHTML += `<h4 class="mb-3">${year}年 ${month}月</h4>`;
             
-            // Mobile List View
             calendarHTML += `<div class="calendar-list-view">`;
             monthEvents.sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(event => {
                 const eventDate = new Date(event.date.replace(/-/g, '/'));
@@ -12182,12 +12065,10 @@
                             <div class="name">${event.name} <span class="category">${event.category}</span></div>
                             <div class="status">${event.status}</div>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             });
             calendarHTML += `</div>`;
 
-            // Desktop Grid View
             let gridHtml = `<table class="calendar-table">`;
             gridHtml += `<thead><tr>${['日', '一', '二', '三', '四', '五', '六'].map(d => `<th>${d}</th>`).join('')}</tr></thead>`;
             
@@ -12211,9 +12092,15 @@
                         tbodyHtml += `<td class="${cellClass}">`;
                         tbodyHtml += `<div class="day-number ${dayClass}">${date}</div>`;
                         if(eventsOnThisDay.length > 0) {
-                            tbodyHtml += '<div class="event-details">';
+                            // 使用两套div，一套用于默认显示，一套用于弹出
+                            tbodyHtml += '<div class="event-details default">';
                             eventsOnThisDay.forEach(event => {
-                                tbodyHtml += `<div class="event-item" title="${event.name} (${event.category}) - ${event.status}">${event.name} <span class="category">${event.category}</span></div>`;
+                                tbodyHtml += `<div class="event-item" title="${event.name}">${event.name} <span class="category">${event.category}</span></div>`;
+                            });
+                            tbodyHtml += '</div>';
+                            tbodyHtml += '<div class="event-details popup">';
+                             eventsOnThisDay.forEach(event => {
+                                tbodyHtml += `<div class="event-item">${event.name} <span class="category">${event.category}</span></div>`;
                                 tbodyHtml += `<div class="event-status">${event.status}</div>`;
                             });
                             tbodyHtml += '</div>';
@@ -12230,13 +12117,135 @@
         });
         container.innerHTML = calendarHTML;
     }
+
+    function setupCalendarHovers() {
+        const eventCells = document.querySelectorAll('.calendar-table td.event');
+        eventCells.forEach(cell => {
+            const popup = cell.querySelector('.event-details.popup');
+            if (!popup) return;
+
+            cell.addEventListener('mouseenter', () => {
+                const rect = cell.getBoundingClientRect();
+                const popupRect = popup.getBoundingClientRect();
+                const viewportWidth = window.innerWidth;
+                
+                popup.classList.remove('edge-left', 'edge-right');
+
+                // 检查是否会超出右边界 (给20px的缓冲)
+                if (rect.left + popupRect.width / 2 + rect.width / 2 > viewportWidth - 20) {
+                    popup.classList.add('edge-right');
+                } 
+                // 检查是否会超出左边界
+                else if (rect.left + rect.width / 2 - popupRect.width / 2 < 20) {
+                    popup.classList.add('edge-left');
+                }
+                popup.classList.add('visible');
+            });
+
+            cell.addEventListener('mouseleave', () => {
+                popup.classList.remove('visible');
+            });
+        });
+    }
+
+    function initMarathonView() {
+        const container = document.getElementById('marathon-calendar-container');
+        if (container && container.innerHTML.trim() === '') {
+            generateMarathonCalendar();
+        }
+        // 每次激活都重新绑定事件，以防万一
+        setupCalendarHovers();
+    }
+
+
+	document.addEventListener('DOMContentLoaded', function() {
+		
+    // --- 手机滑动切换标签页功能 ---
+    let startX = 0;
+    let startY = 0;
+    const tabContent = document.querySelector('.tab-content');
+    const minSwipeDistance = 100;
     
+    tabContent.addEventListener('touchstart', (e) => {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    }, false);
+    
+    tabContent.addEventListener('touchend', (e) => {
+      if (e.target.closest('#cityMap') || e.target.closest('.calendar-table')) return;
+      
+      const endX = e.changedTouches[0].clientX;
+      const endY = e.changedTouches[0].clientY;
+      const diffX = endX - startX;
+      const diffY = endY - startY;
+      
+      if (Math.abs(diffX) > minSwipeDistance && Math.abs(diffX) > Math.abs(diffY)) {
+        const activeTab = document.querySelector('#main-nav-tabs .nav-link.active');
+        const tabs = Array.from(document.querySelectorAll('#main-nav-tabs .nav-link'));
+        const currentIndex = tabs.indexOf(activeTab);
+        
+        if (diffX > 0 && currentIndex > 0) {
+            bootstrap.Tab.getOrCreateInstance(tabs[currentIndex - 1]).show();
+        } else if (diffX < 0 && currentIndex < tabs.length - 1) {
+            bootstrap.Tab.getOrCreateInstance(tabs[currentIndex + 1]).show();
+        }
+      }
+    }, false);
+    
+    tabContent.addEventListener('touchmove', (e) => {
+      if (e.target.closest('#cityMap')) return;
+      
+      const absDiffX = Math.abs(e.touches[0].clientX - startX);
+      const absDiffY = Math.abs(e.touches[0].clientY - startY);
+      
+      if (absDiffX > absDiffY && absDiffX > 10) e.preventDefault();
+    }, { passive: false });
+
+    // --- 页面初始化逻辑 ---
+    initializeUserProfile();
+    loadCommentCounts();
+
+    document.getElementById('commentModal').addEventListener('show.bs.modal', loadProfileIntoModals);
+    document.getElementById('editProfileTrigger').addEventListener('click', () => {
+        new bootstrap.Modal(document.getElementById('profileModal')).show();
+    });
+
+    // --- URL锚点与选项卡同步逻辑 ---
+    const activateTabFromHash = () => {
+      const hash = window.location.hash.substring(1);
+      if (hash) {
+        const tabTrigger = document.querySelector(`.nav-link[data-hash="${hash}"]`);
+        if (tabTrigger) {
+          bootstrap.Tab.getOrCreateInstance(tabTrigger).show();
+          // 如果是marathon，手动初始化日历
+          if (hash === 'marathon') {
+            initMarathonView();
+          }
+        }
+      }
+    };
+    
+    document.querySelectorAll('#main-nav-tabs .nav-link').forEach(tabEl => {
+      tabEl.addEventListener('shown.bs.tab', event => {
+        const hash = event.target.dataset.hash;
+        if (hash) {
+          history.pushState(null, '', '#' + hash);
+        }
+      });
+    });
+
+    window.addEventListener('popstate', activateTabFromHash);
+    activateTabFromHash(); // 页面加载时执行
+    
+    // --- 赛历标签页逻辑 ---
     const marathonTab = document.querySelector('#marathon-tab');
     if (marathonTab) {
         const marathonPane = document.getElementById('marathon-pane');
         const calendarToggle = document.getElementById('calendar-view-toggle');
         
-        marathonPane.classList.add('view-list');
+        // 默认设置为日历模式
+        marathonPane.classList.add('view-grid'); 
+
         if(calendarToggle) {
             calendarToggle.addEventListener('click', (e) => {
                 if (e.target.matches('button')) {
@@ -12249,50 +12258,47 @@
             });
         }
         
-        marathonTab.addEventListener('shown.bs.tab', function () {
-            const container = document.getElementById('marathon-calendar-container');
-            if (container && container.innerHTML.trim() === '') {
-                generateMarathonCalendar();
-            }
-        }, { once: false });
+        // 当标签页被显示时，初始化日历
+        marathonTab.addEventListener('shown.bs.tab', initMarathonView);
     }
 
-		// --- MAP LOGIC ---
-        const eventsTab = document.querySelector('#events-tab');
-        if(eventsTab) {
-            eventsTab.addEventListener('shown.bs.tab', function() {
-                if (!cityMap) {
-                  cityMap = L.map('cityMap', { center: [36, 108], zoom: 4, zoomControl: false });
-                  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', { attribution: '', subdomains: 'abcd', minZoom: 3, maxZoom: 18 }).addTo(cityMap);
-                  cityMap.attributionControl.setPrefix('');
-                  
-                  
-                  
-                      L.circleMarker([23.129, 113.264], { radius: Math.log(420) + 3, fillColor: "var(--accent-color)", color: "var(--bg-color)", weight: 1.5, opacity: 1, fillOpacity: 0.7 }).addTo(cityMap).bindPopup(`<b>广州市</b><br>跑步次数: 420<br>总距离: 3503.8km`);
-                  
-                  
-                  
-                      L.circleMarker([21.663, 110.925], { radius: Math.log(11) + 3, fillColor: "var(--accent-color)", color: "var(--bg-color)", weight: 1.5, opacity: 1, fillOpacity: 0.7 }).addTo(cityMap).bindPopup(`<b>茂名市</b><br>跑步次数: 11<br>总距离: 81.6km`);
-                  
-                  
-                  
-                      L.circleMarker([23.682, 113.056], { radius: Math.log(1) + 3, fillColor: "var(--accent-color)", color: "var(--bg-color)", weight: 1.5, opacity: 1, fillOpacity: 0.7 }).addTo(cityMap).bindPopup(`<b>清远市</b><br>跑步次数: 1<br>总距离: 21.3km`);
-                  
-                  
-                  
-                      L.circleMarker([22.179, 113.549], { radius: Math.log(1) + 3, fillColor: "var(--accent-color)", color: "var(--bg-color)", weight: 1.5, opacity: 1, fillOpacity: 0.7 }).addTo(cityMap).bindPopup(`<b>澳门</b><br>跑步次数: 1<br>总距离: 10.12km`);
-                  
-                  
-                  
-                      L.circleMarker([22.543, 114.058], { radius: Math.log(1) + 3, fillColor: "var(--accent-color)", color: "var(--bg-color)", weight: 1.5, opacity: 1, fillOpacity: 0.7 }).addTo(cityMap).bindPopup(`<b>深圳市</b><br>跑步次数: 1<br>总距离: 5.01km`);
-                  
-                  
-  
-                } else {
-                  cityMap.invalidateSize();
-                }
-            });
-        }
+
+	// --- MAP LOGIC ---
+    const eventsTab = document.querySelector('#events-tab');
+    if(eventsTab) {
+        eventsTab.addEventListener('shown.bs.tab', function() {
+            if (!cityMap) {
+              cityMap = L.map('cityMap', { center: [36, 108], zoom: 4, zoomControl: false });
+              L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', { attribution: '', subdomains: 'abcd', minZoom: 3, maxZoom: 18 }).addTo(cityMap);
+              cityMap.attributionControl.setPrefix('');
+              
+              
+              
+                  L.circleMarker([23.129, 113.264], { radius: Math.log(420) + 3, fillColor: "var(--accent-color)", color: "var(--bg-color)", weight: 1.5, opacity: 1, fillOpacity: 0.7 }).addTo(cityMap).bindPopup(`<b>广州市</b><br>跑步次数: 420<br>总距离: 3503.8km`);
+              
+              
+              
+                  L.circleMarker([21.663, 110.925], { radius: Math.log(11) + 3, fillColor: "var(--accent-color)", color: "var(--bg-color)", weight: 1.5, opacity: 1, fillOpacity: 0.7 }).addTo(cityMap).bindPopup(`<b>茂名市</b><br>跑步次数: 11<br>总距离: 81.6km`);
+              
+              
+              
+                  L.circleMarker([23.682, 113.056], { radius: Math.log(1) + 3, fillColor: "var(--accent-color)", color: "var(--bg-color)", weight: 1.5, opacity: 1, fillOpacity: 0.7 }).addTo(cityMap).bindPopup(`<b>清远市</b><br>跑步次数: 1<br>总距离: 21.3km`);
+              
+              
+              
+                  L.circleMarker([22.179, 113.549], { radius: Math.log(1) + 3, fillColor: "var(--accent-color)", color: "var(--bg-color)", weight: 1.5, opacity: 1, fillOpacity: 0.7 }).addTo(cityMap).bindPopup(`<b>澳门</b><br>跑步次数: 1<br>总距离: 10.12km`);
+              
+              
+              
+                  L.circleMarker([22.543, 114.058], { radius: Math.log(1) + 3, fillColor: "var(--accent-color)", color: "var(--bg-color)", weight: 1.5, opacity: 1, fillOpacity: 0.7 }).addTo(cityMap).bindPopup(`<b>深圳市</b><br>跑步次数: 1<br>总距离: 5.01km`);
+              
+              
+
+            } else {
+              cityMap.invalidateSize();
+            }
+        });
+    }
     
     // --- MAIN STATS CARD FLIP LOGIC ---
     document.querySelectorAll('.flip-icon-container').forEach(icon => {
