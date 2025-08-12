@@ -254,7 +254,9 @@
       --bs-table-color: var(--text-primary);
       --bs-table-border-color: var(--border-color);
     }
-
+    .run-detail-row {
+        cursor: pointer;
+    }
     .modal-content {
       background-color: var(--card-bg);
       color: var(--text-primary);
@@ -377,10 +379,10 @@
         color: var(--text-primary);
         background-color: var(--hover-bg);
         border-color: var(--border-color) var(--border-color) var(--hover-bg);
-    }
+    }/*
     .nav-wrapper .nav {
       --bs-nav-link-padding-x: 0.5rem;
-    }
+    }*/
     #cityMap {
       width: 100%;
       height: 400px;
@@ -675,13 +677,13 @@
         <button class="nav-link active" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary-pane" type="button" role="tab" aria-controls="summary-pane" aria-selected="true" data-hash="summary">概览</button>
         </li>
         <li class="nav-item" role="presentation">
-        <button class="nav-link" id="data-tab" data-bs-toggle="tab" data-bs-target="#data-pane" type="button" role="tab" aria-controls="data-pane" aria-selected="false" data-hash="data">跑步全记录</button>
+        <button class="nav-link" id="data-tab" data-bs-toggle="tab" data-bs-target="#data-pane" type="button" role="tab" aria-controls="data-pane" aria-selected="false" data-hash="data">记录</button>
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="marathon-tab" data-bs-toggle="tab" data-bs-target="#marathon-pane" type="button" role="tab" aria-controls="marathon-pane" aria-selected="false" data-hash="marathon">赛历</button>
         </li>
         <li class="nav-item" role="presentation">
-        <button class="nav-link" id="events-tab" data-bs-toggle="tab" data-bs-target="#events-pane" type="button" role="tab" aria-controls="events-pane" aria-selected="false" data-hash="events">重要时刻</button>
+        <button class="nav-link" id="events-tab" data-bs-toggle="tab" data-bs-target="#events-pane" type="button" role="tab" aria-controls="events-pane" aria-selected="false" data-hash="events">成就</button>
         </li>
         <li class="nav-item" role="presentation">
         <button class="nav-link" id="about-tab" data-bs-toggle="tab" data-bs-target="#about-pane" type="button" role="tab" aria-controls="about-pane" aria-selected="false" data-hash="about">关于</button>
@@ -726,50 +728,7 @@
                       </div>
                     </div>
                 </div>
-            </div><!--
-            <div class="col-12 col-md-6 col-lg-3">
-                <div class="stat-card-flip-container h-100" id="streak-card-container">
-                    <div class="stat-card-flipper h-100">
-                        <div class="stat-card-front">
-                            <div class="stat-card-content">
-                                <div>
-                                    <div class="stat-label">当前连续周</div>
-                                    <div class="stat-value stat-value-small">{{ streak_records.current_streak.weeks }} <small class="small-muted">周</small></div>
-                                </div>
-                                <div class="stat-details">
-                                    <small class="small-muted">
-                                    {% if streak_records.current_streak.weeks > 0 %}
-                                        {{ streak_records.current_streak.start_date }} ~ {{ streak_records.current_streak.end_date }}
-                                    {% else %}
-                                        本周还未跑
-                                    {% endif %}
-                                    </small>
-                                </div>
-                            </div>
-                            <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
-                        </div>
-                        <div class="stat-card-back">
-                            <div class="stat-card-content">
-                                <div>
-                                    <div class="stat-label">最长连续周</div>
-                                    <div class="stat-value stat-value-small">{{ streak_records.longest_streak.weeks }} <small class="small-muted">周</small></div>
-                                </div>
-                                <div class="stat-details">
-                                    <small class="small-muted">
-                                    {% if streak_records.longest_streak.weeks > 0 %}
-                                        {{ streak_records.longest_streak.start_date }} ~ {{ streak_records.longest_streak.end_date }}
-                                    {% else %}
-                                        暂无记录
-                                    {% endif %}
-                                    </small>
-                                </div>
-                            </div>
-                            <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>-->
-            <div class="col-6 col-md-6 col-lg-2">
+            </div><div class="col-6 col-md-6 col-lg-2">
                 <div class="stat-card-flip-container h-100" id="count-card-container">
                     <div class="stat-card-flipper h-100">
                       <div class="stat-card-front">
@@ -965,10 +924,14 @@
                             <tbody id="summary-table-body">
                                 {% for year, year_data in summarized_by_year.items() %}
                                     {% for r in year_data.all_runs %}
-                                    <tr data-distance="{{ r.distance }}" 
+                                    <tr class="run-detail-row"
+                                        data-run-id="{{ r.id }}"
+                                        data-distance="{{ r.distance }}"
+                                        data-distance-formatted="{{ "%.2f"|format(r.distance / 1000) }}"
                                         data-pace-str="{{ r.pace }}"
                                         data-date="{{ r.date.strftime('%Y-%m-%d') }}"
-                                        data-city="{{ r.city }}">
+                                        data-city="{{ r.city[:-1] if r.city and r.city.endswith("市") else r.city }}"
+                                        data-duration="{{ format_duration(r.duration) }}">
                                         <td><code>{{ r.date.strftime('%Y-%m-%d') }}</code></td>
                                         <td>{{ "%.2f"|format(r.distance / 1000) }} <span class="small-muted">km</span></td>
                                         <td class="d-none d-sm-table-cell">{{ format_duration(r.duration) }}</td>
@@ -1299,6 +1262,45 @@
     </div>
 </div>
 
+<div class="modal fade" id="runDetailModal" tabindex="-1" aria-labelledby="runDetailModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="runDetailModalLabel">跑步详情</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="runDetailMap" style="height: 250px; background-color: var(--hover-bg); border-radius: .5rem;" class="mb-3 text-body-secondary d-flex align-items-center justify-content-center">
+          (此处显示跑步轨迹地图)
+        </div>
+        <div class="row text-center mb-3 g-3">
+          <div class="col-4">
+              <div class="stat-label mb-1">距离</div>
+              <div class="fw-bold fs-5" id="runDetailDistance"></div>
+          </div>
+          <div class="col-4">
+              <div class="stat-label mb-1">配速</div>
+              <div class="fw-bold fs-5" id="runDetailPace"></div>
+          </div>
+          <div class="col-4">
+              <div class="stat-label mb-1">用时</div>
+              <div class="fw-bold fs-5" id="runDetailDuration"></div>
+          </div>
+        </div>
+        <div id="runDetailComments" class="mt-4">
+          <h6 class="small-muted mb-2">评论</h6>
+          <div id="runDetailCommentList" style="max-height: 150px; overflow-y: auto; padding: 0.5rem; background-color: var(--hover-bg); border-radius: .25rem;"></div>
+        </div>
+      </div>
+      <div class="modal-footer d-flex justify-content-between">
+        <button type="button" class="btn btn-sm btn-primary" id="addCommentFromDetail">💬 说点什么</button>
+        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 </body>
 <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.bootcdn.net/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -1424,24 +1426,22 @@
     }
 
     // --- MARATHON CALENDAR LOGIC ---
-  
-    const marathonEvents = [
-        {"date": "2025-10-26", "name": "长沙马拉松", "category": "半马", "status": "待抽签 (8/27)"},
-        {"date": "2025-11-09", "name": "南昌马拉松", "category": "半马", "status": "待抽签 (8/22)"},
-        {"date": "2025-11-16", "name": "南京马拉松", "category": "全马", "status": "待抽签 (8/18)"},
-        {"date": "2025-11-30", "name": "上海马拉松", "category": "全马", "status": "待抽签 (8/25)"},
-        {"date": "2025-11-30", "name": "顺德马拉松", "category": "半马", "status": "报名未开始"},
-        {"date": "2025-12-07", "name": "深圳马拉松", "category": "全马", "status": "报名未开始"},
-        {"date": "2025-12-14", "name": "汕头马拉松", "category": "半马", "status": "报名未开始"},
-        {"date": "2025-12-14", "name": "南山半程马拉松", "category": "半马", "status": "报名未开始"},
-        {"date": "2025-12-21", "name": "广州马拉松", "category": "全马", "status": "报名未开始"},
-        {"date": "2026-01-03", "name": "容桂环岛马拉松", "category": "全马", "status": "报名未开始"},
-        {"date": "2026-01-11", "name": "厦门马拉松", "category": "全马", "status": "报名未开始"}
-    ];
-    
-    function generateMarathonCalendar() {
+    async function generateMarathonCalendar() {
         const container = document.getElementById('marathon-calendar-container');
         if (!container) return;
+        container.innerHTML = '<div class="content-card text-center text-body-secondary">加载赛历数据中...</div>';
+
+        let marathonEvents;
+        try {
+            const response = await fetch('https://run.linwn.net/data/upcoming.json');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            marathonEvents = await response.json();
+        } catch (error) {
+            console.error("Could not fetch marathon data:", error);
+            container.innerHTML = '<div class="content-card text-center text-danger">无法加载赛历数据，请稍后重试。</div>';
+            return;
+        }
+        
         const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
         const eventsByMonth = marathonEvents.reduce((acc, event) => {
             const month = event.date.substring(0, 7);
@@ -1560,12 +1560,13 @@
         });
     }
 
-    function initMarathonView() {
+    async function initMarathonView() {
         const container = document.getElementById('marathon-calendar-container');
+        // Only generate if it hasn't been generated before.
         if (container && container.innerHTML.trim() === '') {
-            generateMarathonCalendar();
+            await generateMarathonCalendar();
+            setupCalendarHovers();
         }
-        setupCalendarHovers();
     }
 
 
@@ -1630,9 +1631,6 @@
         const tabTrigger = document.querySelector(`.nav-link[data-hash="${hash}"]`);
         if (tabTrigger) {
           bootstrap.Tab.getOrCreateInstance(tabTrigger).show();
-          if (hash === 'marathon') {
-            initMarathonView();
-          }
         }
       }
     };
@@ -1643,11 +1641,17 @@
         if (hash) {
           history.pushState(null, '', '#' + hash);
         }
+        if (hash === 'marathon') {
+          initMarathonView();
+        }
       });
     });
 
     window.addEventListener('popstate', activateTabFromHash);
     activateTabFromHash();
+    if (window.location.hash === '#marathon') {
+        initMarathonView();
+    }
     
     const marathonTab = document.querySelector('#marathon-tab');
     if (marathonTab) {
@@ -1667,8 +1671,6 @@
                 }
             });
         }
-        
-        marathonTab.addEventListener('shown.bs.tab', initMarathonView);
     }
 
 
@@ -1814,7 +1816,73 @@
         });
     }
 
-    // --- CERTIFICATE & COMMENT MODAL LOGIC ---
+    // --- MODAL AND COMMENT LOGIC ---
+    const commentModalEl = document.getElementById('commentModal');
+    const commentModal = new bootstrap.Modal(commentModalEl);
+
+    async function showCommentModalForRun(runId) {
+        document.getElementById('commentRunId').value = runId;
+        document.getElementById('commentText').value = '';
+        const listContainer = document.getElementById('commentList');
+        listContainer.innerHTML = '<div class="text-muted">加载中...</div>';
+        commentModal.show();
+        try {
+            const res = await fetch(`${commentApiBase}/comments?runId=${encodeURIComponent(runId)}`);
+            if(!res.ok) throw new Error("Failed to fetch comments");
+            const data = await res.json();
+            listContainer.innerHTML = (Array.isArray(data) && data.length > 0) 
+                ? data.map(c => `<div class="border-bottom py-1"><small class="text-muted">${c.nickname || '🌱 匿名'} · ${new Date(c.ts).toLocaleString()}</small><br>${c.text}</div>`).join('')
+                : '<div class="text-muted">暂无评论</div>';
+        } catch(e) {
+            listContainer.innerHTML = '<div class="text-danger">评论加载失败</div>';
+        }
+    }
+
+    const runDetailModalEl = document.getElementById('runDetailModal');
+    const runDetailModal = new bootstrap.Modal(runDetailModalEl);
+
+    document.getElementById('summary-table-body').addEventListener('click', async (e) => {
+        const row = e.target.closest('.run-detail-row');
+        if (!row) return;
+
+        const runId = row.dataset.runId;
+        if (!runId) return;
+
+        // Store runId on the modal itself for the comment button
+        runDetailModalEl.dataset.runId = runId;
+
+        // 1. Populate modal with static data from data-* attributes
+        document.getElementById('runDetailDistance').textContent = `${row.dataset.distanceFormatted} km`;
+        document.getElementById('runDetailPace').textContent = row.dataset.paceStr;
+        document.getElementById('runDetailDuration').textContent = row.dataset.duration;
+        document.getElementById('runDetailModalLabel').textContent = `跑步详情: ${row.dataset.date}`;
+        
+        const commentListContainer = document.getElementById('runDetailCommentList');
+        commentListContainer.innerHTML = '<div class="text-muted">加载评论中...</div>';
+        
+        runDetailModal.show();
+        
+        // 2. Fetch comments asynchronously for the detail view
+        try {
+            const res = await fetch(`${commentApiBase}/comments?runId=${encodeURIComponent(runId)}`);
+            if(!res.ok) throw new Error("Failed to fetch comments");
+            const data = await res.json();
+            commentListContainer.innerHTML = (Array.isArray(data) && data.length > 0) 
+                ? data.map(c => `<div class="border-bottom py-1"><small class="text-muted">${c.nickname || '🌱 匿名'} · ${new Date(c.ts).toLocaleString()}</small><br>${c.text}</div>`).join('')
+                : '<div class="text-muted text-center py-2">暂无评论</div>';
+        } catch {
+            commentListContainer.innerHTML = '<div class="text-danger text-center py-2">评论加载失败</div>';
+        }
+    });
+
+    document.getElementById('addCommentFromDetail').addEventListener('click', () => {
+        const runId = runDetailModalEl.dataset.runId;
+        if (runId) {
+            runDetailModal.hide();
+            showCommentModalForRun(runId);
+        }
+    });
+
     document.addEventListener('click', async e => {
         if (e.target.closest('.certificate-link')) {
             e.preventDefault();
@@ -1826,30 +1894,15 @@
         }
         if (e.target.closest('.comment-link')) {
             e.preventDefault();
-            const link = e.target.closest('.comment-link');
-            const runId = link.dataset.runId;
-            const commentModalEl = document.getElementById('commentModal');
-            document.getElementById('commentRunId').value = runId;
-            document.getElementById('commentText').value = '';
-            const listContainer = document.getElementById('commentList');
-            listContainer.innerHTML = '<div class="text-muted">加载中...</div>';
-            new bootstrap.Modal(commentModalEl).show();
-            try {
-                const res = await fetch(`${commentApiBase}/comments?runId=${encodeURIComponent(runId)}`);
-                const data = await res.json();
-                listContainer.innerHTML = (Array.isArray(data) && data.length > 0) 
-                    ? data.map(c => `<div class="border-bottom py-1"><small class="text-muted">${c.nickname || '🌱 匿名'} · ${new Date(c.ts).toLocaleString()}</small><br>${c.text}</div>`).join('')
-                    : '<div class="text-muted">暂无评论</div>';
-            } catch {
-                listContainer.innerHTML = '<div class="text-danger">评论加载失败</div>';
-            }
+            const runId = e.target.closest('.comment-link').dataset.runId;
+            showCommentModalForRun(runId);
         }
     });
 
     document.getElementById('submitComment').addEventListener('click', async () => {
         const runId = document.getElementById('commentRunId').value;
         const text = document.getElementById('commentText').value.trim();
-        if (!text) return;
+        if (!text || !runId) return;
         
         let nicknameForComment;
         if (localStorage.getItem('run_role') === 'admin') {
@@ -1863,8 +1916,8 @@
         if (res.ok) {
             document.getElementById('commentText').value = '';
             const countEl = document.querySelector(`.comment-count[data-run-id="${runId}"]`);
-            countEl.textContent = parseInt(countEl.textContent, 10) + 1;
-            bootstrap.Modal.getInstance(document.getElementById('commentModal')).hide();
+            if(countEl) countEl.textContent = parseInt(countEl.textContent, 10) + 1;
+            commentModal.hide();
         } else {
             alert('提交失败');
         }
@@ -1875,6 +1928,7 @@
     if(monthlyDistanceChart) monthlyDistanceChart.destroy();
     if(dailyDistanceChart) dailyDistanceChart.destroy();
     if(yearlyDistanceChart) yearlyDistanceChart.destroy();
+    if(cityMap) cityMap.remove();
   });
 </script>
 </html>
