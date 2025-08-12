@@ -379,10 +379,12 @@
         color: var(--text-primary);
         background-color: var(--hover-bg);
         border-color: var(--border-color) var(--border-color) var(--hover-bg);
-    }/*
+    }
+/*
     .nav-wrapper .nav {
       --bs-nav-link-padding-x: 0.5rem;
-    }*/
+    }
+*/
     #cityMap {
       width: 100%;
       height: 400px;
@@ -661,6 +663,45 @@
         .marathon-calendar-container .month-grid { padding: 1rem; }
     }
 
+    /* Comment Media Styles */
+    .comment-media-thumb {
+        max-width: 80px;
+        max-height: 80px;
+        border-radius: 4px;
+        margin: 4px;
+        cursor: pointer;
+        object-fit: cover;
+        transition: transform 0.2s;
+        display: inline-block;
+        vertical-align: middle;
+    }
+    .comment-media-thumb:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 5px var(--accent-color);
+    }
+
+    /* Gallery Modal Styles */
+    #mediaGalleryModal .modal-content {
+      background-color: rgba(0,0,0,0.85);
+      backdrop-filter: blur(5px);
+    }
+    #mediaGalleryModal .btn-close {
+      filter: invert(1) grayscale(100%) brightness(200%);
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      z-index: 20;
+    }
+    #galleryCarouselInner .carousel-item {
+        text-align: center;
+    }
+    #galleryCarouselInner .carousel-item img,
+    #galleryCarouselInner .carousel-item video {
+        max-height: 85vh;
+        width: auto;
+        max-width: 100%;
+    }
+
   </style>
 </head>
 <body>
@@ -718,10 +759,10 @@
                         <div class="stat-card-content">
                           <div>
                             <div class="stat-label">继续坚持</div>
-                            <div class="stat-value">17年54天</div>
+                            <div class="stat-value">17年78天</div>
                           </div>
                           <div class="stat-details">
-                            <div class="stat-label"><small class="small-muted">预计</small>2042年10月01日<small>绕地球一圈</small></div>
+                            <div class="stat-label"><small class="small-muted">预计</small>2042年10月25日<small>绕地球一圈</small></div>
                           </div>
                         </div>
                         <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
@@ -13554,7 +13595,7 @@
             <p>这个跑步记录网站的灵感，来自我在水木社区看到的一个帖子。</p>
             <p>一位跑友分享了他坚持跑步十年的经历，累计跑量达到了三万公里。他接下来的目标是跑到四万公里——正好是绕地球赤道一圈的距离。</p>
             <p>这个目标让我很受触动。四万公里，相当于每天跑<span style="text-decoration: line-through;text-decoration-color: #ff6b6b;text-decoration-thickness: 2px;">十公里</span>五公里，连续跑<span style="text-decoration: line-through;text-decoration-color: #ff6b6b;text-decoration-thickness: 2px;">十一年</span>二十二年。虽然看起来很远，但分解到每一天，就是坚持跑下去。</p>
-            <p>我不是专业跑者，也不追求速度。对我来说，跑步更重要的是保持健康和坚持的习惯。这个网站记录我的跑步历程，看着数字一点点增长，就是最好的动力。</p>
+            <p>我不是专业跑者，<span style="text-decoration: line-through;text-decoration-color: #ff6b6b;text-decoration-thickness: 2px;">也不追求速度</span>(有那么一点点追求)。对我来说，跑步更重要的是保持健康和坚持的习惯。这个网站记录我的跑步历程，看着数字一点点增长，就是最好的动力。</p>
             <p>如果你也有类似的跑步目标，欢迎一起坚持。跑步路上，我们都不孤单。</p>
             <p class="text-end mt-4">2025年7月·广州</p>
         </div>
@@ -13582,7 +13623,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-08-12 14:23:35 
+         | Last updated: 2025-08-12 16:39:56 
     </small>
 </footer>
 
@@ -13597,7 +13638,7 @@
       </div>
       <div class="modal-body">
         <div id="commentList" class="mb-3" style="max-height: 250px; overflow-y: auto;"></div>
-        <textarea class="form-control" id="commentText" rows="3" placeholder="写下你的感想吧..."></textarea>
+        <textarea class="form-control" id="commentText" rows="3" placeholder="写下你的感想吧... 可使用[img]url[/img]或[video]url[/video]分享图片和视频。"></textarea>
         <input type="hidden" id="commentRunId">
       </div>
       <div class="modal-footer d-flex justify-content-between align-items-center">
@@ -13670,6 +13711,28 @@
       <div class="modal-footer d-flex justify-content-between">
         <button type="button" class="btn btn-sm btn-primary" id="addCommentFromDetail">💬 说点什么</button>
         <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="mediaGalleryModal" tabindex="-1" aria-labelledby="mediaGalleryModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body p-0">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div id="mediaCarousel" class="carousel slide">
+          <div class="carousel-inner" id="galleryCarouselInner">
+            </div>
+          <button class="carousel-control-prev" type="button" data-bs-target="#mediaCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#mediaCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -14207,9 +14270,56 @@
         });
     }
 
+    function parseAndRenderMedia(rawText) {
+        const parts = rawText.split(/(\[img\][\s\S]*?\[\/img\]|\[video\][\s\S]*?\[\/video\])/gi);
+        let html = '';
+        let mediaForThisComment = [];
+
+        parts.forEach(part => {
+            const imgMatch = part.match(/^\[img\]([\s\S]*?)\[\/img\]$/i);
+            const videoMatch = part.match(/^\[video\]([\s\S]*?)\[\/video\]$/i);
+
+            if (imgMatch || videoMatch) {
+                const isVideo = !!videoMatch;
+                const url = isVideo ? videoMatch[1].trim() : imgMatch[1].trim();
+                let mediaHtml = '';
+                try {
+                    const sanitizedUrl = new URL(url).href;
+                    if (sanitizedUrl.startsWith('http')) {
+                        mediaForThisComment.push({ type: isVideo ? 'video' : 'image', url: sanitizedUrl });
+                        if (isVideo) {
+                            mediaHtml = `<video src="${sanitizedUrl}" class="comment-media-thumb" data-media-index="${mediaForThisComment.length - 1}" muted playsinline></video>`;
+                        } else {
+                            mediaHtml = `<img src="${sanitizedUrl}" class="comment-media-thumb" data-media-index="${mediaForThisComment.length - 1}" alt="comment image">`;
+                        }
+                    }
+                } catch (e) { /* invalid url, ignore */ }
+                html += mediaHtml;
+            } else if (part) {
+                const sanitizer = document.createElement('div');
+                sanitizer.textContent = part;
+                html += sanitizer.innerHTML.replace(/\n/g, '<br>');
+            }
+        });
+        return `<div class="comment-content-wrapper" data-media='${JSON.stringify(mediaForThisComment)}'>${html}</div>`;
+    }
+
     // --- MODAL AND COMMENT LOGIC ---
     const commentModalEl = document.getElementById('commentModal');
     const commentModal = new bootstrap.Modal(commentModalEl);
+
+    function renderCommentList(container, comments) {
+        if (Array.isArray(comments) && comments.length > 0) {
+            container.innerHTML = comments.map(c => 
+                `<div class="border-bottom py-2">
+                    <small class="text-muted">${c.nickname || '🌱 匿名'} · ${new Date(c.ts).toLocaleString()}</small>
+                    <div class="mt-1">${parseAndRenderMedia(c.text)}</div>
+                 </div>`
+            ).join('');
+        } else {
+             container.innerHTML = '<div class="text-muted text-center py-2">暂无评论</div>';
+        }
+    }
 
     async function showCommentModalForRun(runId) {
         document.getElementById('commentRunId').value = runId;
@@ -14221,9 +14331,10 @@
             const res = await fetch(`${commentApiBase}/comments?runId=${encodeURIComponent(runId)}`);
             if(!res.ok) throw new Error("Failed to fetch comments");
             const data = await res.json();
-            listContainer.innerHTML = (Array.isArray(data) && data.length > 0) 
-                ? data.map(c => `<div class="border-bottom py-1"><small class="text-muted">${c.nickname || '🌱 匿名'} · ${new Date(c.ts).toLocaleString()}</small><br>${c.text}</div>`).join('')
-                : '<div class="text-muted">暂无评论</div>';
+            renderCommentList(listContainer, data);
+
+
+
         } catch(e) {
             listContainer.innerHTML = '<div class="text-danger">评论加载失败</div>';
         }
@@ -14239,10 +14350,10 @@
         const runId = row.dataset.runId;
         if (!runId) return;
 
-        // Store runId on the modal itself for the comment button
+
         runDetailModalEl.dataset.runId = runId;
 
-        // 1. Populate modal with static data from data-* attributes
+
         document.getElementById('runDetailDistance').textContent = `${row.dataset.distanceFormatted} km`;
         document.getElementById('runDetailPace').textContent = row.dataset.paceStr;
         document.getElementById('runDetailDuration').textContent = row.dataset.duration;
@@ -14253,14 +14364,14 @@
         
         runDetailModal.show();
         
-        // 2. Fetch comments asynchronously for the detail view
+
         try {
             const res = await fetch(`${commentApiBase}/comments?runId=${encodeURIComponent(runId)}`);
             if(!res.ok) throw new Error("Failed to fetch comments");
             const data = await res.json();
-            commentListContainer.innerHTML = (Array.isArray(data) && data.length > 0) 
-                ? data.map(c => `<div class="border-bottom py-1"><small class="text-muted">${c.nickname || '🌱 匿名'} · ${new Date(c.ts).toLocaleString()}</small><br>${c.text}</div>`).join('')
-                : '<div class="text-muted text-center py-2">暂无评论</div>';
+            renderCommentList(commentListContainer, data);
+
+
         } catch {
             commentListContainer.innerHTML = '<div class="text-danger text-center py-2">评论加载失败</div>';
         }
@@ -14272,6 +14383,13 @@
             runDetailModal.hide();
             showCommentModalForRun(runId);
         }
+    });
+
+    const mediaGalleryModalEl = document.getElementById('mediaGalleryModal');
+    mediaGalleryModalEl.addEventListener('hidden.bs.modal', () => {
+        const galleryCarouselInner = document.getElementById('galleryCarouselInner');
+        galleryCarouselInner.querySelectorAll('video').forEach(v => v.pause());
+        galleryCarouselInner.innerHTML = '';
     });
 
     document.addEventListener('click', async e => {
@@ -14287,6 +14405,36 @@
             e.preventDefault();
             const runId = e.target.closest('.comment-link').dataset.runId;
             showCommentModalForRun(runId);
+        }
+        if (e.target.classList.contains('comment-media-thumb')) {
+            e.preventDefault();
+            const clickedThumb = e.target;
+            const wrapper = clickedThumb.closest('.comment-content-wrapper');
+            if (!wrapper) return;
+
+            const mediaData = JSON.parse(wrapper.dataset.media);
+            const clickedIndex = parseInt(clickedThumb.dataset.mediaIndex, 10);
+            const galleryCarouselInner = document.getElementById('galleryCarouselInner');
+            
+            galleryCarouselInner.innerHTML = ''; 
+
+            mediaData.forEach((mediaItem, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'carousel-item';
+                if (index === clickedIndex) {
+                    itemDiv.classList.add('active');
+                }
+
+                if (mediaItem.type === 'video') {
+                    itemDiv.innerHTML = `<video src="${mediaItem.url}" class="d-block" controls autoplay loop playsinline></video>`;
+                } else {
+                    itemDiv.innerHTML = `<img src="${mediaItem.url}" class="d-block" alt="gallery image">`;
+                }
+                galleryCarouselInner.appendChild(itemDiv);
+            });
+
+            const mediaGalleryModal = bootstrap.Modal.getOrCreateInstance(mediaGalleryModalEl);
+            mediaGalleryModal.show();
         }
     });
 
