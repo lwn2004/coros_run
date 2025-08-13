@@ -2049,13 +2049,13 @@
               "summary": { "distance_km": 10.02, "duration": "00:52:15", "avg_pace": "5:13", "avg_heart_rate": 152 },
               "route": { "encoded_polyline": "u{~vFvyys@_A`@i@`@q@j@u@j@u@j@w@f@s@d@q@d@o@`@k@Zg@Xm@V]Ra@Te@X]Z]b@a@^a@^a@^g@\\_@b@]f@a@`@e@b@e@d@i@f@i@h@k@h@m@h@m@h@m@h@m@j@m@j@m@j@m@j@m@j@" },
               "photos": [
-                { "url": "https://s.linwn.net/mo/sharing/YGc0TIpjd", "timestamp": "2025-08-13T06:45:12Z", "note": "Sunrise view" },
-                { "url": "https://s.linwn.net/mo/sharing/HY0EhYhP4", "timestamp": "2025-08-13T07:05:45Z", "note": "Bridge crossing" }
+                { "url": `https://picsum.photos/seed/${runId}/200/300`, "timestamp": "2025-08-13T06:45:12Z", "note": "Sunrise view" },
+                { "url": `https://picsum.photos/seed/${runId}a/200/300`, "timestamp": "2025-08-13T07:05:45Z", "note": "Bridge crossing" }
               ]
             };
 
             const runDate = new Date(data.start_time);
-            document.getElementById('runDetailModalLabel').textContent = `跑步详情: ${runDate.toLocaleDateString()}`;
+            document.getElementById('runDetailModalLabel').textContent = `跑步详情 - ${currentDetailRunId}: ${runDate.toLocaleDateString()}`;
 
             // --- Populate Summary & Weather ---
             document.getElementById('detailStatDistance').textContent = `${data.summary.distance_km} km`;
