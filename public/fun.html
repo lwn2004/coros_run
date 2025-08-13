@@ -13660,7 +13660,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-08-13 17:26:52 
+         | Last updated: 2025-08-13 18:31:16 
     </small>
 </footer>
 
@@ -13732,8 +13732,10 @@
                     </div>
 
                     <div id="runDetailContent" class="d-none">
-                        <div id="runDetailMap" style="height: 35vh; min-height: 250px; background-color: var(--hover-bg); border-radius: .5rem;" class="mb-4 w-100"></div>
+                        <div id="runDetailMap" style="height: 35vh; min-height: 250px; background-color: var(--hover-bg); border-radius: .5rem;" class="w-100"></div>
                         
+                        <div id="detailWeatherLine" class="text-center text-body-secondary small my-3"></div>
+
                         <div class="row text-center mb-4 g-3">
                             <div class="col-6 col-md-3">
                                 <div class="stat-label mb-1">距离</div>
@@ -13750,15 +13752,6 @@
                             <div class="col-6 col-md-3">
                                 <div class="stat-label mb-1">平均心率</div>
                                 <div class="fw-bold fs-5" id="detailStatHeartRate"></div>
-                            </div>
-                        </div>
-
-                        <div class="content-card p-3 mb-4">
-                            <h6 class="mb-3 small-muted"><i class="bi bi-thermometer-half me-2"></i>天气情况</h6>
-                            <div class="d-flex justify-content-around">
-                                <span><i class="bi bi-thermometer-sun me-1"></i> 温度: <span id="detailWeatherTemp"></span></span>
-                                <span><i class="bi bi-cloud me-1"></i> 天气: <span id="detailWeatherCond"></span></span>
-                                <span><i class="bi bi-wind me-1"></i> 风速: <span id="detailWeatherWind"></span></span>
                             </div>
                         </div>
 
@@ -14104,6 +14097,7 @@
         const dataTab = document.getElementById('data-tab');
         if (dataTab) {
             bootstrap.Tab.getOrCreateInstance(dataTab).show();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     });
 
@@ -14481,9 +14475,14 @@
             document.getElementById('detailStatPace').textContent = `${data.summary.avg_pace} /km`;
             document.getElementById('detailStatDuration').textContent = data.summary.duration;
             document.getElementById('detailStatHeartRate').textContent = `${data.summary.avg_heart_rate} bpm`;
-            document.getElementById('detailWeatherTemp').textContent = `${data.weather.temperature_c}°C`;
-            document.getElementById('detailWeatherCond').textContent = data.weather.condition;
-            document.getElementById('detailWeatherWind').textContent = `${data.weather.wind_speed_kmh} km/h`;
+
+            const weather_parts = [
+                `${data.weather.condition}`,
+                `${data.weather.temperature_c}°C`,
+                `风速 ${data.weather.wind_speed_kmh} km/h`
+            ];
+            document.getElementById('detailWeatherLine').textContent = weather_parts.join('  ·  ');
+
 
             // --- Populate Map ---
             if (!runDetailMapInstance) {
