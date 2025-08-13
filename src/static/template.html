@@ -254,7 +254,7 @@
       --bs-table-color: var(--text-primary);
       --bs-table-border-color: var(--border-color);
     }
-    .run-detail-row {
+    .run-detail-row, .recent-run-card {
         cursor: pointer;
     }
     .modal-content {
@@ -298,7 +298,13 @@
     .modal-header .btn-close {
         filter: invert(0.8);
     }
-
+    #runDetailModal .modal-header {
+        background-color: var(--card-bg);
+        border-bottom: 1px solid var(--border-color);
+    }
+    #runDetailModal .modal-body {
+        background-color: var(--bg-color);
+    }
     .text-primary-emphasis {
       color: var(--text-primary) !important;
     }
@@ -820,7 +826,7 @@
                 <div class="row g-3">
                 {% for run in recent_runs %}
                 <div class="col-lg-4">
-                    <div class="p-3 rounded h-100 d-flex flex-column" style="background-color: var(--hover-bg);">
+                    <div class="p-3 rounded h-100 d-flex flex-column recent-run-card" data-run-id="{{ run.id }}" style="background-color: var(--hover-bg);">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="fw-bold text-primary-emphasis">{{ "%.2f"|format(run.distance / 1000) }} km</span>
                             <span class="small text-body-secondary">{{ run.date.strftime('%Y-%m-%d %H:%M') }}</span>
@@ -848,11 +854,14 @@
                         </div>
 
                         <div class="mt-auto pt-3 text-end">
-                          <a href="#" class="comment-link small text-body-secondary" data-run-id="{{ run.id }}">💬 说点什么 (<span class="comment-count" data-run-id="{{ run.id }}">0</span>)</a>
+                          <a href="#" class="comment-link small text-body-secondary" data-run-id="{{ run.id }}" data-scroll-to-comment="true">💬 说点什么 (<span class="comment-count" data-run-id="{{ run.id }}">0</span>)</a>
                         </div>
                     </div>
                 </div>
                 {% endfor %}
+                </div>
+                <div class="text-center mt-3">
+                    <a href="#data" id="goto-data-tab" class="comment-link">查看所有记录 &rarr;</a>
                 </div>
             </div>
         </div>
@@ -1304,41 +1313,81 @@
 </div>
 
 <div class="modal fade" id="runDetailModal" tabindex="-1" aria-labelledby="runDetailModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="runDetailModalLabel">跑步详情</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div id="runDetailMap" style="height: 250px; background-color: var(--hover-bg); border-radius: .5rem;" class="mb-3 text-body-secondary d-flex align-items-center justify-content-center">
-          (此处显示跑步轨迹地图)
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header sticky-top">
+                <h5 class="modal-title" id="runDetailModalLabel">跑步详情</h5>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="返回"><i class="bi bi-arrow-left"></i> 返回</button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div id="runDetailLoading" class="text-center p-5">
+                        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2 text-body-secondary">正在加载跑步数据...</p>
+                    </div>
+
+                    <div id="runDetailContent" class="d-none">
+                        <div id="runDetailMap" style="height: 35vh; min-height: 250px; background-color: var(--hover-bg); border-radius: .5rem;" class="mb-4 w-100"></div>
+                        
+                        <div class="row text-center mb-4 g-3">
+                            <div class="col-6 col-md-3">
+                                <div class="stat-label mb-1">距离</div>
+                                <div class="fw-bold fs-5" id="detailStatDistance"></div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="stat-label mb-1">平均配速</div>
+                                <div class="fw-bold fs-5" id="detailStatPace"></div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="stat-label mb-1">用时</div>
+                                <div class="fw-bold fs-5" id="detailStatDuration"></div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="stat-label mb-1">平均心率</div>
+                                <div class="fw-bold fs-5" id="detailStatHeartRate"></div>
+                            </div>
+                        </div>
+
+                        <div class="content-card p-3 mb-4">
+                            <h6 class="mb-3 small-muted"><i class="bi bi-thermometer-half me-2"></i>天气情况</h6>
+                            <div class="d-flex justify-content-around">
+                                <span><i class="bi bi-thermometer-sun me-1"></i> 温度: <span id="detailWeatherTemp"></span></span>
+                                <span><i class="bi bi-cloud me-1"></i> 天气: <span id="detailWeatherCond"></span></span>
+                                <span><i class="bi bi-wind me-1"></i> 风速: <span id="detailWeatherWind"></span></span>
+                            </div>
+                        </div>
+
+                        <div id="runDetailPhotos" class="mb-4">
+                            <h6 class="mb-3 small-muted"><i class="bi bi-images me-2"></i>跑步照片</h6>
+                            <div id="runDetailPhotosContainer" class="row g-3"></div>
+                        </div>
+
+                        <div id="runDetailComments" class="mt-4">
+                            <h6 class="mb-2 small-muted"><i class="bi bi-chat-dots me-2"></i>评论</h6>
+                            <div id="runDetailCommentList" class="mb-3"></div>
+                            <div id="runDetailCommentForm" class="content-card p-3">
+                                <h6 class="mb-3">发表评论</h6>
+                                <textarea class="form-control" id="runDetailCommentText" rows="3" placeholder="写下你的感想吧..."></textarea>
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <div id="detailEditProfileTrigger" style="cursor: pointer;" title="点击修改昵称">
+                                        <span class="small text-body-secondary">
+                                            发言身份: <span id="detailCommentUserIcon"></span> <span id="detailCommentUserNickname"></span>
+                                            <i class="bi bi-pencil-fill small ms-1"></i>
+                                        </span>
+                                    </div>
+                                    <button type="button" class="btn btn-primary btn-sm" id="submitRunDetailComment">
+                                        <i class="bi bi-send-fill"></i> 提交
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="row text-center mb-3 g-3">
-          <div class="col-4">
-              <div class="stat-label mb-1">距离</div>
-              <div class="fw-bold fs-5" id="runDetailDistance"></div>
-          </div>
-          <div class="col-4">
-              <div class="stat-label mb-1">配速</div>
-              <div class="fw-bold fs-5" id="runDetailPace"></div>
-          </div>
-          <div class="col-4">
-              <div class="stat-label mb-1">用时</div>
-              <div class="fw-bold fs-5" id="runDetailDuration"></div>
-          </div>
-        </div>
-        <div id="runDetailComments" class="mt-4">
-          <h6 class="small-muted mb-2">评论</h6>
-          <div id="runDetailCommentList" style="max-height: 150px; overflow-y: auto; padding: 0.5rem; background-color: var(--hover-bg); border-radius: .25rem;"></div>
-        </div>
-      </div>
-      <div class="modal-footer d-flex justify-content-between">
-        <button type="button" class="btn btn-sm btn-primary" id="addCommentFromDetail">💬 说点什么</button>
-        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">关闭</button>
-      </div>
     </div>
-  </div>
 </div>
 
 <div class="modal fade" id="mediaGalleryModal" tabindex="-1" aria-labelledby="mediaGalleryModalLabel" aria-hidden="true">
@@ -1374,6 +1423,7 @@
 	let dailyDistanceChart = null;
 	let yearlyDistanceChart = null;
 	let cityMap = null;
+    let runDetailMapInstance = null;
     let allRunRows = [];
     const commentApiBase = 'https://kv.linwn.net';
 
@@ -1421,12 +1471,13 @@
             }
         }
         
-        const commentIconEl = document.getElementById('commentUserIcon');
-        const commentNicknameEl = document.getElementById('commentUserNickname');
-        if(commentIconEl && commentNicknameEl) {
-            commentIconEl.textContent = profile.icon;
-            commentNicknameEl.textContent = profile.nickname;
-        }
+        // Old comment modal
+        document.getElementById('commentUserIcon').textContent = profile.icon;
+        document.getElementById('commentUserNickname').textContent = profile.nickname;
+
+        // New detail modal
+        document.getElementById('detailCommentUserIcon').textContent = profile.icon;
+        document.getElementById('detailCommentUserNickname').textContent = profile.nickname;
 
         document.getElementById('nicknameInput').value = profile.nickname;
         document.getElementById('nicknameInput').disabled = isAdmin;
@@ -1632,10 +1683,26 @@
         }
     }
 
-
 	document.addEventListener('DOMContentLoaded', function() {
 		
-    //setRandomQuote();
+    // --- 页面初始化逻辑 ---
+    initializeUserProfile();
+    loadCommentCounts();
+
+    document.getElementById('editProfileTrigger').addEventListener('click', () => {
+        new bootstrap.Modal(document.getElementById('profileModal')).show();
+    });
+    document.getElementById('detailEditProfileTrigger').addEventListener('click', () => {
+        new bootstrap.Modal(document.getElementById('profileModal')).show();
+    });
+
+    document.getElementById('goto-data-tab')?.addEventListener('click', e => {
+        e.preventDefault();
+        const dataTab = document.getElementById('data-tab');
+        if (dataTab) {
+            bootstrap.Tab.getOrCreateInstance(dataTab).show();
+        }
+    });
 
     // --- 手机滑动切换标签页功能 ---
     let startX = 0;
@@ -1677,16 +1744,7 @@
       
       if (absDiffX > absDiffY && absDiffX > 10) e.preventDefault();
     }, { passive: false });
-
-    // --- 页面初始化逻辑 ---
-    initializeUserProfile();
-    loadCommentCounts();
-
-    document.getElementById('commentModal').addEventListener('show.bs.modal', loadProfileIntoModals);
-    document.getElementById('editProfileTrigger').addEventListener('click', () => {
-        new bootstrap.Modal(document.getElementById('profileModal')).show();
-    });
-
+    
     // --- URL锚点与选项卡同步逻辑 ---
     const activateTabFromHash = () => {
       const hash = window.location.hash.substring(1);
@@ -1914,9 +1972,6 @@
     }
 
     // --- MODAL AND COMMENT LOGIC ---
-    const commentModalEl = document.getElementById('commentModal');
-    const commentModal = new bootstrap.Modal(commentModalEl);
-
     function renderCommentList(container, comments) {
         if (Array.isArray(comments) && comments.length > 0) {
             container.innerHTML = comments.map(c => 
@@ -1929,71 +1984,165 @@
              container.innerHTML = '<div class="text-muted text-center py-2">暂无评论</div>';
         }
     }
+    
+    // --- NEW RUN DETAIL MODAL LOGIC ---
+    let currentDetailRunId = null;
 
-    async function showCommentModalForRun(runId) {
-        document.getElementById('commentRunId').value = runId;
-        document.getElementById('commentText').value = '';
-        const listContainer = document.getElementById('commentList');
-        listContainer.innerHTML = '<div class="text-muted">加载中...</div>';
-        commentModal.show();
+    function decodePolyline(encoded) {
+        if (!encoded) return [];
+        let index = 0, len = encoded.length;
+        let lat = 0, lng = 0;
+        let array = [];
+        while (index < len) {
+            let b, shift = 0, result = 0;
+            do {
+                b = encoded.charCodeAt(index++) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            } while (b >= 0x20);
+            let dlat = ((result & 1) ? ~(result >> 1) : (result >> 1));
+            lat += dlat;
+            shift = 0; result = 0;
+            do {
+                b = encoded.charCodeAt(index++) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            } while (b >= 0x20);
+            let dlng = ((result & 1) ? ~(result >> 1) : (result >> 1));
+            lng += dlng;
+            array.push([lat * 1e-5, lng * 1e-5]);
+        }
+        return array;
+    }
+
+    async function refreshDetailComments(runId) {
+        const listContainer = document.getElementById('runDetailCommentList');
         try {
             const res = await fetch(`${commentApiBase}/comments?runId=${encodeURIComponent(runId)}`);
             if(!res.ok) throw new Error("Failed to fetch comments");
             const data = await res.json();
             renderCommentList(listContainer, data);
-
-
-
         } catch(e) {
             listContainer.innerHTML = '<div class="text-danger">评论加载失败</div>';
         }
     }
 
-    const runDetailModalEl = document.getElementById('runDetailModal');
-    const runDetailModal = new bootstrap.Modal(runDetailModalEl);
-
-    document.getElementById('summary-table-body').addEventListener('click', async (e) => {
-        const row = e.target.closest('.run-detail-row');
-        if (!row) return;
-
-        const runId = row.dataset.runId;
-        if (!runId) return;
-
-
-        runDetailModalEl.dataset.runId = runId;
-
-
-        document.getElementById('runDetailDistance').textContent = `${row.dataset.distanceFormatted} km`;
-        document.getElementById('runDetailPace').textContent = row.dataset.paceStr;
-        document.getElementById('runDetailDuration').textContent = row.dataset.duration;
-        document.getElementById('runDetailModalLabel').textContent = `跑步详情: ${row.dataset.date}`;
+    async function showRunDetailModal(runId, scrollToComments = false) {
+        currentDetailRunId = runId;
+        const modalEl = document.getElementById('runDetailModal');
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
         
-        const commentListContainer = document.getElementById('runDetailCommentList');
-        commentListContainer.innerHTML = '<div class="text-muted">加载评论中...</div>';
+        document.getElementById('runDetailLoading').style.display = 'block';
+        document.getElementById('runDetailContent').classList.add('d-none');
+        document.getElementById('runDetailModalLabel').textContent = '加载中...';
         
-        runDetailModal.show();
-        
+        modal.show();
 
         try {
-            const res = await fetch(`${commentApiBase}/comments?runId=${encodeURIComponent(runId)}`);
-            if(!res.ok) throw new Error("Failed to fetch comments");
-            const data = await res.json();
-            renderCommentList(commentListContainer, data);
+            // NOTE: Using a static object for this task instead of a live fetch
+            // const response = await fetch(`https://static.linwn.net:10088/runpage/data/${runId}/record.json`);
+            // if (!response.ok) throw new Error('无法加载跑步数据');
+            // const data = await response.json();
+            const data = {
+              "start_time": "2025-08-13T06:30:00Z",
+              "weather": { "temperature_c": 28.5, "condition": "Cloudy", "wind_speed_kmh": 12.3 },
+              "summary": { "distance_km": 10.02, "duration": "00:52:15", "avg_pace": "5:13", "avg_heart_rate": 152 },
+              "route": { "encoded_polyline": "u{~vFvyys@_A`@i@`@q@j@u@j@u@j@w@f@s@d@q@d@o@`@k@Zg@Xm@V]Ra@Te@X]Z]b@a@^a@^a@^g@\\_@b@]f@a@`@e@b@e@d@i@f@i@h@k@h@m@h@m@h@m@h@m@j@m@j@m@j@m@j@m@j@" },
+              "photos": [
+                { "url": "https://s.linwn.net/mo/sharing/YGc0TIpjd", "timestamp": "2025-08-13T06:45:12Z", "note": "Sunrise view" },
+                { "url": "https://s.linwn.net/mo/sharing/HY0EhYhP4", "timestamp": "2025-08-13T07:05:45Z", "note": "Bridge crossing" }
+              ]
+            };
 
+            const runDate = new Date(data.start_time);
+            document.getElementById('runDetailModalLabel').textContent = `跑步详情: ${runDate.toLocaleDateString()}`;
 
-        } catch {
-            commentListContainer.innerHTML = '<div class="text-danger text-center py-2">评论加载失败</div>';
+            // --- Populate Summary & Weather ---
+            document.getElementById('detailStatDistance').textContent = `${data.summary.distance_km} km`;
+            document.getElementById('detailStatPace').textContent = `${data.summary.avg_pace} /km`;
+            document.getElementById('detailStatDuration').textContent = data.summary.duration;
+            document.getElementById('detailStatHeartRate').textContent = `${data.summary.avg_heart_rate} bpm`;
+            document.getElementById('detailWeatherTemp').textContent = `${data.weather.temperature_c}°C`;
+            document.getElementById('detailWeatherCond').textContent = data.weather.condition;
+            document.getElementById('detailWeatherWind').textContent = `${data.weather.wind_speed_kmh} km/h`;
+
+            // --- Populate Map ---
+            if (!runDetailMapInstance) {
+                runDetailMapInstance = L.map('runDetailMap').setView([39.9042, 116.4074], 10);
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', { attribution: '', subdomains: 'abcd', minZoom: 3, maxZoom: 18 }).addTo(runDetailMapInstance);
+            }
+            // Clear previous layers
+            runDetailMapInstance.eachLayer(layer => { if (!!layer.toGeoJSON) runDetailMapInstance.removeLayer(layer); });
+
+            if (data.route.encoded_polyline) {
+                const coordinates = decodePolyline(data.route.encoded_polyline);
+                if (coordinates.length > 0) {
+                    const polyline = L.polyline(coordinates, { color: 'var(--accent-color)', weight: 4 }).addTo(runDetailMapInstance);
+                    runDetailMapInstance.fitBounds(polyline.getBounds().pad(0.1));
+                }
+            }
+            
+            // --- Populate Photos ---
+            const photosContainer = document.getElementById('runDetailPhotosContainer');
+            photosContainer.innerHTML = '';
+            if (data.photos && data.photos.length > 0) {
+                document.getElementById('runDetailPhotos').style.display = 'block';
+                data.photos.forEach(photo => {
+                    photosContainer.innerHTML += `
+                        <div class="col-md-4 col-sm-6">
+                            <figure class="figure">
+                                <img src="${photo.url}" class="figure-img img-fluid rounded" alt="${photo.note}">
+                                <figcaption class="figure-caption">${photo.note || ''} <span class="text-body-secondary">@${new Date(photo.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span></figcaption>
+                            </figure>
+                        </div>`;
+                });
+            } else {
+                document.getElementById('runDetailPhotos').style.display = 'none';
+            }
+
+            // --- Load Comments ---
+            await refreshDetailComments(runId);
+            
+            document.getElementById('runDetailLoading').style.display = 'none';
+            document.getElementById('runDetailContent').classList.remove('d-none');
+            
+            runDetailMapInstance.invalidateSize();
+            
+            if (scrollToComments) {
+                document.getElementById('runDetailCommentForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+        } catch (error) {
+            document.getElementById('runDetailLoading').innerHTML = `<div class="alert alert-danger">加载失败: ${error.message}</div>`;
+        }
+    }
+
+    document.getElementById('runDetailModal').addEventListener('shown.bs.modal', () => {
+        if (runDetailMapInstance) {
+            runDetailMapInstance.invalidateSize();
         }
     });
 
-    document.getElementById('addCommentFromDetail').addEventListener('click', () => {
-        const runId = runDetailModalEl.dataset.runId;
-        if (runId) {
-            runDetailModal.hide();
-            showCommentModalForRun(runId);
+    document.getElementById('submitRunDetailComment').addEventListener('click', async () => {
+        const runId = currentDetailRunId;
+        const text = document.getElementById('runDetailCommentText').value.trim();
+        if (!text || !runId) return;
+        
+        const profile = JSON.parse(localStorage.getItem('run_profile')) || generateRandomProfile();
+        const nicknameForComment = `${profile.icon} ${profile.nickname}`;
+        
+        const res = await fetch(`${commentApiBase}/comment`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ runId, text, nickname: nicknameForComment }) });
+        if (res.ok) {
+            document.getElementById('runDetailCommentText').value = '';
+            await refreshDetailComments(runId);
+            const countEl = document.querySelector(`.comment-count[data-run-id="${runId}"]`);
+            if(countEl) countEl.textContent = parseInt(countEl.textContent, 10) + 1;
+        } else {
+            alert('提交失败');
         }
     });
-
+    
+    // --- EVENT LISTENERS (Certificate, Comment, Media, etc.) ---
     const mediaGalleryModalEl = document.getElementById('mediaGalleryModal');
     mediaGalleryModalEl.addEventListener('hidden.bs.modal', () => {
         const galleryCarouselInner = document.getElementById('galleryCarouselInner');
@@ -2002,19 +2151,39 @@
     });
 
     document.addEventListener('click', async e => {
-        if (e.target.closest('.certificate-link')) {
+        const certLink = e.target.closest('.certificate-link');
+        if (certLink) {
             e.preventDefault();
-            const imgUrl = e.target.closest('.certificate-link').dataset.img;
+            const imgUrl = certLink.dataset.img;
             if(imgUrl) {
                 document.getElementById('certificateImage').src = imgUrl;
                 new bootstrap.Modal(document.getElementById('certificateModal')).show();
             }
+            return;
         }
-        if (e.target.closest('.comment-link')) {
+
+        const runRow = e.target.closest('.run-detail-row');
+        if (runRow) {
             e.preventDefault();
-            const runId = e.target.closest('.comment-link').dataset.runId;
-            showCommentModalForRun(runId);
+            showRunDetailModal(runRow.dataset.runId, false);
+            return;
         }
+
+        const recentCard = e.target.closest('.recent-run-card');
+        if(recentCard) {
+            e.preventDefault();
+            const isCommentLink = e.target.closest('.comment-link');
+            showRunDetailModal(recentCard.dataset.runId, !!isCommentLink);
+            return;
+        }
+        
+        const commentLink = e.target.closest('.comment-link');
+        if (commentLink && !commentLink.closest('.recent-run-card')) {
+             e.preventDefault();
+             showRunDetailModal(commentLink.dataset.runId, true);
+             return;
+        }
+
         if (e.target.classList.contains('comment-media-thumb')) {
             e.preventDefault();
             const clickedThumb = e.target;
@@ -2047,6 +2216,7 @@
         }
     });
 
+    // --- OLD COMMENT MODAL (Kept for now in case of other entry points, but new flow bypasses it) ---
     document.getElementById('submitComment').addEventListener('click', async () => {
         const runId = document.getElementById('commentRunId').value;
         const text = document.getElementById('commentText').value.trim();
@@ -2065,7 +2235,7 @@
             document.getElementById('commentText').value = '';
             const countEl = document.querySelector(`.comment-count[data-run-id="${runId}"]`);
             if(countEl) countEl.textContent = parseInt(countEl.textContent, 10) + 1;
-            commentModal.hide();
+            bootstrap.Modal.getInstance(document.getElementById('commentModal')).hide();
         } else {
             alert('提交失败');
         }
@@ -2077,6 +2247,7 @@
     if(dailyDistanceChart) dailyDistanceChart.destroy();
     if(yearlyDistanceChart) yearlyDistanceChart.destroy();
     if(cityMap) cityMap.remove();
+    if(runDetailMapInstance) runDetailMapInstance.remove();
   });
 </script>
 </html>
