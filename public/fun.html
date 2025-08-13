@@ -264,6 +264,13 @@
     .modal-header {
       border-bottom-color: var(--border-color);
     }
+    #runDetailModal .modal-header {
+        background-color: var(--card-bg);
+        border-bottom: 1px solid var(--border-color);
+    }
+    #runDetailModal .modal-body {
+        background-color: var(--bg-color);
+    }
     .pb-entry {
       border-bottom: 1px solid var(--border-color) !important;
     }
@@ -298,13 +305,7 @@
     .modal-header .btn-close {
         filter: invert(0.8);
     }
-    #runDetailModal .modal-header {
-        background-color: var(--card-bg);
-        border-bottom: 1px solid var(--border-color);
-    }
-    #runDetailModal .modal-body {
-        background-color: var(--bg-color);
-    }
+
     .text-primary-emphasis {
       color: var(--text-primary) !important;
     }
@@ -929,7 +930,7 @@
                 
                 </div>
                 <div class="text-center mt-3">
-                    <a href="#data" id="goto-data-tab" class="comment-link">查看所有记录 &rarr;</a>
+                    <a href="#data" id="goto-data-tab" class="text-decoration-none text-body-secondary">查看所有记录 &rarr;</a>
                 </div>
             </div>
         </div>
@@ -13659,7 +13660,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-08-13 16:55:16 
+         | Last updated: 2025-08-13 17:26:52 
     </small>
 </footer>
 
@@ -14473,7 +14474,7 @@
             };
 
             const runDate = new Date(data.start_time);
-            document.getElementById('runDetailModalLabel').textContent = `跑步详情 - ${currentDetailRunId}: ${runDate.toLocaleDateString()}`;
+            document.getElementById('runDetailModalLabel').textContent = `跑步详情: ${runDate.toLocaleDateString()}`;
 
             // --- Populate Summary & Weather ---
             document.getElementById('detailStatDistance').textContent = `${data.summary.distance_km} km`;
