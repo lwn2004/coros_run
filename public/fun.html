@@ -13768,7 +13768,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-08-14 17:07:55 
+         | Last updated: 2025-08-14 17:42:36 
     </small>
 </footer>
 
@@ -14236,6 +14236,25 @@
     window.addEventListener('popstate', activateTabFromHash);
     activateTabFromHash();
     if (window.location.hash === '#marathon') { initMarathonView(); }
+    const marathonTab = document.querySelector('#marathon-tab');
+    if (marathonTab) {
+        const marathonPane = document.getElementById('marathon-pane');
+        const calendarToggle = document.getElementById('calendar-view-toggle');
+        
+        marathonPane.classList.add('view-grid'); 
+
+        if(calendarToggle) {
+            calendarToggle.addEventListener('click', (e) => {
+                if (e.target.matches('button')) {
+                    const view = e.target.dataset.view;
+                    marathonPane.classList.remove('view-list', 'view-grid');
+                    marathonPane.classList.add(`view-${view}`);
+                    calendarToggle.querySelector('.active').classList.remove('active');
+                    e.target.classList.add('active');
+                }
+            });
+        }
+    }
     
     const eventsTab = document.querySelector('#events-tab');
     if(eventsTab) {
