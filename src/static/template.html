@@ -2064,7 +2064,9 @@
             carouselIndicators.innerHTML += `<button type="button" data-bs-target="#runMediaCarousel" data-bs-slide-to="0" class="active" aria-current="true"></button>`;
 
             if (runDetailMapInstance) runDetailMapInstance.remove();
-            runDetailMapInstance = L.map('runDetailMap', { attributionControl: false, zoomControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false, touchZoom: false, boxZoom: false, keyboard: false });
+            //runDetailMapInstance = L.map('runDetailMap', { attributionControl: false, zoomControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false, touchZoom: false, boxZoom: false, keyboard: false });
+            runDetailMapInstance = L.map('runDetailMap', { center: [36, 108], zoom: 4, zoomControl: false });
+          
             L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', { subdomains: 'abcd' }).addTo(runDetailMapInstance);
 
             if (data.route.encoded_polyline) {
