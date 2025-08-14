@@ -865,7 +865,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-08-14 10:43:14 
+         | Last updated: 2025-08-14 11:09:51 
     </small>
 </footer>
 
@@ -967,13 +967,273 @@
 
 	document.documentElement.setAttribute('data-bs-theme', 'dark');
 
-    // --- USER PROFILE LOGIC, etc. (remains the same as before) ---
-    // ...
+    function setRandomQuote() {
+        const quotes = [
+            "路漫漫其修远兮",
+            "道阻且长",
+        ];
+        const quoteElement = document.getElementById('running-quote');
+        if (quoteElement) {
+            const randomIndex = Math.floor(Math.random() * quotes.length);
+            quoteElement.textContent = quotes[randomIndex];
+        }
+    }
+
+    // --- USER PROFILE LOGIC ---
+    function generateRandomProfile() {
+        const adjectives = ['快乐', '坚定', '闪亮', '迷路', '温柔'];
+        const nouns = ['小鹿', '绿豆芽', '星星', '猫咪', '纸飞机'];
+        const icons = ['🌱','🌸','🌟','🍃','🌊','🐾','🌀','🌼'];
+        
+        return {
+            icon: icons[Math.floor(Math.random() * icons.length)],
+            nickname: `匿名${adjectives[Math.floor(Math.random() * adjectives.length)]}${nouns[Math.floor(Math.random() * nouns.length)]}`
+        };
+    }
+
+    function loadProfileIntoModals() {
+        let profile;
+        const isAdmin = localStorage.getItem('run_role') === 'admin';
+
+        if (isAdmin) {
+            profile = { icon: '👑', nickname: '管理员' };
+        } else {
+            try {
+                profile = JSON.parse(localStorage.getItem('run_profile'));
+                if (!profile || !profile.icon || !profile.nickname) {
+                    throw new Error("Invalid profile");
+                }
+            } catch (e) {
+                profile = generateRandomProfile();
+                localStorage.setItem('run_profile', JSON.stringify(profile));
+            }
+        }
+        
+        // Old comment modal
+        document.getElementById('commentUserIcon').textContent = profile.icon;
+        document.getElementById('commentUserNickname').textContent = profile.nickname;
+
+        // New detail modal
+        document.getElementById('detailCommentUserIcon').textContent = profile.icon;
+        document.getElementById('detailCommentUserNickname').textContent = profile.nickname;
+
+        document.getElementById('nicknameInput').value = profile.nickname;
+        document.getElementById('nicknameInput').disabled = isAdmin;
+        document.getElementById('saveProfileButton').style.display = isAdmin ? 'none' : 'inline-block';
+    }
+
+
+    function initializeUserProfile() {
+        const params = new URLSearchParams(window.location.search);
+        const adminKey = params.get('admin_key');
+        
+        if (adminKey === 'runpage123') {
+            localStorage.setItem('run_role', 'admin');
+            const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + window.location.hash;
+            window.history.replaceState({path: newUrl}, '', newUrl);
+        }
+
+        loadProfileIntoModals();
+
+        document.getElementById('saveProfileButton').addEventListener('click', () => {
+            const newNickname = document.getElementById('nicknameInput').value.trim();
+            if (newNickname) {
+                const currentProfile = JSON.parse(localStorage.getItem('run_profile')) || generateRandomProfile();
+                currentProfile.nickname = newNickname;
+                localStorage.setItem('run_profile', JSON.stringify(currentProfile));
+                loadProfileIntoModals();
+                bootstrap.Modal.getInstance(document.getElementById('profileModal')).hide();
+            }
+        });
+    }
+
+    function parsePaceToSeconds(paceStr) {
+        if (!paceStr || !paceStr.includes("'")) {
+            return 9999; 
+        }
+        try {
+            const parts = paceStr.replace('"', '').split("'");
+            const minutes = parseInt(parts[0], 10);
+            const seconds = parseInt(parts[1], 10);
+            if (isNaN(minutes) || isNaN(seconds)) {
+                return 9999;
+            }
+            return (minutes * 60) + seconds;
+        } catch (e) {
+            return 9999;
+        }
+    }
+
+    async function loadCommentCounts() {
+        document.querySelectorAll('.comment-count').forEach(async (el) => {
+            const runId = el.dataset.runId;
+            try {
+            const res = await fetch(`${commentApiBase}/count?runId=${encodeURIComponent(runId)}`);
+            const data = await res.json();
+            el.textContent = data.count ?? 0;
+            } catch {
+            el.textContent = 0;
+            }
+        });
+    }
+
+    // --- MARATHON CALENDAR LOGIC ---
+    async function generateMarathonCalendar() {
+        const container = document.getElementById('marathon-calendar-container');
+        if (!container) return;
+        container.innerHTML = '<div class="content-card text-center text-body-secondary">加载赛历数据中...</div>';
+
+        let marathonEvents;
+        try {
+            const response = await fetch('https://run.linwn.net/data/upcoming.json');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            marathonEvents = await response.json();
+        } catch (error) {
+            console.error("Could not fetch marathon data:", error);
+            container.innerHTML = '<div class="content-card text-center text-danger">无法加载赛历数据，请稍后重试。</div>';
+            return;
+        }
+        
+        const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+        const eventsByMonth = marathonEvents.reduce((acc, event) => {
+            const month = event.date.substring(0, 7);
+            if (!acc[month]) acc[month] = [];
+            acc[month].push(event);
+            return acc;
+        }, {});
+
+        const sortedMonths = Object.keys(eventsByMonth).sort();
+        
+        if (sortedMonths.length === 0) {
+            container.innerHTML = '<div class="content-card text-center text-body-secondary">暂无赛事计划</div>';
+            return;
+        }
+
+        let calendarHTML = '';
+        sortedMonths.forEach(monthStr => {
+            const [year, month] = monthStr.split('-').map(Number);
+            const monthEvents = eventsByMonth[monthStr];
+            
+            calendarHTML += `<div class="month-grid">`;
+            calendarHTML += `<h4 class="mb-3">${year}年 ${month}月</h4>`;
+            
+            calendarHTML += `<div class="calendar-list-view">`;
+            monthEvents.sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(event => {
+                const eventDate = new Date(event.date.replace(/-/g, '/'));
+                calendarHTML += `
+                    <div class="calendar-list-item">
+                        <div class="list-date">
+                            <div class="day">${eventDate.getDate()}</div>
+                            <div class="weekday">${weekdays[eventDate.getDay()]}</div>
+                        </div>
+                        <div class="list-details">
+                            <div class="name">${event.name} <span class="category">${event.category}</span></div>
+                            <div class="status">${event.status}</div>
+                        </div>
+                    </div>`;
+            });
+            calendarHTML += `</div>`;
+
+            let gridHtml = `<table class="calendar-table">`;
+            gridHtml += `<thead><tr>${['日', '一', '二', '三', '四', '五', '六'].map(d => `<th>${d}</th>`).join('')}</tr></thead>`;
+            
+            let tbodyHtml = '<tbody>';
+            const firstDay = new Date(year, month - 1, 1);
+            const daysInMonth = new Date(year, month, 0).getDate();
+            const startingDay = firstDay.getDay();
+            let date = 1;
+
+            for (let i = 0; i < 6; i++) {
+                if (date > daysInMonth) break;
+                tbodyHtml += '<tr>';
+                for (let j = 0; j < 7; j++) {
+                    if ((i === 0 && j < startingDay) || date > daysInMonth) {
+                        tbodyHtml += '<td class="empty"></td>';
+                    } else {
+                        const eventsOnThisDay = monthEvents.filter(e => parseInt(e.date.substring(8, 10), 10) === date);
+                        let cellClass = eventsOnThisDay.length > 0 ? 'event' : '';
+                        let dayClass = eventsOnThisDay.length > 0 ? 'has-event' : '';
+                        
+                        tbodyHtml += `<td class="${cellClass}">`;
+                        tbodyHtml += `<div class="day-number ${dayClass}">${date}</div>`;
+                        if(eventsOnThisDay.length > 0) {
+                            // 默认显示（截断）
+                            eventsOnThisDay.forEach(event => {
+                                tbodyHtml += `<div class="event-item" title="${event.name}">${event.name}</div>`;
+                            });
+                            // 弹出层（完整内容）
+                            tbodyHtml += '<div class="event-details popup">';
+                             eventsOnThisDay.forEach(event => {
+                                tbodyHtml += `<div class="event-item">${event.name} <span class="category">${event.category}</span></div>`;
+                                tbodyHtml += `<div class="event-status">${event.status}</div>`;
+                            });
+                            tbodyHtml += '</div>';
+                        }
+                        tbodyHtml += '</td>';
+                        date++;
+                    }
+                }
+                tbodyHtml += '</tr>';
+            }
+            tbodyHtml += '</tbody></table>';
+            gridHtml += tbodyHtml;
+            calendarHTML += `<div class="calendar-grid-view">${gridHtml}</div></div>`;
+        });
+        container.innerHTML = calendarHTML;
+    }
+
+    function setupCalendarHovers() {
+        const eventCells = document.querySelectorAll('.calendar-table td.event');
+        eventCells.forEach(cell => {
+            const popup = cell.querySelector('.event-details.popup');
+            if (!popup) return;
+
+            cell.addEventListener('mouseenter', () => {
+                const rect = cell.getBoundingClientRect();
+                const popupWidth = popup.offsetWidth; //
+                const viewportWidth = window.innerWidth;
+                
+                popup.classList.remove('edge-left', 'edge-right');
+
+                // 检查是否会超出右边界 (给10px的缓冲)
+                if (rect.left + rect.width / 2 + popupWidth / 2 > viewportWidth - 10) {
+                    popup.classList.add('edge-right');
+                } 
+                // 检查是否会超出左边界
+                else if (rect.left + rect.width / 2 - popupWidth / 2 < 10) {
+                    popup.classList.add('edge-left');
+                }
+                popup.classList.add('visible');
+            });
+
+            cell.addEventListener('mouseleave', () => {
+                popup.classList.remove('visible');
+            });
+        });
+    }
+
+    async function initMarathonView() {
+        const container = document.getElementById('marathon-calendar-container');
+        // Only generate if it hasn't been generated before.
+        if (container && container.innerHTML.trim() === '') {
+            await generateMarathonCalendar();
+            setupCalendarHovers();
+        }
+    }
 
 	document.addEventListener('DOMContentLoaded', function() {
 		
     // --- 页面初始化逻辑 ---
-    // ... (This part remains largely the same)
+    initializeUserProfile();
+    loadCommentCounts();
+
+    document.getElementById('editProfileTrigger').addEventListener('click', () => {
+        new bootstrap.Modal(document.getElementById('profileModal')).show();
+    });
+    document.getElementById('detailEditProfileTrigger').addEventListener('click', () => {
+        new bootstrap.Modal(document.getElementById('profileModal')).show();
+    });
+
     document.getElementById('goto-data-tab')?.addEventListener('click', e => {
         e.preventDefault();
         const dataTab = document.getElementById('data-tab');
@@ -983,7 +1243,288 @@
         }
     });
 
-    // ... (Other initializations remain the same)
+    // --- 手机滑动切换标签页功能 ---
+    let startX = 0;
+    let startY = 0;
+    const tabContent = document.querySelector('.tab-content');
+    const minSwipeDistance = 100;
+    
+    tabContent.addEventListener('touchstart', (e) => {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    }, false);
+    
+    tabContent.addEventListener('touchend', (e) => {
+      if (e.target.closest('#cityMap') || e.target.closest('.calendar-table')) return;
+      
+      const endX = e.changedTouches[0].clientX;
+      const endY = e.changedTouches[0].clientY;
+      const diffX = endX - startX;
+      const diffY = endY - startY;
+      
+      if (Math.abs(diffX) > minSwipeDistance && Math.abs(diffX) > Math.abs(diffY)) {
+        const activeTab = document.querySelector('#main-nav-tabs .nav-link.active');
+        const tabs = Array.from(document.querySelectorAll('#main-nav-tabs .nav-link'));
+        const currentIndex = tabs.indexOf(activeTab);
+        
+        if (diffX > 0 && currentIndex > 0) {
+            bootstrap.Tab.getOrCreateInstance(tabs[currentIndex - 1]).show();
+        } else if (diffX < 0 && currentIndex < tabs.length - 1) {
+            bootstrap.Tab.getOrCreateInstance(tabs[currentIndex + 1]).show();
+        }
+      }
+    }, false);
+    
+    tabContent.addEventListener('touchmove', (e) => {
+      if (e.target.closest('#cityMap')) return;
+      
+      const absDiffX = Math.abs(e.touches[0].clientX - startX);
+      const absDiffY = Math.abs(e.touches[0].clientY - startY);
+      
+      if (absDiffX > absDiffY && absDiffX > 10) e.preventDefault();
+    }, { passive: false });
+    
+    // --- URL锚点与选项卡同步逻辑 ---
+    const activateTabFromHash = () => {
+      const hash = window.location.hash.substring(1);
+      if (hash) {
+        const tabTrigger = document.querySelector(`.nav-link[data-hash="${hash}"]`);
+        if (tabTrigger) {
+          bootstrap.Tab.getOrCreateInstance(tabTrigger).show();
+        }
+      }
+    };
+    
+    document.querySelectorAll('#main-nav-tabs .nav-link').forEach(tabEl => {
+      tabEl.addEventListener('shown.bs.tab', event => {
+        const hash = event.target.dataset.hash;
+        if (hash) {
+          history.pushState(null, '', '#' + hash);
+        }
+        if (hash === 'marathon') {
+          initMarathonView();
+        }
+      });
+    });
+
+    window.addEventListener('popstate', activateTabFromHash);
+    activateTabFromHash();
+    if (window.location.hash === '#marathon') {
+        initMarathonView();
+    }
+    
+    const marathonTab = document.querySelector('#marathon-tab');
+    if (marathonTab) {
+        const marathonPane = document.getElementById('marathon-pane');
+        const calendarToggle = document.getElementById('calendar-view-toggle');
+        
+        marathonPane.classList.add('view-grid'); 
+
+        if(calendarToggle) {
+            calendarToggle.addEventListener('click', (e) => {
+                if (e.target.matches('button')) {
+                    const view = e.target.dataset.view;
+                    marathonPane.classList.remove('view-list', 'view-grid');
+                    marathonPane.classList.add(`view-${view}`);
+                    calendarToggle.querySelector('.active').classList.remove('active');
+                    e.target.classList.add('active');
+                }
+            });
+        }
+    }
+
+
+    // --- MAP LOGIC ---
+    const eventsTab = document.querySelector('#events-tab');
+    if(eventsTab) {
+        eventsTab.addEventListener('shown.bs.tab', function() {
+            if (!cityMap) {
+              cityMap = L.map('cityMap', { center: [36, 108], zoom: 4, zoomControl: false });
+              L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', { attribution: '', subdomains: 'abcd', minZoom: 3, maxZoom: 18 }).addTo(cityMap);
+              cityMap.attributionControl.setPrefix('');
+              
+              
+              
+                  L.circleMarker([23.129, 113.264], { radius: Math.log(422) + 3, fillColor: "var(--accent-color)", color: "var(--bg-color)", weight: 1.5, opacity: 1, fillOpacity: 0.7 }).addTo(cityMap).bindPopup(`<b>广州市</b><br>跑步次数: 422<br>总距离: 3523.83km`);
+              
+              
+              
+                  L.circleMarker([21.663, 110.925], { radius: Math.log(11) + 3, fillColor: "var(--accent-color)", color: "var(--bg-color)", weight: 1.5, opacity: 1, fillOpacity: 0.7 }).addTo(cityMap).bindPopup(`<b>茂名市</b><br>跑步次数: 11<br>总距离: 81.6km`);
+              
+              
+              
+                  L.circleMarker([23.682, 113.056], { radius: Math.log(1) + 3, fillColor: "var(--accent-color)", color: "var(--bg-color)", weight: 1.5, opacity: 1, fillOpacity: 0.7 }).addTo(cityMap).bindPopup(`<b>清远市</b><br>跑步次数: 1<br>总距离: 21.3km`);
+              
+              
+              
+                  L.circleMarker([22.179, 113.549], { radius: Math.log(1) + 3, fillColor: "var(--accent-color)", color: "var(--bg-color)", weight: 1.5, opacity: 1, fillOpacity: 0.7 }).addTo(cityMap).bindPopup(`<b>澳门</b><br>跑步次数: 1<br>总距离: 10.12km`);
+              
+              
+              
+                  L.circleMarker([22.543, 114.058], { radius: Math.log(1) + 3, fillColor: "var(--accent-color)", color: "var(--bg-color)", weight: 1.5, opacity: 1, fillOpacity: 0.7 }).addTo(cityMap).bindPopup(`<b>深圳市</b><br>跑步次数: 1<br>总距离: 5.01km`);
+              
+              
+
+            } else {
+              cityMap.invalidateSize();
+            }
+        });
+    }
+    
+    // --- MAIN STATS CARD FLIP LOGIC ---
+    document.querySelectorAll('.flip-icon-container').forEach(icon => {
+        icon.addEventListener('click', (event) => {
+            event.stopPropagation();
+            icon.closest('.stat-card-flipper').classList.toggle('flipped');
+        });
+    });
+
+    // --- CHART LOGIC ---
+    const gridColor = 'rgba(128, 128, 128, 0.2)';
+    const tickColor = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim();
+    const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
+    const annotationColor = getComputedStyle(document.documentElement).getPropertyValue('--bs-code-color').trim();
+    const monthlyData = [109.63, 129.56, 126.46, 171.69, 204.69, 202.17, 203.37, 201.7, 150.98, 204.56, 242.42, 106.75];
+    const monthlyTotal = monthlyData.reduce((a, b) => a + b, 0);
+    const monthlyAvg = monthlyData.filter(d => d > 0).length > 0 ? (monthlyTotal / monthlyData.filter(d => d > 0).length) : 0;
+    const dailyData = [12.21, 13.4, 0.0, 23.45, 0.0, 0.0, 0.0, 10.16, 0.0, 11.0, 21.6, 0.0, 10.05, 0.0, 0.0, 6.44, 8.01, 13.66, 10.01, 0.0, 0.0, 0.0, 10.1, 8.24, 21.34, 5.25, 10.12, 8.01, 12.02, 0.0];
+    const dailyTotal = dailyData.reduce((a, b) => a + b, 0);
+    const dailyAvg = dailyData.filter(d => d > 0).length > 0 ? (dailyTotal / dailyData.filter(d => d > 0).length) : 0; 
+    const yearlyData = [35.46, 228.81, 706.97, 1161.34, 1516.63];
+    const yearlyTotal = yearlyData.reduce((a, b) => a + b, 0);
+    const yearlyAvg = yearlyData.filter(d => d > 0).length > 0 ? (yearlyTotal / yearlyData.filter(d => d > 0).length) : 0;
+    Chart.defaults.font.family = "'Noto Sans SC', sans-serif";
+    const annotationDefaults = (avg, total, labelPrefix) => ({ type: 'line', yMin: avg, yMax: avg, borderColor: annotationColor, borderWidth: 1.5, borderDash: [6, 6] });
+    
+    const dailyCtx = document.getElementById('dailyDistanceChart').getContext('2d');
+    dailyDistanceChart = new Chart(dailyCtx, { type: 'bar', data: { labels: ["07-16", "07-17", "07-18", "07-19", "07-20", "07-21", "07-22", "07-23", "07-24", "07-25", "07-26", "07-27", "07-28", "07-29", "07-30", "07-31", "08-01", "08-02", "08-03", "08-04", "08-05", "08-06", "08-07", "08-08", "08-09", "08-10", "08-11", "08-12", "08-13", "08-14"], datasets: [{ label: '距离 (km)', data: dailyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 2, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 }}}, plugins: { legend: { display: false }, title: { display: true, text: `总 ${dailyTotal.toFixed(1)}km / 日均 ${dailyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(dailyAvg) } } } } });
+    const monthlyCtx = document.getElementById('monthlyDistanceChart').getContext('2d');
+    monthlyDistanceChart = new Chart(monthlyCtx, { type: 'bar', data: { labels: ["24-09", "24-10", "24-11", "24-12", "25-01", "25-02", "25-03", "25-04", "25-05", "25-06", "25-07", "25-08"], datasets: [{ label: '距离 (km)', data: monthlyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 4, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 }}}, plugins: { legend: { display: false }, title: { display: true, text: `总 ${monthlyTotal.toFixed(1)}km / 月均 ${monthlyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(monthlyAvg) } } } } });
+    const yearlyCtx = document.getElementById('yearlyDistanceChart').getContext('2d');
+    yearlyDistanceChart = new Chart(yearlyCtx, { type: 'bar', data: { labels: ["2021", "2022", "2023", "2024", "2025"], datasets: [{ label: '距离 (km)', data: yearlyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 4, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 } } }, plugins: { legend: { display: false }, title: { display: true, text: `总 ${yearlyTotal.toFixed(1)}km / 年均 ${yearlyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(yearlyAvg) } } } } });
+
+    document.querySelectorAll('#chart-toggle .btn').forEach(button => { button.addEventListener('click', function() { document.querySelectorAll('#chart-toggle .btn').forEach(btn => btn.classList.remove('active')); this.classList.add('active'); const chartType = this.dataset.chart; Object.values({ monthly: document.getElementById('monthlyChartContainer'), daily: document.getElementById('dailyChartContainer'), yearly: document.getElementById('yearlyChartContainer') }).forEach(c => c.style.display = 'none'); document.getElementById(`${chartType}ChartContainer`).style.display = 'block'; }); });
+
+    // --- DATA TAB LOGIC ---
+    const dataPane = document.getElementById('data-pane');
+    if (dataPane) {
+        allRunRows = Array.from(document.querySelectorAll('#summary-table-body tr'));
+        const updateDataView = () => {
+            const minDist = parseFloat(document.querySelector('#data-dist-filter-toggle .active').dataset.dist);
+            const maxPace = parseFloat(document.querySelector('#data-pace-filter-toggle .active').dataset.pace);
+            const selectedCity = document.getElementById('data-city-filter').value;
+            const startDate = document.getElementById('date-filter-start').value;
+            const endDate = document.getElementById('date-filter-end').value;
+            const activeSortHeader = document.querySelector('.sortable-header[aria-sort]');
+            const sortProp = activeSortHeader ? activeSortHeader.dataset.sort : 'date';
+            const sortOrder = activeSortHeader ? activeSortHeader.getAttribute('aria-sort') : 'descending';
+
+            let filteredRows = allRunRows.filter(row => {
+                const isVisible = (parseFloat(row.dataset.distance) >= minDist) &&
+                                (parsePaceToSeconds(row.dataset.paceStr) <= maxPace) &&
+                                (selectedCity === 'all' || row.dataset.city === selectedCity) &&
+                                (!startDate || row.dataset.date >= startDate) &&
+                                (!endDate || row.dataset.date <= endDate);
+                row.style.display = isVisible ? '' : 'none';
+                return isVisible;
+            });
+            
+            filteredRows.sort((a, b) => {
+                let valA, valB;
+                if (sortProp === 'distance') { [valA, valB] = [parseFloat(a.dataset.distance), parseFloat(b.dataset.distance)]; } 
+                else if (sortProp === 'pace') { [valA, valB] = [(-1)*parsePaceToSeconds(a.dataset.paceStr), (-1)*parsePaceToSeconds(b.dataset.paceStr)]; } 
+                else { [valA, valB] = [a.dataset.date, b.dataset.date]; }
+                if (valA < valB) return sortOrder === 'ascending' ? -1 : 1;
+                if (valA > valB) return sortOrder === 'ascending' ? 1 : -1;
+                return 0;
+            });
+            document.getElementById('summary-table-body').append(...filteredRows);
+        };
+
+        document.getElementById('data-view-toggle').addEventListener('click', (e) => {
+            if (!e.target.matches('button')) return;
+            document.querySelector('#data-view-toggle .active').classList.remove('active');
+            e.target.classList.add('active');
+            const isSummary = e.target.dataset.view === 'summary';
+            document.getElementById('summary-data-view').style.display = isSummary ? '' : 'none';
+            document.getElementById('yearly-data-view').style.display = isSummary ? 'none' : '';
+            document.getElementById('data-controls-collapse').classList.toggle('d-lg-block', isSummary);
+            document.getElementById('summary-controls-toggle').style.display = isSummary ? '' : 'none';
+            if(isSummary) updateDataView();
+        });
+
+        document.querySelectorAll('.sortable-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const currentSort = header.getAttribute('aria-sort');
+                let newSort = (currentSort === 'descending') ? 'ascending' : 'descending';
+                document.querySelectorAll('.sortable-header').forEach(h => h.removeAttribute('aria-sort'));
+                header.setAttribute('aria-sort', newSort);
+                updateDataView();
+            });
+        });
+
+        [...document.querySelectorAll('#data-dist-filter-toggle, #data-pace-filter-toggle')].forEach(group => {
+            group.addEventListener('click', e => {
+                if(e.target.tagName === 'BUTTON') {
+                    group.querySelector('.active').classList.remove('active');
+                    e.target.classList.add('active');
+                    updateDataView();
+                }
+            });
+        });
+        ['data-city-filter', 'date-filter-start', 'date-filter-end'].forEach(id => {
+            document.getElementById(id).addEventListener('change', updateDataView);
+        });
+        
+        updateDataView();
+    }
+    
+    // --- EVENTS TAB LOGIC ---
+    const eventsPane = document.getElementById('events-pane');
+    if (eventsPane) {
+        eventsPane.querySelector('#events-view-toggle').addEventListener('click', (e) => {
+            if (!e.target.matches('button')) return;
+            eventsPane.querySelector('#events-view-toggle .active').classList.remove('active');
+            e.target.classList.add('active');
+            const isCategory = e.target.dataset.view === 'category';
+            eventsPane.querySelector('#events-category-view').style.display = isCategory ? '' : 'none';
+            eventsPane.querySelector('#events-timeline-view').style.display = isCategory ? 'none' : 'block';
+        });
+    }
+
+    function parseAndRenderMedia(rawText) {
+        const parts = rawText.split(/(\[img\][\s\S]*?\[\/img\]|\[video\][\s\S]*?\[\/video\])/gi);
+        let html = '';
+        let mediaForThisComment = [];
+
+        parts.forEach(part => {
+            const imgMatch = part.match(/^\[img\]([\s\S]*?)\[\/img\]$/i);
+            const videoMatch = part.match(/^\[video\]([\s\S]*?)\[\/video\]$/i);
+
+            if (imgMatch || videoMatch) {
+                const isVideo = !!videoMatch;
+                const url = isVideo ? videoMatch[1].trim() : imgMatch[1].trim();
+                let mediaHtml = '';
+                try {
+                    const sanitizedUrl = new URL(url).href;
+                    if (sanitizedUrl.startsWith('http')) {
+                        mediaForThisComment.push({ type: isVideo ? 'video' : 'image', url: sanitizedUrl });
+                        if (isVideo) {
+                            mediaHtml = `<video src="${sanitizedUrl}" class="comment-media-thumb" data-media-index="${mediaForThisComment.length - 1}" muted playsinline></video>`;
+                        } else {
+                            mediaHtml = `<img src="${sanitizedUrl}" class="comment-media-thumb" data-media-index="${mediaForThisComment.length - 1}" alt="comment image">`;
+                        }
+                    }
+                } catch (e) { /* invalid url, ignore */ }
+                html += mediaHtml;
+            } else if (part) {
+                const sanitizer = document.createElement('div');
+                sanitizer.textContent = part;
+                html += sanitizer.innerHTML.replace(/\n/g, '<br>');
+            }
+        });
+        return `<div class="comment-content-wrapper" data-media='${JSON.stringify(mediaForThisComment)}'>${html}</div>`;
+    }
 
     // --- MODAL AND COMMENT LOGIC ---
     function renderCommentList(container, comments) {
@@ -1145,17 +1686,98 @@
     }
 
     document.getElementById('submitRunDetailComment').addEventListener('click', async () => {
-        // This function remains the same
+        const runId = currentDetailRunId;
+        const text = document.getElementById('runDetailCommentText').value.trim();
+        if (!text || !runId) return;
+        
+        const profile = JSON.parse(localStorage.getItem('run_profile')) || generateRandomProfile();
+        const nicknameForComment = `${profile.icon} ${profile.nickname}`;
+        
+        const res = await fetch(`${commentApiBase}/comment`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ runId, text, nickname: nicknameForComment }) });
+        if (res.ok) {
+            document.getElementById('runDetailCommentText').value = '';
+            await refreshDetailComments(runId);
+            const countEl = document.querySelector(`.comment-count[data-run-id="${runId}"]`);
+            if(countEl) countEl.textContent = parseInt(countEl.textContent, 10) + 1;
+        } else {
+            alert('提交失败');
+        }
     });
     
     document.addEventListener('click', async e => {
-        // This function remains the same
+        const certLink = e.target.closest('.certificate-link');
+        if (certLink) {
+            e.preventDefault();
+            const imgUrl = certLink.dataset.img;
+            if(imgUrl) {
+                document.getElementById('certificateImage').src = imgUrl;
+                new bootstrap.Modal(document.getElementById('certificateModal')).show();
+            }
+            return;
+        }
+
+        const runRow = e.target.closest('.run-detail-row');
+        if (runRow) {
+            e.preventDefault();
+            showRunDetailModal(runRow.dataset.runId, false);
+            return;
+        }
+
+        const recentCard = e.target.closest('.recent-run-card');
+        if(recentCard) {
+            e.preventDefault();
+            const isCommentLink = e.target.closest('.comment-link');
+            showRunDetailModal(recentCard.dataset.runId, !!isCommentLink);
+            return;
+        }
+        
+        const commentLink = e.target.closest('.comment-link');
+        if (commentLink && !commentLink.closest('.recent-run-card')) {
+             e.preventDefault();
+             showRunDetailModal(commentLink.dataset.runId, true);
+             return;
+        }
+
+        if (e.target.classList.contains('comment-media-thumb')) {
+            e.preventDefault();
+            const clickedThumb = e.target;
+            const wrapper = clickedThumb.closest('.comment-content-wrapper');
+            if (!wrapper) return;
+
+            const mediaData = JSON.parse(wrapper.dataset.media);
+            const clickedIndex = parseInt(clickedThumb.dataset.mediaIndex, 10);
+            const galleryCarouselInner = document.getElementById('galleryCarouselInner');
+            
+            galleryCarouselInner.innerHTML = ''; 
+
+            mediaData.forEach((mediaItem, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'carousel-item';
+                if (index === clickedIndex) {
+                    itemDiv.classList.add('active');
+                }
+
+                if (mediaItem.type === 'video') {
+                    itemDiv.innerHTML = `<video src="${mediaItem.url}" class="d-block" controls autoplay loop playsinline></video>`;
+                } else {
+                    itemDiv.innerHTML = `<img src="${mediaItem.url}" class="d-block" alt="gallery image">`;
+                }
+                galleryCarouselInner.appendChild(itemDiv);
+            });
+
+            const mediaGalleryModal = bootstrap.Modal.getOrCreateInstance(mediaGalleryModalEl);
+            mediaGalleryModal.show();
+        }
     });
 
   });
 
   window.addEventListener('beforeunload', () => {
-    // This function remains the same
+    if(monthlyDistanceChart) monthlyDistanceChart.destroy();
+    if(dailyDistanceChart) dailyDistanceChart.destroy();
+    if(yearlyDistanceChart) yearlyDistanceChart.destroy();
+    if(cityMap) cityMap.remove();
+    if(runDetailMapInstance) runDetailMapInstance.remove();
   });
 </script>
 </html>
