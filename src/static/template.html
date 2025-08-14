@@ -475,7 +475,187 @@
     }
     .trophy-color-text { color: var(--trophy-color); }
     .accent-color-text { color: var(--accent-color); }
+    /* --- START: 修正后的日历弹出样式 --- */
+    .marathon-calendar-container .month-grid {
+        background-color: var(--card-bg);
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        margin-bottom: 2rem;
+    }
+    .calendar-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+    .calendar-table th {
+        text-align: center;
+        color: var(--text-secondary);
+        font-weight: 500;
+        font-size: 0.8rem;
+        padding-bottom: 0.5rem;
+    }
+    /* 关键改动：移除了 overflow: hidden */
+    .calendar-table td {
+        border: 1px solid var(--border-color);
+        height: 70px;
+        vertical-align: top;
+        padding: 5px;
+        transition: background-color 0.2s;
+    }
+    .calendar-table td.empty {
+       background-color: transparent;
+       border-color: var(--card-bg);
+    }
+    .calendar-table td:not(.empty) {
+        background-color: var(--hover-bg);
+    }
+    .day-number {
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+    .calendar-table td.event {
+        background-color: #3b2f21;
+        border: 1px solid var(--marathon-color);
+        position: relative; /* 为弹出层提供定位锚点 */
+    }
+    .day-number.has-event {
+        color: var(--marathon-color);
+    }
+    .event-details {
+      padding-top: 2px;
+    }
+    /* 默认状态下，事件标题是截断的 */
+    .event-item {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        background-color: rgba(0,0,0,0.2);
+        border-radius: 4px;
+        padding: 2px 4px;
+        margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .event-item .category {
+      font-size: 0.8em;
+      padding: 1px 4px;
+      border-radius: 3px;
+      background-color: var(--marathon-color);
+      color: var(--bg-color);
+      margin-left: 4px;
+      font-weight: bold;
+    }
+    .event-status {
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    /* 弹出层的样式 */
+    .event-details.popup {
+      position: absolute;
+      z-index: 10;
+      top: 8px;
+      left: 50%; /* 默认居中 */
+      transform: translateX(-50%);
+      width: auto;
+      min-width: 180%;
+      padding: 0.6rem;
+      background-color: var(--hover-bg);
+      border: 1px solid var(--accent-color);
+      border-radius: 6px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+      /* 默认隐藏，通过JS添加visible类来显示 */
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s ease, visibility 0.2s ease;
+      pointer-events: none;
+    }
+    .event-details.popup.visible {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+    /* 新增：边缘检测后的样式 */
+    .event-details.popup.edge-left {
+        left: 5px;
+        transform: translateX(0);
+    }
+    .event-details.popup.edge-right {
+        left: auto;
+        right: 5px;
+        transform: translateX(0);
+    }
 
+    /* 弹出层内部文本的样式 */
+    .event-details.popup .event-item,
+    .event-details.popup .event-status {
+      overflow: visible;
+      white-space: normal;
+      text-overflow: initial;
+    }
+    .event-details.popup .event-status {
+        margin-top: 4px;
+    }
+    /* --- END: 修正后的日历弹出样式 --- */
+
+
+    /* Mobile list view for calendar */
+    .calendar-list-view {
+        display: none;
+    }
+    .calendar-list-item {
+        display: flex;
+        gap: 1rem;
+        padding: 0.75rem 0.25rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .calendar-list-item:last-child {
+        border-bottom: none;
+    }
+    .list-date {
+        flex-shrink: 0;
+        text-align: center;
+    }
+    .list-date .day {
+        font-size: 1.5rem;
+        font-weight: 700;
+        line-height: 1;
+        color: var(--marathon-color);
+    }
+    .list-date .weekday {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+    .list-details {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .list-details .name {
+        font-weight: 500;
+    }
+    .list-details .status {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+
+    @media (max-width: 767.98px) {
+        .calendar-table { display: none; }
+        .calendar-list-view { display: block; }
+        
+        #marathon-pane.view-grid .calendar-table { display: table; }
+        #marathon-pane.view-grid .calendar-list-view { display: none; }
+
+        #marathon-pane.view-list .calendar-table { display: none; }
+        #marathon-pane.view-list .calendar-list-view { display: block; }
+        
+        .marathon-calendar-container .month-grid { padding: 1rem; }
+    }
     /* Comment Media Styles */
     .comment-media-thumb {
         max-width: 80px;
