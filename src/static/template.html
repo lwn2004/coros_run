@@ -519,6 +519,7 @@
     #runDetailModal .modal-content {
         background-color: #f7f7f7;
         color: #333;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
     #runDetailModal .modal-body {
         padding: 0;
@@ -527,7 +528,7 @@
     #runDetailModal .detail-header {
         position: sticky;
         top: 0;
-        background: rgba(255,255,255,0.8);
+        background: rgba(247,247,247,0.8);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
         z-index: 10;
@@ -540,6 +541,7 @@
         font-size: 1.5rem;
         padding: 0;
         line-height: 1;
+        color: #333;
     }
     #runDetailModal .detail-header .detail-title {
         font-weight: 600;
@@ -552,6 +554,7 @@
         font-size: 5rem;
         font-weight: 700;
         line-height: 1;
+        letter-spacing: -2px;
     }
     #runDetailModal #detailHeroDistance .distance-unit {
         font-size: 1rem;
@@ -563,20 +566,30 @@
         height: 250px;
         object-fit: cover;
         border-radius: 12px;
+        background-color: #e9ecef;
+    }
+    #runDetailModal .carousel-control-prev,
+    #runDetailModal .carousel-control-next {
+        width: 10%;
     }
     #runDetailModal .carousel-control-prev-icon,
     #runDetailModal .carousel-control-next-icon {
-        filter: invert(0.5);
+        filter: invert(0.5) grayscale(1);
+    }
+    #runDetailModal .carousel-indicators [data-bs-target] {
+        background-color: #888;
     }
     #runDetailModal h4.data-section-title {
         font-weight: 600;
         font-size: 1.2rem;
-        margin-bottom: 1rem;
+        margin-bottom: 1.25rem;
+        color: #000;
     }
     #runDetailModal .data-point-value {
         font-size: 1.5rem;
         font-weight: 600;
         margin-bottom: 0.25rem;
+        color: #000;
     }
     #runDetailModal .data-point-label {
         font-size: 0.8rem;
@@ -593,6 +606,14 @@
      #runDetailModal #runDetailCommentForm textarea {
         background-color: #f7f7f7;
         color: #333;
+        border-color: #ddd;
+     }
+     #runDetailModal #runDetailCommentForm textarea:focus {
+        background-color: #fff;
+     }
+     #runDetailModal #runDetailCommentForm .btn-primary {
+         background-color: #007bff;
+         border-color: #007bff;
      }
   </style>
 </head>
@@ -778,21 +799,366 @@
     </div>
     
     <div class="tab-pane fade" id="data-pane" role="tabpanel" aria-labelledby="data-tab" tabindex="0">
+        <div class="row">
+            <div class="col-lg-3">
+                <div class="position-sticky" style="top: 1rem;">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="btn-group btn-group-sm" id="data-view-toggle" role="group">
+                            <button type="button" class="btn active" data-view="summary">汇总模式</button>
+                            <button type="button" class="btn" data-view="yearly">年度模式</button>
+                        </div>
+                        <button class="btn btn-sm d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#data-controls-collapse" aria-expanded="false" aria-controls="data-controls-collapse" id="summary-controls-toggle">
+                            <i class="bi bi-funnel"></i> 筛选
+                        </button>
+                    </div>
+
+                    <div class="collapse d-lg-block" id="data-controls-collapse">
+                        <div class="content-card p-3 mb-3">
+                            <h6 class="mb-3 small-muted">筛选选项</h6>
+                            <div class="mb-3">
+                                <label class="form-label">按日期</label>
+                                <div class="row g-2">
+                                    <div class="col">
+                                        <input type="date" id="date-filter-start" class="form-control form-control-sm" placeholder="起始">
+                                    </div>
+                                    <div class="col">
+                                        <input type="date" id="date-filter-end" class="form-control form-control-sm" placeholder="结束">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">按距离</label>
+                                <div class="btn-group btn-group-sm w-100" id="data-dist-filter-toggle">
+                                    <button type="button" class="btn active" data-dist="0">全部</button>
+                                    <button type="button" class="btn" data-dist="5000">&gt;5km</button>
+                                    <button type="button" class="btn" data-dist="10000">&gt;10km</button>
+                                    <button type="button" class="btn" data-dist="21097">&gt;半马</button>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">按配速</label>
+                                <div class="btn-group btn-group-sm w-100" id="data-pace-filter-toggle">
+                                    <button type="button" class="btn active" data-pace="9999">全部</button>
+                                    <button type="button" class="btn" data-pace="360">&lt;6'</button>
+                                    <button type="button" class="btn" data-pace="330">&lt;5'30</button>
+                                    <button type="button" class="btn" data-pace="300">&lt;5'</button>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="data-city-filter" class="form-label">按城市</label>
+                                <select class="form-select form-select-sm" id="data-city-filter">
+                                    <option value="all" selected>全部城市</option>
+                                    {% for city in city_stats %}
+                                    <option value="{{ city.name }}">{{ city.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-9">
+                <div id="summary-data-view">
+                    <div class="content-card table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="sortable-header" data-sort="date" aria-sort="descending">
+                                        日期 <span class="sort-icon"><i class="bi bi-arrow-down-up"></i><i class="bi bi-arrow-down"></i><i class="bi bi-arrow-up"></i></span>
+                                    </th>
+                                    <th class="sortable-header" data-sort="distance">
+                                        距离 <span class="sort-icon"><i class="bi bi-arrow-down-up"></i><i class="bi bi-arrow-down"></i><i class="bi bi-arrow-up"></i></span>
+                                    </th>
+                                    <th class="d-none d-sm-table-cell">用时</th>
+                                    <th class="sortable-header" data-sort="pace">
+                                        配速 <span class="sort-icon"><i class="bi bi-arrow-down-up"></i><i class="bi bi-arrow-down"></i><i class="bi bi-arrow-up"></i></span>
+                                    </th>
+                                    <th>城市</th>
+                                </tr>
+                            </thead>
+                            <tbody id="summary-table-body">
+                                {% for year, year_data in summarized_by_year.items() %}
+                                    {% for r in year_data.all_runs %}
+                                    <tr class="run-detail-row"
+                                        data-run-id="{{ r.id }}"
+                                        data-distance="{{ r.distance }}"
+                                        data-distance-formatted="{{ "%.2f"|format(r.distance / 1000) }}"
+                                        data-pace-str="{{ r.pace }}"
+                                        data-date="{{ r.date.strftime('%Y-%m-%d') }}"
+                                        data-city="{{ r.city[:-1] if r.city and r.city.endswith("市") else r.city }}"
+                                        data-duration="{{ format_duration(r.duration) }}">
+                                        <td><code>{{ r.date.strftime('%Y-%m-%d') }}</code></td>
+                                        <td>{{ "%.2f"|format(r.distance / 1000) }} <span class="small-muted">km</span></td>
+                                        <td class="d-none d-sm-table-cell">{{ format_duration(r.duration) }}</td>
+                                        <td>{{ r.pace }}</td>
+                                        <td>{{ r.city[:-1] if r.city and r.city.endswith("市") else r.city }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="yearly-data-view" style="display: none;">
+                    {% for year, year_data in summarized_by_year.items() %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4 class="mb-0">{{ year }} 年</h4>
+                        <span class="small-muted small">
+                        {{ year_data.summary.count }}次 | {{ "%.2f"|format(year_data.summary.dist_km) }} km | {{ year_data.summary.duration_str }} |  {{ year_data.summary.pace }}
+                        </span>
+                    </div>
+                    <div class='accordion mb-4' id='accordion{{ year }}'>
+                        {% for month_num, month_data in year_data.months.items()|sort(reverse=True) %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-m{{ year }}{{ month_num }}" aria-expanded="false" aria-controls="collapse-m{{ year }}{{ month_num }}">
+                                {{ months_map[month_num] }} &nbsp; 
+                                <span class="small-muted small">({{ month_data.summary.count }}次 | {{ "%.2f"|format(month_data.summary.dist_km) }} km | {{ month_data.summary.duration_str }} | {{ month_data.summary.pace }})</span>
+                                </button>
+                            </h2>
+                            <div id="collapse-m{{ year }}{{ month_num }}" class="accordion-collapse collapse" data-bs-parent="#accordion{{ year }}">
+                                <div class="accordion-body">
+                                    <table class="table table-hover table-borderless align-middle mb-0">
+                                        <tbody>
+                                        {% for r in month_data.runs %}
+                                        <tr>
+                                            <td>
+                                                <code>{{ r.date.strftime('%d') }}</code>
+                                                {% if r.streak and r.streak > 1 %}
+                                                <span class="streak-badge">{{ r.streak }}连</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ "%.2f"|format(r.distance / 1000) }} <span class="text-muted small">km</span></td>
+                                            <td><span class="text-body">{{ format_duration(r.duration) }}</span></td>
+                                            <td><span class="text-body">{{ r.pace }}</span></td>
+                                        </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
+    </div>
 
     <div class="tab-pane fade" id="marathon-pane" role="tabpanel" aria-labelledby="marathon-tab" tabindex="0">
+        <div class="d-flex justify-content-end mb-3 d-md-none">
+            <div class="btn-group btn-group-sm" id="calendar-view-toggle" role="group">
+                <button type="button" class="btn" data-view="list">列表模式</button>
+                <button type="button" class="btn active" data-view="grid">日历模式</button>
+            </div>
         </div>
+        <div id="marathon-calendar-container">
+            </div>
+    </div>
 
     <div class="tab-pane fade" id="events-pane" role="tabpanel" aria-labelledby="events-tab" tabindex="0">
+        <div class="d-flex justify-content-end mb-4">
+            <div class="btn-group btn-group-sm" id="events-view-toggle" role="group" aria-label="Events View Toggle">
+                <button type="button" class="btn active" data-view="category">按类别</button>
+                <button type="button" class="btn" data-view="timeline">按时间线</button>
+            </div>
         </div>
+        
+        <div id="events-category-view">
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <div class="content-card h-100 d-flex flex-column">
+                        <h5 class="card-title mb-3"><i class="bi bi-flag-fill text-success"></i> 里程碑</h5>
+                        {% set milestones = [
+                        {'name': '踏出第一步', 'distance': first_run_distance, 'date': first_run_date, 'is_first': True},
+                        {'name': '1000公里', 'distance': 1000, 'date': milestone_dates.get(1000)},
+                        {'name': '10000公里', 'distance': 10000, 'date': milestone_dates.get(10000)},
+                        {'name': '20000公里', 'distance': 20000, 'date': milestone_dates.get(20000)},
+                        {'name': '30000公里', 'distance': 30000, 'date': milestone_dates.get(30000)},
+                        {'name': '40000公里', 'distance': 40000, 'date': milestone_dates.get(40000)}
+                        ] %}
+                        
+                        {% for m in milestones %}
+                        <div class="d-flex justify-content-between align-items-center py-2 pb-entry 
+                                    {% if m.date %}border-success border-2{% endif %}">
+                            <div>
+                            <div class="fw-bold {% if m.date %}text-success{% endif %}">
+                                {{ m.name }}
+                                {% if m.date %}<span class="badge bg-success ms-2">已完成</span>{% endif %}
+                            </div>
+                            <small class="{% if m.date %}text-success{% else %}small-muted{% endif %}">
+                                {% if m.date %}{{ m.date.strftime('%Y年%m月%d日') }}{% else %}{% if m.is_first %}初次跑步{% else %}未达成{% endif %}{% endif %}
+                            </small>
+                            </div>
+                            <div class="text-end">
+                            <div class="fw-bold {% if m.date %}text-success{% elif not m.date and not m.is_first %}text-muted{% endif %}">
+                                {% if m.is_first %}{{ "%.2f"|format(m.distance) }} km{% else %}{{ "%.0f"|format(m.distance) }} km{% endif %}
+                            </div>
+                            <small class="{% if m.date %}text-success{% else %}small-muted{% endif %}">
+                                {% if m.is_first %}首跑{% elif m.date %}里程碑达成{% else %}进行中{% endif %}
+                            </small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="content-card h-100 d-flex flex-column">
+                        <h5 class="card-title mb-3"><i class="bi bi-award-fill trophy-color-text"></i> 个人最佳 (PB)</h5>
+                        <div class="flex-grow-1">
+                            {% for label, pb in personal_bests.items() %}
+                            <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
+                                <div>
+                                <div class="fw-bold">{{ label }}</div>
+                                <small class="small-muted">{{ pb.date }}</small>
+                                </div>
+                                <div class="text-end">
+                                <div class="fw-bold">{{ pb.time }}</div>
+                                <small class="small-muted">配速: {{ pb.pace }}</small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6 mb-4">
+                    <div class="content-card h-100 d-flex flex-column">
+                        <h5 class="card-title mb-3"><i class="bi bi-trophy-fill accent-color-text"></i> 比赛记录</h5>
+                        <div class="flex-grow-1" style="overflow-y: auto;">
+                            {% if events %}
+                            {% for event in events %}
+                                <div class="border-bottom py-2 pb-entry">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="fw-bold text-primary-emphasis">
+                                    {{ event.name }}
+                                    <small class="text-body-secondary">{{ event.category }}</small>
+                                    </div>
+                                    <div class="flex-grow-1 text-center px-2">
+                                    {% if event.certified %}
+                                        <abbr title="点击查看证书" class="certificate-link text-decoration-none" 
+                                            data-img="{{ event.certificate }}" style="cursor: pointer; border-bottom: 1px dotted var(--text-secondary)">
+                                        <span class="classification-text">{{ event.certified }}</span>
+                                        </abbr>
+                                    {% endif %}
+                                    </div>
+                                    <div class="text-nowrap text-primary-emphasis">{{ format_duration(event.duration) }}</div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-1">
+                                    <div>
+                                    <small class="text-body-secondary">
+                                        {% if event.date %}{{ event.date.strftime('%Y.%m.%d') }}{% else %}日期未知{% endif %}
+                                    </small>
+                                    <small class="text-body-secondary ms-2">{{ event.city }}</small>
+                                    </div>
+                                    <div class="text-end"><small class="text-body-secondary">配速: {{ event.pace }}</small></div>
+                                </div>
+                                </div>
+                            {% endfor %}
+                            {% else %}
+                            <div class="text-center py-4 text-body-secondary">暂无比赛记录</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="content-card h-100 d-flex flex-column">
+                        <h5 class="card-title mb-3"><i class="bi bi-geo-alt-fill text-primary"></i> 解锁新城市</h5>
+                        <div class="flex-grow-1" style="overflow-y: auto; max-height: 250px;">
+                            {% if city_stats %}
+                                {% for city in city_stats|sort(attribute='first_date', reverse=True) %}
+                                    {% if city.first_date %}
+                                    <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
+                                        <div>
+                                            <div class="fw-bold">{{ city.name }}</div>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="text-nowrap text-primary-emphasis">{{ city.first_date }}</div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <div class="text-center py-4 text-body-secondary">暂无城市记录</div>
+                            {% endif %}
+                        </div>
+                        <div class="mt-4">
+                            <h6 class="card-title mb-3 small-muted"><i class="bi bi-map-fill"></i> 足迹地图</h6>
+                            <div class="row">
+                                <div class="col-12">
+                                  <div id="cityMap"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% set all_events = [] %}
+        {% for m in milestones %}{% if m.date %}{% set dist_str = ("%.0f"|format(m.distance)) if not m.is_first else ("%.2f"|format(m.distance)) %}{% set details_str = '达成 ' ~ dist_str ~ 'km 里程碑' if not m.is_first else '首跑距离 ' ~ dist_str ~ 'km' %}{% set _ = all_events.append({'date': m.date.strftime('%Y-%m-%d'), 'type': '里程碑', 'icon': 'bi-flag-fill', 'color': 'text-success', 'title': m.name, 'details': details_str}) %}{% endif %}{% endfor %}
+        {% for label, pb in personal_bests.items() %}{% set _ = all_events.append({'date': pb.date, 'type': '个人最佳', 'icon': 'bi-award-fill', 'color': 'trophy-color-text', 'title': 'PB: ' ~ label, 'details': '时间 ' ~ pb.time ~ ' (配速 ' ~ pb.pace ~ ')'}) %}{% endfor %}
+        {% for event in events %}{% if event.date %}{% set _ = all_events.append({'date': event.date.strftime('%Y-%m-%d'), 'type': '比赛记录', 'icon': 'bi-trophy-fill', 'color': 'accent-color-text', 'title': event.name, 'details': event.category ~ ' - 完赛时间: ' ~ format_duration(event.duration)}) %}{% endif %}{% endfor %}
+        {% for city in city_stats %}{% if city.first_date %}{% set _ = all_events.append({'date': city.first_date, 'type': '解锁新城市', 'icon': 'bi-geo-alt-fill', 'color': 'text-primary', 'title': '解锁: ' ~ city.name, 'details': '于 ' ~ city.first_date ~ ' 首次在该城市跑步'}) %}{% endif %}{% endfor %}
+        {% set sorted_events = all_events|sort(attribute='date', reverse=True) %}
+
+        <div id="events-timeline-view" style="display: none;">
+            <div class="content-card">
+                <div class="timeline">
+                    {% if not sorted_events %}
+                        <div class="text-center py-4 text-body-secondary">暂无事件记录</div>
+                    {% else %}
+                        {% for event in sorted_events %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker">
+                                <i class="bi {{ event.icon }} {{ event.color }}"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="small text-body-secondary mb-1">{{ event.date }} &middot; {{ event.type }}</div>
+                                <h6 class="mb-1 fw-bold">{{ event.title }}</h6>
+                                <p class="mb-0 small text-body-secondary">{{ event.details }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
     
     <div class="tab-pane fade" id="about-pane" role="tabpanel" aria-labelledby="about-tab" tabindex="0">
+        <div class="content-card">
+            <h5 class="card-title mb-4">关于这个网站</h5>
+            <p>这个跑步记录网站的灵感，来自我在水木社区看到的一个帖子。</p>
+            <p>一位跑友分享了他坚持跑步十年的经历，累计跑量达到了三万公里。他接下来的目标是跑到四万公里——正好是绕地球赤道一圈的距离。</p>
+            <p>这个目标让我很受触动。四万公里，相当于每天跑<span style="text-decoration: line-through;text-decoration-color: #ff6b6b;text-decoration-thickness: 2px;">十公里</span>五公里，连续跑<span style="text-decoration: line-through;text-decoration-color: #ff6b6b;text-decoration-thickness: 2px;">十一年</span>二十二年。虽然看起来很远，但分解到每一天，就是坚持跑下去。</p>
+            <p>我不是专业跑者，<span style="text-decoration: line-through;text-decoration-color: #ff6b6b;text-decoration-thickness: 2px;">也不追求速度</span>(有那么一点点追求)。对我来说，跑步更重要的是保持健康和坚持的习惯。这个网站记录我的跑步历程，看着数字一点点增长，就是最好的动力。</p>
+            <p>如果你也有类似的跑步目标，欢迎一起坚持。跑步路上，我们都不孤单。</p>
+            <p class="text-end mt-4">2025年7月·广州</p>
         </div>
+    </div>
   </div>
 </div>
 
 <div class="modal fade" id="certificateModal" tabindex="-1" aria-labelledby="certificateModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="certificateModalLabel">等级证书</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <img id="certificateImage" src="" class="img-fluid" style="max-height: 70vh;" alt="跑步等级证书">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">关闭</button>
+      </div>
+    </div>
   </div>
+</div>
 
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
@@ -804,10 +1170,53 @@
 
 
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">跑步评论</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+      </div>
+      <div class="modal-body">
+        <div id="commentList" class="mb-3" style="max-height: 250px; overflow-y: auto;"></div>
+        <textarea class="form-control" id="commentText" rows="3" placeholder="写下你的感想吧... 可使用[img]url[/img]或[video]url[/video]分享图片和视频。"></textarea>
+        <input type="hidden" id="commentRunId">
+      </div>
+      <div class="modal-footer d-flex justify-content-between align-items-center">
+        <div id="editProfileTrigger" style="cursor: pointer;" title="点击修改昵称">
+            <span class="small text-body-secondary">
+                发言身份: <span id="commentUserIcon"></span> <span id="commentUserNickname"></span>
+                <i class="bi bi-pencil-fill small ms-1"></i>
+            </span>
+        </div>
+        <div>
+            <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">取消</button>
+            <button type="button" class="btn btn-primary btn-sm" id="submitComment">提交</button>
+        </div>
+      </div>
     </div>
+  </div>
+</div>
 
 <div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="profileModalLabel">编辑个人信息</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="nicknameInput" class="form-label">昵称</label>
+                    <input type="text" class="form-control" id="nicknameInput" placeholder="请输入你的昵称">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-sm" id="saveProfileButton">保存</button>
+            </div>
+        </div>
     </div>
+</div>
 
 <div class="modal fade" id="runDetailModal" tabindex="-1" aria-labelledby="runDetailModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen">
@@ -880,13 +1289,32 @@
 </div>
 
 <div class="modal fade" id="mediaGalleryModal" tabindex="-1" aria-labelledby="mediaGalleryModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body p-0">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div id="mediaCarousel" class="carousel slide">
+          <div class="carousel-inner" id="galleryCarouselInner">
+            </div>
+          <button class="carousel-control-prev" type="button" data-bs-target="#mediaCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#mediaCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
+</div>
 
 
 </body>
 <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.bootcdn.net/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://cdn.bootcdn.net/ajax/libs/chartjs-plugin-annotation/3.1.0/chartjs-plugin-annotation.min.js "></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/chartjs-plugin-annotation/3.1.0/chartjs-plugin-annotation.min.js"></script>
 <script src="https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 	let monthlyDistanceChart = null;
@@ -942,8 +1370,8 @@
         }
         
         // Old comment modal
-        //document.getElementById('commentUserIcon').textContent = profile.icon;
-        //document.getElementById('commentUserNickname').textContent = profile.nickname;
+        document.getElementById('commentUserIcon').textContent = profile.icon;
+        document.getElementById('commentUserNickname').textContent = profile.nickname;
 
         // New detail modal
         document.getElementById('detailCommentUserIcon').textContent = profile.icon;
@@ -1089,11 +1517,9 @@
                         tbodyHtml += `<td class="${cellClass}">`;
                         tbodyHtml += `<div class="day-number ${dayClass}">${date}</div>`;
                         if(eventsOnThisDay.length > 0) {
-                            // 默认显示（截断）
                             eventsOnThisDay.forEach(event => {
                                 tbodyHtml += `<div class="event-item" title="${event.name}">${event.name}</div>`;
                             });
-                            // 弹出层（完整内容）
                             tbodyHtml += '<div class="event-details popup">';
                              eventsOnThisDay.forEach(event => {
                                 tbodyHtml += `<div class="event-item">${event.name} <span class="category">${event.category}</span></div>`;
@@ -1122,16 +1548,14 @@
 
             cell.addEventListener('mouseenter', () => {
                 const rect = cell.getBoundingClientRect();
-                const popupWidth = popup.offsetWidth; //
+                const popupWidth = popup.offsetWidth;
                 const viewportWidth = window.innerWidth;
                 
                 popup.classList.remove('edge-left', 'edge-right');
 
-                // 检查是否会超出右边界 (给10px的缓冲)
                 if (rect.left + rect.width / 2 + popupWidth / 2 > viewportWidth - 10) {
                     popup.classList.add('edge-right');
                 } 
-                // 检查是否会超出左边界
                 else if (rect.left + rect.width / 2 - popupWidth / 2 < 10) {
                     popup.classList.add('edge-left');
                 }
@@ -1146,7 +1570,6 @@
 
     async function initMarathonView() {
         const container = document.getElementById('marathon-calendar-container');
-        // Only generate if it hasn't been generated before.
         if (container && container.innerHTML.trim() === '') {
             await generateMarathonCalendar();
             setupCalendarHovers();
@@ -1155,7 +1578,6 @@
 
 	document.addEventListener('DOMContentLoaded', function() {
 		
-    // --- 页面初始化逻辑 ---
     initializeUserProfile();
     loadCommentCounts();
 
@@ -1175,7 +1597,6 @@
         }
     });
 
-    // --- 手机滑动切换标签页功能 ---
     let startX = 0;
     let startY = 0;
     const tabContent = document.querySelector('.tab-content');
@@ -1216,7 +1637,6 @@
       if (absDiffX > absDiffY && absDiffX > 10) e.preventDefault();
     }, { passive: false });
     
-    // --- URL锚点与选项卡同步逻辑 ---
     const activateTabFromHash = () => {
       const hash = window.location.hash.substring(1);
       if (hash) {
@@ -1265,8 +1685,7 @@
         }
     }
 
-
-    // --- MAP LOGIC ---
+	// --- MAP LOGIC ---
     const eventsTab = document.querySelector('#events-tab');
     if(eventsTab) {
         eventsTab.addEventListener('shown.bs.tab', function() {
@@ -1300,24 +1719,24 @@
     const tickColor = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim();
     const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
     const annotationColor = getComputedStyle(document.documentElement).getPropertyValue('--bs-code-color').trim();
-    const monthlyData = {{ chart_monthly_data|tojson }};
-    const monthlyTotal = monthlyData.reduce((a, b) => a + b, 0);
-    const monthlyAvg = monthlyData.filter(d => d > 0).length > 0 ? (monthlyTotal / monthlyData.filter(d => d > 0).length) : 0;
-    const dailyData = {{ chart_30_days.data|tojson }};
-    const dailyTotal = dailyData.reduce((a, b) => a + b, 0);
-    const dailyAvg = dailyData.filter(d => d > 0).length > 0 ? (dailyTotal / dailyData.filter(d => d > 0).length) : 0; 
-    const yearlyData = {{ chart_yearly_data|tojson }};
-    const yearlyTotal = yearlyData.reduce((a, b) => a + b, 0);
-    const yearlyAvg = yearlyData.filter(d => d > 0).length > 0 ? (yearlyTotal / yearlyData.filter(d => d > 0).length) : 0;
-    Chart.defaults.font.family = "'Noto Sans SC', sans-serif";
+	const monthlyData = {{ chart_monthly_data|tojson }};
+	const monthlyTotal = monthlyData.reduce((a, b) => a + b, 0);
+	const monthlyAvg = monthlyData.filter(d => d > 0).length > 0 ? (monthlyTotal / monthlyData.filter(d => d > 0).length) : 0;
+	const dailyData = {{ chart_30_days.data|tojson }};
+	const dailyTotal = dailyData.reduce((a, b) => a + b, 0);
+	const dailyAvg = dailyData.filter(d => d > 0).length > 0 ? (dailyTotal / dailyData.filter(d => d > 0).length) : 0; 
+	const yearlyData = {{ chart_yearly_data|tojson }};
+	const yearlyTotal = yearlyData.reduce((a, b) => a + b, 0);
+	const yearlyAvg = yearlyData.filter(d => d > 0).length > 0 ? (yearlyTotal / yearlyData.filter(d => d > 0).length) : 0;
+	Chart.defaults.font.family = "'Noto Sans SC', sans-serif";
     const annotationDefaults = (avg, total, labelPrefix) => ({ type: 'line', yMin: avg, yMax: avg, borderColor: annotationColor, borderWidth: 1.5, borderDash: [6, 6] });
-    
+	
     const dailyCtx = document.getElementById('dailyDistanceChart').getContext('2d');
-    dailyDistanceChart = new Chart(dailyCtx, { type: 'bar', data: { labels: {{ chart_30_days.labels|tojson }}, datasets: [{ label: '距离 (km)', data: dailyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 2, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 }}}, plugins: { legend: { display: false }, title: { display: true, text: `总 ${dailyTotal.toFixed(1)}km / 日均 ${dailyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(dailyAvg) } } } } });
+	dailyDistanceChart = new Chart(dailyCtx, { type: 'bar', data: { labels: {{ chart_30_days.labels|tojson }}, datasets: [{ label: '距离 (km)', data: dailyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 2, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 }}}, plugins: { legend: { display: false }, title: { display: true, text: `总 ${dailyTotal.toFixed(1)}km / 日均 ${dailyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(dailyAvg) } } } } });
     const monthlyCtx = document.getElementById('monthlyDistanceChart').getContext('2d');
-    monthlyDistanceChart = new Chart(monthlyCtx, { type: 'bar', data: { labels: {{ chart_monthly_labels|tojson }}, datasets: [{ label: '距离 (km)', data: monthlyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 4, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 }}}, plugins: { legend: { display: false }, title: { display: true, text: `总 ${monthlyTotal.toFixed(1)}km / 月均 ${monthlyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(monthlyAvg) } } } } });
+	monthlyDistanceChart = new Chart(monthlyCtx, { type: 'bar', data: { labels: {{ chart_monthly_labels|tojson }}, datasets: [{ label: '距离 (km)', data: monthlyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 4, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 }}}, plugins: { legend: { display: false }, title: { display: true, text: `总 ${monthlyTotal.toFixed(1)}km / 月均 ${monthlyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(monthlyAvg) } } } } });
     const yearlyCtx = document.getElementById('yearlyDistanceChart').getContext('2d');
-    yearlyDistanceChart = new Chart(yearlyCtx, { type: 'bar', data: { labels: {{ chart_yearly_labels|tojson }}, datasets: [{ label: '距离 (km)', data: yearlyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 4, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 } } }, plugins: { legend: { display: false }, title: { display: true, text: `总 ${yearlyTotal.toFixed(1)}km / 年均 ${yearlyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(yearlyAvg) } } } } });
+	yearlyDistanceChart = new Chart(yearlyCtx, { type: 'bar', data: { labels: {{ chart_yearly_labels|tojson }}, datasets: [{ label: '距离 (km)', data: yearlyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 4, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 } } }, plugins: { legend: { display: false }, title: { display: true, text: `总 ${yearlyTotal.toFixed(1)}km / 年均 ${yearlyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(yearlyAvg) } } } } });
 
     document.querySelectorAll('#chart-toggle .btn').forEach(button => { button.addEventListener('click', function() { document.querySelectorAll('#chart-toggle .btn').forEach(btn => btn.classList.remove('active')); this.classList.add('active'); const chartType = this.dataset.chart; Object.values({ monthly: document.getElementById('monthlyChartContainer'), daily: document.getElementById('dailyChartContainer'), yearly: document.getElementById('yearlyChartContainer') }).forEach(c => c.style.display = 'none'); document.getElementById(`${chartType}ChartContainer`).style.display = 'block'; }); });
 
@@ -1444,12 +1863,12 @@
 
     // --- MODAL AND COMMENT LOGIC ---
     function renderCommentList(container, comments) {
-        container.style.color = '#333'; // Ensure text color is readable on light bg
+        container.style.color = '#333';
         if (Array.isArray(comments) && comments.length > 0) {
             container.innerHTML = comments.map(c => 
                 `<div class="border-bottom py-2">
                     <small class="text-muted">${c.nickname || '🌱 匿名'} · ${new Date(c.ts).toLocaleString()}</small>
-                    <div class="mt-1" style="color: #333;">${parseAndRenderMedia(c.text)}</div>
+                    <div class="mt-1" style="color: #333;">${c.text}</div>
                  </div>`
             ).join('');
         } else {
@@ -1462,26 +1881,14 @@
 
     function decodePolyline(encoded) {
         if (!encoded) return [];
-        let index = 0, len = encoded.length;
-        let lat = 0, lng = 0;
-        let array = [];
+        let index = 0, len = encoded.length, lat = 0, lng = 0, array = [];
         while (index < len) {
             let b, shift = 0, result = 0;
-            do {
-                b = encoded.charCodeAt(index++) - 63;
-                result |= (b & 0x1f) << shift;
-                shift += 5;
-            } while (b >= 0x20);
-            let dlat = ((result & 1) ? ~(result >> 1) : (result >> 1));
-            lat += dlat;
+            do { b = encoded.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
+            let dlat = ((result & 1) ? ~(result >> 1) : (result >> 1)); lat += dlat;
             shift = 0; result = 0;
-            do {
-                b = encoded.charCodeAt(index++) - 63;
-                result |= (b & 0x1f) << shift;
-                shift += 5;
-            } while (b >= 0x20);
-            let dlng = ((result & 1) ? ~(result >> 1) : (result >> 1));
-            lng += dlng;
+            do { b = encoded.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
+            let dlng = ((result & 1) ? ~(result >> 1) : (result >> 1)); lng += dlng;
             array.push([lat * 1e-5, lng * 1e-5]);
         }
         return array;
@@ -1510,25 +1917,15 @@
         modal.show();
 
         try {
-            // NOTE: Using a static object for this task instead of a live fetch
-            // const response = await fetch(`https://static.linwn.net:10088/runpage/data/${runId}/record.json`);
-            // if (!response.ok) throw new Error('无法加载跑步数据');
-            // const data = await response.json();		
             const data = {
-              "start_time": "2025-08-13T06:30:00Z",
-              "weather": { "temperature_c": 28.5, "condition": "Cloudy", "wind_speed_kmh": 12.3 },
+              "start_time": "2025-08-13T06:30:00Z", "weather": { "temperature_c": 28.5, "condition": "Cloudy", "wind_speed_kmh": 12.3 },
               "summary": { "distance_km": 10.02, "duration": "01:15:33", "avg_pace": "07'32\"" },
               "route": { "encoded_polyline": "u{~vFvyys@_A`@i@`@q@j@u@j@u@j@w@f@s@d@q@d@o@`@k@Zg@Xm@V]Ra@Te@X]Z]b@a@^a@^a@^g@\\_@b@]f@a@`@e@b@e@d@i@f@i@h@k@h@m@h@m@h@m@h@m@j@m@j@m@j@m@j@m@j@" },
-              "photos": [
-                { "url": `https://picsum.photos/seed/${runId}/200/300`, "timestamp": "2025-08-13T06:45:12Z", "note": "Sunrise view" },
-                { "url": `https://picsum.photos/seed/${runId}a/200/300`, "timestamp": "2025-08-13T07:05:45Z", "note": "Bridge crossing" }
-              ]
+              "photos": [ { "url": `https://picsum.photos/seed/${runId}/200/300` }, { "url": `https://picsum.photos/seed/${runId}a/200/300` } ]
             };
 
-            // Populate Hero Distance
             document.querySelector('#detailHeroDistance .distance-value').textContent = data.summary.distance_km;
 
-            // Populate Media Carousel
             const carouselInner = document.querySelector('#runMediaCarousel .carousel-inner');
             const carouselIndicators = document.querySelector('#runMediaCarousel .carousel-indicators');
             carouselInner.innerHTML = '';
@@ -1538,17 +1935,12 @@
             carouselIndicators.innerHTML += `<button type="button" data-bs-target="#runMediaCarousel" data-bs-slide-to="0" class="active" aria-current="true"></button>`;
 
             if (runDetailMapInstance) runDetailMapInstance.remove();
-            runDetailMapInstance = L.map('runDetailMap', {
-                attributionControl: false, zoomControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false, touchZoom: false, boxZoom: false, keyboard: false
-            });
+            runDetailMapInstance = L.map('runDetailMap', { attributionControl: false, zoomControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false, touchZoom: false, boxZoom: false, keyboard: false });
             L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', { subdomains: 'abcd' }).addTo(runDetailMapInstance);
 
             if (data.route.encoded_polyline) {
-                const coordinates = decodePolyline(data.route.encoded_polyline);
-                if (coordinates.length > 0) {
-                    const polyline = L.polyline(coordinates, { color: '#e54747', weight: 4 }).addTo(runDetailMapInstance);
-                    runDetailMapInstance.fitBounds(polyline.getBounds().pad(0.1));
-                }
+                const polyline = L.polyline(decodePolyline(data.route.encoded_polyline), { color: '#e54747', weight: 4 }).addTo(runDetailMapInstance);
+                runDetailMapInstance.fitBounds(polyline.getBounds().pad(0.1));
             }
 
             let photoIndex = 1;
@@ -1563,26 +1955,15 @@
             document.querySelector('#runMediaCarousel .carousel-control-next').style.display = photoIndex > 1 ? 'block' : 'none';
             carouselIndicators.style.display = photoIndex > 1 ? 'flex' : 'none';
             
-            // Populate Data Grid
             const gridContainer = document.getElementById('detailDataGrid');
             const dataMap = {
-                '训练时长': data.summary.duration || '--',
-                '平均配速': data.summary.avg_pace || '--',
-                '运动消耗': '588 千卡',
-                '总时长': '01:33:16',
-                '运动负荷': '184',
-                '爬升高度': '9 米',
-                '平均步频': '130',
-                '平均功率': '156 瓦',
-                '平均步幅': '1.01 米'
+                '训练时长': data.summary.duration || '--', '平均配速': data.summary.avg_pace || '--', '运动消耗': '588 千卡',
+                '总时长': '01:33:16', '运动负荷': '184', '爬升高度': '9 米',
+                '平均步频': '130', '平均功率': '156 瓦', '平均步幅': '1.01 米'
             };
             gridContainer.innerHTML = '';
             for (const [label, value] of Object.entries(dataMap)) {
-                gridContainer.innerHTML += `
-                    <div class="col-4">
-                        <div class="data-point-value">${value}</div>
-                        <div class="data-point-label">${label}</div>
-                    </div>`;
+                gridContainer.innerHTML += `<div class="col-4"><div class="data-point-value">${value}</div><div class="data-point-label">${label}</div></div>`;
             }
 
             await refreshDetailComments(runId);
@@ -1600,7 +1981,7 @@
             document.getElementById('runDetailLoading').innerHTML = `<div class="alert alert-danger">加载失败: ${error.message}</div>`;
         }
     }
-
+    
     document.getElementById('submitRunDetailComment').addEventListener('click', async () => {
         const runId = currentDetailRunId;
         const text = document.getElementById('runDetailCommentText').value.trim();
@@ -1621,23 +2002,8 @@
     });
     
     document.addEventListener('click', async e => {
-        const certLink = e.target.closest('.certificate-link');
-        if (certLink) {
-            e.preventDefault();
-            const imgUrl = certLink.dataset.img;
-            if(imgUrl) {
-                document.getElementById('certificateImage').src = imgUrl;
-                new bootstrap.Modal(document.getElementById('certificateModal')).show();
-            }
-            return;
-        }
-
         const runRow = e.target.closest('.run-detail-row');
-        if (runRow) {
-            e.preventDefault();
-            showRunDetailModal(runRow.dataset.runId, false);
-            return;
-        }
+        if (runRow) { e.preventDefault(); showRunDetailModal(runRow.dataset.runId, false); return; }
 
         const recentCard = e.target.closest('.recent-run-card');
         if(recentCard) {
@@ -1646,54 +2012,15 @@
             showRunDetailModal(recentCard.dataset.runId, !!isCommentLink);
             return;
         }
-        
-        const commentLink = e.target.closest('.comment-link');
-        if (commentLink && !commentLink.closest('.recent-run-card')) {
-             e.preventDefault();
-             showRunDetailModal(commentLink.dataset.runId, true);
-             return;
-        }
-
-        if (e.target.classList.contains('comment-media-thumb')) {
-            e.preventDefault();
-            const clickedThumb = e.target;
-            const wrapper = clickedThumb.closest('.comment-content-wrapper');
-            if (!wrapper) return;
-
-            const mediaData = JSON.parse(wrapper.dataset.media);
-            const clickedIndex = parseInt(clickedThumb.dataset.mediaIndex, 10);
-            const galleryCarouselInner = document.getElementById('galleryCarouselInner');
-            
-            galleryCarouselInner.innerHTML = ''; 
-
-            mediaData.forEach((mediaItem, index) => {
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'carousel-item';
-                if (index === clickedIndex) {
-                    itemDiv.classList.add('active');
-                }
-
-                if (mediaItem.type === 'video') {
-                    itemDiv.innerHTML = `<video src="${mediaItem.url}" class="d-block" controls autoplay loop playsinline></video>`;
-                } else {
-                    itemDiv.innerHTML = `<img src="${mediaItem.url}" class="d-block" alt="gallery image">`;
-                }
-                galleryCarouselInner.appendChild(itemDiv);
-            });
-
-            const mediaGalleryModal = bootstrap.Modal.getOrCreateInstance(mediaGalleryModalEl);
-            mediaGalleryModal.show();
-        }
     });
 
-  });
-
-  window.addEventListener('beforeunload', () => {
-    if(monthlyDistanceChart) monthlyDistanceChart.destroy();
-    if(dailyDistanceChart) dailyDistanceChart.destroy();
-    if(yearlyDistanceChart) yearlyDistanceChart.destroy();
-    if(cityMap) cityMap.remove();
-    if(runDetailMapInstance) runDetailMapInstance.remove();
-  });
+    window.addEventListener('beforeunload', () => {
+      if(monthlyDistanceChart) monthlyDistanceChart.destroy();
+      if(dailyDistanceChart) dailyDistanceChart.destroy();
+      if(yearlyDistanceChart) yearlyDistanceChart.destroy();
+      if(cityMap) cityMap.remove();
+      if(runDetailMapInstance) runDetailMapInstance.remove();
+    });
+});
 </script>
 </html>
