@@ -13793,7 +13793,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-08-15 09:56:43 
+         | Last updated: 2025-08-15 17:39:58 
     </small>
 </footer>
 
@@ -13893,6 +13893,18 @@
                                 </div>
                         </div>
 
+                        <div id="runDetailTagsSection" class="mb-5">
+                            <h4 class="data-section-title">标签</h4>
+                            <div id="runDetailTagsContainer" class="mb-2">
+                            </div>
+                            <div class="input-group input-group-sm">
+                                <input type="text" class="form-control" id="runDetailTagInput" placeholder="添加新标签...">
+                                <button class="btn btn-outline-secondary" type="button" id="addTagButton" style="--bs-btn-border-color: var(--border-color); --bs-btn-hover-bg: var(--accent-color); --bs-btn-hover-border-color: var(--accent-color); --bs-btn-active-bg: var(--accent-color); --bs-btn-active-border-color: var(--accent-color); color: var(--text-secondary);">添加</button>
+                            </div>
+                            <div id="suggestedTagsContainer" class="mt-2">
+                            </div>
+                        </div>
+
                         <div id="runDetailComments" class="pb-4">
                             <hr>
                             <h4 class="data-section-title mt-4">评论</h4>
@@ -13957,6 +13969,10 @@
     let allRunRows = [];
     const commentApiBase = 'https://kv.linwn.net';
     let detailPhotoUrls = [];
+    let currentDetailRunId = null;
+    let currentRunTags = [];
+    const suggestedTags = ['长距离', '恢复跑', '节奏跑', '间歇跑', '越野', '比赛', '晨跑', '夜跑'];
+
 
 	document.documentElement.setAttribute('data-bs-theme', 'dark');
 
@@ -14202,6 +14218,70 @@
         const mediaGalleryModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('mediaGalleryModal'));
         mediaGalleryModal.show();
     }
+    
+    // --- TAGS FEATURE ---
+    function renderRunTags() {
+        const container = document.getElementById('runDetailTagsContainer');
+        container.innerHTML = currentRunTags.map((tag, index) =>
+            `<span class="badge rounded-pill text-bg-secondary me-1 mb-1" style="font-weight: 500; background-color: var(--hover-bg) !important; color: var(--text-secondary) !important; padding: 0.3em 0.5em;">
+                ${tag}
+                <button type="button" class="btn-close ms-1" aria-label="Remove tag" data-tag-index="${index}" style="font-size: 0.6em; filter: invert(0.8);"></button>
+            </span>`
+        ).join('');
+    }
+
+    function renderSuggestedTags() {
+        const container = document.getElementById('suggestedTagsContainer');
+        container.innerHTML = suggestedTags.map(tag =>
+            `<button type="button" class="btn btn-sm" data-tag-name="${tag}" style="font-size: 0.75rem; --bs-btn-padding-y: .1rem; --bs-btn-padding-x: .4rem; margin: 2px;">${tag}</button>`
+        ).join('');
+    }
+
+    async function loadRunTags(runId) {
+        try {
+            const res = await fetch(`${commentApiBase}/tags?runId=${encodeURIComponent(runId)}`);
+            if (res.ok) {
+                const data = await res.json();
+                currentRunTags = data.tags || [];
+            } else {
+                currentRunTags = [];
+            }
+        } catch (e) {
+            console.error("Failed to load tags:", e);
+            currentRunTags = [];
+        }
+        renderRunTags();
+    }
+
+    async function saveRunTags(runId) {
+        try {
+            await fetch(`${commentApiBase}/tags`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ runId: runId, tags: currentRunTags })
+            });
+        } catch (e) {
+            console.error("Failed to save tags:", e);
+            alert('标签保存失败！');
+        }
+    }
+
+    async function addTag(tag) {
+        const trimmedTag = tag.trim();
+        if (trimmedTag && !currentRunTags.includes(trimmedTag)) {
+            currentRunTags.push(trimmedTag);
+            renderRunTags();
+            await saveRunTags(currentDetailRunId);
+        }
+    }
+
+    async function removeTag(index) {
+        currentRunTags.splice(index, 1);
+        renderRunTags();
+        await saveRunTags(currentDetailRunId);
+    }
+    // --- END TAGS FEATURE ---
+
 
     document.addEventListener('DOMContentLoaded', function() {
 		
@@ -14210,6 +14290,34 @@
 
     document.getElementById('editProfileTrigger').addEventListener('click', () => { new bootstrap.Modal(document.getElementById('profileModal')).show(); });
     document.getElementById('detailEditProfileTrigger').addEventListener('click', () => { new bootstrap.Modal(document.getElementById('profileModal')).show(); });
+    
+    // --- TAGS EVENT LISTENERS ---
+    document.getElementById('addTagButton').addEventListener('click', async () => {
+        const input = document.getElementById('runDetailTagInput');
+        await addTag(input.value);
+        input.value = '';
+    });
+    document.getElementById('runDetailTagInput').addEventListener('keypress', async (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const input = document.getElementById('runDetailTagInput');
+            await addTag(input.value);
+            input.value = '';
+        }
+    });
+    document.getElementById('runDetailTagsContainer').addEventListener('click', (e) => {
+        if (e.target.matches('button.btn-close')) {
+            const index = parseInt(e.target.dataset.tagIndex, 10);
+            removeTag(index);
+        }
+    });
+    document.getElementById('suggestedTagsContainer').addEventListener('click', async (e) => {
+        if (e.target.matches('button')) {
+            const tagName = e.target.dataset.tagName;
+            await addTag(tagName);
+        }
+    });
+    // --- END TAGS EVENT LISTENERS ---
 
     document.getElementById('goto-data-tab')?.addEventListener('click', e => {
         e.preventDefault();
@@ -14448,8 +14556,6 @@
         }
     }
     
-    let currentDetailRunId = null;
-
     function decodePolyline(encoded) {
         if (!encoded) return [];
         let index = 0, len = encoded.length, lat = 0, lng = 0, array = [];
@@ -14507,8 +14613,7 @@
             carouselIndicators.innerHTML += `<button type="button" data-bs-target="#runMediaCarousel" data-bs-slide-to="0" class="active" aria-current="true"></button>`;
 
             if (runDetailMapInstance) runDetailMapInstance.remove();
-            //runDetailMapInstance = L.map('runDetailMap', { attributionControl: false, zoomControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false, touchZoom: false, boxZoom: false, keyboard: false });
-            runDetailMapInstance = L.map('runDetailMap', { center: [36, 108], zoom: 4, zoomControl: false });
+            runDetailMapInstance = L.map('runDetailMap', { attributionControl: false, zoomControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false, touchZoom: false, boxZoom: false, keyboard: false });
           
             L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', { subdomains: 'abcd' }).addTo(runDetailMapInstance);
 
@@ -14543,13 +14648,17 @@
             for (const [label, value] of Object.entries(dataMap)) {
                 gridContainer.innerHTML += `<div class="col-4"><div class="data-point-value">${value}</div><div class="data-point-label">${label}</div></div>`;
             }
-
+            
+            await loadRunTags(runId);
+            renderSuggestedTags();
             await refreshDetailComments(runId);
+
             document.getElementById('runDetailLoading').style.display = 'none';
             document.getElementById('runDetailContent').classList.remove('d-none');
             
-            // Invalidate size after a short delay to ensure DOM is ready
-            setTimeout(() => runDetailMapInstance.invalidateSize(), 100);
+            setTimeout(() => {
+                if(runDetailMapInstance) runDetailMapInstance.invalidateSize()
+            }, 100);
             
             if (scrollToComments) {
                 document.getElementById('runDetailComments').scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -14615,6 +14724,16 @@
         }
         gestureIsEligible = false;
     }, {passive: true});
+    
+    // Carousel Map Fix
+    const detailModalCarousel = document.getElementById('runMediaCarousel');
+    if(detailModalCarousel){
+        detailModalCarousel.addEventListener('slid.bs.carousel', function (event) {
+          if (event.relatedTarget.querySelector('#runDetailMap') && runDetailMapInstance) {
+            runDetailMapInstance.invalidateSize();
+          }
+        });
+    }
 
     window.addEventListener('beforeunload', () => {
       if(monthlyDistanceChart) monthlyDistanceChart.destroy();
