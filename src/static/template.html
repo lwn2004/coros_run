@@ -1118,7 +1118,7 @@
                                         data-distance-formatted="{{ "%.2f"|format(r.distance / 1000) }}"
                                         data-pace-str="{{ r.pace }}"
                                         data-date="{{ r.date.strftime('%Y-%m-%d') }}"
-                                        data-city="{{ r.city[:-1] if r.city and r.city.endsWith("市") else r.city }}"
+                                        data-city="{{ r.city[:-1] if r.city and r.city.endswith("市") else r.city }}"
                                         data-duration="{{ format_duration(r.duration) }}">
                                         <td><code>{{ r.date.strftime('%Y-%m-%d') }}</code></td>
                                         <td>{{ "%.2f"|format(r.distance / 1000) }} <span class="small-muted">km</span></td>
