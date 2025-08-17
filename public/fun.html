@@ -887,10 +887,10 @@
                         <div class="stat-card-content">
                           <div>
                             <div class="stat-label">继续坚持</div>
-                            <div class="stat-value">16年343天</div>
+                            <div class="stat-value">17年3天</div>
                           </div>
                           <div class="stat-details">
-                            <div class="stat-label"><small class="small-muted">预计</small>2042年07月22日<small>绕地球一圈</small></div>
+                            <div class="stat-label"><small class="small-muted">预计</small>2042年08月16日<small>绕地球一圈</small></div>
                           </div>
                         </div>
                         <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
@@ -13890,7 +13890,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-08-17 10:02:30 
+         | Last updated: 2025-08-17 18:03:58 
     </small>
 </footer>
 
@@ -14885,8 +14885,8 @@
 
     document.getElementById('routeMapModal').addEventListener('shown.bs.modal', () => {
         if (!routeMapInstance) {
-            routeMapInstance = L.map('routeMap', { attributionControl: false, zoomControl: true });
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', { subdomains: 'abcd' }).addTo(routeMapInstance);
+            routeMapInstance = L.map('routeMap', { attributionControl: false, zoomControl: false });
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png', { subdomains: 'abcd' }).addTo(routeMapInstance);
         }
         if (currentPolyline) {
             const polyline = L.polyline(decodePolyline(currentPolyline), { color: getComputedStyle(document.documentElement).getPropertyValue('--accent-color'), weight: 4 }).addTo(routeMapInstance);
