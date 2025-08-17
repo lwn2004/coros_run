@@ -13890,7 +13890,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-08-17 18:03:58 
+         | Last updated: 2025-08-17 18:13:48 
     </small>
 </footer>
 
@@ -14886,7 +14886,7 @@
     document.getElementById('routeMapModal').addEventListener('shown.bs.modal', () => {
         if (!routeMapInstance) {
             routeMapInstance = L.map('routeMap', { attributionControl: false, zoomControl: false });
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png', { subdomains: 'abcd' }).addTo(routeMapInstance);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { subdomains: 'abcd' }).addTo(routeMapInstance);
         }
         if (currentPolyline) {
             const polyline = L.polyline(decodePolyline(currentPolyline), { color: getComputedStyle(document.documentElement).getPropertyValue('--accent-color'), weight: 4 }).addTo(routeMapInstance);
