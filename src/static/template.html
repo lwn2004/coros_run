@@ -2362,7 +2362,7 @@
     document.getElementById('routeMapModal').addEventListener('shown.bs.modal', () => {
         if (!routeMapInstance) {
             routeMapInstance = L.map('routeMap', { attributionControl: false, zoomControl: false });
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png', { subdomains: 'abcd' }).addTo(routeMapInstance);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { subdomains: 'abcd' }).addTo(routeMapInstance);
         }
         if (currentPolyline) {
             const polyline = L.polyline(decodePolyline(currentPolyline), { color: getComputedStyle(document.documentElement).getPropertyValue('--accent-color'), weight: 4 }).addTo(routeMapInstance);
