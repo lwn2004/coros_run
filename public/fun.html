@@ -15,7 +15,7 @@
 	<meta name="twitter:description" content="一个跑者的跑步记录网站，记录跑量与坚持。你也可以挑战地球一圈！" />
   <meta name="twitter:image" content="https://run.linwn.net/images/card.png" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
   <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
@@ -494,7 +494,6 @@
         font-size: 0.8rem;
         padding-bottom: 0.5rem;
     }
-    /* 关键改动：移除了 overflow: hidden */
     .calendar-table td {
         border: 1px solid var(--border-color);
         height: 70px;
@@ -517,7 +516,7 @@
     .calendar-table td.event {
         background-color: #3b2f21;
         border: 1px solid var(--marathon-color);
-        position: relative; /* 为弹出层提供定位锚点 */
+        position: relative;
     }
     .day-number.has-event {
         color: var(--marathon-color);
@@ -525,7 +524,6 @@
     .event-details {
       padding-top: 2px;
     }
-    /* 默认状态下，事件标题是截断的 */
     .event-item {
         font-size: 0.75rem;
         font-weight: 500;
@@ -555,12 +553,11 @@
         text-overflow: ellipsis;
     }
     
-    /* 弹出层的样式 */
     .event-details.popup {
       position: absolute;
       z-index: 10;
       top: 8px;
-      left: 50%; /* 默认居中 */
+      left: 50%;
       transform: translateX(-50%);
       width: auto;
       min-width: 180%;
@@ -569,7 +566,6 @@
       border: 1px solid var(--accent-color);
       border-radius: 6px;
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-      /* 默认隐藏，通过JS添加visible类来显示 */
       opacity: 0;
       visibility: hidden;
       transition: opacity 0.2s ease, visibility 0.2s ease;
@@ -580,7 +576,6 @@
         visibility: visible;
         pointer-events: auto;
     }
-    /* 新增：边缘检测后的样式 */
     .event-details.popup.edge-left {
         left: 5px;
         transform: translateX(0);
@@ -591,7 +586,6 @@
         transform: translateX(0);
     }
 
-    /* 弹出层内部文本的样式 */
     .event-details.popup .event-item,
     .event-details.popup .event-status {
       overflow: visible;
@@ -601,7 +595,6 @@
     .event-details.popup .event-status {
         margin-top: 4px;
     }
-    /* --- END: 修正后的日历弹出样式 --- */
 
 
     /* Mobile list view for calendar */
@@ -798,6 +791,14 @@
     #runDetailModal .data-point-label {
         font-size: 0.8rem;
         color: var(--text-secondary);
+    }
+    #runDetailModal .analysis-summary {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+    #runDetailModal .analysis-summary strong {
+        color: var(--text-primary);
+        font-weight: 600;
     }
     #runDetailModal #runDetailComments hr {
         border-top: 1px solid var(--border-color);
@@ -13890,7 +13891,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-08-18 10:02:45 
+         | Last updated: 2025-08-18 11:29:06 
     </small>
 </footer>
 
@@ -13951,7 +13952,7 @@
             <div class="modal-body">
                 <div class="detail-header d-flex align-items-center">
                     <button type="button" class="btn-back" data-bs-dismiss="modal" aria-label="Close"><i class="bi bi-chevron-left"></i></button>
-                    <h5 class="detail-title">跑步详情</h5>
+                    <h5 class="detail-title" id="detailTitle">跑步详情</h5>
                 </div>
 
                 <div id="runDetailLoading" class="text-center p-5">
@@ -13990,6 +13991,53 @@
                             </div>
                             <div class="row g-4 text-center" id="detailDataGrid">
                                 </div>
+                        </div>
+
+                        <div id="detailAnalysisSections">
+                            <div class="mb-5">
+                                <h4 class="data-section-title">分段信息</h4>
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>圈数</th>
+                                                <th>时间</th>
+                                                <th>距离</th>
+                                                <th>平均配速</th>
+                                                <th>平均心率</th>
+                                                <th>平均步频</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="detailLapsTableBody">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="mb-5">
+                                <h4 class="data-section-title">配速</h4>
+                                <p class="analysis-summary mb-3">
+                                    平均配速: <strong id="detailAvgPace">--</strong>
+                                    <span class="mx-2">|</span>
+                                    最快配速: <strong id="detailBestPace">--</strong>
+                                </p>
+                                <div style="height: 200px;"><canvas id="paceChart"></canvas></div>
+                            </div>
+                            
+                            <div class="mb-5">
+                                <h4 class="data-section-title">海拔</h4>
+                                <div style="height: 200px;"><canvas id="elevationChart"></canvas></div>
+                            </div>
+                            
+                            <div class="mb-5">
+                                <h4 class="data-section-title">心率</h4>
+                                 <p class="analysis-summary mb-3">
+                                    平均心率: <strong id="detailAvgHr">--</strong>
+                                    <span class="mx-2">|</span>
+                                    最大心率: <strong id="detailMaxHr">--</strong>
+                                </p>
+                                <div style="height: 200px;"><canvas id="hrChart"></canvas></div>
+                            </div>
                         </div>
 
                         <div id="runDetailTagsSection" class="mb-5">
@@ -14121,6 +14169,9 @@
 	let monthlyDistanceChart = null;
 	let dailyDistanceChart = null;
 	let yearlyDistanceChart = null;
+    let paceChart = null;
+    let elevationChart = null;
+    let hrChart = null;
 	let cityMap = null;
     let routeMapInstance = null;
     let currentPolyline = null;
@@ -14211,6 +14262,13 @@
         } catch (e) {
             return 9999;
         }
+    }
+    
+    function formatPaceFromSeconds(totalSeconds) {
+        if (totalSeconds === null || totalSeconds === 0) return "0'00\"";
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = Math.round(totalSeconds % 60);
+        return `${minutes}'${seconds.toString().padStart(2, '0')}"`;
     }
 
     async function loadCommentCounts() {
@@ -14325,6 +14383,7 @@
             calendarHTML += `<div class="calendar-grid-view">${gridHtml}</div></div>`;
         });
         container.innerHTML = calendarHTML;
+        setupCalendarHovers();
     }
 
     function setupCalendarHovers() {
@@ -14359,7 +14418,6 @@
         const container = document.getElementById('marathon-calendar-container');
         if (container && (container.innerHTML.trim() === '' || container.innerHTML.includes('加载'))) {
             await generateMarathonCalendar();
-            setupCalendarHovers();
         }
     }
 
@@ -14743,26 +14801,41 @@
         }
     }
 
-    async function showRunDetailModal(runId, scrollToComments = false) {
+    async function showRunDetailModal(runId, preloadedData = {}, scrollToComments = false) {
         currentDetailRunId = runId;
         const modalEl = document.getElementById('runDetailModal');
         const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
         
-        document.getElementById('runDetailLoading').style.display = 'block';
         document.getElementById('runDetailContent').classList.add('d-none');
+        document.getElementById('runDetailLoading').style.display = 'block';
         
         modal.show();
 
+        // --- OPTIMIZATION: Pre-populate data ---
+        document.getElementById('detailTitle').textContent = `跑步详情 (${preloadedData.date || ''})`;
+        document.getElementById('detailHeroDistance').querySelector('.distance-value').textContent = preloadedData.distanceFormatted || '--';
+        const dataGrid = document.getElementById('detailDataGrid');
+        dataGrid.innerHTML = `
+            <div class="col-4"><div class="data-point-value">${preloadedData.duration || '--'}</div><div class="data-point-label">训练时长</div></div>
+            <div class="col-4"><div class="data-point-value">${preloadedData.paceStr || '--'}</div><div class="data-point-label">平均配速</div></div>
+            <div class="col-4"><div class="data-point-value">--</div><div class="data-point-label">运动消耗</div></div>
+        `;
+        // Clear old detailed data
+        document.getElementById('detailAnalysisSections').style.display = 'none';
+        document.getElementById('detailLapsTableBody').innerHTML = '';
+        if(paceChart) paceChart.destroy();
+        if(elevationChart) elevationChart.destroy();
+        if(hrChart) hrChart.destroy();
+        
         try {
-            const data = {
-              "start_time": "2025-08-13T06:30:00Z", "weather": { "temperature_c": 28.5, "condition": "多云", "wind_speed_kmh": 12.3 },
-              "summary": { "distance_km": 10.02, "duration": "01:15:33", "avg_pace": "07'32\"" },
-              "route": { "encoded_polyline": "q|noCgr_qT?C?E?C?E?C?E?E?E?E?E@E?G?E?E?G?E?GAE?E?E?E?E?E?E?E@E?E?E?E?E?E?E@C?E?E?E?E?E?E?E?E?C?E?E?C?EAE?E?C?E?C?E?E?C?E?C?E?C?E?E?E?E?EAE?E?E?E?E?E?E?E?E?E?EAE?E?E?C?E?E?E?E?E?E?E?E@E?C?E?E?E?E?E?C?E@E?E?C?E?E?C?E?E?C?E?E?C?E?E?C?E@E?E@E?E?E@E?E?E?E?E?E?E?E@CAE?E?C?E?E?C?E?E?E?C?E?E?CAE?E?E?E@E?C?E?E?E?E?C?E?E?E?C?E?C?E?C?C?E?C?C?E?C?E?C?E?C?E?C?E?C?C?E?C@E?E?C?E?E?E?C?E?E?E?E?C?E?E?C?E@CAE?E@C?E?C?EAC?C?E?C?EAC?E?C?CAE?C?E?C?E?C?E?C?E?E@E?E@C?E?E@C?E?C?E@E?C?E?E?E?E?E?EAG?E?EAE?EAE?EAEAEACAEAECCCECAECEACAEAE?G?EAE@E?E?E?E@E?E@E?E@E?E@E@E?E?C@E?E?C@E?E?C@E?C?E?C?C?EAC?E?C?EAC?E?EAE?C?E?C?E?C?EAC?E?C?CAE?E?CAEAC?E?EAC?E?EAE?E?E?E?E?C?E?E@E?C@E?E?E@C?E?E?E?C?E?E?E?C?E?C@E?C?C?CAC?E@C?C?C@E?C?E?C@E?E?E?E?E?E?C?E?C?E?CAE?C?E?CAE?C?EAC?E?E?C?E?C?C?E?C?C?E?C?C?C@C?E?C?C?C?E?C?C?E?C?C?E?C?C?CAE?C?C?E?EAC?E?E@E?E?C?E?E?E?E?E?E@C?E?E?E@C?E?E?C?E?E?E?C?E@C?C?E@C?C?C?C?C?C@CAC?C?E?C?E?CAE?C?E?C?E?C?E?C?C?E?C@E?C?C?E?C?C?E?E?C?EAE?C?E?E?E?C?E?E?E?C?E?E?C?E?CAE?C?E?CAE?EAC?C?EAC?E?C@E?C?C?C@C?C?A?E?C?C?EAC?E?E?E?C@E?E@E?E@E@E?C@E?E?E?C?EAC?E?E?EAC?EAE?E?EAE?E?C?E?E?E@C?E?C?E?C?E?C@E?C?E?C@E?C@E?E@C?C?E@C?E?C@E?C?EAC?E?C?C?E?E?C@E@C?E@C@E?C?E@E?C?E?E?C?E?C@E?C?E@C?E?E?E?C?E?C?E?C?E?C?C?E?C?E?C?E@C?E@C?C@E?E?C@E?C?E?CAE?C?C?E?C?C@C?C@E@C?C@E?C?E?C?E?EAC?E?CAE?E?C?C?E?C?C?CAE?CAC?EAC?CAC?C?E?C?C?C?C?C@C?E?C?C?E@C?CAC?C?C?C?E?C?C?C?E?C?C?C?C?C?C?E?C?C?C?CACAACACACAE?E?E?E?G?E?E?E?G?E@E?E?E@G?E?E?C@E?E?E@E?E?E?E?E?E?E?G?E@E?E?E@E?E?E@E?E?G?E@E?E@C?E@E?E@E@E?E@C@E@E@E@E?E@E@E@E@E@C@E@E@E@E@C?E@E@C@E@E@E@E@E@C@E@E@E@E@EBE@C@E@C@E?E@E@C@E?E@C@E?E@C@E?C@E@C@E?C@E@C@C?E@C@E@C@C?E@E@C@E@C@E@E?C@E@C@E@C@C@E@C@E@C?E@E@C@E@E@E@EBE@E@E@G@E@E@E@E@E@EBE@C@E@E@E?C@E@C@E@C?C@C@C?E@C@C@E?E@C@E@C@E@C@E@E@C@E@E@E@E@E@E@E@E?E@E@E@E@E@E?E@E@C@E@E@E@C@E@E@E?C@G@E?E@E?E@E?E@E@E@E@C@EBE@E@E@C@EBE@E@E@E@E@EBE@C@E@E@E?E@E@E@E@E@E@E?G@E@E@E@E@E@E@E?E@E@C@E@E@C@E@E@C@E@E?E@C@E?E@E@E@E@E@E@E@E@E@E@E@C@E@E@C@E@E@E@G?E@E@E@E?G@E@E?E@E@E?E@E@E?E@C?E?E@E?E@C?E@E?E@E?E@E?E@E?E@E@E?C@E@E?E@E@E@E?E@E@E?E@G@E?E@E@G@E@E?E@E@G@E?E@E@E?E@E?E@G?E@E@C?E@E?E@E@E?C@E@E?E@E?C@E?E@E?E@E?E@E@E?E@E@E?E@E@E?E@E?E?E@C?E@E?E@E@E?E@G@E?E@E@G@E?E@E@E?E@E?E@E@E?E@E?E@E?E@E@C?E@E@E@E?E@E@E@E?C@E@E@C?E@E@E@C?E@E@E@E@G?E@E@E@E?E@E@E@E?E@E@E?E@E?E@E@E?E@C@E@E?E@E@E?E@E?E@C@E?E@E?E@E?E@E@C?E@E?E@E?E@E?E@C?E@E?E@C@E?E@E@C?E@C?E@C?E@C?E?C@E?E?E@E?E@E@E@E?E@E@E?E@E@E?E@E@C@E?E@E?E@E?E@E?E@E?E@E?E@E?C?E@E?E?E?C?E@E?C?E?E?EAE?E?G?E?E?E?E?E?E?G?E?E?G?EAE?E?E?E?E?E?C?E?C@E?E?C?E?EAE?EAEAE?EAC?EAE?E?EAC?EAE?CAE?E?E?EAG?E?E?G?E?E?E?E?EAE?E?E?E?E?C?E?E?E@E?C?E@E?E?E?E@E?C?E?E?G?EAE?E?G?GAE?G?GAE?G?EAG?E?EAE?EAG?EAE?E?E?E?E?EAC?E?E?E?E?E?C?E?E?E?E?E?E?E?G?E?E?G?E?G?E?G?EAE?C?E?E@E?E?CAE?E?E?E?EAE?E?C?E?E?E?E?E?EAE?E?C?E?E?E?C?E?E?EAE?EAE?EAEAGAEAE?GAE?EAE?GAE?E?EAEAE?EAEAE?EAE?EAE?EAEAEAEAE?EAEAEACAEAE?EAEAC?EAE?EAEAE?EAG?EAEAE?EAE?EAE?EAG?E?EAEAE?EACAEAEAEAE?EAEAGAEAEAEAECEAEACAEAE?EAEAEAEAE?EACAEAE?EAE?EAE?EAEAE?EAG?EAEAE?EAEAC?EAGAEAEAE?EAGAE?EAEAE?EAEACAEAEAEAEAEAECGAEAEAE?EAEAEAE?EAE?EAC?EAE?EAEAEAG?EAEAGAEAGAEAGAEAGAEAEAEAGAEAEAEAEAEAGAE?EAEAGAEAEAEAEAEAE?GAEAE?EAG?EAE?EAEAGAEAEAEAEAEACAE?EAEAEAE?EAEAE?EAEAEAE?EAEAE?EAEAC?EAEAE?EAEAEAEAEAE?EAEAEAGAEAEACAEAE?EACAEAEAE?EAGAE?EAGAEAEAE?EAEAEAEAE?EAEAEAEAE?EAEAEAEAE?CAEAEAE?EACAEAECEACAEAECEAEAEAEAEAGAEAEAEAEAEAEAEAEAEAGAEAEAEAGAEAEAEAGAEAEAECEAEAECEAEACCEAEAEAEAEAECEACAEAEAEAEACCEAEAEAEAEAECEAEACAEAEAEAGAEAEAEAE?EAEAE?E?E?G?GAE?GAEAECECECECECECEACCEAECEAEAEACAEAEAE?CAEAEAEACAEAEACCEACCEACCEAECCCECEACCECECECCCECCCEECCECCCECCCCCCCECCECCCCCECCEECCCCCCCECCCCCCCEACCCCCCCCCACCCCCCCCCCCCCCCCACCECCECCCCCCACCCCCCCCCCCCCCCCCCCACCCCCCCCCEECCCECCECCCCCCCCCCCCCCCCCCCAECCAECCAEACCCACCCACCCCCCCACCCCCACCCCCCCACCCCCCCACCCCCCCCCCCACCCCCCCAECCCCACCCACCCCECCCCACCECCCCCCCCCCCCCCCCCCCCCCACCCCCCCCECCACCCCCCCACCCCCACCCCCAACCCCCCCCAECCCCACCCACCCCCCCCCCCCCCCCCCCCCCCCCECCECCCCCECCCCCECCCCACCECCACCEAEACAECCAECCACCECCCECCCCCCCCCECCCCCCCCCCCCCCCCCCCCCECCCCCECECCCECEEECCEECECCCECCCCCECCCCCCCECCCCCECCECCCCEECCCCECCECCECCCCCEECCECCCECCCCCCECCCCCCEECCCCECCCECCECCECCECCCEECCECCCEECCECECCCECCEECCCECECCCECECCEECECCCECECECEAECECEAECECEAECECECECEAECCCECEAECGAECECEAECECEAECECEAECEAECEAECECEACCECEAECGAECEAECECEAECEAECGCEAECEAECECEAECECEAECEACCECEAECEAECEAECEAECEAGCEAECEAEAGCEAEAECEAEAEAEAEACAEACCEACAEAEAGAEAGAEAEAGAECEAGAECEAEAEAEAEAEAEAEAEAGAEAEAEAEAEAG?EAEAGAEAEAEAEAGAE?EAEAEAE?EAGAE?EAEAE?GAEAE?EAEAEAEAE?EAGAE?EAE?EAE?EAG?E?E?E?G?E?E?E?E?E?E?E@E?G?E@E?E@E?E@C?E?E?E@E?E?C?E?E?E?E?E?E@G?E?E?E?E@E?E?G?E?E@E?E?E?E?E?G@E?E@E?E?E?E?E?E?C?E?E?C?E?E?C?E@E?E?E?E@E?E?E?E@E?G@E?E@G?E?G?E?G@E?G?E@G@E?G@E@E@G?E@G@E?E@G?E?E@E?G@E?E@E@G@E?G@E?G@E?E?G?E@E?E?E@E?E@E?E@E?E@E@G?E@E@E@E@G@E@E@G@E@E?E@G@E?E@E@E?E@E@E?E@E?E@E@G?E@E?E@E@G@E?E@G@E@G@E?E@G@E?G@E@E?G@E?E@E@E?E@E@E@E?E@G@E?G?E@G@E?G@E@G?E@E@G?E@G@E?G@E?E@G@E?E@G?E@E?G@E?G@E@G@E?E@G@E@E@G?E@E@E@E@E?E@E?E@E@E?E@E@E?E@E?E@E?E@E@E?E@E?E@C@E?E@E?E@E?E@E?E?E@C?E@E?C?E@E?E?E@E?C?E?E?E?E@C?E?C?C?C?C?C?C?C?E?E?E?E@E?G?E?E?G?E?G?E?GAE?E?E?G?EAE?G?E?E?GAE?E?GAE?E?EAE?E?E?EAE?E?EAE?EAE?E?EAE?E?E?EAE?E?E?EAE?E?EAC?EACAE?EAE?EAE?EAE?EAE?EAE?EAE?GAE?EAEAE?EAEAE?EAG?EAEAEAG?EAGAEAEAG?EAEAGAECGAEAEAGAEAEAECEAGAEAEAEAEAEAEAGAE?EAEAGAECEAECEAECEAEAECEAEAECEAECEACCCECA@C@ADAD@F?DBF@FBFBFBFBD@FBFBD@D@FBD@F@D@F@DBF@D@D@D@F@D@D@F@D@D@F@D@F@D@DBD@F@D@D@F@DBD@D@F@D@D@D@F@D@F@D@F?D@F?D@F@D@D?F@D@D@D@F?D@D@D@D@D@F@D?D@D?D@F@D?D@D?F?D@F?D?F?D?F?D?F?D?F?D?F?D?F?D?F@D?D?D?F?D?D?D?D?DAD?D?D?D?D?D?D?DAF?D?D?D?D?D?DAF?D?D?D?FAD?D?D?D?D?D?DAF?D?DAF?DAFAD?DAFAD?DAF?D?DAF?D?DADAF?DAFAD?DAFAD?FAD?FAD?FADADAFADAFAD?FAD?FAD?DAF?D?DAFADAD?FADADAFAD?DAF?DADAD?DADAD?BADAF?DADAD?FAD?DAF?DAFAD?DAD?DAD?DAD?DADADADAF?DADADAD?FADAD?DAD?FAD?DAD?DADAD?DADAFAD?DADADADAFADADAFAD?DAFAD?FADADAD?FADAD?FAD?DAF?D?DAF?D?DAFAD?DAFAD?FAD?DAD?FAD?DADAF?DAD?DADAD?DADAFADADADAF?DADAF?DAF?DAF?DAF?DAF?FAD?FAD?F?F?D?FAF?D?FAF?D?FAF?D?F?F?D?F?D?F?F?DAF?F?D?F?D?FAF?D?F@D?F?D?FAF?D?FAD?FADAFAD?FAD?FAD?FAD?D?F?D?F?D?F?D?F@F?D?F?D?F@D?F?D?F?D?D@F?D?D@D?D@D?D@D?D@D?D@D?D@D?D@D?D@D?D@D?B?D@D?D@D?D@D@D?F@D@D?D@D@D?D@F@D@D?D@D@D@D@D?D@D?D@D?D?D?D@F?D?DAD?F?D?DAF?DAF?DADADADAFADADADABAFAD?DADADADADADADADCBADCDCBCDADCDCBCDABCDCBCDCBCDCBCDCBCBCDABCBCDCBCBCDCBCDCBCBCDABCDCBCDCBCBCDCBCBCDCBCBCDCBCBADCBCDCBCDCBCDCBCDCBADCBCDCBCBCDCBABCBCBCDCBCDCBCDCDABCDCBCBADCBCDCBCDABCBCDCBCDCBCDCBCDCBCDCBCDADCBCDCBCDCDCBADCBCDCBCDCBCDCBCDADCBCDCBCDCDCDCBCDABCDCBCDCBCDCBCBCDCDCBCDCDCBCDCDCBADCDCBCDCDCBCDCBCDCBCDCBEDCDCBCDCDCBCDCDCBCDCDCBEBCDCBCDEBCDCDCBCDCDCBCDEDCDCBCDCDCBCDCDCDCBCDCDCBCDCDCDEBCDCDCBCDCDCBCDCDCBCDCDEBCDCBCDCDCBCDCDCDCBCDCDCDCDCBCDEDCBCDCDEBCDCDCBEDCBCDCBCDCDEBCDCDCDCBCDCDCDCBCDCDCBADCBCDADCBCDCBCDCBCDCBCDCDCBCDCDCDEBCDCDCDCDCBCDCDCDCDCBCDEDCDCDCDCDCDCDEDCDCBCDCDCDCDEDCDCBCDCDCDEDCDCBCDCDEDCBCDCDCDCDCDCBCDCDEDCDCBCDCDEDCBEDCDCDCDCDCDCDCDCDCDCDCDCBCDCDCBCDCDCDEBCDCDCDCDCDCBCDEDCDCDCDCDEBCDCDCDCDEDCBCDCDCDEDCDCBCDCDCDCDCDEDCBCDCDCDCBCDCDCDCDCDCDEBCDCDCDCBCDEDCDCBEDCDCDCDCBEDCDCBEDCDEBCDCBCDEBCDCDCDCBEDCBCDEBCDCDEBCDCBEDCBCDCBEBCDCBEDCBCDCBEDCDCBCDEDCBEDCBEDCDEBCDEBCDEBCDEBCDEBCDEBCBEDCBEBCBEBCBEBEBCBEBEBCBEBCBCBCBEBCBCBCBCDCBEBCBEBCBCBEBCBEBEBEBEBCBEBEBEBCBEBEBCBE@EBCBEBEBCBEBC@EBEBEBCBEBEBEBCBEBEBCBEBEBCBEBCBEBEBC@EBEBEBC@EBE@EBEBC@EBEBE@CBE@EBEBC@EBE@CBEBE@E@CBE@EBE@EBEBE@EBE@CBEBE@EBE@EBE@EBE@E@EBE@EBE@E@EBE@CBE@E@C@EBE@C@E@E@E@E@E@EBE@E@E@EBE@E@E@E@EBE@E@E@G@E@E@EBE@C@E@E@E@E@E@E@E@E@E@E@E@E@E@E?C@E@C@E@C?E@E?C@E@C@E@C?E@C@E@C?C@E@C@E?E@E@E@E?E@C@E@E?E@C@E@E@C?E@E@C?E@E@C?E@C?E@E?C@E@E?C@E@C?C@C?A?CAHIEAG?E?G?G?E?G@E@G?E?G?E@EBCBGBE@E@GBEAG?G?E@G?E?G?G?E?G?E?G@GAEAGAE?G@E@GBE@G?E?G@E@GBE@G@EBE@GBEBEBEBEBEBEBG@G?E@G?E@G?E@G?GAE?G@EBG?G?AFCDG?G?EAGAECGAECECGAEAGAE?G?E?G?G?E@G@EAGCEAECAE?EEAGA[AEAE?E?G?EAE?G?E?EAG?E?E?G?E@E?E?E@G?E?E?E?E?G?EAE?EAE?EAEAEAE?EAEAEAGAEAEAEAE?G?E?E?E@E@CBABAF?D?F?F?F?F@F?F?DAF?F?F?D?F@F?F?D?F?F@D?F?F?D?F?F?D@F?D?F?F?D?F@D?F?D?F@D?F?F?D?F?F?D?F?F?F?D?F?F?F?D@F?F?D?F?F@F?D?F?F?D?F?D?F?D?FAD?D?F?D?D?FAD?F?D?D?F?D?D?D?F?D?DAF?D?D?F?D?F?D?D?F?D?D?F?D?F@DAD?F?D?F?D?F?D?F?D?F?D?D?F?D?D?F?D?F?D?F?DAF?D?F?D?F?D?F?D?F?D?F?D?F?D?F?D?F?D?F?F?D?F?D@F?D?F?D?D?F?D?D?F?D?DAF?D?D?F?D?F?D?F?F?D?F?F?F?F?F?FAF?F?F?F?F?F?D?F?F?D?F@F?D?F?FAD?F?FAD?F?D?D?F?D?D?F@D?F?D?F?D?F?D?D?F?D?F?F?D?F?D?F?D?F?D?F?F?F?D?F?F?F?D?F?F?F?F?F@D?F?F?F?F?F?F?D?F?D?F?FAF?D?F?F?D?F?D?F?D?F?D?F?F?F?D?F?D?F?D?F?F?D?F?D?F?F?F?D?F?F?D?F?D?F?DAF?D?D?F?DAD?D?F?D@D?D?F?D?D?F?D?F?D?F?D?F?F?D?F?F?D?F?D?F?FAD?F?D@FAD?F?D?F?F@D?F?D?F?D?F?D?F@D?FAD?F?F?D?F?F?D?F?F?F?F?F?D?F?F?F?D?F@F?D?F@F?F@F?D?F@F?F?F?F?F?F?F?D?F?F?F?D?F?DAF?D?F?D?F?D?F@D?F@D@D@DBFBDBDDBBDDBDBFBD@D@F@D?F?D?F?D?FAD?F?D?FAD?D?F?D?DAD?FAD?FAD?DAD?FAD?FAD?DAFAD?FADADAFADADAFAD?DAFAD?DAFADADCFADADADAFADADADAFADADADADAFADCDADCDADCDADCDCDADCDABCDCDCDCBCDCDCDCDCBCDCDCDEDCBCDADCDCDADCDADCDCDADCDCDADCBCDCDADCBCDCDCBADCDCBCDCBCDCBCDCDCBCDCBCDCDCBADCBCDCDCBCDCDCDCBCDADCDCBCDCDCDCDCBCDCDCBCDCDCBCDEBCDADCDCBCDCDABCDCDABCDCDABCDCBADCBCDCBADCDCBCDADCBCDADCDCBADCDADADCDADCDADADCDADADAFAD?DAFAD?DAFAD?DADAF?DAD?DAD?DAF?DAD?DAF?DAD?F?DAD?F?D?D?D?F?D?D?DAD?D?DAF?DAD?D?DAF?D?D?DAF?DADAD?DADADADCDADAFADCDADADCDADCBCDAFCDCDADCDCDCBCDCDCDCDCDCBCDCDCDCDCDCBCDCDCDADCDCDCDEDCDCDCDCDCDCDCBCFCDADCDCDADCDCFADADCFADAFADADAFADADAFADAD?DAFADADAD?DADAFCDADADADADAFADADADAFADADADADADAF?DADAD?FADAD?D?DAF?D?D?DAD?DADADADADADABABABABAD?BADADADAD?FADAFAD?FAD?DAFAD?DAFAD?DAFAD?DAFAD?DAFADAFADCDAFADADAFADADAFADAD?DAF?DADADAFADADAFADADAF?DADAFADAD?DADAF?DADAD?DADAFADAD?DADADABAD?DADADCDADABADADADAF?DADAD?DADAD?FADADADAD?FADADADAFADADAD?FADADAFADADADADAF?DADADAD?FADADAFADADADAF?DADAD?FADADAD?DADADADAD?FADADADADADADADADADADAD?DADADADADADADAD?FADAD?DAF?DAD?DAF?DADAD?DAF?DAD?DADAD?DADADAD?BADADAD?DADADAD?DAD?DADADAB?DADAD?DADADABAD?DADADADAD?DADADAB?DADAD?DADADADADAD?DADAD?DAD?DAD?DAD?DAD?DAD?DAFAD?DADADADADAD?DABADADADAD?DADAD?DAD?D?DADAD?DADADAD?DADADADAD?DADADADADADADADAB?DADAD?DABAD?BADAD?BADAB?DAD?DAD?DAF?DAD?DADADAD?DADADADAD?DADADAF?DADAD?DADADAD?DADADADAD?FADADAD?DADAD?DADAD?BAD?DAD?DAD?DAD?DAB?DAD?DAD?DAD?DAD?D?DAD?DAD?D?DAF?DAD?D?DAD?DAD?D?DAD?D?D?DAD?D?D?DAD?D?DAD?D?DAD?D?DAD?D?D?DAD?D?D?DAD?D?D?DAD?D?D?D?DAB?D?DAD?DAD?DAD?DAD?DAD?DAD?D?DAD?B?DAD?D?DAD?DADAB?DADAD?D?DAD?D?D?DAD?D?D?DAD?F?DAD?D?DAD?DAD?DAD?DAD?D?F?DAD?D?DAD?D?F?DAD?D?D?DAF?D?DAD?DAF?D?DAD?F?DAD?FAD?D?FAD?D?DAF?D?D?FAD?D?D?DAD?DAF?D?DAD?D?DAD?FAD?DADAF?D?DAF?D?DAD?D?D?FAD?DAD?F?DAD?DAF?D?DAF?D?DAF?DAD?FAD?DAF?D?DAF?D?DAF?D?DAD?FAD?D?D?DAF?D?FAD?D?FAD?FAD?F?DAD?F?D?D?F?DAD?D?D?FADAD?FAD?DAF?DAD?F?D?FAD?F?DAF?D?DAF?D?F?F?DAF?D?FAD?FAD?FAD?F?DAF?D?F?DAF?D?D?F?D?D?FAD?FAD?DAF?DAD?F?DAD?FAD?FAD?FAFAD?FAF?DAF?FAD?F?FAD?F?DAF?FAD?FAD?FAFADAF?DAF?FAF?D?FAF?D?F?F?FAD?F?F?FAD?F?FAF?DAF?F?DAF?FAF?DAF?FAF?DAF?FAD?F?FAD?FAF?FAF?DAFAF?FAF?F?F?FAF?F?D?F?F?DAF?DAF?DAFAD?FAD?F?DAF?FAD?FAD?FADAD?FAD?FAD?FAD?DAF?DAFADAFAD?FADAFADAFADAFADAFCDAFADADCFADADAFADADCFADADCFADCDAFCDADCFADCFADADCFADCDAFADCFADAFCDAFADCFADADCFADCFADCDAFCDAFCDADCDAFCDAFADADCFADCDAFADCDAFCDADAFCDCDAFCDAFCDAF?D?D@FBDBDBBDBF@D@F@H@F?F@F@F?F@F?F@F@F@F@D?F@F@D@F?F@F?D@F?F?F@D?F?F@F?D@F?F@F?D@F?F?D?F@F?F?D?F@F?D@F?F@F?D@F?F@F?F@D?F@D?F?F@D?F?F@D?F@D?F?F@D?F@D?F?D?F@D?F@F@D?F@F?F@F?D?F@F?F?F@D?F@F?D@F?F@F?D@F?F@F?F@F?D@F@F?F@F?D@F?F?F@F?F?D@F?F?F@D?F@F?F@D?F@D@F?F@D?F@D?F@F?D@F?F?D@F?F@D?F?F@D?F?F?F@F?D?F@F?F?F@F?F?D?F?F?F@D?F?F?D?F@F?D@F?F?F@D?F@F?D?F?F@F?F?D?F?F?D?F?F?D?FAD?D?FAD?F?DAF?DAF?D?FAF?D?DAF?D?DAD?F?DAD?D?FAD?FAD?D?FAD?F?DAD?F?D?DAF?D?F?DAD?F?DAD?F?D?F?D?F?D?FAF?D?F?D?F?D?FAD?F?DAF?DAF?D?F?DAF?D?F?DAF?F?D?FAD?F?DAF?D?FAD?D?FAD?FAD?DAF?DAF?DAD?FAD?FAD?F?DAF?D?DAF?DAF?DAD?FADAF?DAFADAFADADAF?DAFADAF?DAFADAFADAFADAFADCFADAFCDADCDAFADCFADADCDADCFCDADCDAFCDADCFADCFADCDAFCDCDAFCDCFCDADCFADCFCDADCFCDADCFADCDAFCDADCDAFCDADCFADCDADCFADCDAFCDADCDAFCDADCDAFCDADCDADCDCFADCDCDADCDCDAFCDADCDAFCDADCFCDADCDADCDCDAFCDCDCDAFCDCDCDAFCDADCDCFADCDCDADCFADCDAFADADAFAFADAF?DAFADCFADCFADCDCDCDCBCDCDCBCDCDCDADCDCDADCDADADCFADADCDABCDADCDADADAFADCDADAFADCDADCFADADCDADCFADCDCDADCDCFADCDADADCDAFCDADCDADCDADADCDADAFADADCFADADAFADADCFADADADCDADAFADCDADADADADCFADADCDADAFADCDADADAFADADADADAFADADAFADADADAFADCDADADAF?DAD?F?D?F?F?D?F@D@FBDBBBDDBDBD@D@F@D?F@D?F?D?D?F?D?D?F?D?D?F?D?D?FAD?F?FADAF?DAD?FAD?D?D?DAD?D?D?D?F?D?D?D?F?D?FAD?F?D?F?F?DAD?F?DAF?DAD?F?DAF?D?F?D@D?F?D?D?D?F?D?D@D?D?F?D?D@D?D?D?D?D?D?D@D?D?D?D?D@D?D?D?D?F?D?D?D@D?F?D?D?FAD?D?F?D?D?F?D?F?D?F?F?D?D?F?D?F?D?F?D?F?D?DAD?FAD?D?DAF?D?D?F?D@D?D?D?D@D@D?D@DBBBBFBD@FBF@F@F@F@F?F?F?F?F?F?F?F?F?F?F@F?F?F?F?D?F?F?F?F?F?D?F?D?F?D?F?D@F?F?DAF?D?F@F?F?DAF?F?D?FAF?D?FAD?F?F?D?F?FAD@F?F?F?D?F?D?F@D?D?FAD?D?D?F?D?D?D?F?D?DAD?F?D?D?D?FAD?D?F?D?F@D?D?F?D?F?F?D?F?D?FAF?FAD?FADAF?FAD?F?F?DAF?F@D?F?D?F?D?F?D@F?D?F?D?F?F?D?F?F?D?F?F?D?F?F?D?F?F?F@F?F?D?F?F@F?F?F?F?F@F?D?F?F?D?FAD?F?D?F?DAF@D?F?D?F?F?F?D?F?FAF?F?F?FAF?F?F?F?F?F?F?H?F?F?H?F?F?H?F" },
-              "photos": [ { "url": `https://picsum.photos/seed/${runId}/600/400` }, { "url": `https://picsum.photos/seed/${runId}a/600/400` } ]
-            };
+            const response = await fetch(`https://run.linwn.net/data/runs/${runId}.json`);
+            if (!response.ok) throw new Error(`Could not load run data. Status: ${response.status}`);
+            const data = await response.json();
+
             detailPhotoUrls = data.photos.map(p => p.url);
             currentPolyline = data.route.encoded_polyline;
 
+            document.getElementById('detailTitle').textContent = `跑步详情 (${new Date(data.start_time).toLocaleDateString()})`;
             document.querySelector('#detailHeroDistance .distance-value').textContent = data.summary.distance_km;
 
             const carouselInner = document.querySelector('#runMediaCarousel .carousel-inner');
@@ -14780,32 +14853,67 @@
                 document.getElementById('runMediaCarousel').style.display = 'none';
             }
             
-            const viewRouteBtn = document.getElementById('viewRouteBtn');
-            if(currentPolyline) {
-                viewRouteBtn.style.display = 'block';
-            } else {
-                viewRouteBtn.style.display = 'none';
-            }
+            document.getElementById('viewRouteBtn').style.display = currentPolyline ? 'block' : 'none';
             
             const startTime = new Date(data.start_time);
-            const timeWeatherString = `${startTime.toLocaleString('zh-CN', {year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'})} · ${data.weather.condition} ${data.weather.temperature_c}°C`;
+            const timeWeatherString = `${startTime.toLocaleString('zh-CN', {year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'})}`;
             document.getElementById('detailTimeAndWeather').textContent = timeWeatherString;
 
-            const gridContainer = document.getElementById('detailDataGrid');
             const dataMap = {
-                '训练时长': data.summary.duration || '--', '平均配速': data.summary.avg_pace || '--', '运动消耗': '588 千卡',
-                '总时长': '01:33:16', '运动负荷': '184', '爬升高度': '9 米',
-                '平均步频': '130', '平均功率': '156 瓦', '平均步幅': '1.01 米'
+                '训练时长': data.summary.duration || '--', '平均配速': data.summary.avg_pace || '--', '运动消耗': `${data.summary.calories_kcal} 千卡` || '--',
+                '爬升高度': `${data.summary.total_ascent_m} 米` || '--', '平均步频': data.summary.avg_cadence || '--', '平均功率': `${data.summary.avg_power_w} 瓦` || '--'
             };
-            gridContainer.innerHTML = '';
+            dataGrid.innerHTML = '';
             for (const [label, value] of Object.entries(dataMap)) {
                 const match = String(value).match(/^(.+?)\s?([a-zA-Z\u4e00-\u9fa5'"]+)$/);
                 let valueHtml = match 
                     ? `${match[1]}<span class="data-point-unit">${match[2]}</span>`
                     : value;
-                gridContainer.innerHTML += `<div class="col-4"><div class="data-point-value">${valueHtml}</div><div class="data-point-label">${label}</div></div>`;
+                dataGrid.innerHTML += `<div class="col-4"><div class="data-point-value">${valueHtml}</div><div class="data-point-label">${label}</div></div>`;
             }
             
+            // Populate Laps
+            const lapsBody = document.getElementById('detailLapsTableBody');
+            if (data.laps && data.laps.length > 0) {
+                lapsBody.innerHTML = data.laps.map(lap => `
+                    <tr>
+                        <td>${lap.lap_number}</td>
+                        <td>${lap.duration}</td>
+                        <td>${lap.distance_km} km</td>
+                        <td>${lap.pace}</td>
+                        <td>${lap.avg_hr || 'N/A'}</td>
+                        <td>${lap.avg_cadence || 'N/A'}</td>
+                    </tr>
+                `).join('');
+            }
+
+            // Populate Analysis Summaries
+            document.getElementById('detailAvgPace').textContent = data.summary.avg_pace || '--';
+            document.getElementById('detailBestPace').textContent = data.summary.best_pace || '--';
+            document.getElementById('detailAvgHr').textContent = data.summary.avg_hr || '--';
+            document.getElementById('detailMaxHr').textContent = data.summary.max_hr || '--';
+            
+            // --- Render Charts ---
+            const gridColor = 'rgba(128, 128, 128, 0.2)';
+            const tickColor = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim();
+            const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
+            
+            const chartOptions = { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false }, ticks: { color: tickColor } }, y: { grid: { color: gridColor }, ticks: { color: tickColor } } }, plugins: { legend: { display: false } } };
+            
+            if (data.charts.pace?.labels.length) {
+                const paceCtx = document.getElementById('paceChart').getContext('2d');
+                paceChart = new Chart(paceCtx, { type: 'line', data: { labels: data.charts.pace.labels, datasets: [{ data: data.charts.pace.data, borderColor: accentColor, borderWidth: 2, pointRadius: 0, fill: false, tension: 0.1 }] }, options: { ...chartOptions, scales: { ...chartOptions.scales, y: { ...chartOptions.scales.y, reverse: true, ticks: { ...chartOptions.scales.y.ticks, callback: (value) => formatPaceFromSeconds(value) } } } } });
+            }
+            if (data.charts.elevation?.labels.length) {
+                const elevationCtx = document.getElementById('elevationChart').getContext('2d');
+                elevationChart = new Chart(elevationCtx, { type: 'line', data: { labels: data.charts.elevation.labels, datasets: [{ data: data.charts.elevation.data, borderColor: accentColor, borderWidth: 2, pointRadius: 0, fill: { target: 'origin', above: 'rgba(77, 171, 247, 0.2)' } , tension: 0.1 }] }, options: chartOptions });
+            }
+            if (data.charts.hr?.labels.length) {
+                const hrCtx = document.getElementById('hrChart').getContext('2d');
+                hrChart = new Chart(hrCtx, { type: 'line', data: { labels: data.charts.hr.labels, datasets: [{ data: data.charts.hr.data, borderColor: '#ff6b6b', borderWidth: 2, pointRadius: 0, fill: false, tension: 0.1 }] }, options: chartOptions });
+            }
+
+            document.getElementById('detailAnalysisSections').style.display = 'block';
             await loadRunTags(runId);
             renderSuggestedTags();
             await refreshDetailComments(runId);
@@ -14843,11 +14951,23 @@
 	});
     
     document.addEventListener('click', async e => {
-        if (e.target.closest('.run-detail-row')) { e.preventDefault(); showRunDetailModal(e.target.closest('.run-detail-row').dataset.runId, false); }
-        else if (e.target.closest('.recent-run-card')) {
+        const runRow = e.target.closest('.run-detail-row');
+        const recentCard = e.target.closest('.recent-run-card');
+
+        if (runRow) {
+            e.preventDefault();
+            const preloadedData = {
+                distanceFormatted: runRow.dataset.distanceFormatted,
+                duration: runRow.dataset.duration,
+                paceStr: runRow.dataset.paceStr,
+                date: runRow.dataset.date
+            };
+            showRunDetailModal(runRow.dataset.runId, preloadedData, false);
+        } else if (recentCard) {
             e.preventDefault();
             const isCommentLink = e.target.closest('.comment-link');
-            showRunDetailModal(e.target.closest('.recent-run-card').dataset.runId, !!isCommentLink);
+            // For recent cards, we don't have all the pre-loadable data easily, so we pass an empty object.
+            showRunDetailModal(recentCard.dataset.runId, {}, !!isCommentLink);
         } else if (e.target.classList.contains('gallery-item')) {
             const index = parseInt(e.target.dataset.photoIndex, 10);
             if (!isNaN(index)) { openMediaGallery(detailPhotoUrls, index); }
@@ -14885,8 +15005,8 @@
 
     document.getElementById('routeMapModal').addEventListener('shown.bs.modal', () => {
         if (!routeMapInstance) {
-            routeMapInstance = L.map('routeMap', { attributionControl: false, zoomControl: false });
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { subdomains: 'abcd' }).addTo(routeMapInstance);
+            routeMapInstance = L.map('routeMap', { attributionControl: false, zoomControl: true });
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', { subdomains: 'abcd' }).addTo(routeMapInstance);
         }
         if (currentPolyline) {
             const polyline = L.polyline(decodePolyline(currentPolyline), { color: getComputedStyle(document.documentElement).getPropertyValue('--accent-color'), weight: 4 }).addTo(routeMapInstance);
@@ -15003,6 +15123,9 @@
       if(monthlyDistanceChart) monthlyDistanceChart.destroy();
       if(dailyDistanceChart) dailyDistanceChart.destroy();
       if(yearlyDistanceChart) yearlyDistanceChart.destroy();
+      if(paceChart) paceChart.destroy();
+      if(elevationChart) elevationChart.destroy();
+      if(hrChart) hrChart.destroy();
       if(cityMap) cityMap.remove();
       if(routeMapInstance) routeMapInstance.remove();
     });
