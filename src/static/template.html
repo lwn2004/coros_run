@@ -954,7 +954,7 @@
                       data-distance="{{ run.distance }}"
                       data-distance-formatted="{{ "%.2f"|format(run.distance / 1000) }}"
                       data-pace-str="{{ run.pace }}"
-                      data-date="{{ run.date.strftime('%Y-%m-%d') }}"
+                      data-date="{{ run.date.strftime('%Y-%m-%d %H:%M') }}"
                       data-city="{{ run.city[:-1] if run.city and run.city.endswith("市") else run.city }}"
                       data-duration="{{ format_duration(run.duration) }}"
                       data-heart-rate="{{ run.heart_rate }}"                      
