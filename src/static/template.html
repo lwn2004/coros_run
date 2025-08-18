@@ -949,7 +949,17 @@
                 <div class="row g-3">
                 {% for run in recent_runs %}
                 <div class="col-lg-4">
-                    <div class="p-3 rounded h-100 d-flex flex-column recent-run-card" data-run-id="{{ run.id }}" style="background-color: var(--hover-bg);">
+                    <div class="p-3 rounded h-100 d-flex flex-column recent-run-card" 
+                      data-run-id="{{ run.id }}" 
+                      data-distance="{{ run.distance }}"
+                      data-distance-formatted="{{ "%.2f"|format(run.distance / 1000) }}"
+                      data-pace-str="{{ run.pace }}"
+                      data-date="{{ run.date.strftime('%Y-%m-%d') }}"
+                      data-city="{{ run.city[:-1] if run.city and run.city.endswith("市") else run.city }}"
+                      data-duration="{{ format_duration(run.duration) }}"
+                      data-heart-rate="{{ run.heart_rate }}"                      
+                      style="background-color: var(--hover-bg);
+                    ">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="fw-bold text-primary-emphasis">{{ "%.2f"|format(run.distance / 1000) }} km</span>
                             <span class="small text-body-secondary">{{ run.date.strftime('%Y-%m-%d %H:%M') }}</span>
@@ -1102,9 +1112,11 @@
                                         data-distance="{{ r.distance }}"
                                         data-distance-formatted="{{ "%.2f"|format(r.distance / 1000) }}"
                                         data-pace-str="{{ r.pace }}"
-                                        data-date="{{ r.date.strftime('%Y-%m-%d') }}"
+                                        data-date="{{ r.date.strftime('%Y-%m-%d %H:%M') }}"
                                         data-city="{{ r.city[:-1] if r.city and r.city.endswith("市") else r.city }}"
-                                        data-duration="{{ format_duration(r.duration) }}">
+                                        data-duration="{{ format_duration(r.duration) }}"
+                                        data-heart-rate="{{ r.heart_rate }}"
+                                      >
                                         <td><code>{{ r.date.strftime('%Y-%m-%d') }}</code></td>
                                         <td>{{ "%.2f"|format(r.distance / 1000) }} <span class="small-muted">km</span></td>
                                         <td class="d-none d-sm-table-cell">{{ format_duration(r.duration) }}</td>
@@ -2295,7 +2307,7 @@
         dataGrid.innerHTML = `
             <div class="col-4"><div class="data-point-value">${preloadedData.duration || '--'}</div><div class="data-point-label">训练时长</div></div>
             <div class="col-4"><div class="data-point-value">${preloadedData.paceStr || '--'}</div><div class="data-point-label">平均配速</div></div>
-            <div class="col-4"><div class="data-point-value">--</div><div class="data-point-label">运动消耗</div></div>
+            <div class="col-4"><div class="data-point-value">${preloadedData.heartRate || '--'}</div><div class="data-point-label">平均心率</div></div>
         `;
         // Clear old detailed data
         document.getElementById('detailAnalysisSections').style.display = 'none';
@@ -2337,8 +2349,9 @@
             
             document.getElementById('viewRouteBtn').style.display = currentPolyline ? 'block' : 'none';
             
-            const startTime = new Date(data.start_time);
-            const timeWeatherString = `${startTime.toLocaleString('zh-CN', {year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'})}`;
+            //const startTime = new Date(data.start_time);
+            //const timeWeatherString = `${startTime.toLocaleString('zh-CN', {year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'})}`;
+            timeWeatherString = `${preloadedData.date}`;
             document.getElementById('detailTimeAndWeather').textContent = timeWeatherString;
 /*
             const dataMap = {
@@ -2442,14 +2455,21 @@
                 distanceFormatted: runRow.dataset.distanceFormatted,
                 duration: runRow.dataset.duration,
                 paceStr: runRow.dataset.paceStr,
-                date: runRow.dataset.date
-            };
+                date: runRow.dataset.date,
+                heartRate: runRow.dataset.heartRate,
+            };          
             showRunDetailModal(runRow.dataset.runId, preloadedData, false);
         } else if (recentCard) {
             e.preventDefault();
+            const preloadedData = {
+                distanceFormatted: recentCard.dataset.distanceFormatted,
+                duration: recentCard.dataset.duration,
+                paceStr: recentCard.dataset.paceStr,
+                date: recentCard.dataset.date,
+                heartRate: recentCard.dataset.heartRate,
+            };          
             const isCommentLink = e.target.closest('.comment-link');
-            // For recent cards, we don't have all the pre-loadable data easily, so we pass an empty object.
-            showRunDetailModal(recentCard.dataset.runId, {}, !!isCommentLink);
+            showRunDetailModal(recentCard.dataset.runId, preloadedData, !!isCommentLink);
         } else if (e.target.classList.contains('gallery-item')) {
             const index = parseInt(e.target.dataset.photoIndex, 10);
             if (!isNaN(index)) { openMediaGallery(detailPhotoUrls, index); }
