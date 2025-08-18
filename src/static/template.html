@@ -2380,7 +2380,7 @@
             const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
             
             const chartOptions = { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false }, ticks: { color: tickColor } }, y: { grid: { color: gridColor }, ticks: { color: tickColor } } }, plugins: { legend: { display: false } } };
-            
+            /*
             if (data.charts.pace?.labels.length) {
                 const paceCtx = document.getElementById('paceChart').getContext('2d');
                 paceChart = new Chart(paceCtx, { type: 'line', data: { labels: data.charts.pace.labels, datasets: [{ data: data.charts.pace.data, borderColor: accentColor, borderWidth: 2, pointRadius: 0, fill: false, tension: 0.1 }] }, options: { ...chartOptions, scales: { ...chartOptions.scales, y: { ...chartOptions.scales.y, reverse: true, ticks: { ...chartOptions.scales.y.ticks, callback: (value) => formatPaceFromSeconds(value) } } } } });
@@ -2392,7 +2392,7 @@
             if (data.charts.hr?.labels.length) {
                 const hrCtx = document.getElementById('hrChart').getContext('2d');
                 hrChart = new Chart(hrCtx, { type: 'line', data: { labels: data.charts.hr.labels, datasets: [{ data: data.charts.hr.data, borderColor: '#ff6b6b', borderWidth: 2, pointRadius: 0, fill: false, tension: 0.1 }] }, options: chartOptions });
-            }
+            }*/
 
             document.getElementById('detailAnalysisSections').style.display = 'block';
             await loadRunTags(runId);
