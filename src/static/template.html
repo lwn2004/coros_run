@@ -832,6 +832,10 @@
         background-color: var(--hover-bg);
         border-color: var(--border-color);
      }
+    .calendar-table td.lottery-win {
+        border: 1px solid var(--success-color);
+        box-shadow: 0 0 8px 1px rgba(32, 201, 151, 0.5);
+    }
   </style>
 </head>
 <body>
@@ -1788,7 +1792,7 @@
         });
     }
 
-    async function generateMarathonCalendar() {
+async function generateMarathonCalendar() {
         const container = document.getElementById('marathon-calendar-container');
         if (!container) return;
         container.innerHTML = '<div class="content-card text-center text-body-secondary">加载赛历数据中...</div>';
@@ -1826,9 +1830,16 @@
             calendarHTML += `<div class="month-grid">`;
             calendarHTML += `<h4 class="mb-3">${year}年 ${month}月</h4>`;
             
+            // --- MODIFICATION START for List View ---
             calendarHTML += `<div class="calendar-list-view">`;
             monthEvents.sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(event => {
                 const eventDate = new Date(event.date.replace(/-/g, '/'));
+                let lotteryStatusIcon = '';
+                if (event.status === '中！') {
+                    lotteryStatusIcon = ' <i class="bi bi-check-circle-fill text-success"></i>';
+                } else if (event.status === '不中！') {
+                    lotteryStatusIcon = ' <i class="bi bi-x-circle-fill text-secondary"></i>';
+                }
                 calendarHTML += `
                     <div class="calendar-list-item">
                         <div class="list-date">
@@ -1836,12 +1847,13 @@
                             <div class="weekday">${weekdays[eventDate.getDay()]}</div>
                         </div>
                         <div class="list-details">
-                            <div class="name">${event.name} <span class="category">${event.category}</span></div>
+                            <div class="name">${event.name}${lotteryStatusIcon} <span class="category">${event.category}</span></div>
                             <div class="status">${event.status}</div>
                         </div>
                     </div>`;
             });
             calendarHTML += `</div>`;
+            // --- MODIFICATION END for List View ---
 
             let gridHtml = `<table class="calendar-table">`;
             gridHtml += `<thead><tr>${['日', '一', '二', '三', '四', '五', '六'].map(d => `<th>${d}</th>`).join('')}</tr></thead>`;
@@ -1863,15 +1875,36 @@
                         let cellClass = eventsOnThisDay.length > 0 ? 'event' : '';
                         let dayClass = eventsOnThisDay.length > 0 ? 'has-event' : '';
                         
+                        // --- MODIFICATION START for Grid View Cell ---
+                        const hasWon = eventsOnThisDay.some(e => e.status === '中！');
+                        if (hasWon) {
+                            cellClass += ' lottery-win';
+                        }
+                        // --- MODIFICATION END for Grid View Cell ---
+
                         tbodyHtml += `<td class="${cellClass}">`;
                         tbodyHtml += `<div class="day-number ${dayClass}">${date}</div>`;
                         if(eventsOnThisDay.length > 0) {
                             eventsOnThisDay.forEach(event => {
-                                tbodyHtml += `<div class="event-item" title="${event.name}">${event.name}</div>`;
+                                // --- MODIFICATION START for Grid item text ---
+                                let specialClass = '';
+                                if (event.status === '不中！') {
+                                    specialClass = 'text-decoration-line-through text-body-secondary';
+                                }
+                                // --- MODIFICATION END for Grid item text ---
+                                tbodyHtml += `<div class="event-item ${specialClass}" title="${event.name}">${event.name}</div>`;
                             });
                             tbodyHtml += '<div class="event-details popup">';
                              eventsOnThisDay.forEach(event => {
-                                tbodyHtml += `<div class="event-item">${event.name} <span class="category">${event.category}</span></div>`;
+                                // --- MODIFICATION START for Popup Icon ---
+                                let lotteryStatusIcon = '';
+                                if (event.status === '中！') {
+                                    lotteryStatusIcon = ' <i class="bi bi-check-circle-fill text-success"></i>';
+                                } else if (event.status === '不中！') {
+                                    lotteryStatusIcon = ' <i class="bi bi-x-circle-fill text-body-secondary"></i>';
+                                }
+                                // --- MODIFICATION END for Popup Icon ---
+                                tbodyHtml += `<div class="event-item">${event.name}${lotteryStatusIcon} <span class="category">${event.category}</span></div>`;
                                 tbodyHtml += `<div class="event-status">${event.status}</div>`;
                             });
                             tbodyHtml += '</div>';
