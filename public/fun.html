@@ -18,14 +18,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
-  <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
 
-  <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css" rel="stylesheet" media="print" onload="this.media='all'">
-  <link href="https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.min.css" rel="stylesheet" media="print" onload="this.media='all'">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet" media="print" onload="this.media='all'">
+  <link href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css" rel="stylesheet" media="print" onload="this.media='all'">
   
   <noscript>
-    <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link href="https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css" rel="stylesheet">
   </noscript>
 
   <style>
@@ -875,7 +875,7 @@
                       <div class="stat-card-front">
                         <div class="stat-card-content">
                           <div>
-                            <div class="stat-label">当前跑量</div>
+                            <div class="stat-label">累计跑量</div>
                             <div class="stat-value">3705.48 <small class="small-muted">km</small></div>
                           </div>
                           <div class="stat-details">
@@ -892,10 +892,10 @@
                         <div class="stat-card-content">
                           <div>
                             <div class="stat-label">继续坚持</div>
-                            <div class="stat-value">16年323天</div>
+                            <div class="stat-value">16年346天</div>
                           </div>
                           <div class="stat-details">
-                            <div class="stat-label"><small class="small-muted">预计</small>2042年07月05日<small>绕地球一圈</small></div>
+                            <div class="stat-label"><small class="small-muted">预计</small>2042年07月28日<small>绕地球一圈</small></div>
                           </div>
                         </div>
                         <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
@@ -14923,7 +14923,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-08-20 09:48:35 
+         | Last updated: 2025-08-20 18:48:40 
     </small>
 </footer>
 
@@ -15193,10 +15193,10 @@
 
 
 </body>
-<script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.bootcdn.net/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://cdn.bootcdn.net/ajax/libs/chartjs-plugin-annotation/3.1.0/chartjs-plugin-annotation.min.js "></script>
-<script src="https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.1.0/dist/chartjs-plugin-annotation.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
 <script>
 	let monthlyDistanceChart = null;
 	let dailyDistanceChart = null;
@@ -15727,7 +15727,7 @@ async function generateMarathonCalendar() {
         const annotationDefaults = (avg) => ({ type: 'line', yMin: avg, yMax: avg, borderColor: annotationColor, borderWidth: 1.5, borderDash: [6, 6] });
         
         const dailyCtx = document.getElementById('dailyDistanceChart').getContext('2d');
-        dailyDistanceChart = new Chart(dailyCtx, { type: 'bar', data: { labels: ["07-22", "07-23", "07-24", "07-25", "07-26", "07-27", "07-28", "07-29", "07-30", "07-31", "08-01", "08-02", "08-03", "08-04", "08-05", "08-06", "08-07", "08-08", "08-09", "08-10", "08-11", "08-12", "08-13", "08-14", "08-15", "08-16", "08-17", "08-18", "08-19", "08-20"], datasets: [{ label: '距离 (km)', data: dailyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 2, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 }}}, plugins: { legend: { display: false }, title: { display: true, text: `总 ${dailyTotal.toFixed(1)}km / 日均 ${dailyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(dailyAvg) } } } } });
+        dailyDistanceChart = new Chart(dailyCtx, { type: 'bar', data: { labels: ["07-22", "07-23", "07-24", "07-25", "07-26", "07-27", "07-28", "07-29", "07-30", "07-31", "08-01", "08-02", "08-03", "08-04", "08-05", "08-06", "08-07", "08-08", "08-09", "08-10", "08-11", "08-12", "08-13", "08-14", "08-15", "08-16", "08-17", "08-18", "08-19", "08-20"], datasets: [{ label: '距离 (km)', data: dailyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 2, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 }}}, plugins: { legend: { display: false }, title: { display: true, text: `总 ${dailyTotal.toFixed(1)}km / 次均 ${dailyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(dailyAvg) } } } } });
         const monthlyCtx = document.getElementById('monthlyDistanceChart').getContext('2d');
         monthlyDistanceChart = new Chart(monthlyCtx, { type: 'bar', data: { labels: ["24-09", "24-10", "24-11", "24-12", "25-01", "25-02", "25-03", "25-04", "25-05", "25-06", "25-07", "25-08"], datasets: [{ label: '距离 (km)', data: monthlyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 4, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 }}}, plugins: { legend: { display: false }, title: { display: true, text: `总 ${monthlyTotal.toFixed(1)}km / 月均 ${monthlyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(monthlyAvg) } } } } });
         const yearlyCtx = document.getElementById('yearlyDistanceChart').getContext('2d');
@@ -16081,7 +16081,7 @@ async function generateMarathonCalendar() {
     document.getElementById('routeMapModal').addEventListener('shown.bs.modal', () => {
         if (!routeMapInstance) {
             routeMapInstance = L.map('routeMap', { attributionControl: false, zoomControl: true });
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', { subdomains: 'abcd' }).addTo(routeMapInstance);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { subdomains: 'abcd' }).addTo(routeMapInstance);
         }
         if (currentPolyline) {
             const polyline = L.polyline(decodePolyline(currentPolyline), { color: getComputedStyle(document.documentElement).getPropertyValue('--accent-color'), weight: 4 }).addTo(routeMapInstance);
