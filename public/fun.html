@@ -42,6 +42,7 @@
       --marathon-color: #ff8700;
     }
     html {
+      scroll-behavior: smooth;
       scrollbar-gutter: stable;
     }
 
@@ -942,6 +943,34 @@
                     </div>
                 </div>
             </div>
+            <div class="col-12 col-md-6 col-lg-3">
+              <div class="stat-card-flip-container h-100" id="month-card-container">
+                <div class="stat-card-flipper h-100">
+                  <div class="stat-card-front">
+                    <div class="stat-card-content">
+                      <div class="stat-label">本月跑量</div>
+                      <div class="stat-value">163.00 <small class="small-muted">km</small></div>
+                    </div>
+                    <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
+                  </div>
+                  <div class="stat-card-back">
+                    <div class="stat-card-content">
+                        <div>
+                            <div class="stat-label">较上月同期</div>
+                            <div class="stat-value stat-value-small text-danger">
+                                -20.17
+                                <small class="small-muted">km</small>
+                            </div>
+                        </div>
+                        <div class="stat-details mt-2">
+                            <a href="#run-analysis-section" class="comment-link" id="view-analysis-link">查看分析 &rarr;</a>
+                        </div>
+                    </div>
+                    <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
+                  </div>
+                </div>
+              </div>
+            </div>
         </div>
 
         
@@ -1092,27 +1121,35 @@
         </div>
         
 
-        <div class="card mb-4" style="background-color: var(--card-bg); border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <div class="card mb-4" id="run-analysis-section" style="background-color: var(--card-bg); border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
             <div class="card-header bg-transparent border-0 pt-3">
                 <div class="card-title-container">
                     <h5 class="card-title">跑量分析</h5>
                     <div class="btn-group btn-group-sm" role="group" id="chart-toggle">
                         <button type="button" class="btn active" data-chart="daily">近30天</button>
                         <button type="button" class="btn" data-chart="monthly">近12月</button>
+                        <button type="button" class="btn" data-chart="month-over-month">本月对比</button>
+                        <button type="button" class="btn" data-chart="yearly-dual-axis">今年跑量</button>
                         <button type="button" class="btn" data-chart="yearly">年度汇总</button>
                     </div>
                 </div>
             </div>
             <div class="card-body">
-            <div id="dailyChartContainer" style="display: block; height: 300px;">
-                <canvas id="dailyDistanceChart" aria-label="最近30天跑步距离统计图表"></canvas>
-            </div>
-            <div id="monthlyChartContainer" style="display: none; height: 300px;">
-                <canvas id="monthlyDistanceChart" aria-label="最近12个月跑步距离统计图表"></canvas>
-            </div>
-            <div id="yearlyChartContainer" style="display: none; height: 300px;">
-                <canvas id="yearlyDistanceChart" aria-label="年度跑步距离统计图表"></canvas>
-            </div>
+                <div id="dailyChartContainer" style="display: block; height: 300px;">
+                    <canvas id="dailyDistanceChart" aria-label="最近30天跑步距离统计图表"></canvas>
+                </div>
+                <div id="monthlyChartContainer" style="display: none; height: 300px;">
+                    <canvas id="monthlyDistanceChart" aria-label="最近12个月跑步距离统计图表"></canvas>
+                </div>
+                <div id="monthOverMonthChartContainer" style="display: none; height: 300px;">
+                    <canvas id="monthOverMonthChart" aria-label="本月与上月跑量对比图表"></canvas>
+                </div>
+                <div id="yearlyDualAxisChartContainer" style="display: none; height: 300px;">
+                    <canvas id="yearlyDualAxisChart" aria-label="本年度累积跑量图表"></canvas>
+                </div>
+                <div id="yearlyChartContainer" style="display: none; height: 300px;">
+                    <canvas id="yearlyDistanceChart" aria-label="年度跑步距离统计图表"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -14923,7 +14960,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-08-21 06:46:04 
+         | Last updated: 2025-08-21 06:47:58 
     </small>
 </footer>
 
@@ -15201,6 +15238,8 @@
 	let monthlyDistanceChart = null;
 	let dailyDistanceChart = null;
 	let yearlyDistanceChart = null;
+    let monthOverMonthChart = null;
+    let yearlyDualAxisChart = null;
     let paceChart = null;
     let elevationChart = null;
     let hrChart = null;
@@ -15709,31 +15748,89 @@ async function generateMarathonCalendar() {
         });
     });
 
-	const monthlyData = [109.63, 129.56, 126.46, 171.69, 204.69, 202.17, 203.37, 201.7, 150.98, 204.56, 242.42, 163.0];
-	const dailyData = [0.0, 10.16, 0.0, 11.0, 21.6, 0.0, 10.05, 0.0, 0.0, 6.44, 8.01, 13.66, 10.01, 0.0, 0.0, 0.0, 10.1, 8.24, 21.34, 5.25, 10.12, 8.01, 12.02, 0.0, 6.3, 22.22, 6.1, 0.0, 10.02, 11.6];
-	const yearlyData = [35.46, 228.81, 706.97, 1161.34, 1572.88];
     if (document.getElementById('dailyDistanceChart')) {
+        const monthlyData = [109.63, 129.56, 126.46, 171.69, 204.69, 202.17, 203.37, 201.7, 150.98, 204.56, 242.42, 163.0];
+        const dailyData = [0.0, 10.16, 0.0, 11.0, 21.6, 0.0, 10.05, 0.0, 0.0, 6.44, 8.01, 13.66, 10.01, 0.0, 0.0, 0.0, 10.1, 8.24, 21.34, 5.25, 10.12, 8.01, 12.02, 0.0, 6.3, 22.22, 6.1, 0.0, 10.02, 11.6];
+        const yearlyData = [35.46, 228.81, 706.97, 1161.34, 1572.88];
+        const monthOverMonthData = {"labels": ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"], "last_month_data": [12.01, 12.01, 24.14, 34.39, 55.6, 55.6, 66.81, 78.82, 92.76, 92.76, 102.77, 124.02, 124.02, 134.12, 134.12, 146.33, 159.73, 159.73, 183.17, 183.17, 183.17, 183.17, 193.33, 193.33, 204.33, 225.93, 225.93, 235.98, 235.98, 235.98, 242.42], "summary": {"diff_km": -20.17, "this_month_total": 163.0}, "this_month_data": [8.01, 21.67, 31.68, 31.68, 31.68, 31.68, 41.78, 50.02, 71.36, 76.61, 86.73, 94.73, 106.75, 106.75, 113.06, 135.27, 141.38, 141.38, 151.4, 163.0, 163.0, 163.0, 163.0, 163.0, 163.0, 163.0, 163.0, 163.0, 163.0, 163.0, 163.0]};
+        const yearlyDualAxisData = {"cumulative_data": [204.69, 406.86, 610.23, 811.93, 962.91, 1167.47, 1409.89, 1572.89, 1572.89, 1572.89, 1572.89, 1572.89], "labels": ["1\u6708", "2\u6708", "3\u6708", "4\u6708", "5\u6708", "6\u6708", "7\u6708", "8\u6708", "9\u6708", "10\u6708", "11\u6708", "12\u6708"], "monthly_data": [204.69, 202.17, 203.37, 201.7, 150.98, 204.56, 242.42, 163.0, 0.0, 0.0, 0.0, 0.0], "total": 1572.89};
+
         const gridColor = 'rgba(128, 128, 128, 0.2)';
         const tickColor = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim();
         const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
+        const accentColorSecondary = getComputedStyle(document.documentElement).getPropertyValue('--trophy-color').trim();
         const annotationColor = getComputedStyle(document.documentElement).getPropertyValue('--bs-code-color').trim();
+        
         const monthlyTotal = monthlyData.reduce((a, b) => a + b, 0);
         const monthlyAvg = monthlyData.filter(d => d > 0).length > 0 ? (monthlyTotal / monthlyData.filter(d => d > 0).length) : 0;
         const dailyTotal = dailyData.reduce((a, b) => a + b, 0);
         const dailyAvg = dailyData.filter(d => d > 0).length > 0 ? (dailyTotal / dailyData.filter(d => d > 0).length) : 0; 
         const yearlyTotal = yearlyData.reduce((a, b) => a + b, 0);
         const yearlyAvg = yearlyData.filter(d => d > 0).length > 0 ? (yearlyTotal / yearlyData.filter(d => d > 0).length) : 0;
+        
         Chart.defaults.font.family = "'Noto Sans SC', sans-serif";
         const annotationDefaults = (avg) => ({ type: 'line', yMin: avg, yMax: avg, borderColor: annotationColor, borderWidth: 1.5, borderDash: [6, 6] });
         
         const dailyCtx = document.getElementById('dailyDistanceChart').getContext('2d');
         dailyDistanceChart = new Chart(dailyCtx, { type: 'bar', data: { labels: ["07-22", "07-23", "07-24", "07-25", "07-26", "07-27", "07-28", "07-29", "07-30", "07-31", "08-01", "08-02", "08-03", "08-04", "08-05", "08-06", "08-07", "08-08", "08-09", "08-10", "08-11", "08-12", "08-13", "08-14", "08-15", "08-16", "08-17", "08-18", "08-19", "08-20"], datasets: [{ label: '距离 (km)', data: dailyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 2, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 }}}, plugins: { legend: { display: false }, title: { display: true, text: `总 ${dailyTotal.toFixed(1)}km / 次均 ${dailyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(dailyAvg) } } } } });
+        
         const monthlyCtx = document.getElementById('monthlyDistanceChart').getContext('2d');
         monthlyDistanceChart = new Chart(monthlyCtx, { type: 'bar', data: { labels: ["24-09", "24-10", "24-11", "24-12", "25-01", "25-02", "25-03", "25-04", "25-05", "25-06", "25-07", "25-08"], datasets: [{ label: '距离 (km)', data: monthlyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 4, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 }}}, plugins: { legend: { display: false }, title: { display: true, text: `总 ${monthlyTotal.toFixed(1)}km / 月均 ${monthlyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(monthlyAvg) } } } } });
+        
         const yearlyCtx = document.getElementById('yearlyDistanceChart').getContext('2d');
         yearlyDistanceChart = new Chart(yearlyCtx, { type: 'bar', data: { labels: ["2021", "2022", "2023", "2024", "2025"], datasets: [{ label: '距离 (km)', data: yearlyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 4, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 } } }, plugins: { legend: { display: false }, title: { display: true, text: `总 ${yearlyTotal.toFixed(1)}km / 年均 ${yearlyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(yearlyAvg) } } } } });
 
-        document.querySelectorAll('#chart-toggle .btn').forEach(button => { button.addEventListener('click', function() { document.querySelectorAll('#chart-toggle .btn').forEach(btn => btn.classList.remove('active')); this.classList.add('active'); const chartType = this.dataset.chart; Object.values({ monthly: document.getElementById('monthlyChartContainer'), daily: document.getElementById('dailyChartContainer'), yearly: document.getElementById('yearlyChartContainer') }).forEach(c => c.style.display = 'none'); document.getElementById(`${chartType}ChartContainer`).style.display = 'block'; }); });
+        const monthOverMonthCtx = document.getElementById('monthOverMonthChart').getContext('2d');
+        const diffText = monthOverMonthData.summary.diff_km >= 0 ? `+${monthOverMonthData.summary.diff_km}` : monthOverMonthData.summary.diff_km;
+        monthOverMonthChart = new Chart(monthOverMonthCtx, {
+            type: 'line',
+            data: {
+                labels: monthOverMonthData.labels,
+                datasets: [
+                    { label: '本月', data: monthOverMonthData.this_month_data, borderColor: accentColor, borderWidth: 3, pointRadius: 1, fill: false, tension: 0.1 },
+                    { label: '上月', data: monthOverMonthData.last_month_data, borderColor: 'rgba(128, 128, 128, 0.7)', borderWidth: 2, borderDash: [5, 5], pointRadius: 1, fill: false, tension: 0.1 }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: v => v + ' km' } }, x: { grid: { display: false }, ticks: { color: tickColor } } }, plugins: { legend: { labels: { color: tickColor } }, title: { display: true, text: `本月跑量: ${monthOverMonthData.summary.this_month_total}km (较上月同期: ${diffText}km)`, align: 'start', color: annotationColor } } }
+        });
+
+        const yearlyDualAxisCtx = document.getElementById('yearlyDualAxisChart').getContext('2d');
+        yearlyDualAxisChart = new Chart(yearlyDualAxisCtx, {
+            type: 'bar',
+            data: {
+                labels: yearlyDualAxisData.labels,
+                datasets: [
+                    { type: 'bar', label: '月度跑量', data: yearlyDualAxisData.monthly_data, backgroundColor: accentColor + '99', borderColor: accentColor, yAxisID: 'y' },
+                    { type: 'line', label: '累积跑量', data: yearlyDualAxisData.cumulative_data, borderColor: accentColorSecondary, borderWidth: 3, pointRadius: 2, fill: false, tension: 0.1, yAxisID: 'y1' }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                scales: {
+                    x: { grid: { display: false }, ticks: { color: tickColor } },
+                    y: { type: 'linear', display: true, position: 'left', title: { display: true, text: '月度跑量 (km)', color: tickColor }, grid: { color: gridColor }, ticks: { color: tickColor } },
+                    y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: '累积跑量 (km)', color: tickColor }, grid: { drawOnChartArea: false }, ticks: { color: tickColor } }
+                },
+                plugins: { legend: { labels: { color: tickColor } }, title: { display: true, text: `今年总跑量: ${yearlyDualAxisData.total}km`, align: 'start', color: annotationColor } }
+            }
+        });
+
+        document.querySelectorAll('#chart-toggle .btn').forEach(button => {
+            button.addEventListener('click', function() {
+                document.querySelectorAll('#chart-toggle .btn').forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                const chartType = this.dataset.chart;
+                const containers = {
+                    monthly: document.getElementById('monthlyChartContainer'),
+                    daily: document.getElementById('dailyChartContainer'),
+                    yearly: document.getElementById('yearlyChartContainer'),
+                    'month-over-month': document.getElementById('monthOverMonthChartContainer'),
+                    'yearly-dual-axis': document.getElementById('yearlyDualAxisChartContainer')
+                };
+                Object.values(containers).forEach(c => c.style.display = 'none');
+                containers[chartType].style.display = 'block';
+            });
+        });
     }
     
     const dataPane = document.getElementById('data-pane');
@@ -15895,7 +15992,7 @@ async function generateMarathonCalendar() {
             //const data = await response.json();
             const data = {
               "weather": { "temperature_c": 28.5, "condition": "多云", "wind_speed_kmh": 12.3 },
-              "route": { "encoded_polyline": "q|noCgr_qT?C?E?C?E?C?E?E?E?E?E@E?G?E?E?G?E?GAE?E?E?E?E?E?E?E@E?E?E?E?E?E?E@C?E?E?E?E?E?E?E?E?C?E?E?C?EAE?E?C?E?C?E?E?C?E?C?E?C?E?E?E?E?EAE?E?E?E?E?E?E?E?E?E?EAE?E?E?C?E?E?E?E?E?E?E?E@E?C?E?E?E?E?E?C?E@E?E?C?E?E?C?E?E?C?E?E?C?E?E?C?E@E?E@E?E?E@E?E?E?E?E?E?E?E@CAE?E?C?E?E?C?E?E?E?C?E?E?CAE?E?E?E@E?C?E?E?E?E?C?E?E?E?C?E?C?E?C?C?E?C?C?E?C?E?C?E?C?E?C?E?C?C?E?C@E?E?C?E?E?E?C?E?E?E?E?C?E?E?C?E@CAE?E@C?E?C?EAC?C?E?C?EAC?E?C?CAE?C?E?C?E?C?E?C?E?E@E?E@C?E?E@C?E?C?E@E?C?E?E?E?E?E?EAG?E?EAE?EAE?EAEAEACAEAECCCECAECEACAEAE?G?EAE@E?E?E?E@E?E@E?E@E?E@E@E?E?C@E?E?C@E?E?C@E?C?E?C?C?EAC?E?C?EAC?E?EAE?C?E?C?E?C?EAC?E?C?CAE?E?CAEAC?E?EAC?E?EAE?E?E?E?E?C?E?E@E?C@E?E?E@C?E?E?E?C?E?E?E?C?E?C@E?C?C?CAC?E@C?C?C@E?C?E?C@E?E?E?E?E?E?C?E?C?E?CAE?C?E?CAE?C?EAC?E?E?C?E?C?C?E?C?C?E?C?C?C@C?E?C?C?C?E?C?C?E?C?C?E?C?C?CAE?C?C?E?EAC?E?E@E?E?C?E?E?E?E?E?E@C?E?E?E@C?E?E?C?E?E?E?C?E@C?C?E@C?C?C?C?C?C@CAC?C?E?C?E?CAE?C?E?C?E?C?E?C?C?E?C@E?C?C?E?C?C?E?E?C?EAE?C?E?E?E?C?E?E?E?C?E?E?C?E?CAE?C?E?CAE?EAC?C?EAC?E?C@E?C?C?C@C?C?A?E?C?C?EAC?E?E?E?C@E?E@E?E@E@E?C@E?E?E?C?EAC?E?E?EAC?EAE?E?EAE?E?C?E?E?E@C?E?C?E?C?E?C@E?C?E?C@E?C@E?E@C?C?E@C?E?C@E?C?EAC?E?C?C?E?E?C@E@C?E@C@E?C?E@E?C?E?E?C?E?C@E?C?E@C?E?E?E?C?E?C?E?C?E?C?C?E?C?E?C?E@C?E@C?C@E?E?C@E?C?E?CAE?C?C?E?C?C@C?C@E@C?C@E?C?E?C?E?EAC?E?CAE?E?C?C?E?C?C?CAE?CAC?EAC?CAC?C?E?C?C?C?C?C@C?E?C?C?E@C?CAC?C?C?C?E?C?C?C?E?C?C?C?C?C?C?E?C?C?C?CACAACACACAE?E?E?E?G?E?E?E?G?E@E?E?E@G?E?E?C@E?E?E@E?E?E?E?E?E?E?G?E@E?E?E@E?E?E@E?E?G?E@E?E@C?E@E?E@E@E?E@C@E@E@E@E?E@E@E@E@E@C@E@E@E@E@C?E@E@C@E@E@E@E@E@C@E@E@E@E@EBE@C@E@C@E?E@E@C@E?E@C@E?E@C@E?C@E@C@E?C@E@C@C?E@C@E@C@C?E@E@C@E@C@E@E?C@E@C@E@C@C@E@C@E@C?E@E@C@E@E@E@EBE@E@E@G@E@E@E@E@E@EBE@C@E@E@E?C@E@C@E@C?C@C@C?E@C@C@E?E@C@E@C@E@C@E@E@C@E@E@E@E@E@E@E@E?E@E@E@E@E@E?E@E@C@E@E@E@C@E@E@E?C@G@E?E@E?E@E?E@E@E@E@C@EBE@E@E@C@EBE@E@E@E@E@EBE@C@E@E@E?E@E@E@E@E@E@E?G@E@E@E@E@E@E@E?E@E@C@E@E@C@E@E@C@E@E?E@C@E?E@E@E@E@E@E@E@E@E@E@E@C@E@E@C@E@E@E@G?E@E@E@E?G@E@E?E@E@E?E@E@E?E@C?E?E@E?E@C?E@E?E@E?E@E?E@E?E@E@E?C@E@E?E@E@E@E?E@E@E?E@G@E?E@E@G@E@E?E@E@G@E?E@E@E?E@E?E@G?E@E@C?E@E?E@E@E?C@E@E?E@E?C@E?E@E?E@E?E@E@E?E@E@E?E@E@E?E@E?E?E@C?E@E?E@E@E?E@G@E?E@E@G@E?E@E@E?E@E?E@E@E?E@E?E@E?E@E@C?E@E@E@E?E@E@E@E?C@E@E@C?E@E@E@C?E@E@E@E@G?E@E@E@E?E@E@E@E?E@E@E?E@E?E@E@E?E@C@E@E?E@E@E?E@E?E@C@E?E@E?E@E?E@E@C?E@E?E@E?E@E?E@C?E@E?E@C@E?E@E@C?E@C?E@C?E@C?E?C@E?E?E@E?E@E@E@E?E@E@E?E@E@E?E@E@C@E?E@E?E@E?E@E?E@E?E@E?E@E?C?E@E?E?E?C?E@E?C?E?E?EAE?E?G?E?E?E?E?E?E?G?E?E?G?EAE?E?E?E?E?E?C?E?C@E?E?C?E?EAE?EAEAE?EAC?EAE?E?EAC?EAE?CAE?E?E?EAG?E?E?G?E?E?E?E?EAE?E?E?E?E?C?E?E?E@E?C?E@E?E?E?E@E?C?E?E?G?EAE?E?G?GAE?G?GAE?G?EAG?E?EAE?EAG?EAE?E?E?E?E?EAC?E?E?E?E?E?C?E?E?E?E?E?E?E?G?E?E?G?E?G?E?G?EAE?C?E?E@E?E?CAE?E?E?E?EAE?E?C?E?E?E?E?E?EAE?E?C?E?E?E?C?E?E?EAE?EAE?EAEAGAEAE?GAE?EAE?GAE?E?EAEAE?EAEAE?EAE?EAE?EAEAEAEAE?EAEAEACAEAE?EAEAC?EAE?EAEAE?EAG?EAEAE?EAE?EAE?EAG?E?EAEAE?EACAEAEAEAE?EAEAGAEAEAEAECEAEACAEAE?EAEAEAEAE?EACAEAE?EAE?EAE?EAEAE?EAG?EAEAE?EAEAC?EAGAEAEAE?EAGAE?EAEAE?EAEACAEAEAEAEAEAECGAEAEAE?EAEAEAE?EAE?EAC?EAE?EAEAEAG?EAEAGAEAGAEAGAEAGAEAEAEAGAEAEAEAEAEAGAE?EAEAGAEAEAEAEAEAE?GAEAE?EAG?EAE?EAEAGAEAEAEAEAEACAE?EAEAEAE?EAEAE?EAEAEAE?EAEAE?EAEAC?EAEAE?EAEAEAEAEAE?EAEAEAGAEAEACAEAE?EACAEAEAE?EAGAE?EAGAEAEAE?EAEAEAEAE?EAEAEAEAE?EAEAEAEAE?CAEAEAE?EACAEAECEACAEAECEAEAEAEAEAGAEAEAEAEAEAEAEAEAEAGAEAEAEAGAEAEAEAGAEAEAECEAEAECEAEACCEAEAEAEAEAECEACAEAEAEAEACCEAEAEAEAEAECEAEACAEAEAEAGAEAEAEAE?EAEAE?E?E?G?GAE?GAEAECECECECECECEACCEAECEAEAEACAEAEAE?CAEAEAEACAEAEACCEACCEACCEAECCCECEACCECECECCCECCCEECCECCCECCCCCCCECCECCCCCECCEECCCCCCCECCCCCCCEACCCCCCCCCACCCCCCCCCCCCCCCCACCECCECCCCCCACCCCCCCCCCCCCCCCCCCACCCCCCCCCEECCCECCECCCCCCCCCCCCCCCCCCCAECCAECCAEACCCACCCACCCCCCCACCCCCACCCCCCCACCCCCCCACCCCCCCCCCCACCCCCCCAECCCCACCCACCCCECCCCACCECCCCCCCCCCCCCCCCCCCCCCACCCCCCCCECCACCCCCCCACCCCCACCCCCAACCCCCCCCAECCCCACCCACCCCCCCCCCCCCCCCCCCCCCCCCECCECCCCCECCCCCECCCCACCECCACCEAEACAECCAECCACCECCCECCCCCCCCCECCCCCCCCCCCCCCCCCCCCCECCCCCECECCCECEEECCEECECCCECCCCCECCCCCCCECCCCCECCECCCCEECCCCECCECCECCCCCEECCECCCECCCCCCECCCCCCEECCCCECCCECCECCECCECCCEECCECCCEECCECECCCECCEECCCECECCCECECCEECECCCECECECEAECECEAECECEAECECECECEAECCCECEAECGAECECEAECECEAECECEAECEAECEAECECEACCECEAECGAECEAECECEAECEAECGCEAECEAECECEAECECEAECEACCECEAECEAECEAECEAECEAGCEAECEAEAGCEAEAECEAEAEAEAEACAEACCEACAEAEAGAEAGAEAEAGAECEAGAECEAEAEAEAEAEAEAEAEAGAEAEAEAEAEAG?EAEAGAEAEAEAEAGAE?EAEAEAE?EAGAE?EAEAE?GAEAE?EAEAEAEAE?EAGAE?EAE?EAE?EAG?E?E?E?G?E?E?E?E?E?E?E@E?G?E@E?E@E?E@C?E?E?E@E?E?C?E?E?E?E?E?E@G?E?E?E?E@E?E?G?E?E@E?E?E?E?E?G@E?E@E?E?E?E?E?E?C?E?E?C?E?E?C?E@E?E?E?E@E?E?E?E@E?G@E?E@G?E?G?E?G@E?G?E@G@E?G@E@E@G?E@G@E?E@G?E?E@E?G@E?E@E@G@E?G@E?G@E?E?G?E@E?E?E@E?E@E?E@E?E@E@G?E@E@E@E@G@E@E@G@E@E?E@G@E?E@E@E?E@E@E?E@E?E@E@G?E@E?E@E@G@E?E@G@E@G@E?E@G@E?G@E@E?G@E?E@E@E?E@E@E@E?E@G@E?G?E@G@E?G@E@G?E@E@G?E@G@E?G@E?E@G@E?E@G?E@E?G@E?G@E@G@E?E@G@E@E@G?E@E@E@E@E?E@E?E@E@E?E@E@E?E@E?E@E?E@E@E?E@E?E@C@E?E@E?E@E?E@E?E?E@C?E@E?C?E@E?E?E@E?C?E?E?E?E@C?E?C?C?C?C?C?C?C?E?E?E?E@E?G?E?E?G?E?G?E?GAE?E?E?G?EAE?G?E?E?GAE?E?GAE?E?EAE?E?E?EAE?E?EAE?EAE?E?EAE?E?E?EAE?E?E?EAE?E?EAC?EACAE?EAE?EAE?EAE?EAE?EAE?EAE?GAE?EAEAE?EAEAE?EAG?EAEAEAG?EAGAEAEAG?EAEAGAECGAEAEAGAEAEAECEAGAEAEAEAEAEAEAGAE?EAEAGAECEAECEAECEAEAECEAEAECEAECEACCCECA@C@ADAD@F?DBF@FBFBFBFBD@FBFBD@D@FBD@F@D@F@DBF@D@D@D@F@D@D@F@D@D@F@D@F@D@DBD@F@D@D@F@DBD@D@F@D@D@D@F@D@F@D@F?D@F?D@F@D@D?F@D@D@D@F?D@D@D@D@D@F@D?D@D?D@F@D?D@D?F?D@F?D?F?D?F?D?F?D?F?D?F?D?F?D?F@D?D?D?F?D?D?D?D?DAD?D?D?D?D?D?D?DAF?D?D?D?D?D?DAF?D?D?D?FAD?D?D?D?D?D?DAF?D?DAF?DAFAD?DAFAD?DAF?D?DAF?D?DADAF?DAFAD?DAFAD?FAD?FAD?FADADAFADAFAD?FAD?FAD?DAF?D?DAFADAD?FADADAFAD?DAF?DADAD?DADAD?BADAF?DADAD?FAD?DAF?DAFAD?DAD?DAD?DAD?DADADADAF?DADADAD?FADAD?DAD?FAD?DAD?DADAD?DADAFAD?DADADADAFADADAFAD?DAFAD?FADADAD?FADAD?FAD?DAF?D?DAF?D?DAFAD?DAFAD?FAD?DAD?FAD?DADAF?DAD?DADAD?DADAFADADADAF?DADAF?DAF?DAF?DAF?DAF?FAD?FAD?F?F?D?FAF?D?FAF?D?FAF?D?F?F?D?F?D?F?F?DAF?F?D?F?D?FAF?D?F@D?F?D?FAF?D?FAD?FADAFAD?FAD?FAD?FAD?D?F?D?F?D?F?D?F@F?D?F?D?F@D?F?D?F?D?D@F?D?D@D?D@D?D@D?D@D?D@D?D@D?D@D?D@D?D@D?B?D@D?D@D?D@D@D?F@D@D?D@D@D?D@F@D@D?D@D@D@D@D?D@D?D@D?D?D?D@F?D?DAD?F?D?DAF?DAF?DADADADAFADADADABAFAD?DADADADADADADADCBADCDCBCDADCDCBCDABCDCBCDCBCDCBCDCBCBCDABCBCDCBCBCDCBCDCBCBCDABCDCBCDCBCBCDCBCBCDCBCBCDCBCBADCBCDCBCDCBCDCBCDCBADCBCDCBCBCDCBABCBCBCDCBCDCBCDCDABCDCBCBADCBCDCBCDABCBCDCBCDCBCDCBCDCBCDCBCDADCBCDCBCDCDCBADCBCDCBCDCBCDCBCDADCBCDCBCDCDCDCBCDABCDCBCDCBCDCBCBCDCDCBCDCDCBCDCDCBADCDCBCDCDCBCDCBCDCBCDCBEDCDCBCDCDCBCDCDCBCDCDCBEBCDCBCDEBCDCDCBCDCDCBCDEDCDCBCDCDCBCDCDCDCBCDCDCBCDCDCDEBCDCDCBCDCDCBCDCDCBCDCDEBCDCBCDCDCBCDCDCDCBCDCDCDCDCBCDEDCBCDCDEBCDCDCBEDCBCDCBCDCDEBCDCDCDCBCDCDCDCBCDCDCBADCBCDADCBCDCBCDCBCDCBCDCDCBCDCDCDEBCDCDCDCDCBCDCDCDCDCBCDEDCDCDCDCDCDCDEDCDCBCDCDCDCDEDCDCBCDCDCDEDCDCBCDCDEDCBCDCDCDCDCDCBCDCDEDCDCBCDCDEDCBEDCDCDCDCDCDCDCDCDCDCDCDCBCDCDCBCDCDCDEBCDCDCDCDCDCBCDEDCDCDCDCDEBCDCDCDCDEDCBCDCDCDEDCDCBCDCDCDCDCDEDCBCDCDCDCBCDCDCDCDCDCDEBCDCDCDCBCDEDCDCBEDCDCDCDCBEDCDCBEDCDEBCDCBCDEBCDCDCDCBEDCBCDEBCDCDEBCDCBEDCBCDCBEBCDCBEDCBCDCBEDCDCBCDEDCBEDCBEDCDEBCDEBCDEBCDEBCDEBCDEBCBEDCBEBCBEBCBEBEBCBEBEBCBEBCBCBCBEBCBCBCBCDCBEBCBEBCBCBEBCBEBEBEBEBCBEBEBEBCBEBEBCBE@EBCBEBEBCBEBC@EBEBEBCBEBEBEBCBEBEBCBEBEBCBEBCBEBEBC@EBEBEBC@EBE@EBEBC@EBEBE@CBE@EBEBC@EBE@CBEBE@E@CBE@EBE@EBEBE@EBE@CBEBE@EBE@EBE@EBE@E@EBE@EBE@E@EBE@CBE@E@C@EBE@C@E@E@E@E@E@EBE@E@E@EBE@E@E@E@EBE@E@E@G@E@E@EBE@C@E@E@E@E@E@E@E@E@E@E@E@E@E@E?C@E@C@E@C?E@E?C@E@C@E@C?E@C@E@C?C@E@C@E?E@E@E@E?E@C@E@E?E@C@E@E@C?E@E@C?E@E@C?E@C?E@E?C@E@E?C@E@C?C@C?A?CAHIEAG?E?G?G?E?G@E@G?E?G?E@EBCBGBE@E@GBEAG?G?E@G?E?G?G?E?G?E?G@GAEAGAE?G@E@GBE@G?E?G@E@GBE@G@EBE@GBEBEBEBEBEBEBG@G?E@G?E@G?E@G?GAE?G@EBG?G?AFCDG?G?EAGAECGAECECGAEAGAE?G?E?G?G?E@G@EAGCEAECAE?EEAGA[AEAE?E?G?EAE?G?E?EAG?E?E?G?E@E?E?E@G?E?E?E?E?G?EAE?EAE?EAEAEAE?EAEAEAGAEAEAEAE?G?E?E?E@E@CBABAF?D?F?F?F?F@F?F?DAF?F?F?D?F@F?F?D?F?F@D?F?F?D?F?F?D@F?D?F?F?D?F@D?F?D?F@D?F?F?D?F?F?D?F?F?F?D?F?F?F?D@F?F?D?F?F@F?D?F?F?D?F?D?F?D?FAD?D?F?D?D?FAD?F?D?D?F?D?D?D?F?D?DAF?D?D?F?D?F?D?D?F?D?D?F?D?F@DAD?F?D?F?D?F?D?F?D?F?D?D?F?D?D?F?D?F?D?F?DAF?D?F?D?F?D?F?D?F?D?F?D?F?D?F?D?F?D?F?F?D?F?D@F?D?F?D?D?F?D?D?F?D?DAF?D?D?F?D?F?D?F?F?D?F?F?F?F?F?FAF?F?F?F?F?F?D?F?F?D?F@F?D?F?FAD?F?FAD?F?D?D?F?D?D?F@D?F?D?F?D?F?D?D?F?D?F?F?D?F?D?F?D?F?D?F?F?F?D?F?F?F?D?F?F?F?F?F@D?F?F?F?F?F?F?D?F?D?F?FAF?D?F?F?D?F?D?F?D?F?D?F?F?F?D?F?D?F?D?F?F?D?F?D?F?F?F?D?F?F?D?F?D?F?DAF?D?D?F?DAD?D?F?D@D?D?F?D?D?F?D?F?D?F?D?F?F?D?F?F?D?F?D?F?FAD?F?D@FAD?F?D?F?F@D?F?D?F?D?F?D?F@D?FAD?F?F?D?F?F?D?F?F?F?F?F?D?F?F?F?D?F@F?D?F@F?F@F?D?F@F?F?F?F?F?F?F?D?F?F?F?D?F?DAF?D?F?D?F?D?F@D?F@D@D@DBFBDBDDBBDDBDBFBD@D@F@D?F?D?F?D?FAD?F?D?FAD?D?F?D?DAD?FAD?FAD?DAD?FAD?FAD?DAFAD?FADADAFADADAFAD?DAFAD?DAFADADCFADADADAFADADADAFADADADADAFADCDADCDADCDADCDCDADCDABCDCDCDCBCDCDCDCDCBCDCDCDEDCBCDADCDCDADCDADCDCDADCDCDADCBCDCDADCBCDCDCBADCDCBCDCBCDCBCDCDCBCDCBCDCDCBADCBCDCDCBCDCDCDCBCDADCDCBCDCDCDCDCBCDCDCBCDCDCBCDEBCDADCDCBCDCDABCDCDABCDCDABCDCBADCBCDCBADCDCBCDADCBCDADCDCBADCDADADCDADCDADADCDADADAFAD?DAFAD?DAFAD?DADAF?DAD?DAD?DAF?DAD?DAF?DAD?F?DAD?F?D?D?D?F?D?D?DAD?D?DAF?DAD?D?DAF?D?D?DAF?DADAD?DADADADCDADAFADCDADADCDADCBCDAFCDCDADCDCDCBCDCDCDCDCDCBCDCDCDCDCDCBCDCDCDADCDCDCDEDCDCDCDCDCDCDCBCFCDADCDCDADCDCFADADCFADAFADADAFADADAFADAD?DAFADADAD?DADAFCDADADADADAFADADADAFADADADADADAF?DADAD?FADAD?D?DAF?D?D?DAD?DADADADADADABABABABAD?BADADADAD?FADAFAD?FAD?DAFAD?DAFAD?DAFAD?DAFAD?DAFADAFADCDAFADADAFADADAFADAD?DAF?DADADAFADADAFADADAF?DADAFADAD?DADAF?DADAD?DADAFADAD?DADADABAD?DADADCDADABADADADAF?DADAD?DADAD?FADADADAD?FADADADAFADADAD?FADADAFADADADADAF?DADADAD?FADADAFADADADAF?DADAD?FADADAD?DADADADAD?FADADADADADADADADADADAD?DADADADADADADAD?FADAD?DAF?DAD?DAF?DADAD?DAF?DAD?DADAD?DADADAD?BADADAD?DADADAD?DAD?DADADAB?DADAD?DADADABAD?DADADADAD?DADADAB?DADAD?DADADADADAD?DADAD?DAD?DAD?DAD?DAD?DAD?DAFAD?DADADADADAD?DABADADADAD?DADAD?DAD?D?DADAD?DADADAD?DADADADAD?DADADADADADADADAB?DADAD?DABAD?BADAD?BADAB?DAD?DAD?DAF?DAD?DADADAD?DADADADAD?DADADAF?DADAD?DADADAD?DADADADAD?FADADAD?DADAD?DADAD?BAD?DAD?DAD?DAD?DAB?DAD?DAD?DAD?DAD?D?DAD?DAD?D?DAF?DAD?D?DAD?DAD?D?DAD?D?D?DAD?D?D?DAD?D?DAD?D?DAD?D?DAD?D?D?DAD?D?D?DAD?D?D?DAD?D?D?D?DAB?D?DAD?DAD?DAD?DAD?DAD?DAD?D?DAD?B?DAD?D?DAD?DADAB?DADAD?D?DAD?D?D?DAD?D?D?DAD?F?DAD?D?DAD?DAD?DAD?DAD?D?F?DAD?D?DAD?D?F?DAD?D?D?DAF?D?DAD?DAF?D?DAD?F?DAD?FAD?D?FAD?D?DAF?D?D?FAD?D?D?DAD?DAF?D?DAD?D?DAD?FAD?DADAF?D?DAF?D?DAD?D?D?FAD?DAD?F?DAD?DAF?D?DAF?D?DAF?DAD?FAD?DAF?D?DAF?D?DAF?D?DAD?FAD?D?D?DAF?D?FAD?D?FAD?FAD?F?DAD?F?D?D?F?DAD?D?D?FADAD?FAD?DAF?DAD?F?D?FAD?F?DAF?D?DAF?D?F?F?DAF?D?FAD?FAD?FAD?F?DAF?D?F?DAF?D?D?F?D?D?FAD?FAD?DAF?DAD?F?DAD?FAD?FAD?FAFAD?FAF?DAF?FAD?F?FAD?F?DAF?FAD?FAD?FAFADAF?DAF?FAF?D?FAF?D?F?F?FAD?F?F?FAD?F?FAF?DAF?F?DAF?FAF?DAF?FAF?DAF?FAD?F?FAD?FAF?FAF?DAFAF?FAF?F?F?FAF?F?D?F?F?DAF?DAF?DAFAD?FAD?F?DAF?FAD?FAD?FADAD?FAD?FAD?FAD?DAF?DAFADAFAD?FADAFADAFADAFADAFCDAFADADCFADADAFADADCFADADCFADCDAFCDADCFADCFADADCFADCDAFADCFADAFCDAFADCFADADCFADCFADCDAFCDAFCDADCDAFCDAFADADCFADCDAFADCDAFCDADAFCDCDAFCDAFCDAF?D?D@FBDBDBBDBF@D@F@H@F?F@F@F?F@F?F@F@F@F@D?F@F@D@F?F@F?D@F?F?F@D?F?F@F?D@F?F@F?D@F?F?D?F@F?F?D?F@F?D@F?F@F?D@F?F@F?F@D?F@D?F?F@D?F?F@D?F@D?F?F@D?F@D?F?D?F@D?F@F@D?F@F?F@F?D?F@F?F?F@D?F@F?D@F?F@F?D@F?F@F?F@F?D@F@F?F@F?D@F?F?F@F?F?D@F?F?F@D?F@F?F@D?F@D@F?F@D?F@D?F@F?D@F?F?D@F?F@D?F?F@D?F?F?F@F?D?F@F?F?F@F?F?D?F?F?F@D?F?F?D?F@F?D@F?F?F@D?F@F?D?F?F@F?F?D?F?F?D?F?F?D?FAD?D?FAD?F?DAF?DAF?D?FAF?D?DAF?D?DAD?F?DAD?D?FAD?FAD?D?FAD?F?DAD?F?D?DAF?D?F?DAD?F?DAD?F?D?F?D?F?D?FAF?D?F?D?F?D?FAD?F?DAF?DAF?D?F?DAF?D?F?DAF?F?D?FAD?F?DAF?D?FAD?D?FAD?FAD?DAF?DAF?DAD?FAD?FAD?F?DAF?D?DAF?DAF?DAD?FADAF?DAFADAFADADAF?DAFADAF?DAFADAFADAFADAFADCFADAFCDADCDAFADCFADADCDADCFCDADCDAFCDADCFADCFADCDAFCDCDAFCDCFCDADCFADCFCDADCFCDADCFADCDAFCDADCDAFCDADCFADCDADCFADCDAFCDADCDAFCDADCDAFCDADCDADCDCFADCDCDADCDCDAFCDADCDAFCDADCFCDADCDADCDCDAFCDCDCDAFCDCDCDAFCDADCDCFADCDCDADCFADCDAFADADAFAFADAF?DAFADCFADCFADCDCDCDCBCDCDCBCDCDCDADCDCDADCDADADCFADADCDABCDADCDADADAFADCDADAFADCDADCFADADCDADCFADCDCDADCDCFADCDADADCDAFCDADCDADCDADADCDADAFADADCFADADAFADADCFADADADCDADAFADCDADADADADCFADADCDADAFADCDADADAFADADADADAFADADAFADADADAFADCDADADAF?DAD?F?D?F?F?D?F@D@FBDBBBDDBDBD@D@F@D?F@D?F?D?D?F?D?D?F?D?D?F?D?D?FAD?F?FADAF?DAD?FAD?D?D?DAD?D?D?D?F?D?D?D?F?D?FAD?F?D?F?F?DAD?F?DAF?DAD?F?DAF?D?F?D@D?F?D?D?D?F?D?D@D?D?F?D?D@D?D?D?D?D?D?D@D?D?D?D?D@D?D?D?D?F?D?D?D@D?F?D?D?FAD?D?F?D?D?F?D?F?D?F?F?D?D?F?D?F?D?F?D?F?D?DAD?FAD?D?DAF?D?D?F?D@D?D?D?D@D@D?D@DBBBBFBD@FBF@F@F@F@F?F?F?F?F?F?F?F?F?F?F@F?F?F?F?D?F?F?F?F?F?D?F?D?F?D?F?D@F?F?DAF?D?F@F?F?DAF?F?D?FAF?D?FAD?F?F?D?F?FAD@F?F?F?D?F?D?F@D?D?FAD?D?D?F?D?D?D?F?D?DAD?F?D?D?D?FAD?D?F?D?F@D?D?F?D?F?F?D?F?D?FAF?FAD?FADAF?FAD?F?F?DAF?F@D?F?D?F?D?F?D@F?D?F?D?F?F?D?F?F?D?F?F?D?F?F?D?F?F?F@F?F?D?F?F@F?F?F?F?F@F?D?F?F?D?FAD?F?D?F?DAF@D?F?D?F?F?F?D?F?FAF?F?F?FAF?F?F?F?F?F?F?H?F?F?H?F?F?H?F" },
+              "route": { "encoded_polyline": "" },
               "summary": { "distance_km": 10.02, "duration": "01:15:33", "avg_pace": "07'32\"" },
               "photos": [ { "url": `https://picsum.photos/seed/${runId}/600/400` }, { "url": `https://picsum.photos/seed/${runId}a/600/400` } ]
             };
@@ -16198,6 +16295,8 @@ async function generateMarathonCalendar() {
       if(monthlyDistanceChart) monthlyDistanceChart.destroy();
       if(dailyDistanceChart) dailyDistanceChart.destroy();
       if(yearlyDistanceChart) yearlyDistanceChart.destroy();
+      if(monthOverMonthChart) monthOverMonthChart.destroy();
+      if(yearlyDualAxisChart) yearlyDualAxisChart.destroy();
       if(paceChart) paceChart.destroy();
       if(elevationChart) elevationChart.destroy();
       if(hrChart) hrChart.destroy();
