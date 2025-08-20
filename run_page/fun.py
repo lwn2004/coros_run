@@ -404,6 +404,90 @@ def prepare_template_context(all_runs, fastest_run, pb_file, events_file):
     years_for_chart = sorted(summarized_by_year.keys())
     chart_yearly_labels = [str(y) for y in years_for_chart]
     chart_yearly_data = [round(summarized_by_year[y]["summary"]["dist_km"], 2) for y in years_for_chart]
+    
+    # --- START: New Calculations for Card and Charts ---
+    current_year = today.year
+    current_month = today.month
+    current_day = today.day
+
+    last_month_date = today.replace(day=1) - timedelta(days=1)
+    last_month_year = last_month_date.year
+    last_month = last_month_date.month
+
+    current_month_runs = [r for r in all_runs if r['date'].year == current_year and r['date'].month == current_month]
+    current_month_dist = sum(r['distance'] for r in current_month_runs) / 1000
+
+    last_month_runs_to_date = [
+        r for r in all_runs
+        if r['date'].year == last_month_year
+        and r['date'].month == last_month
+        and r['date'].day <= current_day
+    ]
+    last_month_dist_to_date = sum(r['distance'] for r in last_month_runs_to_date) / 1000
+
+    month_on_month_diff = current_month_dist - last_month_dist_to_date
+
+    monthly_comparison = {
+        "current_month_dist": round(current_month_dist, 2),
+        "diff_km": round(month_on_month_diff, 2)
+    }
+
+    days_in_current_month_obj = (date(current_year, current_month % 12 + 1, 1) if current_month < 12 else date(current_year + 1, 1, 1)) - timedelta(days=1)
+    num_days_for_chart = days_in_current_month_obj.day
+
+    this_month_daily_cumulative = [0.0] * num_days_for_chart
+    last_month_daily_cumulative = [0.0] * num_days_for_chart
+
+    daily_dist_this = defaultdict(float)
+    for run in current_month_runs:
+        daily_dist_this[run['date'].day] += run['distance'] / 1000
+    
+    cumulative = 0.0
+    for i in range(num_days_for_chart):
+        cumulative += daily_dist_this.get(i + 1, 0.0)
+        this_month_daily_cumulative[i] = round(cumulative, 2)
+
+    last_month_runs_full = [r for r in all_runs if r['date'].year == last_month_year and r['date'].month == last_month]
+    daily_dist_last = defaultdict(float)
+    for run in last_month_runs_full:
+        daily_dist_last[run['date'].day] += run['distance'] / 1000
+
+    cumulative = 0.0
+    for i in range(num_days_for_chart):
+        cumulative += daily_dist_last.get(i + 1, 0.0)
+        last_month_daily_cumulative[i] = round(cumulative, 2)
+
+    chart_month_over_month = {
+        'labels': [f"{i+1:02d}" for i in range(num_days_for_chart)],
+        'this_month_data': this_month_daily_cumulative,
+        'last_month_data': last_month_daily_cumulative,
+        'summary': {
+            'this_month_total': round(current_month_dist, 2),
+            'diff_km': round(month_on_month_diff, 2)
+        }
+    }
+
+    current_year_runs = [r for r in all_runs if r['date'].year == current_year]
+    monthly_totals_this_year = [0.0] * 12
+    for run in current_year_runs:
+        monthly_totals_this_year[run['date'].month - 1] += run['distance'] / 1000
+    
+    monthly_totals_this_year = [round(d, 2) for d in monthly_totals_this_year]
+
+    yearly_cumulative_data = []
+    cumulative_dist = 0.0
+    for monthly_dist in monthly_totals_this_year:
+        cumulative_dist += monthly_dist
+        yearly_cumulative_data.append(round(cumulative_dist, 2))
+
+    chart_yearly_dual_axis = {
+        'labels': [f"{m}月" for m in range(1, 13)],
+        'monthly_data': monthly_totals_this_year,
+        'cumulative_data': yearly_cumulative_data,
+        'total': round(cumulative_dist, 2)
+    }
+    # --- END: New Calculations ---
+
 
     beijing_tz = timezone(timedelta(hours=8))
     last_build_time = datetime.now(beijing_tz).strftime('%Y-%m-%d %H:%M:%S')
@@ -433,6 +517,9 @@ def prepare_template_context(all_runs, fastest_run, pb_file, events_file):
         "city_stats": city_stats,
         "streak_records": calculate_streaks(all_runs),
         "last_build_time": last_build_time,
+        "monthly_comparison": monthly_comparison,
+        "chart_month_over_month": chart_month_over_month,
+        "chart_yearly_dual_axis": chart_yearly_dual_axis,
     }
 
 def main():
