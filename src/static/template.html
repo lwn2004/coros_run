@@ -1041,7 +1041,7 @@
                     <div class="btn-group btn-group-sm" role="group" id="chart-toggle">
                         <button type="button" class="btn active" data-chart="month-over-month">本月</button>                      
                         <button type="button" class="btn" data-chart="daily">30天</button>
-                        <!--<button type="button" class="btn" data-chart="monthly">12月</button>-->
+                        <button type="button" class="btn" data-chart="monthly">近12月</button>
                         <button type="button" class="btn" data-chart="yearly-dual-axis">今年</button>
                         <button type="button" class="btn" data-chart="yearly">汇总</button>
                     </div>
@@ -1053,10 +1053,10 @@
                 </div>              
                 <div id="dailyChartContainer" style="display: none; height: 300px;">
                     <canvas id="dailyDistanceChart" aria-label="最近30天跑步距离统计图表"></canvas>
-                </div><!--
+                </div>
                 <div id="monthlyChartContainer" style="display: none; height: 300px;">
                     <canvas id="monthlyDistanceChart" aria-label="最近12个月跑步距离统计图表"></canvas>
-                </div>-->
+                </div>
                 <div id="yearlyDualAxisChartContainer" style="display: none; height: 300px;">
                     <canvas id="yearlyDualAxisChart" aria-label="本年度累积跑量图表"></canvas>
                 </div>
@@ -2239,8 +2239,8 @@ async function generateMarathonCalendar() {
         const dailyCtx = document.getElementById('dailyDistanceChart').getContext('2d');
         dailyDistanceChart = new Chart(dailyCtx, { type: 'bar', data: { labels: {{ chart_30_days.labels|tojson }}, datasets: [{ label: '距离 (km)', data: dailyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 2, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 }}}, plugins: { legend: { display: false }, title: { display: true, text: `总 ${dailyTotal.toFixed(1)}km / 次均 ${dailyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(dailyAvg) } } } } });
         
-        //const monthlyCtx = document.getElementById('monthlyDistanceChart').getContext('2d');
-        //monthlyDistanceChart = new Chart(monthlyCtx, { type: 'bar', data: { labels: {{ chart_monthly_labels|tojson }}, datasets: [{ label: '距离 (km)', data: monthlyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 4, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 }}}, plugins: { legend: { display: false }, title: { display: true, text: `总 ${monthlyTotal.toFixed(1)}km / 月均 ${monthlyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(monthlyAvg) } } } } });
+        const monthlyCtx = document.getElementById('monthlyDistanceChart').getContext('2d');
+        monthlyDistanceChart = new Chart(monthlyCtx, { type: 'bar', data: { labels: {{ chart_monthly_labels|tojson }}, datasets: [{ label: '距离 (km)', data: monthlyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 4, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 }}}, plugins: { legend: { display: false }, title: { display: true, text: `总 ${monthlyTotal.toFixed(1)}km / 月均 ${monthlyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(monthlyAvg) } } } } });
         
         const yearlyCtx = document.getElementById('yearlyDistanceChart').getContext('2d');
         yearlyDistanceChart = new Chart(yearlyCtx, { type: 'bar', data: { labels: {{ chart_yearly_labels|tojson }}, datasets: [{ label: '距离 (km)', data: yearlyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 4, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 } } }, plugins: { legend: { display: false }, title: { display: true, text: `总 ${yearlyTotal.toFixed(1)}km / 年均 ${yearlyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(yearlyAvg) } } } } });
