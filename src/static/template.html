@@ -903,12 +903,13 @@
                       </div>
                     </div>
                 </div>
-            </div><div class="col-6 col-md-6 col-lg-2">
+            </div>
+            <div class="col-lg-2 d-none d-lg-block">
                 <div class="stat-card-flip-container h-100" id="count-card-container">
                     <div class="stat-card-flipper h-100">
                       <div class="stat-card-front">
                         <div class="stat-card-content">
-                          <div class="stat-label">跑步次数</div>
+                          <div class="stat-label">累计次数</div>
                           <div class="stat-value">{{ overall_stats.count }}</div>
                         </div>
                         <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
@@ -943,7 +944,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-md-6 col-lg-3">
+            <div class="col-6 col-md-6 col-lg-3">
               <div class="stat-card-flip-container h-100" id="month-card-container">
                 <div class="stat-card-flipper h-100">
                   <div class="stat-card-front">
@@ -963,7 +964,7 @@
                             </div>
                         </div>
                         <div class="stat-details mt-2">
-                            <a href="#run-analysis-section" class="comment-link" id="view-analysis-link">查看分析 &rarr;</a>
+                            <a href="#run-analysis-section" class="comment-link" id="view-analysis-link">查看图表 &rarr;</a>
                         </div>
                     </div>
                     <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
@@ -1038,24 +1039,24 @@
                 <div class="card-title-container">
                     <h5 class="card-title">跑量分析</h5>
                     <div class="btn-group btn-group-sm" role="group" id="chart-toggle">
-                        <button type="button" class="btn active" data-chart="daily">近30天</button>
-                        <button type="button" class="btn" data-chart="monthly">近12月</button>
-                        <button type="button" class="btn" data-chart="month-over-month">本月对比</button>
-                        <button type="button" class="btn" data-chart="yearly-dual-axis">今年跑量</button>
-                        <button type="button" class="btn" data-chart="yearly">年度汇总</button>
+                        <button type="button" class="btn active" data-chart="month-over-month">本月</button>                      
+                        <button type="button" class="btn" data-chart="daily">30天</button>
+                        <!--<button type="button" class="btn" data-chart="monthly">12月</button>-->
+                        <button type="button" class="btn" data-chart="yearly-dual-axis">今年</button>
+                        <button type="button" class="btn" data-chart="yearly">汇总</button>
                     </div>
                 </div>
             </div>
             <div class="card-body">
-                <div id="dailyChartContainer" style="display: block; height: 300px;">
+                <div id="monthOverMonthChartContainer" style="display: block; height: 300px;">
+                    <canvas id="monthOverMonthChart" aria-label="本月与上月跑量对比图表"></canvas>
+                </div>              
+                <div id="dailyChartContainer" style="display: none; height: 300px;">
                     <canvas id="dailyDistanceChart" aria-label="最近30天跑步距离统计图表"></canvas>
-                </div>
+                </div><!--
                 <div id="monthlyChartContainer" style="display: none; height: 300px;">
                     <canvas id="monthlyDistanceChart" aria-label="最近12个月跑步距离统计图表"></canvas>
-                </div>
-                <div id="monthOverMonthChartContainer" style="display: none; height: 300px;">
-                    <canvas id="monthOverMonthChart" aria-label="本月与上月跑量对比图表"></canvas>
-                </div>
+                </div>-->
                 <div id="yearlyDualAxisChartContainer" style="display: none; height: 300px;">
                     <canvas id="yearlyDualAxisChart" aria-label="本年度累积跑量图表"></canvas>
                 </div>
@@ -2215,6 +2216,10 @@ async function generateMarathonCalendar() {
         const monthOverMonthData = {{ chart_month_over_month|tojson }};
         const yearlyDualAxisData = {{ chart_yearly_dual_axis|tojson }};
 
+        const today = new Date();
+        const currentDay = today.getDate();
+        const currentMonth = today.getMonth(); // 0-indexed
+
         const gridColor = 'rgba(128, 128, 128, 0.2)';
         const tickColor = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim();
         const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
@@ -2242,26 +2247,50 @@ async function generateMarathonCalendar() {
 
         const monthOverMonthCtx = document.getElementById('monthOverMonthChart').getContext('2d');
         const diffText = monthOverMonthData.summary.diff_km >= 0 ? `+${monthOverMonthData.summary.diff_km}` : monthOverMonthData.summary.diff_km;
+        const thisMonthTruncatedData = monthOverMonthData.this_month_data.slice(0, currentDay);
         monthOverMonthChart = new Chart(monthOverMonthCtx, {
             type: 'line',
             data: {
                 labels: monthOverMonthData.labels,
                 datasets: [
-                    { label: '本月', data: monthOverMonthData.this_month_data, borderColor: accentColor, borderWidth: 3, pointRadius: 1, fill: false, tension: 0.1 },
+                    { label: '本月', data: thisMonthTruncatedData, borderColor: accentColor, borderWidth: 3, pointRadius: 1, fill: false, tension: 0.1 },
                     { label: '上月', data: monthOverMonthData.last_month_data, borderColor: 'rgba(128, 128, 128, 0.7)', borderWidth: 2, borderDash: [5, 5], pointRadius: 1, fill: false, tension: 0.1 }
                 ]
             },
-            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: v => v + ' km' } }, x: { grid: { display: false }, ticks: { color: tickColor } } }, plugins: { legend: { labels: { color: tickColor } }, title: { display: true, text: `本月跑量: ${monthOverMonthData.summary.this_month_total}km (较上月同期: ${diffText}km)`, align: 'start', color: annotationColor } } }
+            options: { 
+                responsive: true, maintainAspectRatio: false, 
+                scales: { 
+                    y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: v => v + ' km' } }, 
+                    x: { grid: { display: false }, ticks: { color: tickColor } } 
+                }, 
+                plugins: { 
+                    legend: { labels: { color: tickColor } }, 
+                    title: { display: true, text: `本月跑量: ${monthOverMonthData.summary.this_month_total}km (较上月同期: ${diffText}km)`, align: 'start', color: annotationColor },
+                    annotation: {
+                        annotations: {
+                            todayLine: {
+                                type: 'line',
+                                xMin: currentDay - 1,
+                                xMax: currentDay - 1,
+                                borderColor: 'rgba(255, 255, 255, 0.5)',
+                                borderWidth: 1.5,
+                                borderDash: [6, 6]
+                            }
+                        }
+                    }
+                } 
+            }
         });
 
         const yearlyDualAxisCtx = document.getElementById('yearlyDualAxisChart').getContext('2d');
+        const cumulativeTruncatedData = yearlyDualAxisData.cumulative_data.slice(0, currentMonth + 1);
         yearlyDualAxisChart = new Chart(yearlyDualAxisCtx, {
             type: 'bar',
             data: {
                 labels: yearlyDualAxisData.labels,
                 datasets: [
                     { type: 'bar', label: '月度跑量', data: yearlyDualAxisData.monthly_data, backgroundColor: accentColor + '99', borderColor: accentColor, yAxisID: 'y' },
-                    { type: 'line', label: '累积跑量', data: yearlyDualAxisData.cumulative_data, borderColor: accentColorSecondary, borderWidth: 3, pointRadius: 2, fill: false, tension: 0.1, yAxisID: 'y1' }
+                    { type: 'line', label: '累积跑量', data: cumulativeTruncatedData, borderColor: accentColorSecondary, borderWidth: 3, pointRadius: 2, fill: false, tension: 0.1, yAxisID: 'y1' }
                 ]
             },
             options: {
