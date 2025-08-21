@@ -1058,7 +1058,7 @@
                     <canvas id="monthlyDistanceChart" aria-label="最近12个月跑步距离统计图表"></canvas>
                 </div>
                 <div id="yearlyDualAxisChartContainer" style="display: none; height: 300px;">
-                    <canvas id="yearlyDualAxisChart" aria-label="本年度累积跑量图表"></canvas>
+                    <canvas id="yearlyDualAxisChart" aria-label="本年度累计跑量图表"></canvas>
                 </div>
                 <div id="yearlyChartContainer" style="display: none; height: 300px;">
                     <canvas id="yearlyDistanceChart" aria-label="年度跑步距离统计图表"></canvas>
@@ -2290,7 +2290,7 @@ async function generateMarathonCalendar() {
                 labels: yearlyDualAxisData.labels,
                 datasets: [
                     { type: 'bar', label: '月度跑量', data: yearlyDualAxisData.monthly_data, backgroundColor: accentColor + '99', borderColor: accentColor, yAxisID: 'y' },
-                    { type: 'line', label: '累积跑量', data: cumulativeTruncatedData, borderColor: accentColorSecondary, borderWidth: 3, pointRadius: 2, fill: false, tension: 0.1, yAxisID: 'y1' }
+                    { type: 'line', label: '累计跑量', data: cumulativeTruncatedData, borderColor: accentColorSecondary, borderWidth: 3, pointRadius: 2, fill: false, tension: 0.1, yAxisID: 'y1' }
                 ]
             },
             options: {
@@ -2298,7 +2298,7 @@ async function generateMarathonCalendar() {
                 scales: {
                     x: { grid: { display: false }, ticks: { color: tickColor } },
                     y: { type: 'linear', display: true, position: 'left', title: { display: true, text: '月度跑量 (km)', color: tickColor }, grid: { color: gridColor }, ticks: { color: tickColor } },
-                    y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: '累积跑量 (km)', color: tickColor }, grid: { drawOnChartArea: false }, ticks: { color: tickColor } }
+                    y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: '累计跑量 (km)', color: tickColor }, grid: { drawOnChartArea: false }, ticks: { color: tickColor } }
                 },
                 plugins: { legend: { labels: { color: tickColor } }, title: { display: true, text: `今年总跑量: ${yearlyDualAxisData.total}km`, align: 'start', color: annotationColor } }
             }
