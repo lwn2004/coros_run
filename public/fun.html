@@ -1129,7 +1129,7 @@
                     <div class="btn-group btn-group-sm" role="group" id="chart-toggle">
                         <button type="button" class="btn active" data-chart="month-over-month">本月</button>                      
                         <button type="button" class="btn" data-chart="daily">30天</button>
-                        <!--<button type="button" class="btn" data-chart="monthly">12月</button>-->
+                        <button type="button" class="btn" data-chart="monthly">近12月</button>
                         <button type="button" class="btn" data-chart="yearly-dual-axis">今年</button>
                         <button type="button" class="btn" data-chart="yearly">汇总</button>
                     </div>
@@ -1141,10 +1141,10 @@
                 </div>              
                 <div id="dailyChartContainer" style="display: none; height: 300px;">
                     <canvas id="dailyDistanceChart" aria-label="最近30天跑步距离统计图表"></canvas>
-                </div><!--
+                </div>
                 <div id="monthlyChartContainer" style="display: none; height: 300px;">
                     <canvas id="monthlyDistanceChart" aria-label="最近12个月跑步距离统计图表"></canvas>
-                </div>-->
+                </div>
                 <div id="yearlyDualAxisChartContainer" style="display: none; height: 300px;">
                     <canvas id="yearlyDualAxisChart" aria-label="本年度累积跑量图表"></canvas>
                 </div>
@@ -14961,7 +14961,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-08-21 14:04:57 
+         | Last updated: 2025-08-21 14:42:56 
     </small>
 </footer>
 
@@ -15779,8 +15779,8 @@ async function generateMarathonCalendar() {
         const dailyCtx = document.getElementById('dailyDistanceChart').getContext('2d');
         dailyDistanceChart = new Chart(dailyCtx, { type: 'bar', data: { labels: ["07-23", "07-24", "07-25", "07-26", "07-27", "07-28", "07-29", "07-30", "07-31", "08-01", "08-02", "08-03", "08-04", "08-05", "08-06", "08-07", "08-08", "08-09", "08-10", "08-11", "08-12", "08-13", "08-14", "08-15", "08-16", "08-17", "08-18", "08-19", "08-20", "08-21"], datasets: [{ label: '距离 (km)', data: dailyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 2, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 }}}, plugins: { legend: { display: false }, title: { display: true, text: `总 ${dailyTotal.toFixed(1)}km / 次均 ${dailyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(dailyAvg) } } } } });
         
-        //const monthlyCtx = document.getElementById('monthlyDistanceChart').getContext('2d');
-        //monthlyDistanceChart = new Chart(monthlyCtx, { type: 'bar', data: { labels: ["24-09", "24-10", "24-11", "24-12", "25-01", "25-02", "25-03", "25-04", "25-05", "25-06", "25-07", "25-08"], datasets: [{ label: '距离 (km)', data: monthlyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 4, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 }}}, plugins: { legend: { display: false }, title: { display: true, text: `总 ${monthlyTotal.toFixed(1)}km / 月均 ${monthlyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(monthlyAvg) } } } } });
+        const monthlyCtx = document.getElementById('monthlyDistanceChart').getContext('2d');
+        monthlyDistanceChart = new Chart(monthlyCtx, { type: 'bar', data: { labels: ["24-09", "24-10", "24-11", "24-12", "25-01", "25-02", "25-03", "25-04", "25-05", "25-06", "25-07", "25-08"], datasets: [{ label: '距离 (km)', data: monthlyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 4, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 }}}, plugins: { legend: { display: false }, title: { display: true, text: `总 ${monthlyTotal.toFixed(1)}km / 月均 ${monthlyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(monthlyAvg) } } } } });
         
         const yearlyCtx = document.getElementById('yearlyDistanceChart').getContext('2d');
         yearlyDistanceChart = new Chart(yearlyCtx, { type: 'bar', data: { labels: ["2021", "2022", "2023", "2024", "2025"], datasets: [{ label: '距离 (km)', data: yearlyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 4, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 } } }, plugins: { legend: { display: false }, title: { display: true, text: `总 ${yearlyTotal.toFixed(1)}km / 年均 ${yearlyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(yearlyAvg) } } } } });
