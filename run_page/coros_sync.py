@@ -283,8 +283,9 @@ def parse_fit_file(fit_file_path):
     records, laps, session, file_id = [], [], None, None
 
     for message in fitfile.get_messages():
-        if message.name == "record" and message.has_field('position_lat') and message.has_field('position_long'):
-            records.append(message.get_values())
+        #if message.name == "record" and message.has_field('position_lat') and message.has_field('position_long'):
+        if message.name == "record" and message.get_value('position_lat') is not None and message.get_value('position_long') is not None:
+          records.append(message.get_values())
         elif message.name == "lap":
             laps.append(message.get_values())
         elif message.name == "session":
