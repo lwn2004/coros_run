@@ -29,3 +29,4 @@ pycryptodome
 duckdb
 opencc-python-reimplemented
 jinja2
+fitparse
