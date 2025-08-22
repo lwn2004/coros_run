@@ -266,7 +266,12 @@ def downsample_records(records, target_points):
         for key in chunk[0].keys():
             valid_values = [p[key] for p in chunk if p.get(key) is not None]
             if valid_values:
-                avg_point[key] = sum(valid_values) / len(valid_values)
+                #avg_point[key] = sum(valid_values) / len(valid_values)
+                if isinstance(valid_values[0], (int, float)):
+                    avg_point[key] = sum(valid_values) / len(valid_values)
+                else:
+                    # For non-numeric types (like strings), just take the first value
+                    avg_point[key] = valid_values[0]              
             else:
                 avg_point[key] = None
         downsampled.append(avg_point)
