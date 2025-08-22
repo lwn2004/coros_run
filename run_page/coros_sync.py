@@ -163,7 +163,7 @@ async def download_and_generate(account, password):
     await coros.req.aclose()
     make_activities_file(SQL_FILE, FIT_FOLDER, JSON_FILE, "fit", json_file2 = JSON_FILE2)
 
-    for label_id in to_generate_coros_ids: #['471323505955209320']:
+    for label_id in ['471323505955209320']: #to_generate_coros_ids: #
       fit_path = os.path.join(folder, f"{label_id}.fit")
       run_data = parse_fit_file(fit_path)
   
@@ -208,48 +208,70 @@ def format_pace(speed_mps):
     return f"{minutes}'{seconds:02}\""
 
 def get_weather_data(lat, lon, timestamp):
-    """Fetches historical weather data from Open-Meteo."""
+    """Fetches historical weather, with a fallback to the forecast API for recent data."""
     if lat is None or lon is None or timestamp is None:
         return None
     
     dt_utc = timestamp.replace(tzinfo=timezone.utc)
-    # The API is sometimes slow to update the most recent day, so we check the day before if today fails
-    for i in range(3): # Try for up to 3 days back
-        check_date = dt_utc - timedelta(days=i)
-        date_str = check_date.strftime("%Y-%m-%d")
-        api_url = (
-            f"https://archive-api.open-meteo.com/v1/archive?latitude={lat:.4f}&longitude={lon:.4f}"
-            f"&start_date={date_str}&end_date={date_str}"
-            f"&hourly=temperature_2m,weathercode,windspeed_10m"
-        )
-        try:
-            res = requests.get(api_url, timeout=10)
-            res.raise_for_status()
-            data = res.json()
-            if not data.get('hourly'):
-                print(f"Warning: No hourly weather data returned for {date_str}. Trying previous day.")
-                continue
+    date_str = dt_utc.strftime("%Y-%m-%d")
 
+    # 1. First, try the Archive API (best for data older than a few hours)
+    archive_api_url = (
+        f"https://archive-api.open-meteo.com/v1/archive?latitude={lat:.4f}&longitude={lon:.4f}"
+        f"&start_date={date_str}&end_date={date_str}"
+        f"&hourly=temperature_2m,weathercode,windspeed_10m"
+    )
+    try:
+        res = requests.get(archive_api_url, timeout=10)
+        res.raise_for_status()
+        data = res.json()
+        if data.get('hourly') and data['hourly'].get('time'):
             hour_index = dt_utc.hour
-            
             temp = data['hourly']['temperature_2m'][hour_index]
             code = data['hourly']['weathercode'][hour_index]
             wind_kmh = data['hourly']['windspeed_10m'][hour_index]
-            
             condition, icon = WMO_CODE_MAP.get(code, ("Unknown", ""))
-
+            print("Successfully fetched weather from Archive API.")
             return {
                 "temperature_c": temp,
                 "condition": f"{condition} {icon}",
                 "wind_speed_kmh": wind_kmh
             }
-        except (requests.RequestException, KeyError, IndexError) as e:
-            print(f"Could not fetch or parse weather for {date_str}: {e}")
-    
+    except Exception as e:
+        print(f"Archive API failed for {date_str}: {e}. Will try Forecast API as a fallback.")
+
+    # 2. Fallback to Forecast API for recent dates (within the last 5 days)
+    if (datetime.now(timezone.utc) - dt_utc).days < 5:
+        print("Date is recent, attempting Forecast API fallback...")
+        forecast_api_url = (
+            f"https://api.open-meteo.com/v1/forecast?latitude={lat:.4f}&longitude={lon:.4f}"
+            f"&hourly=temperature_2m,weathercode,windspeed_10m&past_days=5"
+        )
+        try:
+            res = requests.get(forecast_api_url, timeout=10)
+            res.raise_for_status()
+            data = res.json()
+            # Find the matching timestamp in the forecast data
+            target_iso_time = dt_utc.strftime("%Y-%m-%dT%H:00")
+            if target_iso_time in data['hourly']['time']:
+                idx = data['hourly']['time'].index(target_iso_time)
+                temp = data['hourly']['temperature_2m'][idx]
+                code = data['hourly']['weathercode'][idx]
+                wind_kmh = data['hourly']['windspeed_10m'][idx]
+                condition, icon = WMO_CODE_MAP.get(code, ("Unknown", ""))
+                print("Successfully fetched weather from Forecast API fallback.")
+                return {
+                    "temperature_c": temp,
+                    "condition": f"{condition} {icon}",
+                    "wind_speed_kmh": wind_kmh
+                }
+        except Exception as e:
+            print(f"Forecast API fallback also failed: {e}")
+            
     return None
 
 def downsample_records(records, target_points):
-    """Downsamples a list of record dictionaries to a target number of points."""
+    """Downsamples a list of record dictionaries with correct pace/speed averaging."""
     if not records or len(records) <= target_points:
         return records
     
@@ -260,18 +282,30 @@ def downsample_records(records, target_points):
         end = int((i + 1) * chunk_size)
         chunk = records[start:end]
         if not chunk: continue
-        
-        # Average the values in the chunk
+
         avg_point = {}
-        for key in chunk[0].keys():
+        first_record = chunk[0]
+        last_record = chunk[-1]
+
+        # Correctly calculate average speed from total distance and time for the chunk
+        time_delta_seconds = (last_record.get('timestamp') - first_record.get('timestamp')).total_seconds()
+        dist_delta_meters = last_record.get('distance', 0) - first_record.get('distance', 0)
+
+        if time_delta_seconds > 0 and dist_delta_meters > 0:
+            avg_point['speed'] = dist_delta_meters / time_delta_seconds
+        else:
+            avg_point['speed'] = first_record.get('speed')  # Fallback to first point if no change
+
+        # Average other numeric keys, sample non-numeric keys
+        for key in first_record.keys():
+            if key == 'speed': continue  # Already handled
+
             valid_values = [p[key] for p in chunk if p.get(key) is not None]
             if valid_values:
-                #avg_point[key] = sum(valid_values) / len(valid_values)
                 if isinstance(valid_values[0], (int, float)):
                     avg_point[key] = sum(valid_values) / len(valid_values)
                 else:
-                    # For non-numeric types (like strings), just take the first value
-                    avg_point[key] = valid_values[0]              
+                    avg_point[key] = valid_values[0]
             else:
                 avg_point[key] = None
         downsampled.append(avg_point)
