@@ -163,7 +163,7 @@ async def download_and_generate(account, password):
     await coros.req.aclose()
     make_activities_file(SQL_FILE, FIT_FOLDER, JSON_FILE, "fit", json_file2 = JSON_FILE2)
 
-    for label_id in to_generate_coros_ids: #['471323505955209320']: #
+    for label_id in ['471277511687307274', '471277511687307273']: #to_generate_coros_ids: #
       fit_path = os.path.join(folder, f"{label_id}.fit")
       run_data = parse_fit_file(fit_path)
   
@@ -225,6 +225,7 @@ def get_weather_data(lat, lon, timestamp):
         res = requests.get(archive_api_url, timeout=10)
         res.raise_for_status()
         data = res.json()
+        print(json.dumps(data, indent=4, sort_keys=True))
         if data.get('hourly') and data['hourly'].get('time'):
             hour_index = dt_utc.hour
             temp = data['hourly']['temperature_2m'][hour_index]
@@ -358,6 +359,7 @@ def parse_fit_file(fit_file_path):
     total_duration_sec = session.get('total_elapsed_time', 0)
     avg_speed_mps = session.get('avg_speed')
     best_speed_mps = session.get('max_speed')
+    ave_cadence = session.get('avg_running_cadence') *2
     
     summary = {
         "distance_km": f"{total_distance_km:.2f}",
@@ -366,8 +368,8 @@ def parse_fit_file(fit_file_path):
         "best_pace": format_pace(best_speed_mps),
         "calories_kcal": session.get('total_calories'),
         "total_ascent_m": session.get('total_ascent'),
-        "avg_cadence": session.get('avg_cadence'),
-        "avg_power_w": None, # FIT files from COROS don't always have this field
+        "avg_cadence": ave_cadence,
+        "avg_power_w": session.get('avg_power'),
         "avg_hr": session.get('avg_heart_rate'),
         "max_hr": session.get('max_heart_rate')
     }
