@@ -24,49 +24,6 @@ CONFIG = {
 		'上海市': [31.230, 121.473],
 		'天津市': [39.084, 117.201],
 		'重庆市': [29.563, 106.551],
-		
-		# 广东省
-		'广州市': [23.129, 113.264],
-		'深圳市': [22.543, 114.058],
-		'珠海市': [22.271, 113.576],
-		'佛山市': [23.022, 113.122],
-		'东莞市': [23.020, 113.751],
-		'中山市': [22.517, 113.392],
-		'惠州市': [23.112, 114.416],
-		'清远市': [23.682, 113.056],
-		'茂名市': [21.663, 110.925],
-		
-		# 其他省会/重点城市
-		'成都市': [30.572, 104.066],
-		'杭州市': [30.274, 120.155],
-		'武汉市': [30.593, 114.305],
-		'南京市': [32.060, 118.797],
-		'西安市': [34.341, 108.940],
-		'长沙市': [28.228, 112.938],
-		'苏州市': [31.299, 120.585],
-		'厦门市': [24.480, 118.089],
-		'青岛市': [36.067, 120.382],
-		'大连市': [38.914, 121.615],
-		
-		# 东北地区
-		'沈阳市': [41.803, 123.425],
-		'长春市': [43.817, 125.324],
-		'哈尔滨市': [45.803, 126.535],
-		
-		# 西北地区
-		'乌鲁木齐市': [43.825, 87.617],
-		'银川市': [38.487, 106.230],
-		'兰州市': [36.061, 103.834],
-		
-		# 西南地区
-		'昆明市': [25.043, 102.832],
-		'贵阳市': [26.647, 106.630],
-		'拉萨市': [29.646, 91.117],
-		
-		# 港澳台
-		'香港': [22.319, 114.169],
-		'澳门': [22.179, 113.549],
-		'台北市': [25.033, 121.565]
     }
 }
 
@@ -344,11 +301,29 @@ def prepare_template_context(all_runs, fastest_run, pb_file, events_file):
         run_date = run['date'].date()
         if run_date in last_30_days_data:
             last_30_days_data[run_date] += run['distance'] / 1000
-            
-    chart_30_days_labels = [d.strftime('%m-%d') for d in sorted(last_30_days_data.keys())]
-    chart_30_days_values = [round(last_30_days_data[d], 2) for d in sorted(last_30_days_data.keys())]
+
+    # --- START: Modified section for 30-day chart ---
+    sorted_dates = sorted(last_30_days_data.keys())
+    chart_30_days_labels = [d.strftime('%m-%d') for d in sorted_dates]
+    chart_30_days_values = [round(last_30_days_data[d], 2) for d in sorted_dates]
     
-    chart_30_days = {'labels': chart_30_days_labels, 'data': chart_30_days_values}
+    # Define colors based on the day of the week
+    weekday_color = 'rgba(77, 171, 247, 0.6)'  # accent-color
+    weekend_color = 'rgba(32, 201, 151, 0.6)' # success-color
+    
+    # Monday is 0 and Sunday is 6. Saturday is 5.
+    chart_30_days_colors = [
+        weekend_color if d.weekday() >= 5 else weekday_color
+        for d in sorted_dates
+    ]
+    
+    chart_30_days = {
+        'labels': chart_30_days_labels, 
+        'data': chart_30_days_values,
+        'colors': chart_30_days_colors
+    }
+    # --- END: Modified section for 30-day chart ---
+
 
     overall_stats = summarize_runs(all_runs)
     one_year_ago = datetime.now() - timedelta(days=365)
@@ -405,7 +380,6 @@ def prepare_template_context(all_runs, fastest_run, pb_file, events_file):
     chart_yearly_labels = [str(y) for y in years_for_chart]
     chart_yearly_data = [round(summarized_by_year[y]["summary"]["dist_km"], 2) for y in years_for_chart]
     
-    # --- START: New Calculations for Card and Charts ---
     current_year = today.year
     current_month = today.month
     current_day = today.day
@@ -486,8 +460,6 @@ def prepare_template_context(all_runs, fastest_run, pb_file, events_file):
         'cumulative_data': yearly_cumulative_data,
         'total': round(cumulative_dist, 2)
     }
-    # --- END: New Calculations ---
-
 
     beijing_tz = timezone(timedelta(hours=8))
     last_build_time = datetime.now(beijing_tz).strftime('%Y-%m-%d %H:%M:%S')
@@ -556,8 +528,5 @@ def main():
     print(f"Successfully generated report: '{output_file}'")
 
 if __name__ == "__main__":
-    # Correcting path for main execution if necessary
-    # Assuming fun.py is in a 'scripts' or similar directory
-    # To find the project root (parent), we might need to adjust
-    parent = os.path.dirname(current) # This should be correct if fun.py is in a child dir of project root
+    parent = os.path.dirname(current) 
     main()
