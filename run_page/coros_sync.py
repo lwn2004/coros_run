@@ -39,7 +39,24 @@ WMO_CODE_MAP = {
     82: ("Violent rain showers", "🌦️"), 85: ("Slight snow showers", "❄️"), 86: ("Heavy snow showers", "❄️"),
     95: ("Thunderstorm", "⛈️"), 96: ("Thunderstorm with slight hail", "⛈️"), 99: ("Thunderstorm with heavy hail", "⛈️"),
 }
+WMO_CODE_MAP_ZH = {
+    0: ("晴朗", "☀️"),    1: ("大部晴朗", "🌤️"),    2: ("局部多云", "⛅️"),
+    3: ("阴天", "☁️"),    45: ("有雾", "🌫️"),    48: ("雾凇", "🌫️"),
+    51: ("小毛毛雨", "💧"),    53: ("中等毛毛雨", "💧"),    55: ("大毛毛雨", "💧"),
+    56: ("轻微冻毛毛雨", "❄️💧"),    57: ("强冻毛毛雨", "❄️💧"),
+    61: ("小雨", "🌧️"),    63: ("中雨", "🌧️"),    65: ("大雨", "🌧️"),
+    66: ("小冻雨", "❄️🌧️"),    67: ("大冻雨", "❄️🌧️"),
+    71: ("小雪", "🌨️"),    73: ("中雪", "🌨️"),    75: ("大雪", "🌨️"),
+    77: ("雪粒", "🌨️"),    80: ("小阵雨", "🌦️"),    81: ("中阵雨", "🌦️"),
+    82: ("强阵雨", "🌦️"),    85: ("小阵雪", "❄️"),    86: ("大阵雪", "❄️"),
+    95: ("雷暴", "⛈️"),    96: ("雷暴伴轻冰雹", "⛈️"),    99: ("雷暴伴强冰雹", "⛈️"),
+}
+
 TARGET_CHART_POINTS = 150 # Number of data points for charts
+
+current = os.path.dirname(os.path.realpath(__file__))
+parent = os.path.dirname(current)
+details_folder = os.path.join(parent, "public", "data", "details")
 
 class Coros:
     def __init__(self, account, password):
@@ -163,12 +180,12 @@ async def download_and_generate(account, password):
     await coros.req.aclose()
     make_activities_file(SQL_FILE, FIT_FOLDER, JSON_FILE, "fit", json_file2 = JSON_FILE2)
 
-    for label_id in ['471277511687307274', '471277511687307273']: #to_generate_coros_ids: #
+    for label_id in ['471277511687307274', '471277511687307273', '471374084024861075', '471348054109225065']: #to_generate_coros_ids: #
       fit_path = os.path.join(folder, f"{label_id}.fit")
       run_data = parse_fit_file(fit_path)
   
       if run_data:
-        output_filename = os.path.join(folder, f"{label_id}.json")
+        output_filename = os.path.join(details_folder, f"{label_id}.json")
         with open(output_filename, 'w', encoding='utf-8') as f:
             json.dump(run_data, f, indent=4, ensure_ascii=False)
         print(f"Successfully processed run data. Saved to {output_filename}")
@@ -231,7 +248,7 @@ def get_weather_data(lat, lon, timestamp):
             temp = data['hourly']['temperature_2m'][hour_index]
             code = data['hourly']['weathercode'][hour_index]
             wind_kmh = data['hourly']['windspeed_10m'][hour_index]
-            condition, icon = WMO_CODE_MAP.get(code, ("Unknown", ""))
+            condition, icon = WMO_CODE_MAP_ZH.get(code, ("Unknown", ""))
             print("Successfully fetched weather from Archive API.")
             return {
                 "temperature_c": temp,
@@ -259,7 +276,7 @@ def get_weather_data(lat, lon, timestamp):
                 temp = data['hourly']['temperature_2m'][idx]
                 code = data['hourly']['weathercode'][idx]
                 wind_kmh = data['hourly']['windspeed_10m'][idx]
-                condition, icon = WMO_CODE_MAP.get(code, ("Unknown", ""))
+                condition, icon = WMO_CODE_MAP_ZH.get(code, ("Unknown", ""))
                 print("Successfully fetched weather from Forecast API fallback.")
                 return {
                     "temperature_c": temp,
