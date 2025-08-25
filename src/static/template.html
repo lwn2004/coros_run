@@ -476,7 +476,7 @@
     }
     .trophy-color-text { color: var(--trophy-color); }
     .accent-color-text { color: var(--accent-color); }
-    /* --- START: 修正后的日历弹出样式 --- */
+
     .marathon-calendar-container .month-grid {
         background-color: var(--card-bg);
         padding: 1.5rem;
@@ -597,8 +597,6 @@
         margin-top: 4px;
     }
 
-
-    /* Mobile list view for calendar */
     .calendar-list-view {
         display: none;
     }
@@ -655,7 +653,7 @@
         
         .marathon-calendar-container .month-grid { padding: 1rem; }
     }
-    /* Comment Media Styles */
+
     .comment-media-thumb {
         max-width: 80px;
         max-height: 80px;
@@ -672,7 +670,6 @@
         box-shadow: 0 0 5px var(--accent-color);
     }
 
-    /* Gallery Modal Styles */
     #mediaGalleryModal .modal-content {
       background-color: rgba(0,0,0,0.85);
       backdrop-filter: blur(5px);
@@ -694,7 +691,6 @@
         max-width: 100%;
     }
 
-    /* New Run Detail Modal Styles */
     #runDetailModal .modal-content {
         background-color: var(--bg-color);
         color: var(--text-primary);
@@ -955,7 +951,7 @@
                             </div>
                         </div>
                         <div class="stat-details mt-2">
-                            <a href="#run-analysis-section" class="comment-link" id="view-analysis-link">查看图表 &rarr;</a>
+                            <a href="#run-analysis-section" class="comment-link" id="view-analysis-link">查看分析 &rarr;</a>
                         </div>
                     </div>
                     <div class="flip-icon-container"><i class="bi bi-phone-flip"></i></div>
@@ -1735,7 +1731,6 @@
         }
     }
 
-    // ... (The rest of the script is unchanged and provided in full below)
     function generateRandomProfile() {
         const adjectives = ['快乐', '坚定', '闪亮', '迷路', '温柔'];
         const nouns = ['小鹿', '绿豆芽', '星星', '猫咪', '纸飞机'];
@@ -1948,14 +1943,6 @@ async function generateMarathonCalendar() {
         setupCalendarHovers();
     }
 
-	
-	
-	
-	
-	
-	
-	
-	
     function setupCalendarHovers() {
         const eventCells = document.querySelectorAll('.calendar-table td.event');
         eventCells.forEach(cell => {
@@ -2007,7 +1994,6 @@ async function generateMarathonCalendar() {
         mediaGalleryModal.show();
     }
     
-	
     function renderRunTags() {
         const container = document.getElementById('runDetailTagsContainer');
         container.innerHTML = currentRunTags.map((tag, index) =>
@@ -2255,216 +2241,7 @@ async function generateMarathonCalendar() {
         });
         
     }
-        
-        const monthlyCtx = document.getElementById('monthlyDistanceChart').getContext('2d');
-        monthlyDistanceChart = new Chart(monthlyCtx, { type: 'bar', data: { labels: {{ chart_monthly_labels|tojson }}, datasets: [{ label: '距离 (km)', data: monthlyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 4, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 }}}, plugins: { legend: { display: false }, title: { display: true, text: `总 ${monthlyTotal.toFixed(1)}km / 月均 ${monthlyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(monthlyAvg) } } } } });
-        
-        const yearlyCtx = document.getElementById('yearlyDistanceChart').getContext('2d');
-        yearlyDistanceChart = new Chart(yearlyCtx, { type: 'bar', data: { labels: {{ chart_yearly_labels|tojson }}, datasets: [{ label: '距离 (km)', data: yearlyData, backgroundColor: accentColor + '99', borderColor: accentColor, borderWidth: 1, borderRadius: 4, hoverBackgroundColor: accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0, minRotation: 0 } } }, plugins: { legend: { display: false }, title: { display: true, text: `总 ${yearlyTotal.toFixed(1)}km / 年均 ${yearlyAvg.toFixed(1)}km`, align: 'start', color: annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(yearlyAvg) } } } } });
-
-        const monthOverMonthCtx = document.getElementById('monthOverMonthChart').getContext('2d');
-        const diffText = monthOverMonthData.summary.diff_km >= 0 ? `+${monthOverMonthData.summary.diff_km}` : monthOverMonthData.summary.diff_km;
-        const thisMonthTruncatedData = monthOverMonthData.this_month_data.slice(0, currentDay);
-        monthOverMonthChart = new Chart(monthOverMonthCtx, {
-            type: 'line',
-            data: {
-                labels: monthOverMonthData.labels,
-                datasets: [
-                    { label: '本月', data: thisMonthTruncatedData, borderColor: accentColor, borderWidth: 3, pointRadius: 1, fill: false, tension: 0.1 },
-                    { label: '上月', data: monthOverMonthData.last_month_data, borderColor: 'rgba(128, 128, 128, 0.7)', borderWidth: 2, borderDash: [5, 5], pointRadius: 1, fill: false, tension: 0.1 }
-                ]
-            },
-            options: { 
-                responsive: true, maintainAspectRatio: false, 
-                scales: { 
-                    y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, callback: v => v + ' km' } }, 
-                    x: { grid: { display: false }, ticks: { color: tickColor } } 
-                }, 
-                plugins: { 
-                    legend: { labels: { color: tickColor } }, 
-                    title: { display: true, text: `本月跑量: ${monthOverMonthData.summary.this_month_total}km (较上月同期: ${diffText}km)`, align: 'start', color: annotationColor },
-                    annotation: {
-                        annotations: {
-                            todayLine: {
-                                type: 'line',
-                                xMin: currentDay - 1,
-                                xMax: currentDay - 1,
-                                borderColor: 'rgba(255, 255, 255, 0.5)',
-                                borderWidth: 1.5,
-                                borderDash: [6, 6]
-                            }
-                        }
-                    }
-                } 
-            }
-        });
-
-        const yearlyDualAxisCtx = document.getElementById('yearlyDualAxisChart').getContext('2d');
-        const cumulativeTruncatedData = yearlyDualAxisData.cumulative_data.slice(0, currentMonth + 1);
-        yearlyDualAxisChart = new Chart(yearlyDualAxisCtx, {
-            type: 'bar',
-            data: {
-                labels: yearlyDualAxisData.labels,
-                datasets: [
-                    { type: 'bar', label: '月度跑量', data: yearlyDualAxisData.monthly_data, backgroundColor: accentColor + '99', borderColor: accentColor, yAxisID: 'y' },
-                    { type: 'line', label: '累积跑量', data: cumulativeTruncatedData, borderColor: accentColorSecondary, borderWidth: 3, pointRadius: 2, fill: false, tension: 0.1, yAxisID: 'y1' }
-                ]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-                scales: {
-                    x: { grid: { display: false }, ticks: { color: tickColor } },
-                    y: { type: 'linear', display: true, position: 'left', title: { display: true, text: '月度跑量 (km)', color: tickColor }, grid: { color: gridColor }, ticks: { color: tickColor } },
-                    y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: '累积跑量 (km)', color: tickColor }, grid: { drawOnChartArea: false }, ticks: { color: tickColor } }
-                },
-                plugins: { legend: { labels: { color: tickColor } }, title: { display: true, text: `今年总跑量: ${yearlyDualAxisData.total}km`, align: 'start', color: annotationColor } }
-            }
-        });
-
-        document.querySelectorAll('#chart-toggle .btn').forEach(button => {
-            button.addEventListener('click', function() {
-                document.querySelectorAll('#chart-toggle .btn').forEach(btn => btn.classList.remove('active'));
-                this.classList.add('active');
-                const chartType = this.dataset.chart;
-                const containers = {
-                    monthly: document.getElementById('monthlyChartContainer'),
-                    daily: document.getElementById('dailyChartContainer'),
-                    yearly: document.getElementById('yearlyChartContainer'),
-                    'month-over-month': document.getElementById('monthOverMonthChartContainer'),
-                    'yearly-dual-axis': document.getElementById('yearlyDualAxisChartContainer')
-                };
-                Object.values(containers).forEach(c => c.style.display = 'none');
-                containers[chartType].style.display = 'block';
-            });
-        });
-    }
     
-    const dataPane = document.getElementById('data-pane');
-    if (dataPane) {
-        allRunRows = Array.from(document.querySelectorAll('#summary-table-body tr'));
-        const updateDataView = () => {
-            const minDist = parseFloat(document.querySelector('#data-dist-filter-toggle .active').dataset.dist);
-            const maxPace = parseFloat(document.querySelector('#data-pace-filter-toggle .active').dataset.pace);
-            const selectedCity = document.getElementById('data-city-filter').value;
-            const startDate = document.getElementById('date-filter-start').value;
-            const endDate = document.getElementById('date-filter-end').value;
-            const activeSortHeader = document.querySelector('.sortable-header[aria-sort]');
-            const sortProp = activeSortHeader ? activeSortHeader.dataset.sort : 'date';
-            const sortOrder = activeSortHeader ? activeSortHeader.getAttribute('aria-sort') : 'descending';
-
-            let filteredRows = allRunRows.filter(row => {
-                const isVisible = (parseFloat(row.dataset.distance) >= minDist) &&
-                                (parsePaceToSeconds(row.dataset.paceStr) <= maxPace) &&
-                                (selectedCity === 'all' || row.dataset.city === selectedCity) &&
-                                (!startDate || row.dataset.date >= startDate) &&
-                                (!endDate || row.dataset.date <= endDate);
-                row.style.display = isVisible ? '' : 'none';
-                return isVisible;
-            });
-            
-            filteredRows.sort((a, b) => {
-                let valA, valB;
-                if (sortProp === 'distance') { [valA, valB] = [parseFloat(a.dataset.distance), parseFloat(b.dataset.distance)]; } 
-                else if (sortProp === 'pace') { [valA, valB] = [(-1)*parsePaceToSeconds(a.dataset.paceStr), (-1)*parsePaceToSeconds(b.dataset.paceStr)]; } 
-                else { [valA, valB] = [a.dataset.date, b.dataset.date]; }
-                if (valA < valB) return sortOrder === 'ascending' ? -1 : 1;
-                if (valA > valB) return sortOrder === 'ascending' ? 1 : -1;
-                return 0;
-            });
-            document.getElementById('summary-table-body').append(...filteredRows);
-        };
-
-        document.getElementById('data-view-toggle').addEventListener('click', (e) => {
-            if (!e.target.matches('button')) return;
-            document.querySelector('#data-view-toggle .active').classList.remove('active');
-            e.target.classList.add('active');
-            const isSummary = e.target.dataset.view === 'summary';
-            document.getElementById('summary-data-view').style.display = isSummary ? '' : 'none';
-            document.getElementById('yearly-data-view').style.display = isSummary ? 'none' : '';
-            document.getElementById('data-controls-collapse').classList.toggle('d-lg-block', isSummary);
-            document.getElementById('summary-controls-toggle').style.display = isSummary ? '' : 'none';
-            if(isSummary) updateDataView();
-        });
-
-        document.querySelectorAll('.sortable-header').forEach(header => {
-            header.addEventListener('click', () => {
-                const currentSort = header.getAttribute('aria-sort');
-                let newSort = (currentSort === 'descending') ? 'ascending' : 'descending';
-                document.querySelectorAll('.sortable-header').forEach(h => h.removeAttribute('aria-sort'));
-                header.setAttribute('aria-sort', newSort);
-                updateDataView();
-            });
-        });
-
-        [...document.querySelectorAll('#data-dist-filter-toggle, #data-pace-filter-toggle')].forEach(group => {
-            group.addEventListener('click', e => {
-                if(e.target.tagName === 'BUTTON') {
-                    group.querySelector('.active').classList.remove('active');
-                    e.target.classList.add('active');
-                    updateDataView();
-                }
-            });
-        });
-        ['data-city-filter', 'date-filter-start', 'date-filter-end'].forEach(id => {
-            document.getElementById(id).addEventListener('change', updateDataView);
-        });
-        
-        updateDataView();
-    }
-    
-    const eventsPane = document.getElementById('events-pane');
-    if (eventsPane) {
-        eventsPane.querySelector('#events-view-toggle').addEventListener('click', (e) => {
-            if (!e.target.matches('button')) return;
-            eventsPane.querySelector('#events-view-toggle .active').classList.remove('active');
-            e.target.classList.add('active');
-            const isCategory = e.target.dataset.view === 'category';
-            eventsPane.querySelector('#events-category-view').style.display = isCategory ? '' : 'none';
-            eventsPane.querySelector('#events-timeline-view').style.display = isCategory ? 'none' : 'block';
-        });
-    }
-
-    function renderCommentList(container, comments) {
-        container.style.color = 'var(--text-primary)';
-        if (Array.isArray(comments) && comments.length > 0) {
-            container.innerHTML = comments.map(c => 
-                `<div class="border-bottom py-2" style="border-color: var(--border-color) !important;">
-                    <small class="text-secondary">${c.nickname || '🌱 匿名'} · ${new Date(c.ts).toLocaleString()}</small>
-                    <div class="mt-1" style="color: var(--text-primary);">${c.text}</div>
-                 </div>`
-            ).join('');
-        } else {
-             container.innerHTML = '<div class="text-secondary text-center py-2">暂无评论</div>';
-        }
-    }
-    
-    function decodePolyline(encoded) {
-        if (!encoded) return [];
-        let index = 0, len = encoded.length, lat = 0, lng = 0, array = [];
-        while (index < len) {
-            let b, shift = 0, result = 0;
-            do { b = encoded.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
-            let dlat = ((result & 1) ? ~(result >> 1) : (result >> 1)); lat += dlat;
-            shift = 0; result = 0;
-            do { b = encoded.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
-            let dlng = ((result & 1) ? ~(result >> 1) : (result >> 1)); lng += dlng;
-            array.push([lat * 1e-5, lng * 1e-5]);
-        }
-        return array;
-    }
-
-    async function refreshDetailComments(runId) {
-        const listContainer = document.getElementById('runDetailCommentList');
-        try {
-            const res = await fetch(`${commentApiBase}/comments?runId=${encodeURIComponent(runId)}`);
-            if(!res.ok) throw new Error("Failed to fetch comments");
-            const data = await res.json();
-            renderCommentList(listContainer, data);
-        } catch(e) {
-            listContainer.innerHTML = '<div class="text-danger">评论加载失败</div>';
-        }
-    }
-   
     async function showRunDetailModal(runId, preloadedData = {}, scrollToComments = false) {
         currentDetailRunId = runId;
         const modalEl = document.getElementById('runDetailModal');
@@ -2783,7 +2560,7 @@ async function generateMarathonCalendar() {
             if (res.ok) {
                 alert('赛历已成功更新!');
                 calendarEditorModal.hide();
-                await generateMarathonCalendar(); // Refresh main view
+                await generateMarathonCalendar();
             } else {
                 const error = await res.json();
                 alert(`保存失败: ${error.error}`);
@@ -2792,6 +2569,7 @@ async function generateMarathonCalendar() {
             alert(`发生网络错误: ${e.message}`);
         }
     });
+
 
     window.addEventListener('beforeunload', () => {
       if(monthlyDistanceChart) monthlyDistanceChart.destroy();
