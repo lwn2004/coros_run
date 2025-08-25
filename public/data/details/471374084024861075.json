@@ -28,7 +28,7 @@
             "distance_km": "1.00",
             "pace": "6'12\"",
             "avg_hr": 134,
-            "avg_cadence": null
+            "avg_cadence": 170
         },
         {
             "lap_number": 2,
@@ -36,7 +36,7 @@
             "distance_km": "1.00",
             "pace": "5'52\"",
             "avg_hr": 145,
-            "avg_cadence": null
+            "avg_cadence": 176
         },
         {
             "lap_number": 3,
@@ -44,7 +44,7 @@
             "distance_km": "1.00",
             "pace": "5'48\"",
             "avg_hr": 146,
-            "avg_cadence": null
+            "avg_cadence": 176
         },
         {
             "lap_number": 4,
@@ -52,7 +52,7 @@
             "distance_km": "1.00",
             "pace": "5'44\"",
             "avg_hr": 146,
-            "avg_cadence": null
+            "avg_cadence": 174
         },
         {
             "lap_number": 5,
@@ -60,7 +60,7 @@
             "distance_km": "1.00",
             "pace": "5'54\"",
             "avg_hr": 151,
-            "avg_cadence": null
+            "avg_cadence": 176
         },
         {
             "lap_number": 6,
@@ -68,7 +68,7 @@
             "distance_km": "1.00",
             "pace": "5'47\"",
             "avg_hr": 150,
-            "avg_cadence": null
+            "avg_cadence": 176
         },
         {
             "lap_number": 7,
@@ -76,7 +76,7 @@
             "distance_km": "1.00",
             "pace": "5'33\"",
             "avg_hr": 153,
-            "avg_cadence": null
+            "avg_cadence": 176
         },
         {
             "lap_number": 8,
@@ -84,7 +84,7 @@
             "distance_km": "1.00",
             "pace": "5'58\"",
             "avg_hr": 156,
-            "avg_cadence": null
+            "avg_cadence": 174
         }
     ],
     "charts": {
