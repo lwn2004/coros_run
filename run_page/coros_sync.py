@@ -396,13 +396,14 @@ def parse_fit_file(fit_file_path):
     for i, lap in enumerate(laps, 1):
         lap_dist_km = lap.get('total_distance', 0) / 1000
         lap_time_sec = lap.get('total_elapsed_time', 0)
+        ave_cadence = lap.get('avg_running_cadence') *2
         processed_laps.append({
             "lap_number": i,
             "duration": format_duration(lap_time_sec),
             "distance_km": f"{lap_dist_km:.2f}",
             "pace": format_pace(lap.get('avg_speed')),
             "avg_hr": lap.get('avg_heart_rate'),
-            "avg_cadence": lap.get('avg_cadence')
+            "avg_cadence": ave_cadence
         })
 
     # --- Charts ---
