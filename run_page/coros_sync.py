@@ -13,8 +13,6 @@ import requests
 import polyline
 from datetime import datetime, timezone, timedelta
 
-from garmin_fit_sdk.util import FIT_EPOCH_S
-
 from config import JSON_FILE, JSON_FILE2, SQL_FILE, FIT_FOLDER
 from utils import make_activities_file
 
@@ -187,7 +185,7 @@ async def download_and_generate(account, password):
       run_data = parse_fit_file(fit_path)
   
       if run_data:
-        json_id = make_run_id(datetime.fromtimestamp((run_data["start_time"].timestamp() + FIT_EPOCH_S), tz=timezone.utc))
+        json_id = run_data['run_id']
         output_filename = os.path.join(details_folder, f"{json_id}.json")
         with open(output_filename, 'w', encoding='utf-8') as f:
             json.dump(run_data, f, indent=4, ensure_ascii=False)
