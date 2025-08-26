@@ -34,6 +34,7 @@ g = Nominatim(user_agent=randomword())
 
 ACTIVITY_KEYS = [
     "run_id",
+    "runapp_id",
     "name",
     "distance",
     "moving_time",
@@ -52,6 +53,7 @@ class Activity(Base):
     __tablename__ = "activities"
 
     run_id = Column(Integer, primary_key=True)
+    runapp_id = Column(Integer)
     name = Column(String)
     distance = Column(Float)
     moving_time = Column(Interval)
@@ -112,6 +114,7 @@ def update_or_create_activity(session, run_activity):
 
             activity = Activity(
                 run_id=run_activity.id,
+                runapp_id=run_activity.runapp_id,
                 name=run_activity.name,
                 distance=run_activity.distance,
                 moving_time=run_activity.moving_time,
