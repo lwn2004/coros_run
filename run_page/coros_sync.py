@@ -13,6 +13,8 @@ import requests
 import polyline
 from datetime import datetime, timezone, timedelta
 
+from garmin_fit_sdk.util import FIT_EPOCH_S
+
 from config import JSON_FILE, JSON_FILE2, SQL_FILE, FIT_FOLDER
 from utils import make_activities_file
 
@@ -185,7 +187,8 @@ async def download_and_generate(account, password):
       run_data = parse_fit_file(fit_path)
   
       if run_data:
-        output_filename = os.path.join(details_folder, f"{label_id}.json")
+        json_id = make_run_id(datetime.datetime.fromtimestamp((run_data["start_time"].timestamp() + FIT_EPOCH_S), tz=timezone.utc))
+        output_filename = os.path.join(details_folder, f"{json_id}.json")
         with open(output_filename, 'w', encoding='utf-8') as f:
             json.dump(run_data, f, indent=4, ensure_ascii=False)
         print(f"Successfully processed run data. Saved to {output_filename}")
@@ -440,9 +443,10 @@ def parse_fit_file(fit_file_path):
             {"url": f"https://picsum.photos/seed/{run_id}_b/600/400"}
         ]
     }
-    
     return run_detail
 
+def make_run_id(time_stamp):
+      return int(datetime.datetime.timestamp(time_stamp) * 1000)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
