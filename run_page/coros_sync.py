@@ -187,7 +187,7 @@ async def download_and_generate(account, password):
       run_data = parse_fit_file(fit_path)
   
       if run_data:
-        json_id = make_run_id(datetime.datetime.fromtimestamp((run_data["start_time"].timestamp() + FIT_EPOCH_S), tz=timezone.utc))
+        json_id = make_run_id(datetime.fromtimestamp((run_data["start_time"].timestamp() + FIT_EPOCH_S), tz=timezone.utc))
         output_filename = os.path.join(details_folder, f"{json_id}.json")
         with open(output_filename, 'w', encoding='utf-8') as f:
             json.dump(run_data, f, indent=4, ensure_ascii=False)
