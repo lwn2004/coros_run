@@ -180,7 +180,7 @@ async def download_and_generate(account, password):
     await coros.req.aclose()
     make_activities_file(SQL_FILE, FIT_FOLDER, JSON_FILE, "fit", json_file2 = JSON_FILE2)
 
-    for label_id in ['471277511687307274', '471277511687307273', '471374084024861075', '471348054109225065']: #to_generate_coros_ids: #
+    for label_id in ['471348054109225065', '471374084024861075', '471416369590599881', '471439763470057774']: #to_generate_coros_ids: #
       fit_path = os.path.join(folder, f"{label_id}.fit")
       run_data = parse_fit_file(fit_path)
   
