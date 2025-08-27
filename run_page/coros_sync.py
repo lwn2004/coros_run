@@ -6,7 +6,7 @@ import time
 
 import aiofiles
 import httpx
-
+from garmin_fit_sdk.util import FIT_EPOCH_S
 import json
 import fitparse
 import requests
@@ -356,8 +356,9 @@ def parse_fit_file(fit_file_path):
         return None
 
     # --- Basic Info & Weather ---
-    run_id = int(file_id.get('time_created').timestamp())
+    #run_id = int(file_id.get('time_created').timestamp())
     start_time = session.get('start_time')
+    run_id = make_run_id(datetime.fromtimestamp(start_time + FIT_EPOCH_S, tz=timezone.utc))
     first_lat = semicircles_to_degrees(records[0].get('position_lat'))
     first_lon = semicircles_to_degrees(records[0].get('position_long'))
     
@@ -444,7 +445,7 @@ def parse_fit_file(fit_file_path):
     return run_detail
 
 def make_run_id(time_stamp):
-      return int(datetime.datetime.timestamp(time_stamp) * 1000)
+      return int(datetime.timestamp(time_stamp) * 1000)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
