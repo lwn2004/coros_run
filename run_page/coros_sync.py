@@ -358,7 +358,7 @@ def parse_fit_file(fit_file_path):
     # --- Basic Info & Weather ---
     #run_id = int(file_id.get('time_created').timestamp())
     start_time = session.get('start_time')
-    run_id = make_run_id(datetime.fromtimestamp(start_time + FIT_EPOCH_S, tz=timezone.utc))
+    run_id = make_run_id(datetime.fromtimestamp(start_time.timestamp() + FIT_EPOCH_S, tz=timezone.utc))
     first_lat = semicircles_to_degrees(records[0].get('position_lat'))
     first_lon = semicircles_to_degrees(records[0].get('position_long'))
     
