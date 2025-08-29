@@ -225,7 +225,7 @@ def format_pace(speed_mps):
     minutes = int(pace_sec_per_km // 60)
     seconds = int(pace_sec_per_km % 60)
     return f"{minutes}'{seconds:02}\""
-def smooth_elevation_data(records, window_size=5):
+def smooth_elevation_data(records, window_size=7):
     """
     Smoothes elevation data in a list of records using a median filter.
     This is very effective at removing extreme outliers from GPS altitude.
