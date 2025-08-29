@@ -180,7 +180,7 @@ async def download_and_generate(account, password):
     await coros.req.aclose()
     make_activities_file(SQL_FILE, FIT_FOLDER, JSON_FILE, "fit", json_file2 = JSON_FILE2)
 
-    for label_id in to_generate_coros_ids: #sorted(downloaded_ids, key=int, reverse=True):#['471348054109225065', '471374084024861075', '471416369590599881', '471439763470057774']: # #
+    for label_id in sorted(downloaded_ids, key=int, reverse=True):#to_generate_coros_ids: ##['471348054109225065', '471374084024861075', '471416369590599881', '471439763470057774']: # #
       fit_path = os.path.join(folder, f"{label_id}.fit")
       print(f"Parsing fit file: {label_id}")
       run_data = parse_fit_file_garmin_sdk(fit_path)
@@ -333,10 +333,17 @@ def downsample_records(records, target_points):
 def downsample_records_garmin_sdk(records, target_points):
     if not records or len(records) <= target_points:
         return records
-    
+
     downsampled = []
-    chunk_size = len(records) / target_points
-    for i in range(target_points):
+    # We will generate N-1 points via averaging, and the last point will be the true final record.
+    effective_len = len(records) - 1
+    if effective_len < 1:
+        return records 
+
+    effective_target = target_points - 1
+    chunk_size = effective_len / effective_target
+
+    for i in range(effective_target):
         start = int(i * chunk_size)
         end = int((i + 1) * chunk_size)
         chunk = records[start:end]
@@ -346,9 +353,9 @@ def downsample_records_garmin_sdk(records, target_points):
         first_record = chunk[0]
         last_record = chunk[-1]
 
-        # Convert FIT SDK timestamps to datetime objects
-        first_ts = datetime.fromtimestamp(first_record.get('timestamp') + FIT_EPOCH_S, tz=timezone.utc)
-        last_ts = datetime.fromtimestamp(last_record.get('timestamp') + FIT_EPOCH_S, tz=timezone.utc)
+        # Convert FIT SDK timestamps to datetime objects for calculation
+        first_ts = datetime.fromtimestamp(first_record.get('timestamp', 0) + FIT_EPOCH_S, tz=timezone.utc)
+        last_ts = datetime.fromtimestamp(last_record.get('timestamp', 0) + FIT_EPOCH_S, tz=timezone.utc)
         time_delta_seconds = (last_ts - first_ts).total_seconds()
         dist_delta_meters = last_record.get('distance', 0) - first_record.get('distance', 0)
 
@@ -368,6 +375,10 @@ def downsample_records_garmin_sdk(records, target_points):
             else:
                 avg_point[key] = None
         downsampled.append(avg_point)
+
+    # Add the very last record from the original data as the final point.
+    downsampled.append(records[-1])
+
     return downsampled
 def parse_fit_file(fit_file_path):
     """Parses a FIT file and returns a structured dictionary for the run detail modal."""
