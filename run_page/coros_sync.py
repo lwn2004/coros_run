@@ -15,7 +15,7 @@ from datetime import datetime, timezone, timedelta
 
 from config import JSON_FILE, JSON_FILE2, SQL_FILE, FIT_FOLDER
 from utils import make_activities_file
-
+SEMICIRCLE = 11930465
 COROS_URL_DICT = {
     "LOGIN_URL": "https://teamcnapi.coros.com/account/login",
     "DOWNLOAD_URL": "https://teamcnapi.coros.com/activity/detail/download",
