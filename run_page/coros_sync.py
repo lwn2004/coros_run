@@ -9,7 +9,6 @@ import httpx
 from garmin_fit_sdk.util import FIT_EPOCH_S
 from garmin_fit_sdk import Decoder, Stream
 import json
-import fitparse
 import requests
 import polyline
 from datetime import datetime, timezone, timedelta
@@ -331,7 +330,45 @@ def downsample_records(records, target_points):
                 avg_point[key] = None
         downsampled.append(avg_point)
     return downsampled
+def downsample_records_garmin_sdk(records, target_points):
+    if not records or len(records) <= target_points:
+        return records
+    
+    downsampled = []
+    chunk_size = len(records) / target_points
+    for i in range(target_points):
+        start = int(i * chunk_size)
+        end = int((i + 1) * chunk_size)
+        chunk = records[start:end]
+        if not chunk: continue
 
+        avg_point = {}
+        first_record = chunk[0]
+        last_record = chunk[-1]
+
+        # Convert FIT SDK timestamps to datetime objects
+        first_ts = datetime.fromtimestamp(first_record.get('timestamp') + FIT_EPOCH_S, tz=timezone.utc)
+        last_ts = datetime.fromtimestamp(last_record.get('timestamp') + FIT_EPOCH_S, tz=timezone.utc)
+        time_delta_seconds = (last_ts - first_ts).total_seconds()
+        dist_delta_meters = last_record.get('distance', 0) - first_record.get('distance', 0)
+
+        if time_delta_seconds > 0 and dist_delta_meters > 0:
+            avg_point['speed'] = dist_delta_meters / time_delta_seconds
+        else:
+            avg_point['speed'] = first_record.get('speed')
+
+        for key in first_record.keys():
+            if key == 'speed': continue
+            valid_values = [p[key] for p in chunk if p.get(key) is not None]
+            if valid_values:
+                if isinstance(valid_values[0], (int, float)):
+                    avg_point[key] = sum(valid_values) / len(valid_values)
+                else:
+                    avg_point[key] = valid_values[0]
+            else:
+                avg_point[key] = None
+        downsampled.append(avg_point)
+    return downsampled
 def parse_fit_file(fit_file_path):
     """Parses a FIT file and returns a structured dictionary for the run detail modal."""
     try:
@@ -446,112 +483,96 @@ def parse_fit_file(fit_file_path):
     }
     return run_detail
 def parse_fit_file_garmin_sdk(fit_file_path):
-    """Parses a FIT file with Garmin's garmin-fit-sdk and returns a structured dictionary for the run detail modal."""
-
-    stream = Stream.from_file(fit_file_path)
-
-    # --- Decode ---
-    decoder = Decoder(stream)
-    if not decoder.is_fit:
-        print("Not a valid FIT file")
+    """Parses a FIT file using the garmin-fit-sdk decoder.read() method."""
+    try:
+        stream = Stream.from_file(fit_file_path)
+        decoder = Decoder(stream)
+        messages, errors = decoder.read(convert_datetimes_to_dates=False)
+        if errors:
+            print(f"FIT file read errors: {errors}")
+        
+        # Check for essential messages
+        if "session_mesgs" not in messages or "record_mesgs" not in messages:
+            print("FIT file is missing essential data (session or records).")
+            return None
+    except Exception as e:
+        print(f"Error processing FIT file: {e}")
         return None
-    if not decoder.check_integrity():
-        print("FIT file integrity failed (may be truncated or corrupted)")
-        return None
 
-    # Decode messages
-    messages, errors = decoder.read(convert_datetimes_to_dates=False)
-    if errors:
-        print("Errors while decoding:", errors)
-
-    # Containers
-    records, laps, session, file_id = [], [], None, None
-
-    # Iterate through decoded messages
-    for msg in messages["messages"]:
-        if msg["name"] == "record":
-            lat = msg["fields"].get("position_lat")
-            lon = msg["fields"].get("position_long")
-            if lat is not None and lon is not None:
-                records.append(msg["fields"])
-        elif msg["name"] == "lap":
-            laps.append(msg["fields"])
-        elif msg["name"] == "session":
-            session = msg["fields"]
-        elif msg["name"] == "file_id":
-            file_id = msg["fields"]
-
-    if not session or not records or not file_id:
-        print("FIT file is missing essential data (session, records, or file_id).")
-        return None
+    # Extract primary messages
+    session = messages["session_mesgs"][0]
+    records = messages["record_mesgs"]
+    laps = messages.get("lap_mesgs", [])
 
     # --- Basic Info & Weather ---
-    start_time = session.get("start_time")
-    run_id = make_run_id(datetime.fromtimestamp(start_time.timestamp(), tz=timezone.utc))
-    first_lat = semicircles_to_degrees(records[0].get("position_lat"))
-    first_lon = semicircles_to_degrees(records[0].get("position_long"))
+    start_time_value = session.get('start_time')
+    start_time = datetime.fromtimestamp(start_time_value + FIT_EPOCH_S, tz=timezone.utc)
+    run_id = make_run_id(start_time)
+    
+    first_record_with_gps = next((r for r in records if "position_lat" in r and "position_long" in r), None)
+    if not first_record_with_gps:
+        print("No GPS data found in records.")
+        return None
 
+    first_lat = first_record_with_gps["position_lat"] / SEMICIRCLE
+    first_lon = first_record_with_gps["position_long"] / SEMICIRCLE
+    
     print(f"Run ID: {run_id}")
     print(f"Fetching weather for {start_time} at ({first_lat:.4f}, {first_lon:.4f})...")
     weather = get_weather_data(first_lat, first_lon, start_time)
 
     # --- Route Polyline ---
     coords = [
-        (semicircles_to_degrees(r.get("position_lat")), semicircles_to_degrees(r.get("position_long")))
-        for r in records
+        (r["position_lat"] / SEMICIRCLE, r["position_long"] / SEMICIRCLE)
+        for r in records if "position_lat" in r and "position_long" in r
     ]
     encoded_polyline = polyline.encode(coords)
-
+    
     # --- Summary ---
-    total_distance_km = session.get("total_distance", 0) / 1000
-    total_duration_sec = session.get("total_elapsed_time", 0)
-    avg_speed_mps = session.get("avg_speed")
-    best_speed_mps = session.get("max_speed")
-    ave_cadence = (session.get("avg_running_cadence") or 0) * 2
-
+    total_distance_km = session.get('total_distance', 0) / 1000
+    avg_cadence_single = session.get('avg_running_cadence')
+    
     summary = {
         "distance_km": f"{total_distance_km:.2f}",
-        "duration": format_duration(total_duration_sec),
-        "avg_pace": format_pace(avg_speed_mps),
-        "best_pace": format_pace(best_speed_mps),
-        "calories_kcal": session.get("total_calories"),
-        "total_ascent_m": session.get("total_ascent"),
-        "avg_cadence": ave_cadence,
-        "avg_power_w": session.get("avg_power"),
-        "avg_hr": session.get("avg_heart_rate"),
-        "max_hr": session.get("max_heart_rate"),
+        "duration": format_duration(session.get('total_elapsed_time')),
+        "avg_pace": format_pace(session.get('avg_speed')),
+        "best_pace": format_pace(session.get('max_speed')),
+        "calories_kcal": session.get('total_calories'),
+        "total_ascent_m": session.get('total_ascent'),
+        "avg_cadence": avg_cadence_single * 2 if avg_cadence_single else None,
+        "avg_power_w": session.get('avg_power'),
+        "avg_hr": session.get('avg_heart_rate'),
+        "max_hr": session.get('max_heart_rate')
     }
-
+    
     # --- Laps ---
     processed_laps = []
     for i, lap in enumerate(laps, 1):
-        lap_dist_km = lap.get("total_distance", 0) / 1000
-        lap_time_sec = lap.get("total_elapsed_time", 0)
-        ave_cadence = (lap.get("avg_running_cadence") or 0) * 2
+        lap_cadence_single = lap.get('avg_running_cadence')
         processed_laps.append({
             "lap_number": i,
-            "duration": format_duration(lap_time_sec),
-            "distance_km": f"{lap_dist_km:.2f}",
-            "pace": format_pace(lap.get("avg_speed")),
-            "avg_hr": lap.get("avg_heart_rate"),
-            "avg_cadence": ave_cadence,
+            "duration": format_duration(lap.get('total_elapsed_time')),
+            "distance_km": f"{lap.get('total_distance', 0) / 1000:.2f}",
+            "pace": format_pace(lap.get('avg_speed')),
+            "avg_hr": lap.get('avg_heart_rate'),
+            "avg_cadence": lap_cadence_single * 2 if lap_cadence_single else None
         })
 
     # --- Charts ---
-    chart_records = downsample_records(records, TARGET_CHART_POINTS)
-
+    chart_records = downsample_records_garmin_sdk(records, TARGET_CHART_POINTS)
+    
     def create_chart_data(key, label_unit, value_transform=lambda x: x):
         labels, data = [], []
         for r in chart_records:
-            if r.get("distance") is not None and r.get(key) is not None:
+            if r.get('distance') is not None and r.get(key) is not None:
                 labels.append(f"{r['distance']/1000:.1f}{label_unit}")
                 data.append(value_transform(r[key]))
         return {"labels": labels, "data": data}
 
-    pace_chart_data = create_chart_data("speed", "km", lambda s: 1000 / s if s > 0 else 0)
-    elevation_chart_data = create_chart_data("altitude", "km")
-    hr_chart_data = create_chart_data("heart_rate", "km")
-
+    pace_chart_data = create_chart_data('speed', 'km', lambda s: 1000 / s if s > 0 else 0)
+    elevation_chart_data = create_chart_data('altitude', 'km')
+    hr_chart_data = create_chart_data('heart_rate', 'km')
+    
     # --- Final Assembly ---
     run_detail = {
         "run_id": run_id,
@@ -563,12 +584,12 @@ def parse_fit_file_garmin_sdk(fit_file_path):
         "charts": {
             "pace": pace_chart_data,
             "elevation": elevation_chart_data,
-            "hr": hr_chart_data,
+            "hr": hr_chart_data
         },
         "photos": [
             {"url": f"https://picsum.photos/seed/{run_id}_a/600/400"},
-            {"url": f"https://picsum.photos/seed/{run_id}_b/600/400"},
-        ],
+            {"url": f"https://picsum.photos/seed/{run_id}_b/600/400"}
+        ]
     }
     return run_detail
 
