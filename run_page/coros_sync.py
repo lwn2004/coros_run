@@ -445,7 +445,7 @@ def parse_fit_file(fit_file_path):
         ]
     }
     return run_detail
-def parse_fit_file(fit_file_path):
+def parse_fit_file_garmin_sdk(fit_file_path):
     """Parses a FIT file with Garmin's garmin-fit-sdk and returns a structured dictionary for the run detail modal."""
 
     stream = Stream.from_file(fit_file_path)
