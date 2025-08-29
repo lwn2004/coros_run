@@ -225,7 +225,39 @@ def format_pace(speed_mps):
     minutes = int(pace_sec_per_km // 60)
     seconds = int(pace_sec_per_km % 60)
     return f"{minutes}'{seconds:02}\""
+def smooth_elevation_data(records, window_size=5):
+    """
+    Smoothes elevation data in a list of records using a median filter.
+    This is very effective at removing extreme outliers from GPS altitude.
+    """
+    if not records or 'altitude' not in records[0]:
+        return
 
+    # Window size must be an odd number
+    if window_size % 2 == 0:
+        window_size += 1
+    
+    half_window = window_size // 2
+    
+    # Extract original altitudes, handling potential None values
+    original_altitudes = [r.get('altitude') for r in records]
+    smoothed_altitudes = original_altitudes[:] # Create a copy to modify
+
+    for i in range(half_window, len(original_altitudes) - half_window):
+        # Define the window of points to consider
+        window = original_altitudes[i - half_window : i + half_window + 1]
+        
+        # Filter out any None values from the window
+        valid_window_points = [p for p in window if p is not None]
+        
+        if valid_window_points:
+            # Calculate the median and update the value
+            median_value = statistics.median(valid_window_points)
+            smoothed_altitudes[i] = median_value
+            
+    # Update the altitude in the original records dictionary list
+    for i, record in enumerate(records):
+        record['altitude'] = smoothed_altitudes[i]
 def get_weather_data(lat, lon, timestamp):
     """Fetches historical weather, with a fallback to the forecast API for recent data."""
     if lat is None or lon is None or timestamp is None:
@@ -514,7 +546,7 @@ def parse_fit_file_garmin_sdk(fit_file_path):
     session = messages["session_mesgs"][0]
     records = messages["record_mesgs"]
     laps = messages.get("lap_mesgs", [])
-
+    smooth_elevation_data(records)
     # --- Basic Info & Weather ---
     start_time_value = session.get('start_time')
     start_time = datetime.fromtimestamp(start_time_value + FIT_EPOCH_S, tz=timezone.utc)
