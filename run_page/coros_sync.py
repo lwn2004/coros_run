@@ -7,6 +7,8 @@ import time
 import aiofiles
 import httpx
 from garmin_fit_sdk.util import FIT_EPOCH_S
+from garmin_fit_sdk import Decoder, Stream
+from FitDecode import FitDecoder, Decode, MesgBroadcaster, Listener
 import json
 import fitparse
 import requests
@@ -183,7 +185,7 @@ async def download_and_generate(account, password):
     for label_id in sorted(downloaded_ids, key=int, reverse=True):#['471348054109225065', '471374084024861075', '471416369590599881', '471439763470057774']: #to_generate_coros_ids: #
       fit_path = os.path.join(folder, f"{label_id}.fit")
       print(f"Parsing fit file: {label_id}")
-      run_data = parse_fit_file(fit_path)
+      run_data = parse_fit_file_garmin_sdk(fit_path)
   
       if run_data:
         json_id = run_data['run_id']
@@ -444,7 +446,141 @@ def parse_fit_file(fit_file_path):
         ]
     }
     return run_detail
+def parse_fit_file_garmin_sdk(fit_file_path):
+    """Parses a FIT file with Garmin's FIT SDK decoder and returns a structured dictionary for the run detail modal."""
 
+    # Containers
+    records, laps, session, file_id = [], [], None, None
+
+    try:
+        # Open file with Garmin SDK decoder
+        decode = Decode()
+        with open(fit_file_path, "rb") as fit_file:
+            if not decode.is_fit(fit_file):
+                print("Not a valid FIT file")
+                return None
+            if not decode.check_integrity(fit_file):
+                print("FIT file integrity failed (may be truncated or corrupted)")
+                return None
+
+            fit_file.seek(0)  # reset pointer for decoding
+            mesg_broadcaster = MesgBroadcaster(decode)
+
+            # Define listeners for different message types
+            class MyListener(Listener):
+                def on_mesg(self, mesg):
+                    nonlocal records, laps, session, file_id
+                    if mesg.name == "record":
+                        lat = mesg.get_field("position_lat").get_value()
+                        lon = mesg.get_field("position_long").get_value()
+                        if lat is not None and lon is not None:
+                            records.append({f.name: f.get_value() for f in mesg.fields})
+                    elif mesg.name == "lap":
+                        laps.append({f.name: f.get_value() for f in mesg.fields})
+                    elif mesg.name == "session":
+                        session = {f.name: f.get_value() for f in mesg.fields}
+                    elif mesg.name == "file_id":
+                        file_id = {f.name: f.get_value() for f in mesg.fields}
+
+            listener = MyListener()
+            mesg_broadcaster.add_listener(listener)
+            decode.read(fit_file, mesg_broadcaster)
+
+    except Exception as e:
+        print(f"Error opening FIT file: {e}")
+        return None
+
+    if not session or not records or not file_id:
+        print("FIT file is missing essential data (session, records, or file_id).")
+        return None
+
+    # --- Basic Info & Weather ---
+    start_time = session.get("start_time")
+    run_id = make_run_id(datetime.fromtimestamp(start_time.timestamp(), tz=timezone.utc))
+    first_lat = semicircles_to_degrees(records[0].get("position_lat"))
+    first_lon = semicircles_to_degrees(records[0].get("position_long"))
+
+    print(f"Run ID: {run_id}")
+    print(f"Fetching weather for {start_time} at ({first_lat:.4f}, {first_lon:.4f})...")
+    weather = get_weather_data(first_lat, first_lon, start_time)
+
+    # --- Route Polyline ---
+    coords = [
+        (semicircles_to_degrees(r.get("position_lat")), semicircles_to_degrees(r.get("position_long")))
+        for r in records
+    ]
+    encoded_polyline = polyline.encode(coords)
+
+    # --- Summary ---
+    total_distance_km = session.get("total_distance", 0) / 1000
+    total_duration_sec = session.get("total_elapsed_time", 0)
+    avg_speed_mps = session.get("avg_speed")
+    best_speed_mps = session.get("max_speed")
+    ave_cadence = (session.get("avg_running_cadence") or 0) * 2
+
+    summary = {
+        "distance_km": f"{total_distance_km:.2f}",
+        "duration": format_duration(total_duration_sec),
+        "avg_pace": format_pace(avg_speed_mps),
+        "best_pace": format_pace(best_speed_mps),
+        "calories_kcal": session.get("total_calories"),
+        "total_ascent_m": session.get("total_ascent"),
+        "avg_cadence": ave_cadence,
+        "avg_power_w": session.get("avg_power"),
+        "avg_hr": session.get("avg_heart_rate"),
+        "max_hr": session.get("max_heart_rate"),
+    }
+
+    # --- Laps ---
+    processed_laps = []
+    for i, lap in enumerate(laps, 1):
+        lap_dist_km = lap.get("total_distance", 0) / 1000
+        lap_time_sec = lap.get("total_elapsed_time", 0)
+        ave_cadence = (lap.get("avg_running_cadence") or 0) * 2
+        processed_laps.append({
+            "lap_number": i,
+            "duration": format_duration(lap_time_sec),
+            "distance_km": f"{lap_dist_km:.2f}",
+            "pace": format_pace(lap.get("avg_speed")),
+            "avg_hr": lap.get("avg_heart_rate"),
+            "avg_cadence": ave_cadence,
+        })
+
+    # --- Charts ---
+    chart_records = downsample_records(records, TARGET_CHART_POINTS)
+
+    def create_chart_data(key, label_unit, value_transform=lambda x: x):
+        labels, data = [], []
+        for r in chart_records:
+            if r.get("distance") is not None and r.get(key) is not None:
+                labels.append(f"{r['distance']/1000:.1f}{label_unit}")
+                data.append(value_transform(r[key]))
+        return {"labels": labels, "data": data}
+
+    pace_chart_data = create_chart_data("speed", "km", lambda s: 1000 / s if s > 0 else 0)
+    elevation_chart_data = create_chart_data("altitude", "km")
+    hr_chart_data = create_chart_data("heart_rate", "km")
+
+    # --- Final Assembly ---
+    run_detail = {
+        "run_id": run_id,
+        "start_time": start_time.isoformat(),
+        "weather": weather,
+        "route": {"encoded_polyline": encoded_polyline},
+        "summary": summary,
+        "laps": processed_laps,
+        "charts": {
+            "pace": pace_chart_data,
+            "elevation": elevation_chart_data,
+            "hr": hr_chart_data,
+        },
+        "photos": [
+            {"url": f"https://picsum.photos/seed/{run_id}_a/600/400"},
+            {"url": f"https://picsum.photos/seed/{run_id}_b/600/400"},
+        ],
+    }
+    return run_detail
+  
 def make_run_id(time_stamp):
       return int(datetime.timestamp(time_stamp) * 1000)
 
