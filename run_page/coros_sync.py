@@ -8,7 +8,6 @@ import aiofiles
 import httpx
 from garmin_fit_sdk.util import FIT_EPOCH_S
 from garmin_fit_sdk import Decoder, Stream
-from FitDecode import FitDecoder, Decode, MesgBroadcaster, Listener
 import json
 import fitparse
 import requests
