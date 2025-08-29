@@ -180,8 +180,9 @@ async def download_and_generate(account, password):
     await coros.req.aclose()
     make_activities_file(SQL_FILE, FIT_FOLDER, JSON_FILE, "fit", json_file2 = JSON_FILE2)
 
-    for label_id in downloaded_ids:#['471348054109225065', '471374084024861075', '471416369590599881', '471439763470057774']: #to_generate_coros_ids: #
+    for label_id in sorted(downloaded_ids, key=int, reverse=True):#['471348054109225065', '471374084024861075', '471416369590599881', '471439763470057774']: #to_generate_coros_ids: #
       fit_path = os.path.join(folder, f"{label_id}.fit")
+      print(f"Parsing fit file: {label_id}")
       run_data = parse_fit_file(fit_path)
   
       if run_data:
@@ -243,7 +244,7 @@ def get_weather_data(lat, lon, timestamp):
         res = requests.get(archive_api_url, timeout=10)
         res.raise_for_status()
         data = res.json()
-        print(json.dumps(data, indent=4, sort_keys=True))
+        #print(json.dumps(data, indent=4, sort_keys=True))
         if data.get('hourly') and data['hourly'].get('time'):
             hour_index = dt_utc.hour
             temp = data['hourly']['temperature_2m'][hour_index]
