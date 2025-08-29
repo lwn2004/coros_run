@@ -1,11 +1,7 @@
 {
     "run_id": 1746919734000,
     "start_time": "2025-05-10T23:28:54+00:00",
-    "weather": {
-        "temperature_c": 17.7,
-        "condition": "阴天 ☁️",
-        "wind_speed_kmh": 13.0
-    },
+    "weather": null,
     "route": {
         "encoded_polyline": "wjzkC}ujrTBA@?@CBA@ABC@CDCBABCBABADCBADABADADAD?D@D@F@D@DBFBBBD@DBBBB@DBBBB@DBBBBBBB@B@B@B@B?B@D@B@B@DBBBBBBBBBBBBBBDBBBBBBDBBBBBDBBDBBBBBBBBBBBBBBBB@BBB@BB@BBBBBDBB@BBDBBBD@BBD@DBD@D@D@D@D?D@F@D?DBD@BBD@BBBBB@BBD@BBB@DBB@D?B@B?@A@A?C?C?C?E?E?C?E?E@E?E?E?E?E?CAE?EAE?ECIAI"
     },
