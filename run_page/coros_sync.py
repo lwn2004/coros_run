@@ -446,49 +446,41 @@ def parse_fit_file(fit_file_path):
         ]
     }
     return run_detail
-def parse_fit_file_garmin_sdk(fit_file_path):
-    """Parses a FIT file with Garmin's FIT SDK decoder and returns a structured dictionary for the run detail modal."""
+def parse_fit_file(fit_file_path):
+    """Parses a FIT file with Garmin's garmin-fit-sdk and returns a structured dictionary for the run detail modal."""
+
+    stream = Stream.from_file(fit_file_path)
+
+    # --- Decode ---
+    decoder = Decoder(stream)
+    if not decoder.is_fit:
+        print("Not a valid FIT file")
+        return None
+    if not decoder.check_integrity():
+        print("FIT file integrity failed (may be truncated or corrupted)")
+        return None
+
+    # Decode messages
+    messages, errors = decoder.read(convert_datetimes_to_dates=False)
+    if errors:
+        print("Errors while decoding:", errors)
 
     # Containers
     records, laps, session, file_id = [], [], None, None
 
-    try:
-        # Open file with Garmin SDK decoder
-        decode = Decode()
-        with open(fit_file_path, "rb") as fit_file:
-            if not decode.is_fit(fit_file):
-                print("Not a valid FIT file")
-                return None
-            if not decode.check_integrity(fit_file):
-                print("FIT file integrity failed (may be truncated or corrupted)")
-                return None
-
-            fit_file.seek(0)  # reset pointer for decoding
-            mesg_broadcaster = MesgBroadcaster(decode)
-
-            # Define listeners for different message types
-            class MyListener(Listener):
-                def on_mesg(self, mesg):
-                    nonlocal records, laps, session, file_id
-                    if mesg.name == "record":
-                        lat = mesg.get_field("position_lat").get_value()
-                        lon = mesg.get_field("position_long").get_value()
-                        if lat is not None and lon is not None:
-                            records.append({f.name: f.get_value() for f in mesg.fields})
-                    elif mesg.name == "lap":
-                        laps.append({f.name: f.get_value() for f in mesg.fields})
-                    elif mesg.name == "session":
-                        session = {f.name: f.get_value() for f in mesg.fields}
-                    elif mesg.name == "file_id":
-                        file_id = {f.name: f.get_value() for f in mesg.fields}
-
-            listener = MyListener()
-            mesg_broadcaster.add_listener(listener)
-            decode.read(fit_file, mesg_broadcaster)
-
-    except Exception as e:
-        print(f"Error opening FIT file: {e}")
-        return None
+    # Iterate through decoded messages
+    for msg in messages["messages"]:
+        if msg["name"] == "record":
+            lat = msg["fields"].get("position_lat")
+            lon = msg["fields"].get("position_long")
+            if lat is not None and lon is not None:
+                records.append(msg["fields"])
+        elif msg["name"] == "lap":
+            laps.append(msg["fields"])
+        elif msg["name"] == "session":
+            session = msg["fields"]
+        elif msg["name"] == "file_id":
+            file_id = msg["fields"]
 
     if not session or not records or not file_id:
         print("FIT file is missing essential data (session, records, or file_id).")
@@ -580,6 +572,7 @@ def parse_fit_file_garmin_sdk(fit_file_path):
         ],
     }
     return run_detail
+
   
 def make_run_id(time_stamp):
       return int(datetime.timestamp(time_stamp) * 1000)
