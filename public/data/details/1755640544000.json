@@ -1,11 +1,7 @@
 {
     "run_id": 1755640544000,
     "start_time": "2025-08-19T21:55:44+00:00",
-    "weather": {
-        "temperature_c": 25.4,
-        "condition": "局部多云 ⛅️",
-        "wind_speed_kmh": 8.6
-    },
+    "weather": null,
     "route": {
         "encoded_polyline": "q`zkCcrjrT?@?@@@@BB@BBBBBBB@B@BBB@@BBBBDBDDBBDD@D@D@F?F?D?F?D?F?D?D@B?D@B@B?B@B@B@BBB@B@B@BBB@BB@@B@BBB@BBB@B@@@B@B?B@B@B@B@B@B@B@B@BBD@B@B@B@D@B@B@D@BBB?D@B?B?DABABABC@CBC@C@E@E?C@E@E@C?E@C@EBC@E@C@E@C@C@E@C@E@C@E@C@C?C@E@C@C@CBE@C@CBE@E@C?C@EBA@CBAB?D?B?D@B@D@B@D@D@BBBB@@@B?B?B?BAB?BAB?DABABABABABA@ABABAB?BA@ABABAB?@ABABABABADABABABABABABADABABAB?BABADCBABABABABABABABABAB?BAB?B?D@@?BB@BBB@B@B@B@B@B@B@B@B@BBB@B@B@B@@@B?B@B@B@B@B@BBB@D@B@B@B@BBB@B@B@B@B@B@B@B@@BBBBDBBBBBDBBB@BBB@BBBBBBBBD@BBB@B@B@B@B@B@B@BBB@DBB@BBBBB@DBB@BBD@BBD@B@B@B@B@B@BBD@B@B@B@B@B@D@B@B@DBB@B@B@D@B@B@B@B@D@BBB@B@BBB@DBB@BBB@BBB@D@BBB@B@D@B@D@B?D@B?D@B@B?D@B@B?D@B@B@D@B@B?D@B@D@B?BBB@B@B@DBB@B@B@D@B@B?D@B@B@D@B@B@D@B@B@B@D?B@D@B?D@B?D@B?D@D?B@D@B@D?B@B@D@B@B@BBB@B@B@DBB@B@BBB@B@D@BBB@D@B@B@B@B@D@BBB@B@B@D@B@B@D@B@D@B?B@D@B@B@D@B@B@B@D@B@B@B@BBB@B@BBBBB@@DBB@BBB@DBBBB@BB@BBD@BBB@B@B@B@B@D@B@B@B@B@B@D@B@B@B?B@B@B@B?B@B@B?B@D@DBFBFB"
     },
