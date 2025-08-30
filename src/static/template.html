@@ -709,21 +709,15 @@
         z-index: 10;
         border-bottom: 1px solid var(--border-color);
         padding: 0.75rem 1rem;
-    }
-    #runDetailModal .detail-header .btn-back {
-        background: none;
-        border: none;
-        font-size: 1.5rem;
-        padding: 0;
-        line-height: 1;
-        color: var(--text-primary);
+        /* Add height for title centering */
+        min-height: 50px; 
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
     #runDetailModal .detail-header .detail-title {
         font-weight: 600;
         font-size: 1.1rem;
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
         color: var(--text-primary);
     }
     #runDetailModal #detailHeroDistance .distance-value {
@@ -823,6 +817,32 @@
     .calendar-table td.lottery-win {
         border: 1px solid var(--success-color);
         box-shadow: 0 0 8px 1px rgba(32, 201, 151, 0.5);
+    }
+    /* New styles for the bottom close button */
+    .btn-close-bottom {
+        position: fixed;
+        bottom: 25px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: rgba(40, 42, 45, 0.7);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #e4e6eb;
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1056; /* Ensure it's above the modal content */
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+    }
+    .btn-close-bottom:hover {
+        background-color: rgba(58, 59, 60, 0.9);
+        transform: translateX(-50%) scale(1.05);
     }
   </style>
 </head>
@@ -1488,8 +1508,7 @@
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
             <div class="modal-body">
-                <div class="detail-header d-flex align-items-center">
-                    <button type="button" class="btn-back" data-bs-dismiss="modal" aria-label="Close"><i class="bi bi-chevron-left"></i></button>
+                <div class="detail-header">
                     <h5 class="detail-title" id="detailTitle">跑步详情</h5>
                 </div>
 
@@ -1613,6 +1632,9 @@
                     </div>
                 </div>
             </div>
+            <button type="button" class="btn-close-bottom" data-bs-dismiss="modal" aria-label="Close">
+                <i class="bi bi-x-lg"></i>
+            </button>
         </div>
     </div>
 </div>
