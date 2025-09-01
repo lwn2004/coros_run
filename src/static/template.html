@@ -1558,7 +1558,7 @@
                             <div class="row g-4 text-center" id="detailDataGrid">
                                 </div>
                         </div>
-                        <div id="detailAnalysisSectionsLoading" class="spinner-border text-secondary" role="status"></div>
+                        <div id="detailAnalysisSectionsLoading" class="d-flex justify-content-center"><div class="spinner-border text-secondary" role="status"></div></div>
                         <div id="detailAnalysisSections">
                             <div class="mb-5">
                                 <h4 class="data-section-title">分段信息</h4>
@@ -2627,7 +2627,6 @@ async function generateMarathonCalendar() {
             <div class="col-4"><div class="data-point-value">${preloadedData.paceStr || '--'}</div><div class="data-point-label">平均配速</div></div>
             <div class="col-4"><div class="data-point-value">${preloadedData.heartRate || '--'}</div><div class="data-point-label">平均心率</div></div>
         `;
-        if(routeMapInstance) routeMapInstance.remove();
         document.getElementById('viewRouteBtn').style.display = 'none';
         document.getElementById('detailAnalysisSectionsLoading').style.display = 'block';
         document.getElementById('detailAnalysisSections').style.display = 'none';
@@ -2738,6 +2737,7 @@ async function generateMarathonCalendar() {
             console.error("Error loading run detail:", error);
             //document.getElementById('runDetailLoading').innerHTML = `<div class="alert alert-danger">加载失败: ${error.message}</div>`;
             document.getElementById('detailAnalysisSectionsLoading').style.display = 'none';
+            currentPolyline = null;
         }
     }
     
