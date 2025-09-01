@@ -15181,7 +15181,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-09-01 14:38:33 
+         | Last updated: 2025-09-01 14:49:16 
     </small>
 </footer>
 
@@ -15896,123 +15896,6 @@ async function generateMarathonCalendar() {
         renderRunTags();
         await saveRunTags(currentDetailRunId);
     }
-    
-    document.addEventListener('DOMContentLoaded', function() {
-    setTheme(getPreferredTheme());
-		
-    initializeUserProfile();
-    loadCommentCounts();
-
-    document.getElementById('editProfileTrigger').addEventListener('click', () => { new bootstrap.Modal(document.getElementById('profileModal')).show(); });
-    document.getElementById('detailEditProfileTrigger').addEventListener('click', () => { new bootstrap.Modal(document.getElementById('profileModal')).show(); });
-    
-    document.getElementById('addTagButton').addEventListener('click', async () => {
-        const input = document.getElementById('runDetailTagInput');
-        await addTag(input.value);
-        input.value = '';
-    });
-    document.getElementById('runDetailTagInput').addEventListener('keypress', async (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            const input = document.getElementById('runDetailTagInput');
-            await addTag(input.value);
-            input.value = '';
-        }
-    });
-    document.getElementById('runDetailTagsContainer').addEventListener('click', (e) => {
-        if (e.target.matches('button.btn-close')) {
-            const index = parseInt(e.target.dataset.tagIndex, 10);
-            removeTag(index);
-        }
-    });
-    document.getElementById('suggestedTagsContainer').addEventListener('click', async (e) => {
-        if (e.target.matches('button')) {
-            const tagName = e.target.dataset.tagName;
-            await addTag(tagName);
-        }
-    });
-
-    document.getElementById('goto-data-tab')?.addEventListener('click', e => {
-        e.preventDefault();
-        const dataTab = document.getElementById('data-tab');
-        if (dataTab) {
-            bootstrap.Tab.getOrCreateInstance(dataTab).show();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    });
-
-    let startX = 0, startY = 0;
-    const tabContent = document.querySelector('.tab-content');
-    const minSwipeDistance = 100;
-    
-    tabContent.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; }, false);
-    
-    tabContent.addEventListener('touchend', (e) => {
-      if (e.target.closest('#cityMap') || e.target.closest('.calendar-table')) return;
-      const endX = e.changedTouches[0].clientX;
-      const diffX = endX - startX;
-      if (Math.abs(diffX) > minSwipeDistance && Math.abs(diffX) > Math.abs(e.changedTouches[0].clientY - startY)) {
-        const activeTab = document.querySelector('#main-nav-tabs .nav-link.active');
-        const tabs = Array.from(document.querySelectorAll('#main-nav-tabs .nav-link'));
-        const currentIndex = tabs.indexOf(activeTab);
-        if (diffX > 0 && currentIndex > 0) {
-            bootstrap.Tab.getOrCreateInstance(tabs[currentIndex - 1]).show();
-        } else if (diffX < 0 && currentIndex < tabs.length - 1) {
-            bootstrap.Tab.getOrCreateInstance(tabs[currentIndex + 1]).show();
-        }
-      }
-    }, false);
-    
-    const activateTabFromHash = () => {
-      const hash = window.location.hash.substring(1);
-      if (hash) {
-        const tabTrigger = document.querySelector(`.nav-link[data-hash="${hash}"]`);
-        if (tabTrigger) { bootstrap.Tab.getOrCreateInstance(tabTrigger).show(); }
-      }
-    };
-    
-    document.querySelectorAll('#main-nav-tabs .nav-link').forEach(tabEl => {
-      tabEl.addEventListener('shown.bs.tab', event => {
-        const hash = event.target.dataset.hash;
-        if (hash) { history.pushState(null, '', '#' + hash); }
-        if (hash === 'marathon') { initMarathonView(); }
-        if (hash === 'events' && !cityMap) {
-            const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
-            const tileUrl = isDark ? 
-                'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png' :
-                'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png';
-
-            cityMap = L.map('cityMap', { center: [36, 108], zoom: 4, zoomControl: false });
-            L.tileLayer(tileUrl, { attribution: '', subdomains: 'abcd', minZoom: 3, maxZoom: 18 }).addTo(cityMap);
-            cityMap.attributionControl.setPrefix('');
-            
-            cityStatsData.forEach(city => {
-                if (city.coordinates && city.coordinates.length === 2) {
-                    L.circleMarker([city.coordinates[0], city.coordinates[1]], { 
-                        radius: Math.log(city.count) + 3, 
-                        fillColor: "var(--accent-color)", 
-                        color: "var(--text-primary)", 
-                        weight: 1.5, 
-                        opacity: 1, 
-                        fillOpacity: 0.7 
-                    }).addTo(cityMap).bindPopup(`<b>${city.name}</b><br>跑步次数: ${city.count}<br>总距离: ${city.distance} km`);
-                }
-            });
-        } else if (hash === 'events' && cityMap) {
-            cityMap.invalidateSize();
-        }
-      });
-    });
-
-    window.addEventListener('popstate', activateTabFromHash);
-    activateTabFromHash();
-    if (window.location.hash === '#marathon') { initMarathonView(); }
-    
-    document.querySelectorAll('.stat-card-flip-container').forEach(container => {
-        container.addEventListener('click', (event) => {
-            event.currentTarget.querySelector('.stat-card-flipper').classList.toggle('flipped');
-        });
-    });
 
     function getChartColors() {
         const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
@@ -16036,6 +15919,7 @@ async function generateMarathonCalendar() {
             };
         }
     }
+
 
     function createAllCharts() {
         if (document.getElementById('dailyDistanceChart')) {
@@ -16170,7 +16054,125 @@ async function generateMarathonCalendar() {
     function recreateAllCharts() {
         destroyAllCharts();
         createAllCharts();
-    }
+    }	
+
+    
+    document.addEventListener('DOMContentLoaded', function() {
+    setTheme(getPreferredTheme());
+		
+    initializeUserProfile();
+    loadCommentCounts();
+
+    document.getElementById('editProfileTrigger').addEventListener('click', () => { new bootstrap.Modal(document.getElementById('profileModal')).show(); });
+    document.getElementById('detailEditProfileTrigger').addEventListener('click', () => { new bootstrap.Modal(document.getElementById('profileModal')).show(); });
+    
+    document.getElementById('addTagButton').addEventListener('click', async () => {
+        const input = document.getElementById('runDetailTagInput');
+        await addTag(input.value);
+        input.value = '';
+    });
+    document.getElementById('runDetailTagInput').addEventListener('keypress', async (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const input = document.getElementById('runDetailTagInput');
+            await addTag(input.value);
+            input.value = '';
+        }
+    });
+    document.getElementById('runDetailTagsContainer').addEventListener('click', (e) => {
+        if (e.target.matches('button.btn-close')) {
+            const index = parseInt(e.target.dataset.tagIndex, 10);
+            removeTag(index);
+        }
+    });
+    document.getElementById('suggestedTagsContainer').addEventListener('click', async (e) => {
+        if (e.target.matches('button')) {
+            const tagName = e.target.dataset.tagName;
+            await addTag(tagName);
+        }
+    });
+
+    document.getElementById('goto-data-tab')?.addEventListener('click', e => {
+        e.preventDefault();
+        const dataTab = document.getElementById('data-tab');
+        if (dataTab) {
+            bootstrap.Tab.getOrCreateInstance(dataTab).show();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    });
+
+    let startX = 0, startY = 0;
+    const tabContent = document.querySelector('.tab-content');
+    const minSwipeDistance = 100;
+    
+    tabContent.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; }, false);
+    
+    tabContent.addEventListener('touchend', (e) => {
+      if (e.target.closest('#cityMap') || e.target.closest('.calendar-table')) return;
+      const endX = e.changedTouches[0].clientX;
+      const diffX = endX - startX;
+      if (Math.abs(diffX) > minSwipeDistance && Math.abs(diffX) > Math.abs(e.changedTouches[0].clientY - startY)) {
+        const activeTab = document.querySelector('#main-nav-tabs .nav-link.active');
+        const tabs = Array.from(document.querySelectorAll('#main-nav-tabs .nav-link'));
+        const currentIndex = tabs.indexOf(activeTab);
+        if (diffX > 0 && currentIndex > 0) {
+            bootstrap.Tab.getOrCreateInstance(tabs[currentIndex - 1]).show();
+        } else if (diffX < 0 && currentIndex < tabs.length - 1) {
+            bootstrap.Tab.getOrCreateInstance(tabs[currentIndex + 1]).show();
+        }
+      }
+    }, false);
+    
+    const activateTabFromHash = () => {
+      const hash = window.location.hash.substring(1);
+      if (hash) {
+        const tabTrigger = document.querySelector(`.nav-link[data-hash="${hash}"]`);
+        if (tabTrigger) { bootstrap.Tab.getOrCreateInstance(tabTrigger).show(); }
+      }
+    };
+    
+    document.querySelectorAll('#main-nav-tabs .nav-link').forEach(tabEl => {
+      tabEl.addEventListener('shown.bs.tab', event => {
+        const hash = event.target.dataset.hash;
+        if (hash) { history.pushState(null, '', '#' + hash); }
+        if (hash === 'marathon') { initMarathonView(); }
+        if (hash === 'events' && !cityMap) {
+            const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+            const tileUrl = isDark ? 
+                'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png' :
+                'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png';
+
+            cityMap = L.map('cityMap', { center: [36, 108], zoom: 4, zoomControl: false });
+            L.tileLayer(tileUrl, { attribution: '', subdomains: 'abcd', minZoom: 3, maxZoom: 18 }).addTo(cityMap);
+            cityMap.attributionControl.setPrefix('');
+            
+            cityStatsData.forEach(city => {
+                if (city.coordinates && city.coordinates.length === 2) {
+                    L.circleMarker([city.coordinates[0], city.coordinates[1]], { 
+                        radius: Math.log(city.count) + 3, 
+                        fillColor: "var(--accent-color)", 
+                        color: "var(--text-primary)", 
+                        weight: 1.5, 
+                        opacity: 1, 
+                        fillOpacity: 0.7 
+                    }).addTo(cityMap).bindPopup(`<b>${city.name}</b><br>跑步次数: ${city.count}<br>总距离: ${city.distance} km`);
+                }
+            });
+        } else if (hash === 'events' && cityMap) {
+            cityMap.invalidateSize();
+        }
+      });
+    });
+
+    window.addEventListener('popstate', activateTabFromHash);
+    activateTabFromHash();
+    if (window.location.hash === '#marathon') { initMarathonView(); }
+    
+    document.querySelectorAll('.stat-card-flip-container').forEach(container => {
+        container.addEventListener('click', (event) => {
+            event.currentTarget.querySelector('.stat-card-flipper').classList.toggle('flipped');
+        });
+    });
 
     createAllCharts(); 
 
