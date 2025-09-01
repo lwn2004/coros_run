@@ -8,6 +8,21 @@ import os
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 # --- Configuration ---
+CITIES_FILE_PATH = os.path.join(parent, "src", "static", "cities.json")
+
+def load_city_coordinates(path):
+    """从指定路径加载城市坐标JSON文件"""
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print(f"错误：找不到城市坐标文件 {path}")
+        return {}
+    except json.JSONDecodeError:
+        print(f"错误：无法解析城市坐标文件 {path}，请检查JSON格式。")
+        return {}
+
+# --- 您的主配置 ---
 CONFIG = {
     "earth_circumference_km": 40075.017,
     "pb_type_map": {
@@ -18,13 +33,9 @@ CONFIG = {
     "pb_display_order": ["1公里", "3公里", "5公里", "10公里", "半马", "全马"],
     "milestone_distances_km": [1000, 10000, 20000, 30000, 40000],
     "months_map": {i: f"{i:02d}月" for i in range(1, 13)},
-    "city_coordinates": {
-		# 直辖市
-		'北京市': [39.904, 116.407],
-		'上海市': [31.230, 121.473],
-		'天津市': [39.084, 117.201],
-		'重庆市': [29.563, 106.551],
-    }
+    
+    # 通过调用函数来加载城市坐标
+    "city_coordinates": load_city_coordinates(CITIES_FILE_PATH)
 }
 
 # --- Formatting Utilities ---
@@ -530,3 +541,4 @@ def main():
 if __name__ == "__main__":
     parent = os.path.dirname(current) 
     main()
+
