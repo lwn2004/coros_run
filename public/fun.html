@@ -15179,7 +15179,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-09-01 18:00:29 
+         | Last updated: 2025-09-01 18:17:46 
     </small>
 </footer>
 
@@ -15477,6 +15477,7 @@
     let routeMapInstance = null;
     let countdownInterval = null;
     let currentPolyline = null;
+    let polyline;
     let allRunRows = [];
     const commentApiBase = 'https://kv.linwn.net';
     const cityStatsData = [{"coordinates": [23.1291, 113.2644], "count": 437, "distance": 3664.71, "first_date": "2021-03-24", "name": "\u5e7f\u5dde\u5e02"}, {"coordinates": [21.6622, 110.9175], "count": 11, "distance": 81.6, "first_date": "2022-01-31", "name": "\u8302\u540d\u5e02"}, {"coordinates": [23.7, 113.05], "count": 1, "distance": 21.3, "first_date": "2025-03-16", "name": "\u6e05\u8fdc\u5e02"}, {"coordinates": [22.1987, 113.5439], "count": 1, "distance": 10.12, "first_date": "2024-11-10", "name": "\u6fb3\u95e8"}, {"coordinates": [22.5431, 114.0579], "count": 1, "distance": 5.01, "first_date": "2023-05-01", "name": "\u6df1\u5733\u5e02"}];
@@ -16551,7 +16552,10 @@ async function generateMarathonCalendar() {
             L.tileLayer(tileUrl, { subdomains: 'abcd' }).addTo(routeMapInstance);
         }
         if (currentPolyline) {
-            const polyline = L.polyline(decodePolyline(currentPolyline), { color: getComputedStyle(document.documentElement).getPropertyValue('--accent-color'), weight: 4 }).addTo(routeMapInstance);
+            if (polyline) {
+              routeMapInstance.removeLayer(polyline);
+            }
+            polyline = L.polyline(decodePolyline(currentPolyline), { color: getComputedStyle(document.documentElement).getPropertyValue('--accent-color'), weight: 4 }).addTo(routeMapInstance);
             routeMapInstance.fitBounds(polyline.getBounds().pad(0.1));
         }
         setTimeout(() => routeMapInstance.invalidateSize(), 10);
