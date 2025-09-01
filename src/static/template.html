@@ -1558,7 +1558,7 @@
                             <div class="row g-4 text-center" id="detailDataGrid">
                                 </div>
                         </div>
-
+                        <div id="detailAnalysisSectionsLoading" class="spinner-border text-secondary" role="status"></div>
                         <div id="detailAnalysisSections">
                             <div class="mb-5">
                                 <h4 class="data-section-title">分段信息</h4>
@@ -1752,7 +1752,7 @@
     let paceChart = null;
     let elevationChart = null;
     let hrChart = null;
-	let cityMap = null;
+	  let cityMap = null;
     let routeMapInstance = null;
     let countdownInterval = null;
     let currentPolyline = null;
@@ -2627,6 +2627,9 @@ async function generateMarathonCalendar() {
             <div class="col-4"><div class="data-point-value">${preloadedData.paceStr || '--'}</div><div class="data-point-label">平均配速</div></div>
             <div class="col-4"><div class="data-point-value">${preloadedData.heartRate || '--'}</div><div class="data-point-label">平均心率</div></div>
         `;
+        if(routeMapInstance) routeMapInstance.remove();
+        document.getElementById('viewRouteBtn').style.display = 'none';
+        document.getElementById('detailAnalysisSectionsLoading').style.display = 'block';
         document.getElementById('detailAnalysisSections').style.display = 'none';
         document.getElementById('detailLapsTableBody').innerHTML = '';
         if(paceChart) paceChart.destroy();
@@ -2718,7 +2721,7 @@ async function generateMarathonCalendar() {
                 const elevationCtx = document.getElementById('elevationChart').getContext('2d');
                 elevationChart = new Chart(elevationCtx, { type: 'line', data: { labels: data.charts.elevation.labels, datasets: [{ data: data.charts.elevation.data, borderColor: colors.accentColor, borderWidth: 2, pointRadius: 0, fill: { target: 'origin', above: `${colors.accentColor}33` } , tension: 0.1 }] }, options: chartOptions });
             }
-
+            document.getElementById('detailAnalysisSectionsLoading').style.display = 'none';
             document.getElementById('detailAnalysisSections').style.display = 'block';
             await loadRunTags(runId);
             renderSuggestedTags();
@@ -2734,6 +2737,7 @@ async function generateMarathonCalendar() {
         } catch (error) {
             console.error("Error loading run detail:", error);
             //document.getElementById('runDetailLoading').innerHTML = `<div class="alert alert-danger">加载失败: ${error.message}</div>`;
+            document.getElementById('detailAnalysisSectionsLoading').style.display = 'none';
         }
     }
     
