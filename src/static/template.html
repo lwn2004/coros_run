@@ -1756,6 +1756,7 @@
     let routeMapInstance = null;
     let countdownInterval = null;
     let currentPolyline = null;
+    let polyline;
     let allRunRows = [];
     const commentApiBase = 'https://kv.linwn.net';
     const cityStatsData = {{ city_stats|tojson }};
@@ -2830,7 +2831,10 @@ async function generateMarathonCalendar() {
             L.tileLayer(tileUrl, { subdomains: 'abcd' }).addTo(routeMapInstance);
         }
         if (currentPolyline) {
-            const polyline = L.polyline(decodePolyline(currentPolyline), { color: getComputedStyle(document.documentElement).getPropertyValue('--accent-color'), weight: 4 }).addTo(routeMapInstance);
+            if (polyline) {
+              routeMapInstance.removeLayer(polyline);
+            }
+            polyline = L.polyline(decodePolyline(currentPolyline), { color: getComputedStyle(document.documentElement).getPropertyValue('--accent-color'), weight: 4 }).addTo(routeMapInstance);
             routeMapInstance.fitBounds(polyline.getBounds().pad(0.1));
         }
         setTimeout(() => routeMapInstance.invalidateSize(), 10);
