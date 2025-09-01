@@ -1520,15 +1520,15 @@
                 <div class="detail-header">
                     <h5 class="detail-title" id="detailTitle">跑步详情</h5>
                 </div>
-
+                <!--
                 <div id="runDetailLoading" class="text-center p-5">
                     <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
                         <span class="visually-hidden">Loading...</span>
                     </div>
                     <p class="mt-2 text-secondary">正在加载跑步数据...</p>
                 </div>
-
-                <div id="runDetailContent" class="d-none">
+                -->
+                <div id="runDetailContent">
                     <div class="container-fluid px-4">
                         <div class="text-center my-4" id="detailHeroDistance">
                             <span class="distance-value">--</span>
@@ -2724,8 +2724,8 @@ async function generateMarathonCalendar() {
             renderSuggestedTags();
             await refreshDetailComments(runId);
 
-            document.getElementById('runDetailLoading').style.display = 'none';
-            document.getElementById('runDetailContent').classList.remove('d-none');
+            //document.getElementById('runDetailLoading').style.display = 'none';
+            //document.getElementById('runDetailContent').classList.remove('d-none');
             
             if (scrollToComments) {
                 document.getElementById('runDetailComments').scrollIntoView({ behavior: 'smooth', block: 'center' });
