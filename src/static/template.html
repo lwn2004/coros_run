@@ -628,45 +628,6 @@
     .event-details.popup .event-status {
         margin-top: 4px;
     }
-
-    .calendar-list-view {
-        display: none;
-    }
-    .calendar-list-item {
-        display: flex;
-        gap: 1rem;
-        padding: 0.75rem 0.25rem;
-        border-bottom: 1px solid var(--border-color);
-    }
-    .calendar-list-item:last-child {
-        border-bottom: none;
-    }
-    .list-date {
-        flex-shrink: 0;
-        text-align: center;
-    }
-    .list-date .day {
-        font-size: 1.5rem;
-        font-weight: 700;
-        line-height: 1;
-        color: var(--marathon-color);
-    }
-    .list-date .weekday {
-        font-size: 0.75rem;
-        color: var(--text-secondary);
-    }
-    .list-details {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
-    .list-details .name {
-        font-weight: 500;
-    }
-    .list-details .status {
-        font-size: 0.8rem;
-        color: var(--text-secondary);
-    }
     
     .calendar-grid-view {
         overflow-x: auto;
@@ -691,9 +652,6 @@
     }
 
     @media (max-width: 767.98px) {
-        /* Default to calendar view on mobile, hide list view entirely */
-        .calendar-table { display: table; }
-        .calendar-list-view { display: none; }
         .marathon-calendar-container .month-grid { padding: 1rem; }
         #countdown-timer .time-value { font-size: 2rem; }
         #countdown-timer .time-block { padding: 0 0.5rem; }
@@ -754,7 +712,6 @@
         z-index: 10;
         border-bottom: 1px solid var(--border-color);
         padding: 0.75rem 1rem;
-        /* Add height for title centering */
         min-height: 50px; 
         display: flex;
         justify-content: center;
@@ -866,7 +823,6 @@
         border: 1px solid var(--success-color);
         box-shadow: 0 0 8px 1px rgba(var(--success-color-rgb), 0.5);
     }
-    /* New styles for the bottom close button */
     .btn-close-bottom {
         position: fixed;
         bottom: 25px;
@@ -884,7 +840,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        z-index: 1056; /* Ensure it's above the modal content */
+        z-index: 1056; 
         cursor: pointer;
         transition: all 0.2s ease-in-out;
     }
@@ -1747,7 +1703,7 @@
                 <form id="calendarEventForm">
                     <input type="hidden" id="event-id">
                     <div class="mb-2">
-                        <label for="event-date" class="form-label">日期</label>
+                        <label for="event-date" class="form-label">比赛日期</label>
                         <input type="date" class="form-control form-control-sm" id="event-date" required>
                     </div>
                     <div class="mb-2">
@@ -1759,9 +1715,18 @@
                         <input type="text" class="form-control form-control-sm" id="event-category" required>
                     </div>
                     <div class="mb-3">
-                        <label for="event-status" class="form-label">状态 (如: 已报名)</label>
-                        <input type="text" class="form-control form-control-sm" id="event-status" required>
+                        <label for="event-status" class="form-label">状态</label>
+                        <select class="form-select form-select-sm" id="event-status" required>
+                            <option value="待报名">待报名</option>
+                            <option value="待抽签">待抽签</option>
+                            <option value="待比赛" selected>待比赛</option>
+                        </select>
                     </div>
+                    <div class="mb-3" id="secondary-date-wrapper" style="display: none;">
+                        <label for="event-secondary-date" class="form-label" id="event-secondary-date-label"></label>
+                        <input type="date" class="form-control form-control-sm" id="event-secondary-date">
+                    </div>
+
                     <button type="submit" class="btn btn-sm btn-primary">保存赛事</button>
                     <button type="button" id="cancelEditBtn" class="btn btn-sm btn-secondary" style="display: none;">取消编辑</button>
                 </form>
@@ -1823,7 +1788,6 @@
         }
         localStorage.setItem('theme', theme);
         updateRootColors();
-        // Redraw charts with new colors if they exist
         if (monthlyDistanceChart) {
             recreateAllCharts();
         }
@@ -1898,7 +1862,7 @@
     function initializeUserProfile() {
         const params = new URLSearchParams(window.location.search);
         const adminKey = params.get('admin_key');
-        if (adminKey === 'runpage123') { // Replace with a real key mechanism if needed
+        if (adminKey === 'runpage123') { 
             localStorage.setItem('run_role', 'admin');
             const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + window.location.hash;
             window.history.replaceState({path: newUrl}, '', newUrl);
@@ -2008,7 +1972,7 @@ async function generateMarathonCalendar() {
             const response = await fetch(`${commentApiBase}/marathon-events`);
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             marathonEventsCache = await response.json();
-            initializeRaceCountdown(); // Initialize countdown after fetching data
+            initializeRaceCountdown(); 
         } catch (error) {
             console.error("Could not fetch marathon data:", error);
             container.innerHTML = '<div class="content-card text-center text-danger">无法加载赛历数据，请稍后重试。</div>';
@@ -2038,29 +2002,6 @@ async function generateMarathonCalendar() {
             calendarHTML += `<div class="month-grid">`;
             calendarHTML += `<h4 class="mb-3">${year}年 ${month}月</h4>`;
             
-            calendarHTML += `<div class="calendar-list-view">`;
-            monthEvents.sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(event => {
-                const eventDate = new Date(event.date.replace(/-/g, '/'));
-                let lotteryStatusIcon = '';
-                if (event.status === '中！') {
-                    lotteryStatusIcon = ' <i class="bi bi-check-circle-fill text-success"></i>';
-                } else if (event.status === '不中！') {
-                    lotteryStatusIcon = ' <i class="bi bi-x-circle-fill text-secondary"></i>';
-                }
-                calendarHTML += `
-                    <div class="calendar-list-item">
-                        <div class="list-date">
-                            <div class="day">${eventDate.getDate()}</div>
-                            <div class="weekday">${weekdays[eventDate.getDay()]}</div>
-                        </div>
-                        <div class="list-details">
-                            <div class="name">${event.name}${lotteryStatusIcon} <span class="category">${event.category}</span></div>
-                            <div class="status">${event.status}</div>
-                        </div>
-                    </div>`;
-            });
-            calendarHTML += `</div>`;
-
             let gridHtml = `<table class="calendar-table">`;
             gridHtml += `<thead><tr>${['日', '一', '二', '三', '四', '五', '六'].map(d => `<th>${d}</th>`).join('')}</tr></thead>`;
             
@@ -2329,7 +2270,7 @@ async function generateMarathonCalendar() {
                     L.circleMarker([city.coordinates[0], city.coordinates[1]], { 
                         radius: Math.log(city.count) + 3, 
                         fillColor: "var(--accent-color)", 
-                        color: "var(--text-primary)", // FIX: Use a contrasting color
+                        color: "var(--text-primary)", 
                         weight: 1.5, 
                         opacity: 1, 
                         fillOpacity: 0.7 
@@ -2510,7 +2451,7 @@ async function generateMarathonCalendar() {
         createAllCharts();
     }
 
-    createAllCharts(); // Initial creation
+    createAllCharts(); 
 
     document.querySelectorAll('#chart-toggle .btn').forEach(button => {
         button.addEventListener('click', function() {
@@ -2899,7 +2840,7 @@ async function generateMarathonCalendar() {
     let editorEvents = [];
 
     document.getElementById('editCalendarBtn').addEventListener('click', () => {
-        editorEvents = JSON.parse(JSON.stringify(marathonEventsCache)); // Deep copy
+        editorEvents = JSON.parse(JSON.stringify(marathonEventsCache)); 
         renderCalendarEditor();
         calendarEditorModal.show();
     });
@@ -2911,11 +2852,13 @@ async function generateMarathonCalendar() {
             return;
         }
         editorEvents.sort((a,b) => new Date(a.date) - new Date(b.date)).forEach((event, index) => {
+            const secondaryDateInfo = event.secondary_date ? `<br><small class="text-info">${event.secondary_date}</small>` : '';
             editorList.innerHTML += `
             <div class="list-group-item d-flex justify-content-between align-items-center">
                 <div>
                     <strong>${event.name}</strong> (${event.category})<br>
                     <small class="text-secondary">${event.date} - ${event.status}</small>
+                    ${secondaryDateInfo}
                 </div>
                 <div>
                     <button class="btn btn-sm btn-outline-primary me-2" onclick="editCalendarEvent(${index})"><i class="bi bi-pencil-fill"></i></button>
@@ -2932,8 +2875,10 @@ async function generateMarathonCalendar() {
         document.getElementById('event-name').value = event.name;
         document.getElementById('event-category').value = event.category;
         document.getElementById('event-status').value = event.status;
+        document.getElementById('event-secondary-date').value = event.secondary_date || '';
         document.getElementById('calendarFormTitle').textContent = '编辑赛事';
         document.getElementById('cancelEditBtn').style.display = 'inline-block';
+        document.getElementById('event-status').dispatchEvent(new Event('change'));
     }
 
     window.deleteCalendarEvent = (index) => {
@@ -2942,12 +2887,28 @@ async function generateMarathonCalendar() {
             renderCalendarEditor();
         }
     }
+    
+    document.getElementById('event-status').addEventListener('change', (e) => {
+        const status = e.target.value;
+        const wrapper = document.getElementById('secondary-date-wrapper');
+        const label = document.getElementById('event-secondary-date-label');
+        if (status === '待报名') {
+            label.textContent = '报名截止日期';
+            wrapper.style.display = 'block';
+        } else if (status === '待抽签') {
+            label.textContent = '抽签公布日期';
+            wrapper.style.display = 'block';
+        } else {
+            wrapper.style.display = 'none';
+        }
+    });
 
     document.getElementById('cancelEditBtn').addEventListener('click', () => {
         calendarForm.reset();
         document.getElementById('event-id').value = '';
         document.getElementById('calendarFormTitle').textContent = '添加新赛事';
         document.getElementById('cancelEditBtn').style.display = 'none';
+        document.getElementById('secondary-date-wrapper').style.display = 'none';
     });
 
     calendarForm.addEventListener('submit', (e) => {
@@ -2957,12 +2918,13 @@ async function generateMarathonCalendar() {
             name: document.getElementById('event-name').value,
             category: document.getElementById('event-category').value,
             status: document.getElementById('event-status').value,
+            secondary_date: document.getElementById('event-secondary-date').value || null
         };
         const eventId = document.getElementById('event-id').value;
 
-        if (eventId !== '') { // Editing
+        if (eventId !== '') { 
             editorEvents[parseInt(eventId)] = eventData;
-        } else { // Adding
+        } else { 
             editorEvents.push(eventData);
         }
         renderCalendarEditor();
