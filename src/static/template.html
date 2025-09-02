@@ -41,7 +41,6 @@
       --trophy-color: #ffc107;
       --hover-bg: #e9ecef;
       --marathon-color: #fd7e14;
-      --danger-color: #dc3545;
     }
 
     /* Dark Theme Variables */
@@ -56,7 +55,6 @@
       --trophy-color: #fcc419;
       --hover-bg: #3a3b3c;
       --marathon-color: #ff8700;
-      --danger-color: #ff6b6b;
     }
 
     html {
@@ -527,11 +525,10 @@
     }
     .calendar-table td {
         border: 1px solid var(--border-color);
-        height: 80px;
+        height: 70px;
         vertical-align: top;
         padding: 5px;
         transition: background-color 0.2s;
-        position: relative;
     }
     .calendar-table td.empty {
        background-color: transparent;
@@ -545,71 +542,58 @@
         font-size: 0.9rem;
         color: var(--text-secondary);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    .day-markers {
-        padding-top: 4px;
-
-
-
-
-
-        display: flex;
-        gap: 4px;
-        flex-wrap: wrap;
+    .calendar-table td.event {
+        background-color: #3b2f21;
+        border: 1px solid var(--marathon-color);
+        position: relative;
+    }
+    [data-bs-theme="light"] .calendar-table td.event {
+        background-color: #fff3e0;
     }
 
-
-
-
-
-
-    .day-marker {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
+    .day-number.has-event {
+        color: var(--marathon-color);
     }
-    .day-marker.race { background-color: var(--marathon-color); }
-    .day-marker.registration { background-color: var(--accent-color); }
-    .day-marker.lottery { background-color: var(--success-color); }
+    .event-details {
+      padding-top: 2px;
+    }
+    .event-item {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        background-color: rgba(0,0,0,0.2);
+        border-radius: 4px;
+        padding: 2px 4px;
+        margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .event-item .category {
+      font-size: 0.8em;
+      padding: 1px 4px;
+      border-radius: 3px;
+      background-color: var(--marathon-color);
+      color: var(--bg-color);
+      margin-left: 4px;
+      font-weight: bold;
+    }
+    .event-status {
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
     
-
-    .day-popup-details {
+    .event-details.popup {
       position: absolute;
       z-index: 10;
-
-      bottom: calc(100% + 5px);
+      top: 8px;
       left: 50%;
       transform: translateX(-50%);
       width: auto;
-      min-width: 220px;
+      min-width: 180%;
       padding: 0.6rem;
       background-color: var(--hover-bg);
       border: 1px solid var(--accent-color);
@@ -620,46 +604,34 @@
       transition: opacity 0.2s ease, visibility 0.2s ease;
       pointer-events: none;
     }
-
-    .calendar-table td:hover .day-popup-details {
+    .event-details.popup.visible {
         opacity: 1;
         visibility: visible;
         pointer-events: auto;
     }
-
-
-
-
-
-
-
-
-    .popup-event-item {
-        font-size: 0.8rem;
-        margin-bottom: 0.5rem;
+    .event-details.popup.edge-left {
+        left: 5px;
+        transform: translateX(0);
+    }
+    .event-details.popup.edge-right {
+        left: auto;
+        right: 5px;
+        transform: translateX(0);
     }
 
-
-
-
-
-
-    .popup-event-item:last-child {
-        margin-bottom: 0;
+    .event-details.popup .event-item,
+    .event-details.popup .event-status {
+      overflow: visible;
+      white-space: normal;
+      text-overflow: initial;
     }
-
-
-    .popup-event-title {
-        font-weight: bold;
-        display: block;
+    .event-details.popup .event-status {
+        margin-top: 4px;
     }
-
-
-
-
-    .popup-event-type {
-        font-size: 0.75rem;
-        color: var(--text-secondary);
+    
+    .calendar-grid-view {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     /* Countdown Timer Styles */
@@ -1730,55 +1702,28 @@
                 <form id="calendarEventForm">
                     <input type="hidden" id="event-id">
                     <div class="mb-2">
-
-
-
-
+                        <label for="event-date" class="form-label">比赛日期</label>
+                        <input type="date" class="form-control form-control-sm" id="event-date" required>
+                    </div>
+                    <div class="mb-2">
                         <label for="event-name" class="form-label">赛事名称</label>
                         <input type="text" class="form-control form-control-sm" id="event-name" required>
                     </div>
-                    <div class="row g-2 mb-2">
-                        <div class="col-md">
-                            <label for="event-category" class="form-label">类别 (如: 全马)</label>
-                            <input type="text" class="form-control form-control-sm" id="event-category" required>
-                        </div>
-                        <div class="col-md">
-                            <label for="event-status" class="form-label">状态</label>
-                            <select class="form-select form-select-sm" id="event-status" required>
-                                <option value="待报名">待报名</option>
-                                <option value="报名中">报名中</option>
-                                <option value="待抽签">待抽签</option>
-                                <option value="已中签">已中签</option>
-                                <option value="未中签">未中签</option>
-                                <option value="待比赛">待比赛</option>
-                                <option value="已完赛">已完赛</option>
-                            </select>
-                        </div>
+                    <div class="mb-2">
+                        <label for="event-category" class="form-label">类别 (如: 全马)</label>
+                        <input type="text" class="form-control form-control-sm" id="event-category" required>
                     </div>
-                    <div class="row g-2 mb-2">
-                        <div class="col-md">
-                            <label for="event-reg-start" class="form-label">报名开始日期</label>
-                            <input type="date" class="form-control form-control-sm" id="event-reg-start">
-
-
-
-
-                        </div>
-                        <div class="col-md">
-                            <label for="event-reg-end" class="form-label">报名结束日期</label>
-                            <input type="date" class="form-control form-control-sm" id="event-reg-end">
-                        </div>
+                    <div class="mb-3">
+                        <label for="event-status" class="form-label">状态</label>
+                        <select class="form-select form-select-sm" id="event-status" required>
+                            <option value="待报名">待报名</option>
+                            <option value="待抽签">待抽签</option>
+                            <option value="待比赛" selected>待比赛</option>
+                        </select>
                     </div>
-
-                    <div class="row g-2 mb-3">
-                       <div class="col-md">
-                            <label for="event-lottery-date" class="form-label">出签日期</label>
-                            <input type="date" class="form-control form-control-sm" id="event-lottery-date">
-                        </div>
-                        <div class="col-md">
-                            <label for="event-date" class="form-label">比赛日期</label>
-                            <input type="date" class="form-control form-control-sm" id="event-date" required>
-                        </div>
+                    <div class="mb-3" id="secondary-date-wrapper" style="display: none;">
+                        <label for="event-secondary-date" class="form-label" id="event-secondary-date-label"></label>
+                        <input type="date" class="form-control form-control-sm" id="event-secondary-date">
                     </div>
 
                     <button type="submit" class="btn btn-sm btn-primary">保存赛事</button>
@@ -1820,7 +1765,6 @@
     let currentDetailRunId = null;
     let currentRunTags = [];
     const suggestedTags = ['长距离', '恢复跑', '节奏跑', '间歇跑', '越野', '比赛', '运动场'];
-
     let marathonEventsCache = [];
 
     // --- THEME SWITCHER LOGIC ---
@@ -2017,14 +1961,9 @@ function initializeRaceCountdown() {
     updateCountdown();
     countdownInterval = setInterval(updateCountdown, 1000);
 }
-    const commentApiBase = 'https://kv.linwn.net';
-    // ... other global variables are identical
 
-    // Theme switcher logic is identical...
-    // Chart functions (getChartColors, createAllCharts, etc.) are identical...
 
-    // Main calendar generation logic (heavily updated)
-    async function generateMarathonCalendar() {
+async function generateMarathonCalendar() {
         const container = document.getElementById('marathon-calendar-container');
         if (!container) return;
         container.innerHTML = '<div class="content-card text-center text-body-secondary">加载赛历数据中...</div>';
@@ -2039,9 +1978,8 @@ function initializeRaceCountdown() {
             container.innerHTML = '<div class="content-card text-center text-danger">无法加载赛历数据，请稍后重试。</div>';
             return;
         }
-
-
-
+        
+        const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
         const eventsByMonth = marathonEventsCache.reduce((acc, event) => {
             const month = event.date.substring(0, 7);
             if (!acc[month]) acc[month] = [];
@@ -2049,7 +1987,6 @@ function initializeRaceCountdown() {
             return acc;
         }, {});
 
-        
         const sortedMonths = Object.keys(eventsByMonth).sort();
         
         if (sortedMonths.length === 0) {
@@ -2057,32 +1994,10 @@ function initializeRaceCountdown() {
             return;
         }
 
-        // --- New Date Marker Logic ---
-        const dateMarkers = {};
-        marathonEventsCache.forEach(event => {
-            const addMarker = (dateStr, type, eventName) => {
-                if (!dateStr) return;
-                if (!dateMarkers[dateStr]) dateMarkers[dateStr] = [];
-                dateMarkers[dateStr].push({ type, name: eventName });
-            };
-            
-            addMarker(event.date, 'race', event.name);
-            addMarker(event.lottery_date, 'lottery', `${event.name} - 出签`);
-            
-            if (event.registration_start && event.registration_end) {
-                let currentDate = new Date(event.registration_start.replace(/-/g, '/'));
-                const endDate = new Date(event.registration_end.replace(/-/g, '/'));
-                while (currentDate <= endDate) {
-                    addMarker(currentDate.toISOString().split('T')[0], 'registration', `${event.name} - 报名`);
-                    currentDate.setDate(currentDate.getDate() + 1);
-                }
-            }
-        });
-
         let calendarHTML = '';
         sortedMonths.forEach(monthStr => {
             const [year, month] = monthStr.split('-').map(Number);
-
+            const monthEvents = eventsByMonth[monthStr];
             
             calendarHTML += `<div class="month-grid">`;
             calendarHTML += `<h4 class="mb-3">${year}年 ${month}月</h4>`;
@@ -2103,52 +2018,35 @@ function initializeRaceCountdown() {
                     if ((i === 0 && j < startingDay) || date > daysInMonth) {
                         tbodyHtml += '<td class="empty"></td>';
                     } else {
-
-
-
-                        const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
-                        const markersForDay = dateMarkers[dateStr];
+                        const eventsOnThisDay = monthEvents.filter(e => parseInt(e.date.substring(8, 10), 10) === date);
+                        let cellClass = eventsOnThisDay.length > 0 ? 'event' : '';
+                        let dayClass = eventsOnThisDay.length > 0 ? 'has-event' : '';
                         
+                        const hasWon = eventsOnThisDay.some(e => e.status === '中！');
+                        if (hasWon) {
+                            cellClass += ' lottery-win';
+                        }
 
-
-
-
-
-
-                        tbodyHtml += `<td>`;
-                        tbodyHtml += `<div class="day-number">${date}</div>`;
-
-
-
-
-
-
-
-                        
-                        if (markersForDay) {
-                            const uniqueTypes = [...new Set(markersForDay.map(m => m.type))];
-                            tbodyHtml += `<div class="day-markers">`;
-                            uniqueTypes.forEach(type => {
-                                tbodyHtml += `<div class="day-marker ${type}"></div>`;
+                        tbodyHtml += `<td class="${cellClass}">`;
+                        tbodyHtml += `<div class="day-number ${dayClass}">${date}</div>`;
+                        if(eventsOnThisDay.length > 0) {
+                            eventsOnThisDay.forEach(event => {
+                                let specialClass = '';
+                                if (event.status === '不中！') {
+                                    specialClass = 'text-decoration-line-through text-body-secondary';
+                                }
+                                tbodyHtml += `<div class="event-item ${specialClass}" title="${event.name}">${event.name}</div>`;
                             });
-
-
-
-
-
-
-
-
-
-
-                            tbodyHtml += `</div>`;
-
-                            tbodyHtml += '<div class="day-popup-details">';
-                            markersForDay.forEach(marker => {
-                                tbodyHtml += `<div class="popup-event-item">
-                                    <span class="popup-event-title">${marker.name}</span>
-                                    <span class="popup-event-type">${{race: '比赛日', registration: '报名', lottery: '出签'}[marker.type]}</span>
-                                </div>`;
+                            tbodyHtml += '<div class="event-details popup">';
+                             eventsOnThisDay.forEach(event => {
+                                let lotteryStatusIcon = '';
+                                if (event.status === '中！') {
+                                    lotteryStatusIcon = ' <i class="bi bi-check-circle-fill text-success"></i>';
+                                } else if (event.status === '不中！') {
+                                    lotteryStatusIcon = ' <i class="bi bi-x-circle-fill text-body-secondary"></i>';
+                                }
+                                tbodyHtml += `<div class="event-item">${event.name}${lotteryStatusIcon} <span class="category">${event.category}</span></div>`;
+                                tbodyHtml += `<div class="event-status">${event.status}</div>`;
                             });
                             tbodyHtml += '</div>';
                         }
@@ -3025,20 +2923,14 @@ function initializeRaceCountdown() {
         });
     }
 
-    // Calendar Editor Form Logic (updated)
     window.editCalendarEvent = (index) => {
         const event = editorEvents[index];
         document.getElementById('event-id').value = index;
-
+        document.getElementById('event-date').value = event.date;
         document.getElementById('event-name').value = event.name;
         document.getElementById('event-category').value = event.category;
         document.getElementById('event-status').value = event.status;
-
-        document.getElementById('event-date').value = event.date;
-        document.getElementById('event-reg-start').value = event.registration_start || '';
-        document.getElementById('event-reg-end').value = event.registration_end || '';
-        document.getElementById('event-lottery-date').value = event.lottery_date || '';
-        
+        document.getElementById('event-secondary-date').value = event.secondary_date || '';
         document.getElementById('calendarFormTitle').textContent = '编辑赛事';
         document.getElementById('cancelEditBtn').style.display = 'inline-block';
         document.getElementById('event-status').dispatchEvent(new Event('change'));
@@ -3077,21 +2969,16 @@ function initializeRaceCountdown() {
     calendarForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const eventData = {
-
-            id: document.getElementById('event-id').value || `evt_${new Date().getTime()}`,
+            date: document.getElementById('event-date').value,
             name: document.getElementById('event-name').value,
             category: document.getElementById('event-category').value,
             status: document.getElementById('event-status').value,
-            date: document.getElementById('event-date').value,
-            registration_start: document.getElementById('event-reg-start').value || null,
-            registration_end: document.getElementById('event-reg-end').value || null,
-            lottery_date: document.getElementById('event-lottery-date').value || null
+            secondary_date: document.getElementById('event-secondary-date').value || null
         };
         const eventId = document.getElementById('event-id').value;
 
         if (eventId !== '') { 
-            const index = editorEvents.findIndex(evt => evt.id == eventId);
-            if (index > -1) editorEvents[index] = eventData;
+            editorEvents[parseInt(eventId)] = eventData;
         } else { 
             editorEvents.push(eventData);
         }
@@ -3099,7 +2986,7 @@ function initializeRaceCountdown() {
         calendarForm.reset();
         document.getElementById('cancelEditBtn').click();
     });
-
+    
     document.getElementById('saveAllCalendarChanges').addEventListener('click', async () => {
         const secret = prompt("请输入管理员密钥:");
         if (!secret) return;
