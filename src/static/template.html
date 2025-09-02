@@ -4,15 +4,15 @@
   <meta charset="UTF-8">
   <title>步履不停 - 已绕地球{{ "%.2f"|format(overall_stats.dist_km/40075.017) }}圈儿</title>
   <link rel="icon" type="image/png" href="https://run.linwn.net/images/favicon.png">
-	<meta property="og:title" content="步履不停 - 我的四万公里跑量挑战" />
-	<meta property="og:description" content="一个跑者的跑步记录网站，记录跑量与坚持。你也可以挑战地球一圈！" />
+  <meta property="og:title" content="步履不停 - 我的四万公里跑量挑战" />
+  <meta property="og:description" content="一个跑者的跑步记录网站，记录跑量与坚持。你也可以挑战地球一圈！" />
   <meta property="og:image" content="https://run.linwn.net/images/card.png" />
-	<meta property="og:url" content="https://run.linwn.net/fun" />
-	<meta property="og:type" content="website" />
+  <meta property="og:url" content="https://run.linwn.net/fun" />
+  <meta property="og:type" content="website" />
 
-	<meta name="twitter:card" content="https://run.linwn.net/images/card.png" />
-	<meta name="twitter:title" content="步履不停 - 我的四万公里跑量挑战" />
-	<meta name="twitter:description" content="一个跑者的跑步记录网站，记录跑量与坚持。你也可以挑战地球一圈！" />
+  <meta name="twitter:card" content="https://run.linwn.net/images/card.png" />
+  <meta name="twitter:title" content="步履不停 - 我的四万公里跑量挑战" />
+  <meta name="twitter:description" content="一个跑者的跑步记录网站，记录跑量与坚持。你也可以挑战地球一圈！" />
   <meta name="twitter:image" content="https://run.linwn.net/images/card.png" />
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -132,7 +132,7 @@
       color: var(--text-secondary);
       text-transform: uppercase;
       margin-bottom: 0.5rem;
-	  min-height: 1.0rem;
+    min-height: 1.0rem;
     }
 
     .stat-value {
@@ -140,7 +140,7 @@
       font-weight: 700;
       color: var(--text-primary);
       line-height: 1.2;
-	  min-height: 2.4rem;
+    min-height: 2.4rem;
     }
 
     .stat-value-small {
@@ -148,9 +148,9 @@
     }
     
     .stat-details {
-	  margin-top: auto;
-	  width: 100%;
-	}
+    margin-top: auto;
+    width: 100%;
+  }
 
     .stat-card-flip-container {
         perspective: 1000px;
@@ -159,7 +159,7 @@
     }
 
     .stat-card-flipper {
-		text-align: center;
+    text-align: center;
         position: relative;
         width: 100%;
         height: 100%;
@@ -215,9 +215,9 @@
         --bs-btn-hover-border-color: var(--accent-color);
         --bs-btn-active-bg: var(--accent-color);
         --bs-btn-active-border-color: var(--accent-color);
-		--bs-btn-active-color: var(--text-primary);
+    --bs-btn-active-color: var(--text-primary);
         font-size: 0.8rem;
-		color: var(--text-secondary);
+    color: var(--text-secondary);
     }
     #saveProfileButton {
         --bs-btn-bg: var(--accent-color);
@@ -228,9 +228,9 @@
     }
 
     .btn-group .btn.active {
-		color: var(--text-primary);
-		font-weight: 500;
-	}
+    color: var(--text-primary);
+    font-weight: 500;
+  }
     @media (max-width: 767.98px) {
       .stat-value { font-size: 1.8rem; }
     }
@@ -590,6 +590,7 @@
       position: absolute;
       z-index: 10;
       top: 8px;
+      left: 50%;
       transform: translateX(-50%);
       width: auto;
       min-width: 180%;
@@ -629,6 +630,7 @@
     }
     
     .calendar-grid-view {
+        overflow-x: auto;
         -webkit-overflow-scrolling: touch;
     }
 
@@ -735,7 +737,8 @@
     #runDetailModal .carousel-item img.gallery-item {
         cursor: pointer;
     }
-    #runDetailModal .carousel-item img {
+    #runDetailModal .carousel-item img,
+    #runDetailModal #detail-map-item {
         height: 250px;
         object-fit: cover;
         border-radius: 12px;
@@ -947,13 +950,13 @@
                       </div>
                       <div class="stat-card-back">
                         <div class="stat-card-content">
-						  <div>
-							  <div class="stat-label">最快配速</div>
-							  <div class="stat-value">{{ fastest_pace_info.pace }}</div>
-						  </div>
+              <div>
+                <div class="stat-label">最快配速</div>
+                <div class="stat-value">{{ fastest_pace_info.pace }}</div>
+              </div>
                           <div class="stat-details">
                             <small class="small-muted">{{ fastest_pace_info.date }}</small>
-                          </div>						  
+                          </div>              
                         </div>
                       </div>
                     </div>
@@ -1064,7 +1067,7 @@
                 <div id="monthOverMonthChartContainer" style="display: block; height: 300px;">
                     <canvas id="monthOverMonthChart" aria-label="本月与上月跑量对比图表"></canvas>
                 </div>                
-				<div id="dailyChartContainer" style="display: none; height: 300px;">
+        <div id="dailyChartContainer" style="display: none; height: 300px;">
                     <canvas id="dailyDistanceChart" aria-label="最近30天跑步距离统计图表"></canvas>
                 </div>
                 <div id="monthlyChartContainer" style="display: none; height: 300px;">
@@ -1520,14 +1523,7 @@
                 <div class="detail-header">
                     <h5 class="detail-title" id="detailTitle">跑步详情</h5>
                 </div>
-                <!--
-                <div id="runDetailLoading" class="text-center p-5">
-                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p class="mt-2 text-secondary">正在加载跑步数据...</p>
-                </div>
-                -->
+                
                 <div id="runDetailContent">
                     <div class="container-fluid px-4">
                         <div class="text-center my-4" id="detailHeroDistance">
@@ -1555,11 +1551,16 @@
                                 <h4 class="data-section-title">运动数据</h4>
                                 <button id="viewRouteBtn" class="btn btn-sm mb-3" style="display: none;"><i class="bi bi-map-fill"></i> 查看路线</button>
                             </div>
-                            <div class="row g-4 text-center" id="detailDataGrid">
-                                </div>
+                            <div class="row g-4 text-center" id="detailDataGrid"></div>
                         </div>
-                        <div id="detailAnalysisSectionsLoading"><div class="d-flex justify-content-center"><div class="spinner-border text-secondary" role="status"></div></div></div>
-                        <div id="detailAnalysisSections">
+
+                        <div id="detailAnalysisSectionsLoading" class="text-center p-4">
+                            <div class="spinner-border text-secondary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+
+                        <div id="detailAnalysisSections" style="display: none;">
                             <div class="mb-5">
                                 <h4 class="data-section-title">分段信息</h4>
                                 <div class="table-responsive">
@@ -1744,19 +1745,19 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.1.0/dist/chartjs-plugin-annotation.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
 <script>
-	let monthlyDistanceChart = null;
-	let dailyDistanceChart = null;
-	let yearlyDistanceChart = null;
+  let monthlyDistanceChart = null;
+  let dailyDistanceChart = null;
+  let yearlyDistanceChart = null;
     let monthOverMonthChart = null;
     let yearlyDualAxisChart = null;
     let paceChart = null;
     let elevationChart = null;
     let hrChart = null;
-	  let cityMap = null;
-    let routeMapInstance = null;
+    let cityMap = null;
+    let modalMapInstance = null;
+    let detailMapInstance = null;
     let countdownInterval = null;
     let currentPolyline = null;
-    let polyline;
     let allRunRows = [];
     const commentApiBase = 'https://kv.linwn.net';
     const cityStatsData = {{ city_stats|tojson }};
@@ -2332,14 +2333,15 @@ async function generateMarathonCalendar() {
     function recreateAllCharts() {
         destroyAllCharts();
         createAllCharts();
-    }	
-
+    } 
     
     document.addEventListener('DOMContentLoaded', function() {
     setTheme(getPreferredTheme());
-		
+    
     initializeUserProfile();
     loadCommentCounts();
+
+    createAllCharts(); 
 
     document.getElementById('editProfileTrigger').addEventListener('click', () => { new bootstrap.Modal(document.getElementById('profileModal')).show(); });
     document.getElementById('detailEditProfileTrigger').addEventListener('click', () => { new bootstrap.Modal(document.getElementById('profileModal')).show(); });
@@ -2451,8 +2453,6 @@ async function generateMarathonCalendar() {
             event.currentTarget.querySelector('.stat-card-flipper').classList.toggle('flipped');
         });
     });
-
-    createAllCharts(); 
 
     document.querySelectorAll('#chart-toggle .btn').forEach(button => {
         button.addEventListener('click', function() {
@@ -2622,8 +2622,7 @@ async function generateMarathonCalendar() {
 
         document.getElementById('detailTitle').textContent = `跑步详情: ${preloadedData.date}`;
         document.getElementById('detailHeroDistance').querySelector('.distance-value').textContent = preloadedData.distanceFormatted || '--';
-        const dataGrid = document.getElementById('detailDataGrid');
-        dataGrid.innerHTML = `
+        document.getElementById('detailDataGrid').innerHTML = `
             <div class="col-4"><div class="data-point-value">${preloadedData.duration || '--'}</div><div class="data-point-label">训练时长</div></div>
             <div class="col-4"><div class="data-point-value">${preloadedData.paceStr || '--'}</div><div class="data-point-label">平均配速</div></div>
             <div class="col-4"><div class="data-point-value">${preloadedData.heartRate || '--'}</div><div class="data-point-label">平均心率</div></div>
@@ -2647,17 +2646,72 @@ async function generateMarathonCalendar() {
             const carouselIndicators = document.querySelector('#runMediaCarousel .carousel-indicators');
             carouselInner.innerHTML = '';
             carouselIndicators.innerHTML = '';
+            if (detailMapInstance) {
+                detailMapInstance.remove();
+                detailMapInstance = null;
+            }
+
+            let activeSlideSet = false;
+            let slideIndex = 0;
+
+            if (currentPolyline) {
+                const mapItem = document.createElement('div');
+                mapItem.className = 'carousel-item';
+                mapItem.innerHTML = `<div id="detail-map-item" class="d-block w-100"></div>`;
+                carouselInner.appendChild(mapItem);
+                
+                carouselIndicators.innerHTML += `<button type="button" data-bs-target="#runMediaCarousel" data-bs-slide-to="${slideIndex}" class="text" aria-label="Slide ${slideIndex+1}">地图</button>`;
+                
+                if (!activeSlideSet) {
+                    mapItem.classList.add('active');
+                    carouselIndicators.querySelector('button').classList.add('active');
+                    activeSlideSet = true;
+                }
+                slideIndex++;
+
+                setTimeout(() => {
+                    const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+                    const tileUrl = isDark ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+                    
+                    detailMapInstance = L.map('detail-map-item', { 
+                        attributionControl: false, 
+                        dragging: false, zoomControl: false, scrollWheelZoom: false, 
+                        doubleClickZoom: false, boxZoom: false, keyboard: false, 
+                        tap: false, touchZoom: false
+                    });
+                    
+                    L.tileLayer(tileUrl, { subdomains: 'abcd' }).addTo(detailMapInstance);
+                    const polyline = L.polyline(decodePolyline(currentPolyline), { color: getComputedStyle(document.documentElement).getPropertyValue('--accent-color'), weight: 4 }).addTo(detailMapInstance);
+                    detailMapInstance.fitBounds(polyline.getBounds().pad(0.1));
+                    detailMapInstance.invalidateSize();
+                }, 100); 
+
+            }
 
             if (data.photos && data.photos.length > 0) {
-                document.getElementById('runMediaCarousel').style.display = 'block';
                 data.photos.forEach((photo, index) => {
-                    carouselInner.innerHTML += `<div class="carousel-item ${index === 0 ? 'active' : ''}"><img src="${photo.url}" class="d-block w-100 gallery-item" alt="跑步照片" data-photo-index="${index}"></div>`;
-                    carouselIndicators.innerHTML += `<button type="button" data-bs-target="#runMediaCarousel" data-bs-slide-to="${index}" class="${index === 0 ? 'active' : ''}" aria-current="true"></button>`;
+                    const photoItem = document.createElement('div');
+                    photoItem.className = 'carousel-item';
+                    photoItem.innerHTML = `<img src="${photo.url}" class="d-block w-100 gallery-item" alt="跑步照片" data-photo-index="${index}">`;
+                    carouselInner.appendChild(photoItem);
+                    
+                    carouselIndicators.innerHTML += `<button type="button" data-bs-target="#runMediaCarousel" data-bs-slide-to="${slideIndex}" class="" aria-label="Slide ${slideIndex+1}"></button>`;
+                    
+                    if (!activeSlideSet) {
+                        photoItem.classList.add('active');
+                        carouselIndicators.querySelector(`button[data-bs-slide-to="${slideIndex}"]`).classList.add('active');
+                        activeSlideSet = true;
+                    }
+                    slideIndex++;
                 });
-            } else {
-                document.getElementById('runMediaCarousel').style.display = 'none';
             }
-            
+
+            if (slideIndex === 0) {
+                document.getElementById('runMediaCarousel').style.display = 'none';
+            } else {
+                 document.getElementById('runMediaCarousel').style.display = 'block';
+            }
+
             document.getElementById('viewRouteBtn').style.display = currentPolyline ? 'block' : 'none';
             
             let weatherString = '';
@@ -2726,9 +2780,6 @@ async function generateMarathonCalendar() {
             await loadRunTags(runId);
             renderSuggestedTags();
             await refreshDetailComments(runId);
-
-            //document.getElementById('runDetailLoading').style.display = 'none';
-            //document.getElementById('runDetailContent').classList.remove('d-none');
             
             if (scrollToComments) {
                 document.getElementById('runDetailComments').scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -2736,7 +2787,6 @@ async function generateMarathonCalendar() {
 
         } catch (error) {
             console.error("Error loading run detail:", error);
-            //document.getElementById('runDetailLoading').innerHTML = `<div class="alert alert-danger">加载失败: ${error.message}</div>`;
             document.getElementById('detailAnalysisSectionsLoading').style.display = 'none';
             currentPolyline = null;
         }
@@ -2758,8 +2808,8 @@ async function generateMarathonCalendar() {
             if(countEl) countEl.textContent = parseInt(countEl.textContent, 10) + 1;
         } else {
             alert('提交失败');
-        }	
-	});
+        } 
+  });
     
     document.addEventListener('click', async e => {
         const runRow = e.target.closest('.run-detail-row');
@@ -2822,22 +2872,19 @@ async function generateMarathonCalendar() {
     });
 
     document.getElementById('routeMapModal').addEventListener('shown.bs.modal', () => {
-        if (!routeMapInstance) {
+        if (!modalMapInstance) {
             const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
             const tileUrl = isDark ? 
                 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' :
                 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-            routeMapInstance = L.map('routeMap', { attributionControl: false, zoomControl: true });
-            L.tileLayer(tileUrl, { subdomains: 'abcd' }).addTo(routeMapInstance);
+            modalMapInstance = L.map('routeMap', { attributionControl: false, zoomControl: true });
+            L.tileLayer(tileUrl, { subdomains: 'abcd' }).addTo(modalMapInstance);
         }
         if (currentPolyline) {
-            if (polyline) {
-              routeMapInstance.removeLayer(polyline);
-            }
-            polyline = L.polyline(decodePolyline(currentPolyline), { color: getComputedStyle(document.documentElement).getPropertyValue('--accent-color'), weight: 4 }).addTo(routeMapInstance);
-            routeMapInstance.fitBounds(polyline.getBounds().pad(0.1));
+            const polyline = L.polyline(decodePolyline(currentPolyline), { color: getComputedStyle(document.documentElement).getPropertyValue('--accent-color'), weight: 4 }).addTo(modalMapInstance);
+            modalMapInstance.fitBounds(polyline.getBounds().pad(0.1));
         }
-        setTimeout(() => routeMapInstance.invalidateSize(), 10);
+        setTimeout(() => modalMapInstance.invalidateSize(), 10);
     });
 
     const calendarEditorModalEl = document.getElementById('calendarEditorModal');
@@ -2970,7 +3017,8 @@ async function generateMarathonCalendar() {
       if(elevationChart) elevationChart.destroy();
       if(hrChart) hrChart.destroy();
       if(cityMap) cityMap.remove();
-      if(routeMapInstance) routeMapInstance.remove();
+      if(modalMapInstance) modalMapInstance.remove();
+      if(detailMapInstance) detailMapInstance.remove();
       if(countdownInterval) clearInterval(countdownInterval);
     });
 });
