@@ -546,7 +546,7 @@ def parse_fit_file_garmin_sdk(fit_file_path):
     session = messages["session_mesgs"][0]
     records = messages["record_mesgs"]
     laps = messages.get("lap_mesgs", [])
-    smooth_elevation_data(records)
+    #smooth_elevation_data(records)
     # --- Basic Info & Weather ---
     start_time_value = session.get('start_time')
     start_time = datetime.fromtimestamp(start_time_value + FIT_EPOCH_S, tz=timezone.utc)
@@ -612,8 +612,8 @@ def parse_fit_file_garmin_sdk(fit_file_path):
                 data.append(value_transform(r[key]))
         return {"labels": labels, "data": data}
 
-    pace_chart_data = create_chart_data('speed', 'km', lambda s: 1000 / s if s > 0 else 0)
-    elevation_chart_data = create_chart_data('altitude', 'km')
+    pace_chart_data = create_chart_data('enhanced_speed', 'km', lambda s: 1000 / s if s > 0 else 0)
+    elevation_chart_data = create_chart_data('enhanced_altitude', 'km')
     hr_chart_data = create_chart_data('heart_rate', 'km')
     
     # --- Final Assembly ---
