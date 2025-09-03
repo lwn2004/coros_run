@@ -152,6 +152,7 @@
     .stat-details {
 	  margin-top: auto;
 	  width: 100%;
+
 	}
 
     .stat-card-flip-container {
@@ -232,6 +233,7 @@
     .btn-group .btn.active {
 		color: var(--text-primary);
 		font-weight: 500;
+
 	}
     @media (max-width: 767.98px) {
       .stat-value { font-size: 1.8rem; }
@@ -545,12 +547,52 @@
         font-size: 0.9rem;
         color: var(--text-secondary);
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
     .day-markers {
         padding-top: 4px;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         display: flex;
         gap: 4px;
         flex-wrap: wrap;
     }
+
+
+
+
+
+
     .day-marker {
         width: 8px;
         height: 8px;
@@ -560,9 +602,11 @@
     .day-marker.registration { background-color: var(--accent-color); }
     .day-marker.lottery { background-color: var(--success-color); }
     
+
     .day-popup-details {
       position: absolute;
       z-index: 10;
+
       bottom: calc(100% + 5px);
       left: 50%;
       transform: translateX(-50%);
@@ -578,22 +622,43 @@
       transition: opacity 0.2s ease, visibility 0.2s ease;
       pointer-events: none;
     }
+
     .calendar-table td:hover .day-popup-details {
         opacity: 1;
         visibility: visible;
         pointer-events: auto;
     }
+
+
+
+
+
+
+
+
     .popup-event-item {
         font-size: 0.8rem;
         margin-bottom: 0.5rem;
     }
+
+
+
+
+
+
     .popup-event-item:last-child {
         margin-bottom: 0;
     }
+
+
     .popup-event-title {
         font-weight: bold;
         display: block;
     }
+
+
+
+
     .popup-event-type {
         font-size: 0.75rem;
         color: var(--text-secondary);
@@ -915,12 +980,15 @@
                       </div>
                       <div class="stat-card-back">
                         <div class="stat-card-content">
+
 						  <div>
 							  <div class="stat-label">最快配速</div>
 							  <div class="stat-value">{{ fastest_pace_info.pace }}</div>
+
 						  </div>
                           <div class="stat-details">
                             <small class="small-muted">{{ fastest_pace_info.date }}</small>
+
                           </div>						  
                         </div>
                       </div>
@@ -1667,6 +1735,10 @@
                 <form id="calendarEventForm">
                     <input type="hidden" id="event-id">
                     <div class="mb-2">
+
+
+
+
                         <label for="event-name" class="form-label">赛事名称</label>
                         <input type="text" class="form-control form-control-sm" id="event-name" required>
                     </div>
@@ -1692,12 +1764,17 @@
                         <div class="col-md">
                             <label for="event-reg-start" class="form-label">报名开始日期</label>
                             <input type="date" class="form-control form-control-sm" id="event-reg-start">
+
+
+
+
                         </div>
                         <div class="col-md">
                             <label for="event-reg-end" class="form-label">报名结束日期</label>
                             <input type="date" class="form-control form-control-sm" id="event-reg-end">
                         </div>
                     </div>
+
                     <div class="row g-2 mb-3">
                        <div class="col-md">
                             <label for="event-lottery-date" class="form-label">出签日期</label>
@@ -1720,6 +1797,7 @@
         </div>
     </div>
 </div>
+
 
 </body>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
@@ -1798,6 +1876,367 @@
     });
     // --- END THEME SWITCHER LOGIC ---
 
+    function setRandomQuote() {
+        const quotes = [ "路漫漫其修远兮", "道阻且长" ];
+        const quoteElement = document.getElementById('running-quote');
+        if (quoteElement) {
+            const randomIndex = Math.floor(Math.random() * quotes.length);
+            quoteElement.textContent = quotes[randomIndex];
+        }
+    }
+
+    function generateRandomProfile() {
+        const adjectives = ['快乐', '坚定', '闪亮', '迷路', '温柔'];
+        const nouns = ['小鹿', '绿豆芽', '星星', '猫咪', '纸飞机'];
+        const icons = ['🌱','🌸','🌟','🍃','🌊','🐾','🌀','🌼'];
+        return {
+            icon: icons[Math.floor(Math.random() * icons.length)],
+            nickname: `匿名${adjectives[Math.floor(Math.random() * adjectives.length)]}${nouns[Math.floor(Math.random() * nouns.length)]}`
+        };
+    }
+
+    function loadProfileIntoModals() {
+        let profile;
+        const isAdmin = localStorage.getItem('run_role') === 'admin';
+        if (isAdmin) {
+            profile = { icon: '👑', nickname: '管理员' };
+            document.getElementById('editCalendarBtn').style.display = 'block';
+        } else {
+            document.getElementById('editCalendarBtn').style.display = 'none';
+            try {
+                profile = JSON.parse(localStorage.getItem('run_profile'));
+                if (!profile || !profile.icon || !profile.nickname) { throw new Error("Invalid profile"); }
+            } catch (e) {
+                profile = generateRandomProfile();
+                localStorage.setItem('run_profile', JSON.stringify(profile));
+            }
+        }
+        document.getElementById('commentUserIcon').textContent = profile.icon;
+        document.getElementById('commentUserNickname').textContent = profile.nickname;
+        document.getElementById('detailCommentUserIcon').textContent = profile.icon;
+        document.getElementById('detailCommentUserNickname').textContent = profile.nickname;
+        document.getElementById('nicknameInput').value = profile.nickname;
+        document.getElementById('nicknameInput').disabled = isAdmin;
+        document.getElementById('saveProfileButton').style.display = isAdmin ? 'none' : 'inline-block';
+    }
+
+    function initializeUserProfile() {
+        const params = new URLSearchParams(window.location.search);
+        const adminKey = params.get('admin_key');
+        if (adminKey === 'runpage123') { 
+            localStorage.setItem('run_role', 'admin');
+            const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + window.location.hash;
+            window.history.replaceState({path: newUrl}, '', newUrl);
+        }
+        loadProfileIntoModals();
+        document.getElementById('saveProfileButton').addEventListener('click', () => {
+            const newNickname = document.getElementById('nicknameInput').value.trim();
+            if (newNickname) {
+                const currentProfile = JSON.parse(localStorage.getItem('run_profile')) || generateRandomProfile();
+                currentProfile.nickname = newNickname;
+                localStorage.setItem('run_profile', JSON.stringify(currentProfile));
+                loadProfileIntoModals();
+                bootstrap.Modal.getInstance(document.getElementById('profileModal')).hide();
+            }
+        });
+    }
+
+    function parsePaceToSeconds(paceStr) {
+        if (!paceStr || !paceStr.includes("'")) { return 9999; }
+        try {
+            const parts = paceStr.replace('"', '').split("'");
+            const minutes = parseInt(parts[0], 10);
+            const seconds = parseInt(parts[1], 10);
+            if (isNaN(minutes) || isNaN(seconds)) { return 9999; }
+            return (minutes * 60) + seconds;
+        } catch (e) {
+            return 9999;
+        }
+    }
+    
+    function formatPaceFromSeconds(totalSeconds) {
+        if (totalSeconds === null || totalSeconds === 0) return "0'00\"";
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = Math.round(totalSeconds % 60);
+        return `${minutes}'${seconds.toString().padStart(2, '0')}"`;
+    }
+
+    async function loadCommentCounts() {
+        document.querySelectorAll('.comment-count').forEach(async (el) => {
+            const runId = el.dataset.runId;
+            try {
+                const res = await fetch(`${commentApiBase}/count?runId=${encodeURIComponent(runId)}`);
+                const data = await res.json();
+                el.textContent = data.count ?? 0;
+            } catch {
+                el.textContent = 0;
+            }
+        });
+    }
+
+function initializeRaceCountdown() {
+    if (countdownInterval) {
+        clearInterval(countdownInterval);
+    }
+
+    const now = new Date();
+    const upcomingRaces = marathonEventsCache
+        .filter(event => event.status === '待比赛' && new Date(event.date.replace(/-/g, '/')) > now)
+        .sort((a, b) => new Date(a.date.replace(/-/g, '/')) - new Date(b.date.replace(/-/g, '/')));
+
+    const countdownContainer = document.getElementById('race-countdown-container');
+    
+    if (upcomingRaces.length === 0) {
+        countdownContainer.style.display = 'none';
+        return;
+    }
+
+    const nextRace = upcomingRaces[0];
+    const targetDate = new Date(nextRace.date + "T00:00:00");
+
+    document.getElementById('countdown-race-name').textContent = `${nextRace.name} (${nextRace.category})`;
+    document.getElementById('countdown-race-date').textContent = nextRace.date;
+    countdownContainer.style.display = 'block';
+
+    const updateCountdown = () => {
+        const currentTime = new Date();
+        const diff = targetDate - currentTime;
+
+        if (diff <= 0) {
+            clearInterval(countdownInterval);
+            countdownContainer.innerHTML = `<h5 class="card-title my-3">${nextRace.name} 比赛进行中！</h5>`;
+            return;
+        }
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        document.getElementById('cd-days').textContent = String(days).padStart(2, '0');
+        document.getElementById('cd-hours').textContent = String(hours).padStart(2, '0');
+        document.getElementById('cd-minutes').textContent = String(minutes).padStart(2, '0');
+        document.getElementById('cd-seconds').textContent = String(seconds).padStart(2, '0');
+    };
+
+    updateCountdown();
+    countdownInterval = setInterval(updateCountdown, 1000);
+}
+
+
+async function generateMarathonCalendar() {
+        const container = document.getElementById('marathon-calendar-container');
+        if (!container) return;
+        container.innerHTML = '<div class="content-card text-center text-body-secondary">加载赛历数据中...</div>';
+
+        try {
+            const response = await fetch(`${commentApiBase}/marathon-events`);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            marathonEventsCache = await response.json();
+            initializeRaceCountdown(); 
+        } catch (error) {
+            console.error("Could not fetch marathon data:", error);
+            container.innerHTML = '<div class="content-card text-center text-danger">无法加载赛历数据，请稍后重试。</div>';
+            return;
+        }
+        
+        const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+        const eventsByMonth = marathonEventsCache.reduce((acc, event) => {
+            const month = event.date.substring(0, 7);
+            if (!acc[month]) acc[month] = [];
+            acc[month].push(event);
+            return acc;
+        }, {});
+
+        const sortedMonths = Object.keys(eventsByMonth).sort();
+        
+        if (sortedMonths.length === 0) {
+            container.innerHTML = '<div class="content-card text-center text-body-secondary">暂无赛事计划</div>';
+            return;
+        }
+
+        let calendarHTML = '';
+        sortedMonths.forEach(monthStr => {
+            const [year, month] = monthStr.split('-').map(Number);
+            const monthEvents = eventsByMonth[monthStr];
+            
+            calendarHTML += `<div class="month-grid">`;
+            calendarHTML += `<h4 class="mb-3">${year}年 ${month}月</h4>`;
+            
+            let gridHtml = `<table class="calendar-table">`;
+            gridHtml += `<thead><tr>${['日', '一', '二', '三', '四', '五', '六'].map(d => `<th>${d}</th>`).join('')}</tr></thead>`;
+            
+            let tbodyHtml = '<tbody>';
+            const firstDay = new Date(year, month - 1, 1);
+            const daysInMonth = new Date(year, month, 0).getDate();
+            const startingDay = firstDay.getDay();
+            let date = 1;
+
+            for (let i = 0; i < 6; i++) {
+                if (date > daysInMonth) break;
+                tbodyHtml += '<tr>';
+                for (let j = 0; j < 7; j++) {
+                    if ((i === 0 && j < startingDay) || date > daysInMonth) {
+                        tbodyHtml += '<td class="empty"></td>';
+                    } else {
+                        const eventsOnThisDay = monthEvents.filter(e => parseInt(e.date.substring(8, 10), 10) === date);
+                        let cellClass = eventsOnThisDay.length > 0 ? 'event' : '';
+                        let dayClass = eventsOnThisDay.length > 0 ? 'has-event' : '';
+                        
+                        const hasWon = eventsOnThisDay.some(e => e.status === '中！');
+                        if (hasWon) {
+                            cellClass += ' lottery-win';
+                        }
+
+                        tbodyHtml += `<td class="${cellClass}">`;
+                        tbodyHtml += `<div class="day-number ${dayClass}">${date}</div>`;
+                        if(eventsOnThisDay.length > 0) {
+                            eventsOnThisDay.forEach(event => {
+                                let specialClass = '';
+                                if (event.status === '不中！') {
+                                    specialClass = 'text-decoration-line-through text-body-secondary';
+                                }
+                                tbodyHtml += `<div class="event-item ${specialClass}" title="${event.name}">${event.name}</div>`;
+                            });
+                            tbodyHtml += '<div class="event-details popup">';
+                             eventsOnThisDay.forEach(event => {
+                                let lotteryStatusIcon = '';
+                                if (event.status === '中！') {
+                                    lotteryStatusIcon = ' <i class="bi bi-check-circle-fill text-success"></i>';
+                                } else if (event.status === '不中！') {
+                                    lotteryStatusIcon = ' <i class="bi bi-x-circle-fill text-body-secondary"></i>';
+                                }
+                                tbodyHtml += `<div class="event-item">${event.name}${lotteryStatusIcon} <span class="category">${event.category}</span></div>`;
+                                tbodyHtml += `<div class="event-status">${event.status}</div>`;
+                            });
+                            tbodyHtml += '</div>';
+                        }
+                        tbodyHtml += '</td>';
+                        date++;
+                    }
+                }
+                tbodyHtml += '</tr>';
+            }
+            tbodyHtml += '</tbody></table>';
+            gridHtml += tbodyHtml;
+            calendarHTML += `<div class="calendar-grid-view">${gridHtml}</div></div>`;
+        });
+        container.innerHTML = calendarHTML;
+        setupCalendarHovers();
+    }
+
+    function setupCalendarHovers() {
+        const eventCells = document.querySelectorAll('.calendar-table td.event');
+        eventCells.forEach(cell => {
+            const popup = cell.querySelector('.event-details.popup');
+            if (!popup) return;
+
+            cell.addEventListener('mouseenter', () => {
+                const rect = cell.getBoundingClientRect();
+                const popupWidth = popup.offsetWidth;
+                const viewportWidth = window.innerWidth;
+                
+                popup.classList.remove('edge-left', 'edge-right');
+
+                if (rect.left + rect.width / 2 + popupWidth / 2 > viewportWidth - 10) {
+                    popup.classList.add('edge-right');
+                } 
+                else if (rect.left + rect.width / 2 - popupWidth / 2 < 10) {
+                    popup.classList.add('edge-left');
+                }
+                popup.classList.add('visible');
+            });
+
+            cell.addEventListener('mouseleave', () => {
+                popup.classList.remove('visible');
+            });
+        });
+    }
+
+    async function initMarathonView() {
+        const container = document.getElementById('marathon-calendar-container');
+        if (container && (container.innerHTML.trim() === '' || container.innerHTML.includes('加载'))) {
+            await generateMarathonCalendar();
+        }
+    }
+
+    function openMediaGallery(photoUrls, startIndex) {
+        const galleryCarouselInner = document.getElementById('galleryCarouselInner');
+        galleryCarouselInner.innerHTML = '';
+        photoUrls.forEach((url, index) => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'carousel-item';
+            if (index === startIndex) {
+                itemDiv.classList.add('active');
+            }
+            itemDiv.innerHTML = `<img src="${url}" class="d-block" alt="gallery image">`;
+            galleryCarouselInner.appendChild(itemDiv);
+        });
+        const mediaGalleryModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('mediaGalleryModal'));
+        mediaGalleryModal.show();
+    }
+    
+    function renderRunTags() {
+        const container = document.getElementById('runDetailTagsContainer');
+        container.innerHTML = currentRunTags.map((tag, index) =>
+            `<span class="badge rounded-pill text-bg-secondary me-1 mb-1" style="font-weight: 500; background-color: var(--hover-bg) !important; color: var(--text-secondary) !important; padding: 0.3em 0.5em;">
+                ${tag}
+                <button type="button" class="btn-close ms-1" aria-label="Remove tag" data-tag-index="${index}" style="font-size: 0.6em; filter: invert(0.8);"></button>
+            </span>`
+        ).join('');
+    }
+
+    function renderSuggestedTags() {
+        const container = document.getElementById('suggestedTagsContainer');
+        container.innerHTML = suggestedTags.map(tag =>
+            `<button type="button" class="btn btn-sm" data-tag-name="${tag}" style="font-size: 0.75rem; --bs-btn-padding-y: .1rem; --bs-btn-padding-x: .4rem; margin: 2px;">${tag}</button>`
+        ).join('');
+    }
+
+    async function loadRunTags(runId) {
+        try {
+            const res = await fetch(`${commentApiBase}/tags?runId=${encodeURIComponent(runId)}`);
+            if (res.ok) {
+                const data = await res.json();
+                currentRunTags = data.tags || [];
+            } else {
+                currentRunTags = [];
+            }
+        } catch (e) {
+            console.error("Failed to load tags:", e);
+            currentRunTags = [];
+        }
+        renderRunTags();
+    }
+
+    async function saveRunTags(runId) {
+        try {
+            await fetch(`${commentApiBase}/tags`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ runId: runId, tags: currentRunTags })
+            });
+        } catch (e) {
+            console.error("Failed to save tags:", e);
+            alert('标签保存失败！');
+        }
+    }
+
+    async function addTag(tag) {
+        const trimmedTag = tag.trim();
+        if (trimmedTag && !currentRunTags.includes(trimmedTag)) {
+            currentRunTags.push(trimmedTag);
+            renderRunTags();
+            await saveRunTags(currentDetailRunId);
+        }
+    }
+
+    async function removeTag(index) {
+        currentRunTags.splice(index, 1);
+        renderRunTags();
+        await saveRunTags(currentDetailRunId);
+    }
+
     function getChartColors() {
         const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
         if (isDark) {
@@ -1820,6 +2259,7 @@
             };
         }
     }
+
 
     function createAllCharts() {
         if (document.getElementById('dailyDistanceChart')) {
@@ -1958,6 +2398,7 @@
     
     document.addEventListener('DOMContentLoaded', function() {
         setTheme(getPreferredTheme());
+
         
         initializeUserProfile();
         loadCommentCounts();
@@ -1966,6 +2407,7 @@
 
         document.getElementById('editProfileTrigger').addEventListener('click', () => { new bootstrap.Modal(document.getElementById('profileModal')).show(); });
         document.getElementById('detailEditProfileTrigger').addEventListener('click', () => { new bootstrap.Modal(document.getElementById('profileModal')).show(); });
+
         
         document.getElementById('addTagButton').addEventListener('click', async () => {
             const input = document.getElementById('runDetailTagInput');
@@ -1984,6 +2426,7 @@
             if (e.target.matches('button.btn-close')) {
                 const index = parseInt(e.target.dataset.tagIndex, 10);
                 removeTag(index);
+
             }
         });
         document.getElementById('suggestedTagsContainer').addEventListener('click', async (e) => {
@@ -2000,8 +2443,9 @@
                 bootstrap.Tab.getOrCreateInstance(dataTab).show();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
+			
         });
-
+		
         let startX = 0, startY = 0;
         const tabContent = document.querySelector('.tab-content');
         const minSwipeDistance = 100;
@@ -2043,6 +2487,9 @@
                     'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png' :
                     'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png';
 
+					
+
+
                 cityMap = L.map('cityMap', { center: [36, 108], zoom: 4, zoomControl: false });
                 L.tileLayer(tileUrl, { attribution: '', subdomains: 'abcd', minZoom: 3, maxZoom: 18 }).addTo(cityMap);
                 cityMap.attributionControl.setPrefix('');
@@ -2064,6 +2511,8 @@
             }
           });
         });
+
+
 
         window.addEventListener('popstate', activateTabFromHash);
         activateTabFromHash();
@@ -2101,6 +2550,7 @@
                 const selectedCity = document.getElementById('data-city-filter').value;
                 const startDate = document.getElementById('date-filter-start').value;
                 const endDate = document.getElementById('date-filter-end').value;
+
                 const activeSortHeader = document.querySelector('.sortable-header[aria-sort]');
                 const sortProp = activeSortHeader ? activeSortHeader.dataset.sort : 'date';
                 const sortOrder = activeSortHeader ? activeSortHeader.getAttribute('aria-sort') : 'descending';
@@ -2129,18 +2579,22 @@
             const clearFilters = () => {
                 document.getElementById('date-filter-start').value = '';
                 document.getElementById('date-filter-end').value = '';
-                document.getElementById('data-city-filter').value = 'all';
-                
+                document.getElementById('data-city-filter').value = 'all';                
                 document.querySelector('#data-dist-filter-toggle .active').classList.remove('active');
                 document.querySelector('#data-dist-filter-toggle button[data-dist="0"]').classList.add('active');
 
+
+
                 document.querySelector('#data-pace-filter-toggle .active').classList.remove('active');
                 document.querySelector('#data-pace-filter-toggle button[data-pace="9999"]').classList.add('active');
+
 
                 updateDataView();
             };
 
             document.getElementById('clear-filters-btn').addEventListener('click', clearFilters);
+
+
 
             document.getElementById('data-view-toggle').addEventListener('click', (e) => {
                 if (!e.target.matches('button')) return;
@@ -2161,6 +2615,7 @@
                     document.querySelectorAll('.sortable-header').forEach(h => h.removeAttribute('aria-sort'));
                     header.setAttribute('aria-sort', newSort);
                     updateDataView();
+
                 });
             });
 
@@ -2177,9 +2632,11 @@
             ['data-city-filter', 'date-filter-start', 'date-filter-end'].forEach(id => {
                 document.getElementById(id).addEventListener('change', updateDataView);
             });
-
             updateDataView();
         }
+
+
+
 
         const eventsPane = document.getElementById('events-pane');
         if (eventsPane) {
@@ -2193,6 +2650,9 @@
             });
         }
 
+
+		
+		
         function renderCommentList(container, comments) {
             container.style.color = 'var(--text-primary)';
             if (Array.isArray(comments) && comments.length > 0) {
@@ -2207,6 +2667,7 @@
             }
         }
 
+		
         function decodePolyline(encoded) {
             if (!encoded) return [];
             let index = 0, len = encoded.length, lat = 0, lng = 0, array = [];
@@ -2221,7 +2682,7 @@
             }
             return array;
         }
-
+		
         async function refreshDetailComments(runId) {
             const listContainer = document.getElementById('runDetailCommentList');
             try {
@@ -2262,7 +2723,6 @@
                 const data = await response.json();
                 detailPhotoUrls = data.photos.map(p => p.url);
                 currentPolyline = data.route.encoded_polyline;
-
                 const carouselInner = document.querySelector('#runMediaCarousel .carousel-inner');
                 const carouselIndicators = document.querySelector('#runMediaCarousel .carousel-indicators');
                 carouselInner.innerHTML = '';
@@ -2271,10 +2731,8 @@
                     detailMapInstance.remove();
                     detailMapInstance = null;
                 }
-
                 let activeSlideSet = false;
                 let slideIndex = 0;
-
                 if (currentPolyline) {
                     const mapItem = document.createElement('div');
                     mapItem.className = 'carousel-item';
@@ -2289,6 +2747,13 @@
                         activeSlideSet = true;
                     }
                     slideIndex++;
+
+
+
+
+
+
+
 
                     setTimeout(() => {
                         const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
@@ -2334,12 +2799,14 @@
                 }
 
                 document.getElementById('viewRouteBtn').style.display = currentPolyline ? 'block' : 'none';
+
                 
                 let weatherString = '';
                 if(data.weather) {
                 weatherString = `${data.weather.temperature_c}°C, ${data.weather.condition}`;
                 if(data.weather.wind_speed_kmh) {
                     weatherString += ` | 风速: ${data.weather.wind_speed_kmh} km/h`;
+
                 }
                 }
                 document.getElementById('detailWeather').textContent = weatherString;
@@ -2418,6 +2885,22 @@
             const text = document.getElementById('runDetailCommentText').value.trim();
             if (!text || !runId) return;
             
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             const profile = JSON.parse(localStorage.getItem('run_profile')) || generateRandomProfile();
             const nicknameForComment = `${profile.icon} ${profile.nickname}`;
             
@@ -2463,6 +2946,24 @@
             }
         });
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         const detailModalEl = document.getElementById('runDetailModal');
         let gestureStartX = 0;
         let gestureIsEligible = false;
@@ -2474,6 +2975,16 @@
                 gestureIsEligible = false;
                 return;
             }
+
+
+
+
+
+
+
+
+
+
             gestureStartX = e.touches[0].clientX;
             gestureIsEligible = gestureStartX < gestureThreshold;
         }, {passive: true});
@@ -2485,6 +2996,9 @@
             if (diffX > gestureMinSwipe) {
                 bootstrap.Modal.getInstance(detailModalEl).hide();
             }
+
+
+
             gestureIsEligible = false;
         }, {passive: true});
         
@@ -2501,6 +3015,14 @@
                 modalMapInstance = L.map('routeMap', { attributionControl: false, zoomControl: true });
                 L.tileLayer(tileUrl, { subdomains: 'abcd' }).addTo(modalMapInstance);
             }
+
+
+
+
+
+
+
+
             if (currentPolyline) {
                 const polyline = L.polyline(decodePolyline(currentPolyline), { color: getComputedStyle(document.documentElement).getPropertyValue('--accent-color'), weight: 4 }).addTo(modalMapInstance);
                 modalMapInstance.fitBounds(polyline.getBounds().pad(0.1));
@@ -2508,18 +3030,91 @@
             setTimeout(() => modalMapInstance.invalidateSize(), 10);
         });
 
+
+
+
+
+
+
+
+
+
         const calendarEditorModalEl = document.getElementById('calendarEditorModal');
         const calendarEditorModal = bootstrap.Modal.getOrCreateInstance(calendarEditorModalEl);
         const calendarForm = document.getElementById('calendarEventForm');
+
+
+
+
         const editorList = document.getElementById('calendarEditorList');
         
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         let editorEvents = [];
 
         document.getElementById('editCalendarBtn').addEventListener('click', () => {
+
+
+
+
+
+
+
             editorEvents = JSON.parse(JSON.stringify(marathonEventsCache)); 
             renderCalendarEditor();
             calendarEditorModal.show();
         });
+
+
+
+
+
+
 
         function renderCalendarEditor() {
             editorList.innerHTML = '';
@@ -2544,15 +3139,44 @@
             });
         }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         window.editCalendarEvent = (index) => {
             const event = editorEvents[index];
             document.getElementById('event-id').value = index;
+
+
 
             document.getElementById('event-name').value = event.name;
             document.getElementById('event-category').value = event.category;
             document.getElementById('event-status').value = event.status;
 
+
+
             document.getElementById('event-date').value = event.date;
+
+
+
+
             document.getElementById('event-reg-start').value = event.registration_start || '';
             document.getElementById('event-reg-end').value = event.registration_end || '';
             document.getElementById('event-lottery-date').value = event.lottery_date || '';
@@ -2561,12 +3185,31 @@
             document.getElementById('cancelEditBtn').style.display = 'inline-block';
         }
 
+
+
+
+
+
         window.deleteCalendarEvent = (index) => {
             if(confirm('确定要删除这项赛事吗?')) {
                 editorEvents.splice(index, 1);
                 renderCalendarEditor();
             }
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         
         document.getElementById('cancelEditBtn').addEventListener('click', () => {
             calendarForm.reset();
@@ -2574,6 +3217,9 @@
             document.getElementById('calendarFormTitle').textContent = '添加新赛事';
             document.getElementById('cancelEditBtn').style.display = 'none';
         });
+
+
+
 
         calendarForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -2589,6 +3235,9 @@
             };
             const eventId = document.getElementById('event-id').value;
 
+
+
+
             if (eventId !== '') { 
                 const index = editorEvents.findIndex(evt => evt.id == eventId);
                 if (index > -1) editorEvents[index] = eventData;
@@ -2596,24 +3245,72 @@
                 editorEvents.push(eventData);
             }
             renderCalendarEditor();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             calendarForm.reset();
+
+
+
+
+
+
+
+
+
             document.getElementById('cancelEditBtn').click();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         });
+
         
         document.getElementById('saveAllCalendarChanges').addEventListener('click', async () => {
             const secret = prompt("请输入管理员密钥:");
             if (!secret) return;
+
 
             try {
                 const res = await fetch(`${commentApiBase}/marathon-events`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ events: editorEvents, secret: secret })
+
+
                 });
                 if (res.ok) {
                     alert('赛历已成功更新!');
                     calendarEditorModal.hide();
                     await generateMarathonCalendar();
+
                 } else {
                     const error = await res.json();
                     alert(`保存失败: ${error.error}`);
@@ -2621,6 +3318,9 @@
             } catch (e) {
                 alert(`发生网络错误: ${e.message}`);
             }
+
+
+
         });
 
 
@@ -2635,5 +3335,6 @@
           if(countdownInterval) clearInterval(countdownInterval);
         });
     });
+
 </script>
 </html>
