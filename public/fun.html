@@ -41,6 +41,7 @@
       --trophy-color: #ffc107;
       --hover-bg: #e9ecef;
       --marathon-color: #fd7e14;
+      --danger-color: #dc3545;
     }
 
     /* Dark Theme Variables */
@@ -55,6 +56,7 @@
       --trophy-color: #fcc419;
       --hover-bg: #3a3b3c;
       --marathon-color: #ff8700;
+      --danger-color: #ff6b6b;
     }
 
     html {
@@ -132,7 +134,7 @@
       color: var(--text-secondary);
       text-transform: uppercase;
       margin-bottom: 0.5rem;
-    min-height: 1.0rem;
+	  min-height: 1.0rem;
     }
 
     .stat-value {
@@ -140,7 +142,7 @@
       font-weight: 700;
       color: var(--text-primary);
       line-height: 1.2;
-    min-height: 2.4rem;
+	  min-height: 2.4rem;
     }
 
     .stat-value-small {
@@ -148,9 +150,9 @@
     }
     
     .stat-details {
-    margin-top: auto;
-    width: 100%;
-  }
+	  margin-top: auto;
+	  width: 100%;
+	}
 
     .stat-card-flip-container {
         perspective: 1000px;
@@ -159,7 +161,7 @@
     }
 
     .stat-card-flipper {
-    text-align: center;
+		text-align: center;
         position: relative;
         width: 100%;
         height: 100%;
@@ -215,9 +217,9 @@
         --bs-btn-hover-border-color: var(--accent-color);
         --bs-btn-active-bg: var(--accent-color);
         --bs-btn-active-border-color: var(--accent-color);
-    --bs-btn-active-color: var(--text-primary);
+		--bs-btn-active-color: var(--text-primary);
         font-size: 0.8rem;
-    color: var(--text-secondary);
+		color: var(--text-secondary);
     }
     #saveProfileButton {
         --bs-btn-bg: var(--accent-color);
@@ -228,9 +230,9 @@
     }
 
     .btn-group .btn.active {
-    color: var(--text-primary);
-    font-weight: 500;
-  }
+		color: var(--text-primary);
+		font-weight: 500;
+	}
     @media (max-width: 767.98px) {
       .stat-value { font-size: 1.8rem; }
     }
@@ -525,10 +527,11 @@
     }
     .calendar-table td {
         border: 1px solid var(--border-color);
-        height: 70px;
+        height: 80px;
         vertical-align: top;
         padding: 5px;
         transition: background-color 0.2s;
+        position: relative;
     }
     .calendar-table td.empty {
        background-color: transparent;
@@ -542,58 +545,29 @@
         font-size: 0.9rem;
         color: var(--text-secondary);
     }
-    .calendar-table td.event {
-        background-color: #3b2f21;
-        border: 1px solid var(--marathon-color);
-        position: relative;
+    .day-markers {
+        padding-top: 4px;
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
     }
-    [data-bs-theme="light"] .calendar-table td.event {
-        background-color: #fff3e0;
+    .day-marker {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
     }
-
-    .day-number.has-event {
-        color: var(--marathon-color);
-    }
-    .event-details {
-      padding-top: 2px;
-    }
-    .event-item {
-        font-size: 0.75rem;
-        font-weight: 500;
-        color: var(--text-primary);
-        background-color: rgba(0,0,0,0.2);
-        border-radius: 4px;
-        padding: 2px 4px;
-        margin-bottom: 4px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    .event-item .category {
-      font-size: 0.8em;
-      padding: 1px 4px;
-      border-radius: 3px;
-      background-color: var(--marathon-color);
-      color: var(--bg-color);
-      margin-left: 4px;
-      font-weight: bold;
-    }
-    .event-status {
-        font-size: 0.7rem;
-        color: var(--text-secondary);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
+    .day-marker.race { background-color: var(--marathon-color); }
+    .day-marker.registration { background-color: var(--accent-color); }
+    .day-marker.lottery { background-color: var(--success-color); }
     
-    .event-details.popup {
+    .day-popup-details {
       position: absolute;
       z-index: 10;
-      top: 8px;
+      bottom: calc(100% + 5px);
       left: 50%;
       transform: translateX(-50%);
       width: auto;
-      min-width: 180%;
+      min-width: 220px;
       padding: 0.6rem;
       background-color: var(--hover-bg);
       border: 1px solid var(--accent-color);
@@ -604,34 +578,25 @@
       transition: opacity 0.2s ease, visibility 0.2s ease;
       pointer-events: none;
     }
-    .event-details.popup.visible {
+    .calendar-table td:hover .day-popup-details {
         opacity: 1;
         visibility: visible;
         pointer-events: auto;
     }
-    .event-details.popup.edge-left {
-        left: 5px;
-        transform: translateX(0);
+    .popup-event-item {
+        font-size: 0.8rem;
+        margin-bottom: 0.5rem;
     }
-    .event-details.popup.edge-right {
-        left: auto;
-        right: 5px;
-        transform: translateX(0);
+    .popup-event-item:last-child {
+        margin-bottom: 0;
     }
-
-    .event-details.popup .event-item,
-    .event-details.popup .event-status {
-      overflow: visible;
-      white-space: normal;
-      text-overflow: initial;
+    .popup-event-title {
+        font-weight: bold;
+        display: block;
     }
-    .event-details.popup .event-status {
-        margin-top: 4px;
-    }
-    
-    .calendar-grid-view {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
+    .popup-event-type {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
     }
 
     /* Countdown Timer Styles */
@@ -911,10 +876,10 @@
                         <div class="stat-card-content">
                           <div>
                             <div class="stat-label">继续坚持</div>
-                            <div class="stat-value">16年169天</div>
+                            <div class="stat-value">16年188天</div>
                           </div>
                           <div class="stat-details">
-                            <div class="stat-label"><small class="small-muted">预计</small>2042年02月15日<small>绕地球一圈</small></div>
+                            <div class="stat-label"><small class="small-muted">预计</small>2042年03月06日<small>绕地球一圈</small></div>
                           </div>
                         </div>
                       </div>
@@ -950,13 +915,13 @@
                       </div>
                       <div class="stat-card-back">
                         <div class="stat-card-content">
-              <div>
-                <div class="stat-label">最快配速</div>
-                <div class="stat-value">4&#39;07&#34;</div>
-              </div>
+						  <div>
+							  <div class="stat-label">最快配速</div>
+							  <div class="stat-value">4&#39;07&#34;</div>
+						  </div>
                           <div class="stat-details">
                             <small class="small-muted">2025-08-17</small>
-                          </div>              
+                          </div>						  
                         </div>
                       </div>
                     </div>
@@ -1155,7 +1120,7 @@
                 <div id="monthOverMonthChartContainer" style="display: block; height: 300px;">
                     <canvas id="monthOverMonthChart" aria-label="本月与上月跑量对比图表"></canvas>
                 </div>                
-        <div id="dailyChartContainer" style="display: none; height: 300px;">
+				<div id="dailyChartContainer" style="display: none; height: 300px;">
                     <canvas id="dailyDistanceChart" aria-label="最近30天跑步距离统计图表"></canvas>
                 </div>
                 <div id="monthlyChartContainer" style="display: none; height: 300px;">
@@ -15314,7 +15279,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-09-03 10:02:54 
+         | Last updated: 2025-09-03 16:03:33 
     </small>
 </footer>
 
@@ -15555,28 +15520,46 @@
                 <form id="calendarEventForm">
                     <input type="hidden" id="event-id">
                     <div class="mb-2">
-                        <label for="event-date" class="form-label">比赛日期</label>
-                        <input type="date" class="form-control form-control-sm" id="event-date" required>
-                    </div>
-                    <div class="mb-2">
                         <label for="event-name" class="form-label">赛事名称</label>
                         <input type="text" class="form-control form-control-sm" id="event-name" required>
                     </div>
-                    <div class="mb-2">
-                        <label for="event-category" class="form-label">类别 (如: 全马)</label>
-                        <input type="text" class="form-control form-control-sm" id="event-category" required>
+                    <div class="row g-2 mb-2">
+                        <div class="col-md">
+                            <label for="event-category" class="form-label">类别 (如: 全马)</label>
+                            <input type="text" class="form-control form-control-sm" id="event-category" required>
+                        </div>
+                        <div class="col-md">
+                            <label for="event-status" class="form-label">状态</label>
+                            <select class="form-select form-select-sm" id="event-status" required>
+                                <option value="待报名">待报名</option>
+                                <option value="报名中">报名中</option>
+                                <option value="待抽签">待抽签</option>
+                                <option value="已中签">已中签</option>
+                                <option value="未中签">未中签</option>
+                                <option value="待比赛">待比赛</option>
+                                <option value="已完赛">已完赛</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="event-status" class="form-label">状态</label>
-                        <select class="form-select form-select-sm" id="event-status" required>
-                            <option value="待报名">待报名</option>
-                            <option value="待抽签">待抽签</option>
-                            <option value="待比赛" selected>待比赛</option>
-                        </select>
+                    <div class="row g-2 mb-2">
+                        <div class="col-md">
+                            <label for="event-reg-start" class="form-label">报名开始日期</label>
+                            <input type="date" class="form-control form-control-sm" id="event-reg-start">
+                        </div>
+                        <div class="col-md">
+                            <label for="event-reg-end" class="form-label">报名结束日期</label>
+                            <input type="date" class="form-control form-control-sm" id="event-reg-end">
+                        </div>
                     </div>
-                    <div class="mb-3" id="secondary-date-wrapper" style="display: none;">
-                        <label for="event-secondary-date" class="form-label" id="event-secondary-date-label"></label>
-                        <input type="date" class="form-control form-control-sm" id="event-secondary-date">
+                    <div class="row g-2 mb-3">
+                       <div class="col-md">
+                            <label for="event-lottery-date" class="form-label">出签日期</label>
+                            <input type="date" class="form-control form-control-sm" id="event-lottery-date">
+                        </div>
+                        <div class="col-md">
+                            <label for="event-date" class="form-label">比赛日期</label>
+                            <input type="date" class="form-control form-control-sm" id="event-date" required>
+                        </div>
                     </div>
 
                     <button type="submit" class="btn btn-sm btn-primary">保存赛事</button>
@@ -15591,16 +15574,16 @@
     </div>
 </div>
 
-
 </body>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.1.0/dist/chartjs-plugin-annotation.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
 <script>
-  let monthlyDistanceChart = null;
-  let dailyDistanceChart = null;
-  let yearlyDistanceChart = null;
+    // Global variables...
+    let monthlyDistanceChart = null;
+    let dailyDistanceChart = null;
+    let yearlyDistanceChart = null;
     let monthOverMonthChart = null;
     let yearlyDualAxisChart = null;
     let paceChart = null;
@@ -15668,367 +15651,6 @@
     });
     // --- END THEME SWITCHER LOGIC ---
 
-    function setRandomQuote() {
-        const quotes = [ "路漫漫其修远兮", "道阻且长" ];
-        const quoteElement = document.getElementById('running-quote');
-        if (quoteElement) {
-            const randomIndex = Math.floor(Math.random() * quotes.length);
-            quoteElement.textContent = quotes[randomIndex];
-        }
-    }
-
-    function generateRandomProfile() {
-        const adjectives = ['快乐', '坚定', '闪亮', '迷路', '温柔'];
-        const nouns = ['小鹿', '绿豆芽', '星星', '猫咪', '纸飞机'];
-        const icons = ['🌱','🌸','🌟','🍃','🌊','🐾','🌀','🌼'];
-        return {
-            icon: icons[Math.floor(Math.random() * icons.length)],
-            nickname: `匿名${adjectives[Math.floor(Math.random() * adjectives.length)]}${nouns[Math.floor(Math.random() * nouns.length)]}`
-        };
-    }
-
-    function loadProfileIntoModals() {
-        let profile;
-        const isAdmin = localStorage.getItem('run_role') === 'admin';
-        if (isAdmin) {
-            profile = { icon: '👑', nickname: '管理员' };
-            document.getElementById('editCalendarBtn').style.display = 'block';
-        } else {
-            document.getElementById('editCalendarBtn').style.display = 'none';
-            try {
-                profile = JSON.parse(localStorage.getItem('run_profile'));
-                if (!profile || !profile.icon || !profile.nickname) { throw new Error("Invalid profile"); }
-            } catch (e) {
-                profile = generateRandomProfile();
-                localStorage.setItem('run_profile', JSON.stringify(profile));
-            }
-        }
-        document.getElementById('commentUserIcon').textContent = profile.icon;
-        document.getElementById('commentUserNickname').textContent = profile.nickname;
-        document.getElementById('detailCommentUserIcon').textContent = profile.icon;
-        document.getElementById('detailCommentUserNickname').textContent = profile.nickname;
-        document.getElementById('nicknameInput').value = profile.nickname;
-        document.getElementById('nicknameInput').disabled = isAdmin;
-        document.getElementById('saveProfileButton').style.display = isAdmin ? 'none' : 'inline-block';
-    }
-
-    function initializeUserProfile() {
-        const params = new URLSearchParams(window.location.search);
-        const adminKey = params.get('admin_key');
-        if (adminKey === 'runpage123') { 
-            localStorage.setItem('run_role', 'admin');
-            const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + window.location.hash;
-            window.history.replaceState({path: newUrl}, '', newUrl);
-        }
-        loadProfileIntoModals();
-        document.getElementById('saveProfileButton').addEventListener('click', () => {
-            const newNickname = document.getElementById('nicknameInput').value.trim();
-            if (newNickname) {
-                const currentProfile = JSON.parse(localStorage.getItem('run_profile')) || generateRandomProfile();
-                currentProfile.nickname = newNickname;
-                localStorage.setItem('run_profile', JSON.stringify(currentProfile));
-                loadProfileIntoModals();
-                bootstrap.Modal.getInstance(document.getElementById('profileModal')).hide();
-            }
-        });
-    }
-
-    function parsePaceToSeconds(paceStr) {
-        if (!paceStr || !paceStr.includes("'")) { return 9999; }
-        try {
-            const parts = paceStr.replace('"', '').split("'");
-            const minutes = parseInt(parts[0], 10);
-            const seconds = parseInt(parts[1], 10);
-            if (isNaN(minutes) || isNaN(seconds)) { return 9999; }
-            return (minutes * 60) + seconds;
-        } catch (e) {
-            return 9999;
-        }
-    }
-    
-    function formatPaceFromSeconds(totalSeconds) {
-        if (totalSeconds === null || totalSeconds === 0) return "0'00\"";
-        const minutes = Math.floor(totalSeconds / 60);
-        const seconds = Math.round(totalSeconds % 60);
-        return `${minutes}'${seconds.toString().padStart(2, '0')}"`;
-    }
-
-    async function loadCommentCounts() {
-        document.querySelectorAll('.comment-count').forEach(async (el) => {
-            const runId = el.dataset.runId;
-            try {
-                const res = await fetch(`${commentApiBase}/count?runId=${encodeURIComponent(runId)}`);
-                const data = await res.json();
-                el.textContent = data.count ?? 0;
-            } catch {
-                el.textContent = 0;
-            }
-        });
-    }
-
-function initializeRaceCountdown() {
-    if (countdownInterval) {
-        clearInterval(countdownInterval);
-    }
-
-    const now = new Date();
-    const upcomingRaces = marathonEventsCache
-        .filter(event => event.status === '待比赛' && new Date(event.date.replace(/-/g, '/')) > now)
-        .sort((a, b) => new Date(a.date.replace(/-/g, '/')) - new Date(b.date.replace(/-/g, '/')));
-
-    const countdownContainer = document.getElementById('race-countdown-container');
-    
-    if (upcomingRaces.length === 0) {
-        countdownContainer.style.display = 'none';
-        return;
-    }
-
-    const nextRace = upcomingRaces[0];
-    const targetDate = new Date(nextRace.date + "T00:00:00");
-
-    document.getElementById('countdown-race-name').textContent = `${nextRace.name} (${nextRace.category})`;
-    document.getElementById('countdown-race-date').textContent = nextRace.date;
-    countdownContainer.style.display = 'block';
-
-    const updateCountdown = () => {
-        const currentTime = new Date();
-        const diff = targetDate - currentTime;
-
-        if (diff <= 0) {
-            clearInterval(countdownInterval);
-            countdownContainer.innerHTML = `<h5 class="card-title my-3">${nextRace.name} 比赛进行中！</h5>`;
-            return;
-        }
-
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-        document.getElementById('cd-days').textContent = String(days).padStart(2, '0');
-        document.getElementById('cd-hours').textContent = String(hours).padStart(2, '0');
-        document.getElementById('cd-minutes').textContent = String(minutes).padStart(2, '0');
-        document.getElementById('cd-seconds').textContent = String(seconds).padStart(2, '0');
-    };
-
-    updateCountdown();
-    countdownInterval = setInterval(updateCountdown, 1000);
-}
-
-
-async function generateMarathonCalendar() {
-        const container = document.getElementById('marathon-calendar-container');
-        if (!container) return;
-        container.innerHTML = '<div class="content-card text-center text-body-secondary">加载赛历数据中...</div>';
-
-        try {
-            const response = await fetch(`${commentApiBase}/marathon-events`);
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            marathonEventsCache = await response.json();
-            initializeRaceCountdown(); 
-        } catch (error) {
-            console.error("Could not fetch marathon data:", error);
-            container.innerHTML = '<div class="content-card text-center text-danger">无法加载赛历数据，请稍后重试。</div>';
-            return;
-        }
-        
-        const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-        const eventsByMonth = marathonEventsCache.reduce((acc, event) => {
-            const month = event.date.substring(0, 7);
-            if (!acc[month]) acc[month] = [];
-            acc[month].push(event);
-            return acc;
-        }, {});
-
-        const sortedMonths = Object.keys(eventsByMonth).sort();
-        
-        if (sortedMonths.length === 0) {
-            container.innerHTML = '<div class="content-card text-center text-body-secondary">暂无赛事计划</div>';
-            return;
-        }
-
-        let calendarHTML = '';
-        sortedMonths.forEach(monthStr => {
-            const [year, month] = monthStr.split('-').map(Number);
-            const monthEvents = eventsByMonth[monthStr];
-            
-            calendarHTML += `<div class="month-grid">`;
-            calendarHTML += `<h4 class="mb-3">${year}年 ${month}月</h4>`;
-            
-            let gridHtml = `<table class="calendar-table">`;
-            gridHtml += `<thead><tr>${['日', '一', '二', '三', '四', '五', '六'].map(d => `<th>${d}</th>`).join('')}</tr></thead>`;
-            
-            let tbodyHtml = '<tbody>';
-            const firstDay = new Date(year, month - 1, 1);
-            const daysInMonth = new Date(year, month, 0).getDate();
-            const startingDay = firstDay.getDay();
-            let date = 1;
-
-            for (let i = 0; i < 6; i++) {
-                if (date > daysInMonth) break;
-                tbodyHtml += '<tr>';
-                for (let j = 0; j < 7; j++) {
-                    if ((i === 0 && j < startingDay) || date > daysInMonth) {
-                        tbodyHtml += '<td class="empty"></td>';
-                    } else {
-                        const eventsOnThisDay = monthEvents.filter(e => parseInt(e.date.substring(8, 10), 10) === date);
-                        let cellClass = eventsOnThisDay.length > 0 ? 'event' : '';
-                        let dayClass = eventsOnThisDay.length > 0 ? 'has-event' : '';
-                        
-                        const hasWon = eventsOnThisDay.some(e => e.status === '中！');
-                        if (hasWon) {
-                            cellClass += ' lottery-win';
-                        }
-
-                        tbodyHtml += `<td class="${cellClass}">`;
-                        tbodyHtml += `<div class="day-number ${dayClass}">${date}</div>`;
-                        if(eventsOnThisDay.length > 0) {
-                            eventsOnThisDay.forEach(event => {
-                                let specialClass = '';
-                                if (event.status === '不中！') {
-                                    specialClass = 'text-decoration-line-through text-body-secondary';
-                                }
-                                tbodyHtml += `<div class="event-item ${specialClass}" title="${event.name}">${event.name}</div>`;
-                            });
-                            tbodyHtml += '<div class="event-details popup">';
-                             eventsOnThisDay.forEach(event => {
-                                let lotteryStatusIcon = '';
-                                if (event.status === '中！') {
-                                    lotteryStatusIcon = ' <i class="bi bi-check-circle-fill text-success"></i>';
-                                } else if (event.status === '不中！') {
-                                    lotteryStatusIcon = ' <i class="bi bi-x-circle-fill text-body-secondary"></i>';
-                                }
-                                tbodyHtml += `<div class="event-item">${event.name}${lotteryStatusIcon} <span class="category">${event.category}</span></div>`;
-                                tbodyHtml += `<div class="event-status">${event.status}</div>`;
-                            });
-                            tbodyHtml += '</div>';
-                        }
-                        tbodyHtml += '</td>';
-                        date++;
-                    }
-                }
-                tbodyHtml += '</tr>';
-            }
-            tbodyHtml += '</tbody></table>';
-            gridHtml += tbodyHtml;
-            calendarHTML += `<div class="calendar-grid-view">${gridHtml}</div></div>`;
-        });
-        container.innerHTML = calendarHTML;
-        setupCalendarHovers();
-    }
-
-    function setupCalendarHovers() {
-        const eventCells = document.querySelectorAll('.calendar-table td.event');
-        eventCells.forEach(cell => {
-            const popup = cell.querySelector('.event-details.popup');
-            if (!popup) return;
-
-            cell.addEventListener('mouseenter', () => {
-                const rect = cell.getBoundingClientRect();
-                const popupWidth = popup.offsetWidth;
-                const viewportWidth = window.innerWidth;
-                
-                popup.classList.remove('edge-left', 'edge-right');
-
-                if (rect.left + rect.width / 2 + popupWidth / 2 > viewportWidth - 10) {
-                    popup.classList.add('edge-right');
-                } 
-                else if (rect.left + rect.width / 2 - popupWidth / 2 < 10) {
-                    popup.classList.add('edge-left');
-                }
-                popup.classList.add('visible');
-            });
-
-            cell.addEventListener('mouseleave', () => {
-                popup.classList.remove('visible');
-            });
-        });
-    }
-
-    async function initMarathonView() {
-        const container = document.getElementById('marathon-calendar-container');
-        if (container && (container.innerHTML.trim() === '' || container.innerHTML.includes('加载'))) {
-            await generateMarathonCalendar();
-        }
-    }
-
-    function openMediaGallery(photoUrls, startIndex) {
-        const galleryCarouselInner = document.getElementById('galleryCarouselInner');
-        galleryCarouselInner.innerHTML = '';
-        photoUrls.forEach((url, index) => {
-            const itemDiv = document.createElement('div');
-            itemDiv.className = 'carousel-item';
-            if (index === startIndex) {
-                itemDiv.classList.add('active');
-            }
-            itemDiv.innerHTML = `<img src="${url}" class="d-block" alt="gallery image">`;
-            galleryCarouselInner.appendChild(itemDiv);
-        });
-        const mediaGalleryModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('mediaGalleryModal'));
-        mediaGalleryModal.show();
-    }
-    
-    function renderRunTags() {
-        const container = document.getElementById('runDetailTagsContainer');
-        container.innerHTML = currentRunTags.map((tag, index) =>
-            `<span class="badge rounded-pill text-bg-secondary me-1 mb-1" style="font-weight: 500; background-color: var(--hover-bg) !important; color: var(--text-secondary) !important; padding: 0.3em 0.5em;">
-                ${tag}
-                <button type="button" class="btn-close ms-1" aria-label="Remove tag" data-tag-index="${index}" style="font-size: 0.6em; filter: invert(0.8);"></button>
-            </span>`
-        ).join('');
-    }
-
-    function renderSuggestedTags() {
-        const container = document.getElementById('suggestedTagsContainer');
-        container.innerHTML = suggestedTags.map(tag =>
-            `<button type="button" class="btn btn-sm" data-tag-name="${tag}" style="font-size: 0.75rem; --bs-btn-padding-y: .1rem; --bs-btn-padding-x: .4rem; margin: 2px;">${tag}</button>`
-        ).join('');
-    }
-
-    async function loadRunTags(runId) {
-        try {
-            const res = await fetch(`${commentApiBase}/tags?runId=${encodeURIComponent(runId)}`);
-            if (res.ok) {
-                const data = await res.json();
-                currentRunTags = data.tags || [];
-            } else {
-                currentRunTags = [];
-            }
-        } catch (e) {
-            console.error("Failed to load tags:", e);
-            currentRunTags = [];
-        }
-        renderRunTags();
-    }
-
-    async function saveRunTags(runId) {
-        try {
-            await fetch(`${commentApiBase}/tags`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ runId: runId, tags: currentRunTags })
-            });
-        } catch (e) {
-            console.error("Failed to save tags:", e);
-            alert('标签保存失败！');
-        }
-    }
-
-    async function addTag(tag) {
-        const trimmedTag = tag.trim();
-        if (trimmedTag && !currentRunTags.includes(trimmedTag)) {
-            currentRunTags.push(trimmedTag);
-            renderRunTags();
-            await saveRunTags(currentDetailRunId);
-        }
-    }
-
-    async function removeTag(index) {
-        currentRunTags.splice(index, 1);
-        renderRunTags();
-        await saveRunTags(currentDetailRunId);
-    }
-
     function getChartColors() {
         const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
         if (isDark) {
@@ -16051,7 +15673,6 @@ async function generateMarathonCalendar() {
             };
         }
     }
-
 
     function createAllCharts() {
         if (document.getElementById('dailyDistanceChart')) {
@@ -16189,691 +15810,683 @@ async function generateMarathonCalendar() {
     } 
     
     document.addEventListener('DOMContentLoaded', function() {
-    setTheme(getPreferredTheme());
-    
-    initializeUserProfile();
-    loadCommentCounts();
+        setTheme(getPreferredTheme());
+        
+        initializeUserProfile();
+        loadCommentCounts();
 
-    createAllCharts(); 
+        createAllCharts(); 
 
-    document.getElementById('editProfileTrigger').addEventListener('click', () => { new bootstrap.Modal(document.getElementById('profileModal')).show(); });
-    document.getElementById('detailEditProfileTrigger').addEventListener('click', () => { new bootstrap.Modal(document.getElementById('profileModal')).show(); });
-    
-    document.getElementById('addTagButton').addEventListener('click', async () => {
-        const input = document.getElementById('runDetailTagInput');
-        await addTag(input.value);
-        input.value = '';
-    });
-    document.getElementById('runDetailTagInput').addEventListener('keypress', async (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
+        document.getElementById('editProfileTrigger').addEventListener('click', () => { new bootstrap.Modal(document.getElementById('profileModal')).show(); });
+        document.getElementById('detailEditProfileTrigger').addEventListener('click', () => { new bootstrap.Modal(document.getElementById('profileModal')).show(); });
+        
+        document.getElementById('addTagButton').addEventListener('click', async () => {
             const input = document.getElementById('runDetailTagInput');
             await addTag(input.value);
             input.value = '';
-        }
-    });
-    document.getElementById('runDetailTagsContainer').addEventListener('click', (e) => {
-        if (e.target.matches('button.btn-close')) {
-            const index = parseInt(e.target.dataset.tagIndex, 10);
-            removeTag(index);
-        }
-    });
-    document.getElementById('suggestedTagsContainer').addEventListener('click', async (e) => {
-        if (e.target.matches('button')) {
-            const tagName = e.target.dataset.tagName;
-            await addTag(tagName);
-        }
-    });
-
-    document.getElementById('goto-data-tab')?.addEventListener('click', e => {
-        e.preventDefault();
-        const dataTab = document.getElementById('data-tab');
-        if (dataTab) {
-            bootstrap.Tab.getOrCreateInstance(dataTab).show();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    });
-
-    let startX = 0, startY = 0;
-    const tabContent = document.querySelector('.tab-content');
-    const minSwipeDistance = 100;
-    
-    tabContent.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; }, false);
-    
-    tabContent.addEventListener('touchend', (e) => {
-      if (e.target.closest('#cityMap') || e.target.closest('.calendar-table')) return;
-      const endX = e.changedTouches[0].clientX;
-      const diffX = endX - startX;
-      if (Math.abs(diffX) > minSwipeDistance && Math.abs(diffX) > Math.abs(e.changedTouches[0].clientY - startY)) {
-        const activeTab = document.querySelector('#main-nav-tabs .nav-link.active');
-        const tabs = Array.from(document.querySelectorAll('#main-nav-tabs .nav-link'));
-        const currentIndex = tabs.indexOf(activeTab);
-        if (diffX > 0 && currentIndex > 0) {
-            bootstrap.Tab.getOrCreateInstance(tabs[currentIndex - 1]).show();
-        } else if (diffX < 0 && currentIndex < tabs.length - 1) {
-            bootstrap.Tab.getOrCreateInstance(tabs[currentIndex + 1]).show();
-        }
-      }
-    }, false);
-    
-    const activateTabFromHash = () => {
-      const hash = window.location.hash.substring(1);
-      if (hash) {
-        const tabTrigger = document.querySelector(`.nav-link[data-hash="${hash}"]`);
-        if (tabTrigger) { bootstrap.Tab.getOrCreateInstance(tabTrigger).show(); }
-      }
-    };
-    
-    document.querySelectorAll('#main-nav-tabs .nav-link').forEach(tabEl => {
-      tabEl.addEventListener('shown.bs.tab', event => {
-        const hash = event.target.dataset.hash;
-        if (hash) { history.pushState(null, '', '#' + hash); }
-        if (hash === 'marathon') { initMarathonView(); }
-        if (hash === 'events' && !cityMap) {
-            const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
-            const tileUrl = isDark ? 
-                'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png' :
-                'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png';
-
-            cityMap = L.map('cityMap', { center: [36, 108], zoom: 4, zoomControl: false });
-            L.tileLayer(tileUrl, { attribution: '', subdomains: 'abcd', minZoom: 3, maxZoom: 18 }).addTo(cityMap);
-            cityMap.attributionControl.setPrefix('');
-            
-            cityStatsData.forEach(city => {
-                if (city.coordinates && city.coordinates.length === 2) {
-                    L.circleMarker([city.coordinates[0], city.coordinates[1]], { 
-                        radius: Math.log(city.count) + 3, 
-                        fillColor: "var(--accent-color)", 
-                        color: "var(--text-primary)", 
-                        weight: 1.5, 
-                        opacity: 1, 
-                        fillOpacity: 0.7 
-                    }).addTo(cityMap).bindPopup(`<b>${city.name}</b><br>跑步次数: ${city.count}<br>总距离: ${city.distance} km`);
-                }
-            });
-        } else if (hash === 'events' && cityMap) {
-            cityMap.invalidateSize();
-        }
-      });
-    });
-
-    window.addEventListener('popstate', activateTabFromHash);
-    activateTabFromHash();
-    if (window.location.hash === '#marathon') { initMarathonView(); }
-    
-    document.querySelectorAll('.stat-card-flip-container').forEach(container => {
-        container.addEventListener('click', (event) => {
-            event.currentTarget.querySelector('.stat-card-flipper').classList.toggle('flipped');
         });
-    });
-
-    document.querySelectorAll('#chart-toggle .btn').forEach(button => {
-        button.addEventListener('click', function() {
-            document.querySelectorAll('#chart-toggle .btn').forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
-            const chartType = this.dataset.chart;
-            const containers = {
-                monthly: document.getElementById('monthlyChartContainer'),
-                daily: document.getElementById('dailyChartContainer'),
-                yearly: document.getElementById('yearlyChartContainer'),
-                'month-over-month': document.getElementById('monthOverMonthChartContainer'),
-                'yearly-dual-axis': document.getElementById('yearlyDualAxisChartContainer')
-            };
-            Object.values(containers).forEach(c => c.style.display = 'none');
-            containers[chartType].style.display = 'block';
+        document.getElementById('runDetailTagInput').addEventListener('keypress', async (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const input = document.getElementById('runDetailTagInput');
+                await addTag(input.value);
+                input.value = '';
+            }
         });
-    });        
-    
-    const dataPane = document.getElementById('data-pane');
-    if (dataPane) {
-        allRunRows = Array.from(document.querySelectorAll('#summary-table-body tr'));
-        const updateDataView = () => {
-            const minDist = parseFloat(document.querySelector('#data-dist-filter-toggle .active').dataset.dist);
-            const maxPace = parseFloat(document.querySelector('#data-pace-filter-toggle .active').dataset.pace);
-            const selectedCity = document.getElementById('data-city-filter').value;
-            const startDate = document.getElementById('date-filter-start').value;
-            const endDate = document.getElementById('date-filter-end').value;
-            const activeSortHeader = document.querySelector('.sortable-header[aria-sort]');
-            const sortProp = activeSortHeader ? activeSortHeader.dataset.sort : 'date';
-            const sortOrder = activeSortHeader ? activeSortHeader.getAttribute('aria-sort') : 'descending';
-            let filteredRows = allRunRows.filter(row => {
-                const isVisible = (parseFloat(row.dataset.distance) >= minDist) &&
-                                (parsePaceToSeconds(row.dataset.paceStr) <= maxPace) &&
-                                (selectedCity === 'all' || row.dataset.city === selectedCity) &&
-                                (!startDate || row.dataset.date >= startDate) &&
-                                (!endDate || row.dataset.date <= endDate);
-                row.style.display = isVisible ? '' : 'none';
-                return isVisible;
-            });
-     
-            filteredRows.sort((a, b) => {
-                let valA, valB;
-                if (sortProp === 'distance') { [valA, valB] = [parseFloat(a.dataset.distance), parseFloat(b.dataset.distance)]; } 
-                else if (sortProp === 'pace') { [valA, valB] = [(-1)*parsePaceToSeconds(a.dataset.paceStr), (-1)*parsePaceToSeconds(b.dataset.paceStr)]; } 
-                else { [valA, valB] = [a.dataset.date, b.dataset.date]; }
-                if (valA < valB) return sortOrder === 'ascending' ? -1 : 1;
-                if (valA > valB) return sortOrder === 'ascending' ? 1 : -1;
-                return 0;
-            });
-            document.getElementById('summary-table-body').append(...filteredRows);
+        document.getElementById('runDetailTagsContainer').addEventListener('click', (e) => {
+            if (e.target.matches('button.btn-close')) {
+                const index = parseInt(e.target.dataset.tagIndex, 10);
+                removeTag(index);
+            }
+        });
+        document.getElementById('suggestedTagsContainer').addEventListener('click', async (e) => {
+            if (e.target.matches('button')) {
+                const tagName = e.target.dataset.tagName;
+                await addTag(tagName);
+            }
+        });
+
+        document.getElementById('goto-data-tab')?.addEventListener('click', e => {
+            e.preventDefault();
+            const dataTab = document.getElementById('data-tab');
+            if (dataTab) {
+                bootstrap.Tab.getOrCreateInstance(dataTab).show();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+
+        let startX = 0, startY = 0;
+        const tabContent = document.querySelector('.tab-content');
+        const minSwipeDistance = 100;
+        
+        tabContent.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; }, { passive: true });
+        
+        tabContent.addEventListener('touchend', (e) => {
+          if (e.target.closest('#cityMap') || e.target.closest('.calendar-table')) return;
+          const endX = e.changedTouches[0].clientX;
+          const diffX = endX - startX;
+          if (Math.abs(diffX) > minSwipeDistance && Math.abs(diffX) > Math.abs(e.changedTouches[0].clientY - startY)) {
+            const activeTab = document.querySelector('#main-nav-tabs .nav-link.active');
+            const tabs = Array.from(document.querySelectorAll('#main-nav-tabs .nav-link'));
+            const currentIndex = tabs.indexOf(activeTab);
+            if (diffX > 0 && currentIndex > 0) {
+                bootstrap.Tab.getOrCreateInstance(tabs[currentIndex - 1]).show();
+            } else if (diffX < 0 && currentIndex < tabs.length - 1) {
+                bootstrap.Tab.getOrCreateInstance(tabs[currentIndex + 1]).show();
+            }
+          }
+        }, { passive: true });
+        
+        const activateTabFromHash = () => {
+          const hash = window.location.hash.substring(1);
+          if (hash) {
+            const tabTrigger = document.querySelector(`.nav-link[data-hash="${hash}"]`);
+            if (tabTrigger) { bootstrap.Tab.getOrCreateInstance(tabTrigger).show(); }
+          }
         };
         
-        const clearFilters = () => {
-            document.getElementById('date-filter-start').value = '';
-            document.getElementById('date-filter-end').value = '';
-            document.getElementById('data-city-filter').value = 'all';
-            
-            document.querySelector('#data-dist-filter-toggle .active').classList.remove('active');
-            document.querySelector('#data-dist-filter-toggle button[data-dist="0"]').classList.add('active');
+        document.querySelectorAll('#main-nav-tabs .nav-link').forEach(tabEl => {
+          tabEl.addEventListener('shown.bs.tab', event => {
+            const hash = event.target.dataset.hash;
+            if (hash) { history.pushState(null, '', '#' + hash); }
+            if (hash === 'marathon') { initMarathonView(); }
+            if (hash === 'events' && !cityMap) {
+                const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+                const tileUrl = isDark ? 
+                    'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png' :
+                    'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png';
 
-            document.querySelector('#data-pace-filter-toggle .active').classList.remove('active');
-            document.querySelector('#data-pace-filter-toggle button[data-pace="9999"]').classList.add('active');
+                cityMap = L.map('cityMap', { center: [36, 108], zoom: 4, zoomControl: false });
+                L.tileLayer(tileUrl, { attribution: '', subdomains: 'abcd', minZoom: 3, maxZoom: 18 }).addTo(cityMap);
+                cityMap.attributionControl.setPrefix('');
+                
+                cityStatsData.forEach(city => {
+                    if (city.coordinates && city.coordinates.length === 2) {
+                        L.circleMarker([city.coordinates[0], city.coordinates[1]], { 
+                            radius: Math.log(city.count) + 3, 
+                            fillColor: "var(--accent-color)", 
+                            color: "var(--text-primary)", 
+                            weight: 1.5, 
+                            opacity: 1, 
+                            fillOpacity: 0.7 
+                        }).addTo(cityMap).bindPopup(`<b>${city.name}</b><br>跑步次数: ${city.count}<br>总距离: ${city.distance} km`);
+                    }
+                });
+            } else if (hash === 'events' && cityMap) {
+                cityMap.invalidateSize();
+            }
+          });
+        });
+
+        window.addEventListener('popstate', activateTabFromHash);
+        activateTabFromHash();
+        if (window.location.hash === '#marathon') { initMarathonView(); }
+        
+        document.querySelectorAll('.stat-card-flip-container').forEach(container => {
+            container.addEventListener('click', (event) => {
+                event.currentTarget.querySelector('.stat-card-flipper').classList.toggle('flipped');
+            });
+        });
+
+        document.querySelectorAll('#chart-toggle .btn').forEach(button => {
+            button.addEventListener('click', function() {
+                document.querySelectorAll('#chart-toggle .btn').forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                const chartType = this.dataset.chart;
+                const containers = {
+                    monthly: document.getElementById('monthlyChartContainer'),
+                    daily: document.getElementById('dailyChartContainer'),
+                    yearly: document.getElementById('yearlyChartContainer'),
+                    'month-over-month': document.getElementById('monthOverMonthChartContainer'),
+                    'yearly-dual-axis': document.getElementById('yearlyDualAxisChartContainer')
+                };
+                Object.values(containers).forEach(c => c.style.display = 'none');
+                containers[chartType].style.display = 'block';
+            });
+        });        
+        
+        const dataPane = document.getElementById('data-pane');
+        if (dataPane) {
+            allRunRows = Array.from(document.querySelectorAll('#summary-table-body tr'));
+            const updateDataView = () => {
+                const minDist = parseFloat(document.querySelector('#data-dist-filter-toggle .active').dataset.dist);
+                const maxPace = parseFloat(document.querySelector('#data-pace-filter-toggle .active').dataset.pace);
+                const selectedCity = document.getElementById('data-city-filter').value;
+                const startDate = document.getElementById('date-filter-start').value;
+                const endDate = document.getElementById('date-filter-end').value;
+                const activeSortHeader = document.querySelector('.sortable-header[aria-sort]');
+                const sortProp = activeSortHeader ? activeSortHeader.dataset.sort : 'date';
+                const sortOrder = activeSortHeader ? activeSortHeader.getAttribute('aria-sort') : 'descending';
+                let filteredRows = allRunRows.filter(row => {
+                    const isVisible = (parseFloat(row.dataset.distance) >= minDist) &&
+                                    (parsePaceToSeconds(row.dataset.paceStr) <= maxPace) &&
+                                    (selectedCity === 'all' || row.dataset.city === selectedCity) &&
+                                    (!startDate || row.dataset.date >= startDate) &&
+                                    (!endDate || row.dataset.date <= endDate);
+                    row.style.display = isVisible ? '' : 'none';
+                    return isVisible;
+                });
+        
+                filteredRows.sort((a, b) => {
+                    let valA, valB;
+                    if (sortProp === 'distance') { [valA, valB] = [parseFloat(a.dataset.distance), parseFloat(b.dataset.distance)]; } 
+                    else if (sortProp === 'pace') { [valA, valB] = [(-1)*parsePaceToSeconds(a.dataset.paceStr), (-1)*parsePaceToSeconds(b.dataset.paceStr)]; } 
+                    else { [valA, valB] = [a.dataset.date, b.dataset.date]; }
+                    if (valA < valB) return sortOrder === 'ascending' ? -1 : 1;
+                    if (valA > valB) return sortOrder === 'ascending' ? 1 : -1;
+                    return 0;
+                });
+                document.getElementById('summary-table-body').append(...filteredRows);
+            };
+            
+            const clearFilters = () => {
+                document.getElementById('date-filter-start').value = '';
+                document.getElementById('date-filter-end').value = '';
+                document.getElementById('data-city-filter').value = 'all';
+                
+                document.querySelector('#data-dist-filter-toggle .active').classList.remove('active');
+                document.querySelector('#data-dist-filter-toggle button[data-dist="0"]').classList.add('active');
+
+                document.querySelector('#data-pace-filter-toggle .active').classList.remove('active');
+                document.querySelector('#data-pace-filter-toggle button[data-pace="9999"]').classList.add('active');
+
+                updateDataView();
+            };
+
+            document.getElementById('clear-filters-btn').addEventListener('click', clearFilters);
+
+            document.getElementById('data-view-toggle').addEventListener('click', (e) => {
+                if (!e.target.matches('button')) return;
+                document.querySelector('#data-view-toggle .active').classList.remove('active');
+                e.target.classList.add('active');
+                const isSummary = e.target.dataset.view === 'summary';
+                document.getElementById('summary-data-view').style.display = isSummary ? '' : 'none';
+                document.getElementById('yearly-data-view').style.display = isSummary ? 'none' : '';
+                document.getElementById('data-controls-collapse').classList.toggle('d-lg-block', isSummary);
+                document.getElementById('summary-controls-toggle').style.display = isSummary ? '' : 'none';
+                if(isSummary) updateDataView();
+            });
+
+            document.querySelectorAll('.sortable-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    const currentSort = header.getAttribute('aria-sort');
+                    let newSort = (currentSort === 'descending') ? 'ascending' : 'descending';
+                    document.querySelectorAll('.sortable-header').forEach(h => h.removeAttribute('aria-sort'));
+                    header.setAttribute('aria-sort', newSort);
+                    updateDataView();
+                });
+            });
+
+            [...document.querySelectorAll('#data-dist-filter-toggle, #data-pace-filter-toggle')].forEach(group => {
+                group.addEventListener('click', e => {
+                    if(e.target.tagName === 'BUTTON') {
+                        group.querySelector('.active').classList.remove('active');
+                        e.target.classList.add('active');
+                        updateDataView();
+                    }
+                });
+            });
+
+            ['data-city-filter', 'date-filter-start', 'date-filter-end'].forEach(id => {
+                document.getElementById(id).addEventListener('change', updateDataView);
+            });
 
             updateDataView();
-        };
+        }
 
-        document.getElementById('clear-filters-btn').addEventListener('click', clearFilters);
-
-        document.getElementById('data-view-toggle').addEventListener('click', (e) => {
-            if (!e.target.matches('button')) return;
-            document.querySelector('#data-view-toggle .active').classList.remove('active');
-            e.target.classList.add('active');
-            const isSummary = e.target.dataset.view === 'summary';
-            document.getElementById('summary-data-view').style.display = isSummary ? '' : 'none';
-            document.getElementById('yearly-data-view').style.display = isSummary ? 'none' : '';
-            document.getElementById('data-controls-collapse').classList.toggle('d-lg-block', isSummary);
-            document.getElementById('summary-controls-toggle').style.display = isSummary ? '' : 'none';
-            if(isSummary) updateDataView();
-        });
-
-        document.querySelectorAll('.sortable-header').forEach(header => {
-            header.addEventListener('click', () => {
-                const currentSort = header.getAttribute('aria-sort');
-                let newSort = (currentSort === 'descending') ? 'ascending' : 'descending';
-                document.querySelectorAll('.sortable-header').forEach(h => h.removeAttribute('aria-sort'));
-                header.setAttribute('aria-sort', newSort);
-                updateDataView();
+        const eventsPane = document.getElementById('events-pane');
+        if (eventsPane) {
+            eventsPane.querySelector('#events-view-toggle').addEventListener('click', (e) => {
+                if (!e.target.matches('button')) return;
+                eventsPane.querySelector('#events-view-toggle .active').classList.remove('active');
+                e.target.classList.add('active');
+                const isCategory = e.target.dataset.view === 'category';
+                eventsPane.querySelector('#events-category-view').style.display = isCategory ? '' : 'none';
+                eventsPane.querySelector('#events-timeline-view').style.display = isCategory ? 'none' : 'block';
             });
-        });
-
-        [...document.querySelectorAll('#data-dist-filter-toggle, #data-pace-filter-toggle')].forEach(group => {
-            group.addEventListener('click', e => {
-                if(e.target.tagName === 'BUTTON') {
-                    group.querySelector('.active').classList.remove('active');
-                    e.target.classList.add('active');
-                    updateDataView();
-                }
-            });
-        });
-
-        ['data-city-filter', 'date-filter-start', 'date-filter-end'].forEach(id => {
-            document.getElementById(id).addEventListener('change', updateDataView);
-        });
-
-        updateDataView();
-    }
-
-    const eventsPane = document.getElementById('events-pane');
-    if (eventsPane) {
-        eventsPane.querySelector('#events-view-toggle').addEventListener('click', (e) => {
-            if (!e.target.matches('button')) return;
-            eventsPane.querySelector('#events-view-toggle .active').classList.remove('active');
-            e.target.classList.add('active');
-            const isCategory = e.target.dataset.view === 'category';
-            eventsPane.querySelector('#events-category-view').style.display = isCategory ? '' : 'none';
-            eventsPane.querySelector('#events-timeline-view').style.display = isCategory ? 'none' : 'block';
-        });
-    }
-
-    function renderCommentList(container, comments) {
-        container.style.color = 'var(--text-primary)';
-        if (Array.isArray(comments) && comments.length > 0) {
-            container.innerHTML = comments.map(c => 
-                `<div class="border-bottom py-2" style="border-color: var(--border-color) !important;">
-                    <small class="text-secondary">${c.nickname || '🌱 匿名'} · ${new Date(c.ts).toLocaleString()}</small>
-                    <div class="mt-1" style="color: var(--text-primary);">${c.text}</div>
-                 </div>`
-            ).join('');
-        } else {
-             container.innerHTML = '<div class="text-secondary text-center py-2">暂无评论</div>';
         }
-    }
 
-    function decodePolyline(encoded) {
-        if (!encoded) return [];
-        let index = 0, len = encoded.length, lat = 0, lng = 0, array = [];
-        while (index < len) {
-            let b, shift = 0, result = 0;
-            do { b = encoded.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
-            let dlat = ((result & 1) ? ~(result >> 1) : (result >> 1)); lat += dlat;
-            shift = 0; result = 0;
-            do { b = encoded.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
-            let dlng = ((result & 1) ? ~(result >> 1) : (result >> 1)); lng += dlng;
-            array.push([lat * 1e-5, lng * 1e-5]);
-        }
-        return array;
-    }
-
-    async function refreshDetailComments(runId) {
-        const listContainer = document.getElementById('runDetailCommentList');
-        try {
-            const res = await fetch(`${commentApiBase}/comments?runId=${encodeURIComponent(runId)}`);
-            if(!res.ok) throw new Error("Failed to fetch comments");
-            const data = await res.json();
-            renderCommentList(listContainer, data);
-        } catch(e) {
-            listContainer.innerHTML = '<div class="text-danger">评论加载失败</div>';
-        }
-    }
-      
-    async function showRunDetailModal(runId, preloadedData = {}, scrollToComments = false) {
-        currentDetailRunId = runId;
-        const modalEl = document.getElementById('runDetailModal');
-        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-        
-        modal.show();
-
-        document.getElementById('detailTitle').textContent = `跑步详情: ${preloadedData.date}`;
-        document.getElementById('detailHeroDistance').querySelector('.distance-value').textContent = preloadedData.distanceFormatted || '--';
-        document.getElementById('detailDataGrid').innerHTML = `
-            <div class="col-4"><div class="data-point-value">${preloadedData.duration || '--'}</div><div class="data-point-label">训练时长</div></div>
-            <div class="col-4"><div class="data-point-value">${preloadedData.paceStr || '--'}</div><div class="data-point-label">平均配速</div></div>
-            <div class="col-4"><div class="data-point-value">${preloadedData.heartRate || '--'}</div><div class="data-point-label">平均心率</div></div>
-        `;
-        document.getElementById('viewRouteBtn').style.display = 'none';
-        document.getElementById('detailAnalysisSectionsLoading').style.display = 'block';
-        document.getElementById('detailAnalysisSections').style.display = 'none';
-        document.getElementById('detailLapsTableBody').innerHTML = '';
-        if(paceChart) paceChart.destroy();
-        if(elevationChart) elevationChart.destroy();
-        if(hrChart) hrChart.destroy();
-        
-        try {
-            const response = await fetch(`https://run.linwn.net/data/details/${runId}.json`);
-            if (!response.ok) throw new Error(`Could not load run data. Status: ${response.status}`);
-            const data = await response.json();
-            detailPhotoUrls = data.photos.map(p => p.url);
-            currentPolyline = data.route.encoded_polyline;
-
-            const carouselInner = document.querySelector('#runMediaCarousel .carousel-inner');
-            const carouselIndicators = document.querySelector('#runMediaCarousel .carousel-indicators');
-            carouselInner.innerHTML = '';
-            carouselIndicators.innerHTML = '';
-            if (detailMapInstance) {
-                detailMapInstance.remove();
-                detailMapInstance = null;
+        function renderCommentList(container, comments) {
+            container.style.color = 'var(--text-primary)';
+            if (Array.isArray(comments) && comments.length > 0) {
+                container.innerHTML = comments.map(c => 
+                    `<div class="border-bottom py-2" style="border-color: var(--border-color) !important;">
+                        <small class="text-secondary">${c.nickname || '🌱 匿名'} · ${new Date(c.ts).toLocaleString()}</small>
+                        <div class="mt-1" style="color: var(--text-primary);">${c.text}</div>
+                    </div>`
+                ).join('');
+            } else {
+                container.innerHTML = '<div class="text-secondary text-center py-2">暂无评论</div>';
             }
+        }
 
-            let activeSlideSet = false;
-            let slideIndex = 0;
-
-            if (currentPolyline) {
-                const mapItem = document.createElement('div');
-                mapItem.className = 'carousel-item';
-                mapItem.innerHTML = `<div id="detail-map-item" class="d-block w-100"></div>`;
-                carouselInner.appendChild(mapItem);
-                
-                carouselIndicators.innerHTML += `<button type="button" data-bs-target="#runMediaCarousel" data-bs-slide-to="${slideIndex}" class="text" aria-label="Slide ${slideIndex+1}">地图</button>`;
-                
-                if (!activeSlideSet) {
-                    mapItem.classList.add('active');
-                    carouselIndicators.querySelector('button').classList.add('active');
-                    activeSlideSet = true;
-                }
-                slideIndex++;
-
-                setTimeout(() => {
-                    const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
-                    const tileUrl = isDark ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-                    
-                    detailMapInstance = L.map('detail-map-item', { 
-                        attributionControl: false, 
-                        dragging: false, zoomControl: false, scrollWheelZoom: false, 
-                        doubleClickZoom: false, boxZoom: false, keyboard: false, 
-                        tap: false, touchZoom: false
-                    });
-                    
-                    L.tileLayer(tileUrl, { subdomains: 'abcd' }).addTo(detailMapInstance);
-                    const polyline = L.polyline(decodePolyline(currentPolyline), { color: getComputedStyle(document.documentElement).getPropertyValue('--accent-color'), weight: 4 }).addTo(detailMapInstance);
-                    detailMapInstance.fitBounds(polyline.getBounds().pad(0.1));
-                    detailMapInstance.invalidateSize();
-                }, 100); 
-
+        function decodePolyline(encoded) {
+            if (!encoded) return [];
+            let index = 0, len = encoded.length, lat = 0, lng = 0, array = [];
+            while (index < len) {
+                let b, shift = 0, result = 0;
+                do { b = encoded.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
+                let dlat = ((result & 1) ? ~(result >> 1) : (result >> 1)); lat += dlat;
+                shift = 0; result = 0;
+                do { b = encoded.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
+                let dlng = ((result & 1) ? ~(result >> 1) : (result >> 1)); lng += dlng;
+                array.push([lat * 1e-5, lng * 1e-5]);
             }
+            return array;
+        }
 
-            if (data.photos && data.photos.length > 0) {
-                data.photos.forEach((photo, index) => {
-                    const photoItem = document.createElement('div');
-                    photoItem.className = 'carousel-item';
-                    photoItem.innerHTML = `<img src="${photo.url}" class="d-block w-100 gallery-item" alt="跑步照片" data-photo-index="${index}">`;
-                    carouselInner.appendChild(photoItem);
+        async function refreshDetailComments(runId) {
+            const listContainer = document.getElementById('runDetailCommentList');
+            try {
+                const res = await fetch(`${commentApiBase}/comments?runId=${encodeURIComponent(runId)}`);
+                if(!res.ok) throw new Error("Failed to fetch comments");
+                const data = await res.json();
+                renderCommentList(listContainer, data);
+            } catch(e) {
+                listContainer.innerHTML = '<div class="text-danger">评论加载失败</div>';
+            }
+        }
+        
+        async function showRunDetailModal(runId, preloadedData = {}, scrollToComments = false) {
+            currentDetailRunId = runId;
+            const modalEl = document.getElementById('runDetailModal');
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            
+            modal.show();
+
+            document.getElementById('detailTitle').textContent = `跑步详情: ${preloadedData.date}`;
+            document.getElementById('detailHeroDistance').querySelector('.distance-value').textContent = preloadedData.distanceFormatted || '--';
+            document.getElementById('detailDataGrid').innerHTML = `
+                <div class="col-4"><div class="data-point-value">${preloadedData.duration || '--'}</div><div class="data-point-label">训练时长</div></div>
+                <div class="col-4"><div class="data-point-value">${preloadedData.paceStr || '--'}</div><div class="data-point-label">平均配速</div></div>
+                <div class="col-4"><div class="data-point-value">${preloadedData.heartRate || '--'}</div><div class="data-point-label">平均心率</div></div>
+            `;
+            document.getElementById('viewRouteBtn').style.display = 'none';
+            document.getElementById('detailAnalysisSectionsLoading').style.display = 'block';
+            document.getElementById('detailAnalysisSections').style.display = 'none';
+            document.getElementById('detailLapsTableBody').innerHTML = '';
+            if(paceChart) paceChart.destroy();
+            if(elevationChart) elevationChart.destroy();
+            if(hrChart) hrChart.destroy();
+            
+            try {
+                const response = await fetch(`https://run.linwn.net/data/details/${runId}.json`);
+                if (!response.ok) throw new Error(`Could not load run data. Status: ${response.status}`);
+                const data = await response.json();
+                detailPhotoUrls = data.photos.map(p => p.url);
+                currentPolyline = data.route.encoded_polyline;
+
+                const carouselInner = document.querySelector('#runMediaCarousel .carousel-inner');
+                const carouselIndicators = document.querySelector('#runMediaCarousel .carousel-indicators');
+                carouselInner.innerHTML = '';
+                carouselIndicators.innerHTML = '';
+                if (detailMapInstance) {
+                    detailMapInstance.remove();
+                    detailMapInstance = null;
+                }
+
+                let activeSlideSet = false;
+                let slideIndex = 0;
+
+                if (currentPolyline) {
+                    const mapItem = document.createElement('div');
+                    mapItem.className = 'carousel-item';
+                    mapItem.innerHTML = `<div id="detail-map-item" class="d-block w-100"></div>`;
+                    carouselInner.appendChild(mapItem);
                     
-                    carouselIndicators.innerHTML += `<button type="button" data-bs-target="#runMediaCarousel" data-bs-slide-to="${slideIndex}" class="" aria-label="Slide ${slideIndex+1}"></button>`;
+                    carouselIndicators.innerHTML += `<button type="button" data-bs-target="#runMediaCarousel" data-bs-slide-to="${slideIndex}" class="text" aria-label="Slide ${slideIndex+1}">地图</button>`;
                     
                     if (!activeSlideSet) {
-                        photoItem.classList.add('active');
-                        carouselIndicators.querySelector(`button[data-bs-slide-to="${slideIndex}"]`).classList.add('active');
+                        mapItem.classList.add('active');
+                        carouselIndicators.querySelector('button').classList.add('active');
                         activeSlideSet = true;
                     }
                     slideIndex++;
-                });
-            }
 
-            if (slideIndex === 0) {
-                document.getElementById('runMediaCarousel').style.display = 'none';
-            } else {
-                 document.getElementById('runMediaCarousel').style.display = 'block';
-            }
+                    setTimeout(() => {
+                        const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+                        const tileUrl = isDark ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+                        
+                        detailMapInstance = L.map('detail-map-item', { 
+                            attributionControl: false, 
+                            dragging: false, zoomControl: false, scrollWheelZoom: false, 
+                            doubleClickZoom: false, boxZoom: false, keyboard: false, 
+                            tap: false, touchZoom: false
+                        });
+                        
+                        L.tileLayer(tileUrl, { subdomains: 'abcd' }).addTo(detailMapInstance);
+                        const polyline = L.polyline(decodePolyline(currentPolyline), { color: getComputedStyle(document.documentElement).getPropertyValue('--accent-color'), weight: 4 }).addTo(detailMapInstance);
+                        detailMapInstance.fitBounds(polyline.getBounds().pad(0.1));
+                        detailMapInstance.invalidateSize();
+                    }, 100); 
 
-            document.getElementById('viewRouteBtn').style.display = currentPolyline ? 'block' : 'none';
-            
-            let weatherString = '';
-            if(data.weather) {
-              weatherString = `${data.weather.temperature_c}°C, ${data.weather.condition}`;
-              if(data.weather.wind_speed_kmh) {
-                weatherString += ` | 风速: ${data.weather.wind_speed_kmh} km/h`;
-              }
-            }
-            document.getElementById('detailWeather').textContent = weatherString;
-            
-            const lapsBody = document.getElementById('detailLapsTableBody');
-            if (data.laps && data.laps.length > 0) {
-                lapsBody.innerHTML = data.laps.map(lap => {
-                    let displayDuration = lap.duration;
-                    if (displayDuration && displayDuration.startsWith('00:')) {
-                        displayDuration = displayDuration.substring(3);
-                    }
-                    return `<tr>
-                        <td>${lap.lap_number}</td>
-                        <td>${displayDuration}</td>
-                        <td>${lap.distance_km} km</td>
-                        <td>${lap.pace}</td>
-                        <td>${lap.avg_hr || 'N/A'}</td>
-                        <td>${lap.avg_cadence || 'N/A'}</td>
-                    </tr>`
-                }).join('');
-            }
+                }
 
-            document.getElementById('detailAvgPace').textContent = data.summary.avg_pace || '--';
-            document.getElementById('detailBestPace').textContent = data.summary.best_pace || '--';
-            document.getElementById('detailAvgHr').textContent = data.summary.avg_hr || '--';
-            document.getElementById('detailMaxHr').textContent = data.summary.max_hr || '--';
-            
-            const colors = getChartColors();
-            const chartOptions = { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false }, ticks: { color: colors.tickColor } }, y: { grid: { color: colors.gridColor }, ticks: { color: colors.tickColor } } }, plugins: { legend: { display: false } } };
-            
-            if (data.charts.pace?.labels.length) {
-                const avgPaceSeconds = parsePaceToSeconds(data.summary.avg_pace);
-                const paceCtx = document.getElementById('paceChart').getContext('2d');
-                paceChart = new Chart(paceCtx, { 
-                    type: 'line', 
-                    data: { labels: data.charts.pace.labels, datasets: [{ data: data.charts.pace.data, borderColor: colors.accentColor, borderWidth: 2, pointRadius: 0, fill: false, tension: 0.1 }] }, 
-                    options: { ...chartOptions, scales: { ...chartOptions.scales, y: { ...chartOptions.scales.y, reverse: true, ticks: { ...chartOptions.scales.y.ticks, callback: (value) => formatPaceFromSeconds(value) } } },
-                    plugins: { ...chartOptions.plugins, annotation: { annotations: { avgLine: { type: 'line', yMin: avgPaceSeconds, yMax: avgPaceSeconds, borderColor: colors.annotationColor, borderWidth: 1.5, borderDash: [6, 6] } } } }
-                    } 
-                });
-            }
-            if (data.charts.hr?.labels.length) {
-                const avgHr = data.summary.avg_hr;
-                const hrCtx = document.getElementById('hrChart').getContext('2d');
-                hrChart = new Chart(hrCtx, { 
-                    type: 'line', 
-                    data: { labels: data.charts.hr.labels, datasets: [{ data: data.charts.hr.data, borderColor: '#ff6b6b', borderWidth: 2, pointRadius: 0, fill: false, tension: 0.1 }] }, 
-                    options: { ...chartOptions, 
-                        plugins: { ...chartOptions.plugins, annotation: { annotations: { avgLine: { type: 'line', yMin: avgHr, yMax: avgHr, borderColor: colors.annotationColor, borderWidth: 1.5, borderDash: [6, 6] } } } }
-                    }
-                });
-            }
-            if (data.charts.elevation?.labels.length) {
-                const elevationCtx = document.getElementById('elevationChart').getContext('2d');
-                elevationChart = new Chart(elevationCtx, { type: 'line', data: { labels: data.charts.elevation.labels, datasets: [{ data: data.charts.elevation.data, borderColor: colors.accentColor, borderWidth: 2, pointRadius: 0, fill: { target: 'origin', above: `${colors.accentColor}33` } , tension: 0.1 }] }, options: chartOptions });
-            }
-            document.getElementById('detailAnalysisSectionsLoading').style.display = 'none';
-            document.getElementById('detailAnalysisSections').style.display = 'block';
-            await loadRunTags(runId);
-            renderSuggestedTags();
-            await refreshDetailComments(runId);
-            
-            if (scrollToComments) {
-                document.getElementById('runDetailComments').scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
+                if (data.photos && data.photos.length > 0) {
+                    data.photos.forEach((photo, index) => {
+                        const photoItem = document.createElement('div');
+                        photoItem.className = 'carousel-item';
+                        photoItem.innerHTML = `<img src="${photo.url}" class="d-block w-100 gallery-item" alt="跑步照片" data-photo-index="${index}">`;
+                        carouselInner.appendChild(photoItem);
+                        
+                        carouselIndicators.innerHTML += `<button type="button" data-bs-target="#runMediaCarousel" data-bs-slide-to="${slideIndex}" class="" aria-label="Slide ${slideIndex+1}"></button>`;
+                        
+                        if (!activeSlideSet) {
+                            photoItem.classList.add('active');
+                            carouselIndicators.querySelector(`button[data-bs-slide-to="${slideIndex}"]`).classList.add('active');
+                            activeSlideSet = true;
+                        }
+                        slideIndex++;
+                    });
+                }
 
-        } catch (error) {
-            console.error("Error loading run detail:", error);
-            document.getElementById('detailAnalysisSectionsLoading').style.display = 'none';
-            currentPolyline = null;
+                if (slideIndex === 0) {
+                    document.getElementById('runMediaCarousel').style.display = 'none';
+                } else {
+                    document.getElementById('runMediaCarousel').style.display = 'block';
+                }
+
+                document.getElementById('viewRouteBtn').style.display = currentPolyline ? 'block' : 'none';
+                
+                let weatherString = '';
+                if(data.weather) {
+                weatherString = `${data.weather.temperature_c}°C, ${data.weather.condition}`;
+                if(data.weather.wind_speed_kmh) {
+                    weatherString += ` | 风速: ${data.weather.wind_speed_kmh} km/h`;
+                }
+                }
+                document.getElementById('detailWeather').textContent = weatherString;
+                
+                const lapsBody = document.getElementById('detailLapsTableBody');
+                if (data.laps && data.laps.length > 0) {
+                    lapsBody.innerHTML = data.laps.map(lap => {
+                        let displayDuration = lap.duration;
+                        if (displayDuration && displayDuration.startsWith('00:')) {
+                            displayDuration = displayDuration.substring(3);
+                        }
+                        return `<tr>
+                            <td>${lap.lap_number}</td>
+                            <td>${displayDuration}</td>
+                            <td>${lap.distance_km} km</td>
+                            <td>${lap.pace}</td>
+                            <td>${lap.avg_hr || 'N/A'}</td>
+                            <td>${lap.avg_cadence || 'N/A'}</td>
+                        </tr>`
+                    }).join('');
+                }
+
+                document.getElementById('detailAvgPace').textContent = data.summary.avg_pace || '--';
+                document.getElementById('detailBestPace').textContent = data.summary.best_pace || '--';
+                document.getElementById('detailAvgHr').textContent = data.summary.avg_hr || '--';
+                document.getElementById('detailMaxHr').textContent = data.summary.max_hr || '--';
+                
+                const colors = getChartColors();
+                const chartOptions = { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false }, ticks: { color: colors.tickColor } }, y: { grid: { color: colors.gridColor }, ticks: { color: colors.tickColor } } }, plugins: { legend: { display: false } } };
+                
+                if (data.charts.pace?.labels.length) {
+                    const avgPaceSeconds = parsePaceToSeconds(data.summary.avg_pace);
+                    const paceCtx = document.getElementById('paceChart').getContext('2d');
+                    paceChart = new Chart(paceCtx, { 
+                        type: 'line', 
+                        data: { labels: data.charts.pace.labels, datasets: [{ data: data.charts.pace.data, borderColor: colors.accentColor, borderWidth: 2, pointRadius: 0, fill: false, tension: 0.1 }] }, 
+                        options: { ...chartOptions, scales: { ...chartOptions.scales, y: { ...chartOptions.scales.y, reverse: true, ticks: { ...chartOptions.scales.y.ticks, callback: (value) => formatPaceFromSeconds(value) } } },
+                        plugins: { ...chartOptions.plugins, annotation: { annotations: { avgLine: { type: 'line', yMin: avgPaceSeconds, yMax: avgPaceSeconds, borderColor: colors.annotationColor, borderWidth: 1.5, borderDash: [6, 6] } } } }
+                        } 
+                    });
+                }
+                if (data.charts.hr?.labels.length) {
+                    const avgHr = data.summary.avg_hr;
+                    const hrCtx = document.getElementById('hrChart').getContext('2d');
+                    hrChart = new Chart(hrCtx, { 
+                        type: 'line', 
+                        data: { labels: data.charts.hr.labels, datasets: [{ data: data.charts.hr.data, borderColor: '#ff6b6b', borderWidth: 2, pointRadius: 0, fill: false, tension: 0.1 }] }, 
+                        options: { ...chartOptions, 
+                            plugins: { ...chartOptions.plugins, annotation: { annotations: { avgLine: { type: 'line', yMin: avgHr, yMax: avgHr, borderColor: colors.annotationColor, borderWidth: 1.5, borderDash: [6, 6] } } } }
+                        }
+                    });
+                }
+                if (data.charts.elevation?.labels.length) {
+                    const elevationCtx = document.getElementById('elevationChart').getContext('2d');
+                    elevationChart = new Chart(elevationCtx, { type: 'line', data: { labels: data.charts.elevation.labels, datasets: [{ data: data.charts.elevation.data, borderColor: colors.accentColor, borderWidth: 2, pointRadius: 0, fill: { target: 'origin', above: `${colors.accentColor}33` } , tension: 0.1 }] }, options: chartOptions });
+                }
+                document.getElementById('detailAnalysisSectionsLoading').style.display = 'none';
+                document.getElementById('detailAnalysisSections').style.display = 'block';
+                await loadRunTags(runId);
+                renderSuggestedTags();
+                await refreshDetailComments(runId);
+                
+                if (scrollToComments) {
+                    document.getElementById('runDetailComments').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+
+            } catch (error) {
+                console.error("Error loading run detail:", error);
+                document.getElementById('detailAnalysisSectionsLoading').style.display = 'none';
+                currentPolyline = null;
+            }
         }
-    }
-    
-    document.getElementById('submitRunDetailComment').addEventListener('click', async () => {
-        const runId = currentDetailRunId;
-        const text = document.getElementById('runDetailCommentText').value.trim();
-        if (!text || !runId) return;
         
-        const profile = JSON.parse(localStorage.getItem('run_profile')) || generateRandomProfile();
-        const nicknameForComment = `${profile.icon} ${profile.nickname}`;
-        
-        const res = await fetch(`${commentApiBase}/comment`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ runId, text, nickname: nicknameForComment }) });
-        if (res.ok) {
-            document.getElementById('runDetailCommentText').value = '';
-            await refreshDetailComments(runId);
-            const countEl = document.querySelector(`.comment-count[data-run-id="${runId}"]`);
-            if(countEl) countEl.textContent = parseInt(countEl.textContent, 10) + 1;
-        } else {
-            alert('提交失败');
-        } 
-  });
-    
-    document.addEventListener('click', async e => {
-        const runRow = e.target.closest('.run-detail-row');
-        const recentCard = e.target.closest('.recent-run-card');
-
-        if (runRow) {
-            e.preventDefault();
-            const preloadedData = {
-                distanceFormatted: runRow.dataset.distanceFormatted,
-                duration: runRow.dataset.duration,
-                paceStr: runRow.dataset.paceStr,
-                date: runRow.dataset.date,
-                heartRate: runRow.dataset.heartRate,
-            };          
-            showRunDetailModal(runRow.dataset.runId, preloadedData, false);
-        } else if (recentCard) {
-            e.preventDefault();
-            const preloadedData = {
-                distanceFormatted: recentCard.dataset.distanceFormatted,
-                duration: recentCard.dataset.duration,
-                paceStr: recentCard.dataset.paceStr,
-                date: recentCard.dataset.date,
-                heartRate: recentCard.dataset.heartRate,
-            };          
-            const isCommentLink = e.target.closest('.comment-link');
-            showRunDetailModal(recentCard.dataset.runId, preloadedData, !!isCommentLink);
-        } else if (e.target.classList.contains('gallery-item')) {
-            const index = parseInt(e.target.dataset.photoIndex, 10);
-            if (!isNaN(index)) { openMediaGallery(detailPhotoUrls, index); }
-        }
-    });
-
-    const detailModalEl = document.getElementById('runDetailModal');
-    let gestureStartX = 0;
-    let gestureIsEligible = false;
-    const gestureThreshold = 50;
-    const gestureMinSwipe = 100;
-
-    detailModalEl.addEventListener('touchstart', e => {
-        if (e.touches.length !== 1 || e.target.closest('.carousel')) {
-            gestureIsEligible = false;
-            return;
-        }
-        gestureStartX = e.touches[0].clientX;
-        gestureIsEligible = gestureStartX < gestureThreshold;
-    }, {passive: true});
-
-    detailModalEl.addEventListener('touchend', e => {
-        if (!gestureIsEligible || e.changedTouches.length !== 1) return;
-        const endX = e.changedTouches[0].clientX;
-        const diffX = endX - gestureStartX;
-        if (diffX > gestureMinSwipe) {
-            bootstrap.Modal.getInstance(detailModalEl).hide();
-        }
-        gestureIsEligible = false;
-    }, {passive: true});
-    
-    document.getElementById('viewRouteBtn').addEventListener('click', () => {
-        bootstrap.Modal.getOrCreateInstance(document.getElementById('routeMapModal')).show();
-    });
-
-    document.getElementById('routeMapModal').addEventListener('shown.bs.modal', () => {
-        if (!modalMapInstance) {
-            const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
-            const tileUrl = isDark ? 
-                'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' :
-                'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-            modalMapInstance = L.map('routeMap', { attributionControl: false, zoomControl: true });
-            L.tileLayer(tileUrl, { subdomains: 'abcd' }).addTo(modalMapInstance);
-        }
-        if (currentPolyline) {
-            const polyline = L.polyline(decodePolyline(currentPolyline), { color: getComputedStyle(document.documentElement).getPropertyValue('--accent-color'), weight: 4 }).addTo(modalMapInstance);
-            modalMapInstance.fitBounds(polyline.getBounds().pad(0.1));
-        }
-        setTimeout(() => modalMapInstance.invalidateSize(), 10);
-    });
-
-    const calendarEditorModalEl = document.getElementById('calendarEditorModal');
-    const calendarEditorModal = bootstrap.Modal.getOrCreateInstance(calendarEditorModalEl);
-    const calendarForm = document.getElementById('calendarEventForm');
-    const editorList = document.getElementById('calendarEditorList');
-    
-    let editorEvents = [];
-
-    document.getElementById('editCalendarBtn').addEventListener('click', () => {
-        editorEvents = JSON.parse(JSON.stringify(marathonEventsCache)); 
-        renderCalendarEditor();
-        calendarEditorModal.show();
-    });
-
-    function renderCalendarEditor() {
-        editorList.innerHTML = '';
-        if (editorEvents.length === 0) {
-            editorList.innerHTML = '<p class="text-secondary">暂无赛事</p>';
-            return;
-        }
-        editorEvents.sort((a,b) => new Date(a.date) - new Date(b.date)).forEach((event, index) => {
-            const secondaryDateInfo = event.secondary_date ? `<br><small class="text-info">${event.secondary_date}</small>` : '';
-            editorList.innerHTML += `
-            <div class="list-group-item d-flex justify-content-between align-items-center">
-                <div>
-                    <strong>${event.name}</strong> (${event.category})<br>
-                    <small class="text-secondary">${event.date} - ${event.status}</small>
-                    ${secondaryDateInfo}
-                </div>
-                <div>
-                    <button class="btn btn-sm btn-outline-primary me-2" onclick="editCalendarEvent(${index})"><i class="bi bi-pencil-fill"></i></button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="deleteCalendarEvent(${index})"><i class="bi bi-trash-fill"></i></button>
-                </div>
-            </div>`;
-        });
-    }
-
-    window.editCalendarEvent = (index) => {
-        const event = editorEvents[index];
-        document.getElementById('event-id').value = index;
-        document.getElementById('event-date').value = event.date;
-        document.getElementById('event-name').value = event.name;
-        document.getElementById('event-category').value = event.category;
-        document.getElementById('event-status').value = event.status;
-        document.getElementById('event-secondary-date').value = event.secondary_date || '';
-        document.getElementById('calendarFormTitle').textContent = '编辑赛事';
-        document.getElementById('cancelEditBtn').style.display = 'inline-block';
-        document.getElementById('event-status').dispatchEvent(new Event('change'));
-    }
-
-    window.deleteCalendarEvent = (index) => {
-        if(confirm('确定要删除这项赛事吗?')) {
-            editorEvents.splice(index, 1);
-            renderCalendarEditor();
-        }
-    }
-    
-    document.getElementById('event-status').addEventListener('change', (e) => {
-        const status = e.target.value;
-        const wrapper = document.getElementById('secondary-date-wrapper');
-        const label = document.getElementById('event-secondary-date-label');
-        if (status === '待报名') {
-            label.textContent = '报名截止日期';
-            wrapper.style.display = 'block';
-        } else if (status === '待抽签') {
-            label.textContent = '抽签公布日期';
-            wrapper.style.display = 'block';
-        } else {
-            wrapper.style.display = 'none';
-        }
-    });
-
-    document.getElementById('cancelEditBtn').addEventListener('click', () => {
-        calendarForm.reset();
-        document.getElementById('event-id').value = '';
-        document.getElementById('calendarFormTitle').textContent = '添加新赛事';
-        document.getElementById('cancelEditBtn').style.display = 'none';
-        document.getElementById('secondary-date-wrapper').style.display = 'none';
-    });
-
-    calendarForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const eventData = {
-            date: document.getElementById('event-date').value,
-            name: document.getElementById('event-name').value,
-            category: document.getElementById('event-category').value,
-            status: document.getElementById('event-status').value,
-            secondary_date: document.getElementById('event-secondary-date').value || null
-        };
-        const eventId = document.getElementById('event-id').value;
-
-        if (eventId !== '') { 
-            editorEvents[parseInt(eventId)] = eventData;
-        } else { 
-            editorEvents.push(eventData);
-        }
-        renderCalendarEditor();
-        calendarForm.reset();
-        document.getElementById('cancelEditBtn').click();
-    });
-    
-    document.getElementById('saveAllCalendarChanges').addEventListener('click', async () => {
-        const secret = prompt("请输入管理员密钥:");
-        if (!secret) return;
-
-        try {
-            const res = await fetch(`${commentApiBase}/marathon-events`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ events: editorEvents, secret: secret })
-            });
+        document.getElementById('submitRunDetailComment').addEventListener('click', async () => {
+            const runId = currentDetailRunId;
+            const text = document.getElementById('runDetailCommentText').value.trim();
+            if (!text || !runId) return;
+            
+            const profile = JSON.parse(localStorage.getItem('run_profile')) || generateRandomProfile();
+            const nicknameForComment = `${profile.icon} ${profile.nickname}`;
+            
+            const res = await fetch(`${commentApiBase}/comment`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ runId, text, nickname: nicknameForComment }) });
             if (res.ok) {
-                alert('赛历已成功更新!');
-                calendarEditorModal.hide();
-                await generateMarathonCalendar();
+                document.getElementById('runDetailCommentText').value = '';
+                await refreshDetailComments(runId);
+                const countEl = document.querySelector(`.comment-count[data-run-id="${runId}"]`);
+                if(countEl) countEl.textContent = parseInt(countEl.textContent, 10) + 1;
             } else {
-                const error = await res.json();
-                alert(`保存失败: ${error.error}`);
+                alert('提交失败');
+            } 
+        });
+        
+        document.addEventListener('click', async e => {
+            const runRow = e.target.closest('.run-detail-row');
+            const recentCard = e.target.closest('.recent-run-card');
+
+            if (runRow) {
+                e.preventDefault();
+                const preloadedData = {
+                    distanceFormatted: runRow.dataset.distanceFormatted,
+                    duration: runRow.dataset.duration,
+                    paceStr: runRow.dataset.paceStr,
+                    date: runRow.dataset.date,
+                    heartRate: runRow.dataset.heartRate,
+                };          
+                showRunDetailModal(runRow.dataset.runId, preloadedData, false);
+            } else if (recentCard) {
+                e.preventDefault();
+                const preloadedData = {
+                    distanceFormatted: recentCard.dataset.distanceFormatted,
+                    duration: recentCard.dataset.duration,
+                    paceStr: recentCard.dataset.paceStr,
+                    date: recentCard.dataset.date,
+                    heartRate: recentCard.dataset.heartRate,
+                };          
+                const isCommentLink = e.target.closest('.comment-link');
+                showRunDetailModal(recentCard.dataset.runId, preloadedData, !!isCommentLink);
+            } else if (e.target.classList.contains('gallery-item')) {
+                const index = parseInt(e.target.dataset.photoIndex, 10);
+                if (!isNaN(index)) { openMediaGallery(detailPhotoUrls, index); }
             }
-        } catch (e) {
-            alert(`发生网络错误: ${e.message}`);
+        });
+
+        const detailModalEl = document.getElementById('runDetailModal');
+        let gestureStartX = 0;
+        let gestureIsEligible = false;
+        const gestureThreshold = 50;
+        const gestureMinSwipe = 100;
+
+        detailModalEl.addEventListener('touchstart', e => {
+            if (e.touches.length !== 1 || e.target.closest('.carousel')) {
+                gestureIsEligible = false;
+                return;
+            }
+            gestureStartX = e.touches[0].clientX;
+            gestureIsEligible = gestureStartX < gestureThreshold;
+        }, {passive: true});
+
+        detailModalEl.addEventListener('touchend', e => {
+            if (!gestureIsEligible || e.changedTouches.length !== 1) return;
+            const endX = e.changedTouches[0].clientX;
+            const diffX = endX - gestureStartX;
+            if (diffX > gestureMinSwipe) {
+                bootstrap.Modal.getInstance(detailModalEl).hide();
+            }
+            gestureIsEligible = false;
+        }, {passive: true});
+        
+        document.getElementById('viewRouteBtn').addEventListener('click', () => {
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('routeMapModal')).show();
+        });
+
+        document.getElementById('routeMapModal').addEventListener('shown.bs.modal', () => {
+            if (!modalMapInstance) {
+                const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+                const tileUrl = isDark ? 
+                    'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' :
+                    'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+                modalMapInstance = L.map('routeMap', { attributionControl: false, zoomControl: true });
+                L.tileLayer(tileUrl, { subdomains: 'abcd' }).addTo(modalMapInstance);
+            }
+            if (currentPolyline) {
+                const polyline = L.polyline(decodePolyline(currentPolyline), { color: getComputedStyle(document.documentElement).getPropertyValue('--accent-color'), weight: 4 }).addTo(modalMapInstance);
+                modalMapInstance.fitBounds(polyline.getBounds().pad(0.1));
+            }
+            setTimeout(() => modalMapInstance.invalidateSize(), 10);
+        });
+
+        const calendarEditorModalEl = document.getElementById('calendarEditorModal');
+        const calendarEditorModal = bootstrap.Modal.getOrCreateInstance(calendarEditorModalEl);
+        const calendarForm = document.getElementById('calendarEventForm');
+        const editorList = document.getElementById('calendarEditorList');
+        
+        let editorEvents = [];
+
+        document.getElementById('editCalendarBtn').addEventListener('click', () => {
+            editorEvents = JSON.parse(JSON.stringify(marathonEventsCache)); 
+            renderCalendarEditor();
+            calendarEditorModal.show();
+        });
+
+        function renderCalendarEditor() {
+            editorList.innerHTML = '';
+            if (editorEvents.length === 0) {
+                editorList.innerHTML = '<p class="text-secondary">暂无赛事</p>';
+                return;
+            }
+            editorEvents.sort((a,b) => new Date(a.date) - new Date(b.date)).forEach((event, index) => {
+                const secondaryDateInfo = event.secondary_date ? `<br><small class="text-info">${event.secondary_date}</small>` : '';
+                editorList.innerHTML += `
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>${event.name}</strong> (${event.category})<br>
+                        <small class="text-secondary">${event.date} - ${event.status}</small>
+                        ${secondaryDateInfo}
+                    </div>
+                    <div>
+                        <button class="btn btn-sm btn-outline-primary me-2" onclick="editCalendarEvent(${index})"><i class="bi bi-pencil-fill"></i></button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteCalendarEvent(${index})"><i class="bi bi-trash-fill"></i></button>
+                    </div>
+                </div>`;
+            });
         }
-    });
+
+        window.editCalendarEvent = (index) => {
+            const event = editorEvents[index];
+            document.getElementById('event-id').value = index;
+
+            document.getElementById('event-name').value = event.name;
+            document.getElementById('event-category').value = event.category;
+            document.getElementById('event-status').value = event.status;
+
+            document.getElementById('event-date').value = event.date;
+            document.getElementById('event-reg-start').value = event.registration_start || '';
+            document.getElementById('event-reg-end').value = event.registration_end || '';
+            document.getElementById('event-lottery-date').value = event.lottery_date || '';
+            
+            document.getElementById('calendarFormTitle').textContent = '编辑赛事';
+            document.getElementById('cancelEditBtn').style.display = 'inline-block';
+        }
+
+        window.deleteCalendarEvent = (index) => {
+            if(confirm('确定要删除这项赛事吗?')) {
+                editorEvents.splice(index, 1);
+                renderCalendarEditor();
+            }
+        }
+        
+        document.getElementById('cancelEditBtn').addEventListener('click', () => {
+            calendarForm.reset();
+            document.getElementById('event-id').value = '';
+            document.getElementById('calendarFormTitle').textContent = '添加新赛事';
+            document.getElementById('cancelEditBtn').style.display = 'none';
+        });
+
+        calendarForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const eventData = {
+                id: document.getElementById('event-id').value || `evt_${new Date().getTime()}`,
+                name: document.getElementById('event-name').value,
+                category: document.getElementById('event-category').value,
+                status: document.getElementById('event-status').value,
+                date: document.getElementById('event-date').value,
+                registration_start: document.getElementById('event-reg-start').value || null,
+                registration_end: document.getElementById('event-reg-end').value || null,
+                lottery_date: document.getElementById('event-lottery-date').value || null
+            };
+            const eventId = document.getElementById('event-id').value;
+
+            if (eventId !== '') { 
+                const index = editorEvents.findIndex(evt => evt.id == eventId);
+                if (index > -1) editorEvents[index] = eventData;
+            } else { 
+                editorEvents.push(eventData);
+            }
+            renderCalendarEditor();
+            calendarForm.reset();
+            document.getElementById('cancelEditBtn').click();
+        });
+        
+        document.getElementById('saveAllCalendarChanges').addEventListener('click', async () => {
+            const secret = prompt("请输入管理员密钥:");
+            if (!secret) return;
+
+            try {
+                const res = await fetch(`${commentApiBase}/marathon-events`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ events: editorEvents, secret: secret })
+                });
+                if (res.ok) {
+                    alert('赛历已成功更新!');
+                    calendarEditorModal.hide();
+                    await generateMarathonCalendar();
+                } else {
+                    const error = await res.json();
+                    alert(`保存失败: ${error.error}`);
+                }
+            } catch (e) {
+                alert(`发生网络错误: ${e.message}`);
+            }
+        });
 
 
-    window.addEventListener('beforeunload', () => {
-      destroyAllCharts();
-      if(paceChart) paceChart.destroy();
-      if(elevationChart) elevationChart.destroy();
-      if(hrChart) hrChart.destroy();
-      if(cityMap) cityMap.remove();
-      if(modalMapInstance) modalMapInstance.remove();
-      if(detailMapInstance) detailMapInstance.remove();
-      if(countdownInterval) clearInterval(countdownInterval);
+        window.addEventListener('beforeunload', () => {
+          destroyAllCharts();
+          if(paceChart) paceChart.destroy();
+          if(elevationChart) elevationChart.destroy();
+          if(hrChart) hrChart.destroy();
+          if(cityMap) cityMap.remove();
+          if(modalMapInstance) modalMapInstance.remove();
+          if(detailMapInstance) detailMapInstance.remove();
+          if(countdownInterval) clearInterval(countdownInterval);
+        });
     });
-});
 </script>
 </html>
