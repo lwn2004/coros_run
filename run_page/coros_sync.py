@@ -352,10 +352,10 @@ def get_weather_data(lat, lon, timestamp):
         except (KeyError, IndexError) as e:
             print(f"Error parsing Forecast API data: {e}")
     return None
-def find_non_archive_weather_fit_ids(folder_path):
+def find_non_archive_fit_ids(folder_path):
     """
     Scans all JSON files in a folder and returns a list of fit_ids
-    where weather.type is not 'archive_api'.
+    where weather.type is not 'archive_api' OR weather is missing.
     """
     fit_ids = []
     for filename in os.listdir(folder_path):
@@ -365,9 +365,11 @@ def find_non_archive_weather_fit_ids(folder_path):
         try:
             with open(file_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
-            # Check weather type
-            if data.get("weather", {}).get("type") != "archive_api":
-                fit_ids.append(data.get("fit_id"))
+            fit_id = data.get("fit_id")
+            # collect if weather is missing or type is not 'archive_api'
+            weather = data.get("weather")
+            if weather is None or weather.get("type") != "archive_api":
+                fit_ids.append(fit_id)
         except Exception as e:
             print(f"Skipping {filename}: {e}")
     return fit_ids
