@@ -570,11 +570,7 @@ def parse_fit_file(fit_file_path):
             "pace": pace_chart_data,
             "elevation": elevation_chart_data,
             "hr": hr_chart_data
-        },
-        "photos": [
-            {"url": f"https://picsum.photos/seed/{run_id}_a/600/400"},
-            {"url": f"https://picsum.photos/seed/{run_id}_b/600/400"}
-        ]
+        }
     }
     return run_detail
 def parse_fit_file_garmin_sdk(fit_file_path):
