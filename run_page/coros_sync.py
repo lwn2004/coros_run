@@ -352,7 +352,7 @@ def get_weather_data(lat, lon, timestamp):
         except (KeyError, IndexError) as e:
             print(f"Error parsing Forecast API data: {e}")
     return None
-def find_non_archive_fit_ids(folder_path):
+def find_non_archive_weather_fit_ids(folder_path):
     """
     Scans all JSON files in a folder and returns a list of fit_ids
     where weather.type is not 'archive_api' OR weather is missing.
