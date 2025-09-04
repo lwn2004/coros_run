@@ -800,13 +800,5 @@
             ]
         }
     },
-    "photos": [
-        {
-            "url": "https://picsum.photos/seed/1746919734000_a/600/400"
-        },
-        {
-            "url": "https://picsum.photos/seed/1746919734000_b/600/400"
-        }
-    ],
     "fit_id": "468935306297507866"
 }

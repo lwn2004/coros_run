@@ -1,7 +1,12 @@
 {
     "run_id": 1725489345000,
     "start_time": "2024-09-04T22:35:45+00:00",
-    "weather": null,
+    "weather": {
+        "type": "archive_api",
+        "temperature_c": 26.8,
+        "condition": "阴天 ☁️",
+        "wind_speed_kmh": 10.4
+    },
     "route": {
         "encoded_polyline": "u_zkCerjrT@@@@@BB@B@@BBBB@BDBBB@BB@@B@BB@@B@@@BB@BB@@B@@B@B@@?B@@@B@B?BBB@D@B@BBB@BB@B@B?B?D@B?D?B?B?BA@?BA?A?C?AAC?CAEACCCACAECCACCCACCCAACCACACAC?CACAA?CAC?CAA?CAC?CACACAC?CCCCAECCACCCACCCAACCAACACAEACAC?EACAEACACAC?CCCAEACACACCCAECACCCACAC?CAC?E?CACAEACACCCACACCCAACCCAACCCCCACACCCAEACACCEACCCACACCAACCCCACACAC?CACACACACAC?CACACAA?C@E?C@CBC@CBC@ABCBCBCBCBABCBCBCBC@ABC@CBC@C@C@C@C@C@C@C@CBC@ABCBABCBCBABCBCBC@ABCBCBABCBABCBABCBC@CBC@CBC@C@CBC@E@CBC@C@C@CBA@C@C@CBC@CBC@CBA@C@C@ABC@C@C@A@C@C@E@CBC@C@EBC@ABC@CBC@CBC@CBC@CBC@A@CBABC@ABABCBA@CBA@C@ABC@ABC@ABC?A@A?A?AAC?CCEAEA"
     },
@@ -921,13 +926,5 @@
             ]
         }
     },
-    "photos": [
-        {
-            "url": "https://picsum.photos/seed/1725489345000_a/600/400"
-        },
-        {
-            "url": "https://picsum.photos/seed/1725489345000_b/600/400"
-        }
-    ],
     "fit_id": "463183970058665988"
 }

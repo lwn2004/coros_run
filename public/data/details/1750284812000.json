@@ -1004,13 +1004,5 @@
             ]
         }
     },
-    "photos": [
-        {
-            "url": "https://picsum.photos/seed/1750284812000_a/600/400"
-        },
-        {
-            "url": "https://picsum.photos/seed/1750284812000_b/600/400"
-        }
-    ],
     "fit_id": "469839521201029143"
 }
