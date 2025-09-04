@@ -179,14 +179,15 @@ async def download_and_generate(account, password):
     print(f"Download finished. Elapsed {time.time()-start_time} seconds")
     await coros.req.aclose()
     make_activities_file(SQL_FILE, FIT_FOLDER, JSON_FILE, "fit", json_file2 = JSON_FILE2)
-
-    for label_id in to_generate_coros_ids: #sorted(downloaded_ids, key=int, reverse=True):##['471348054109225065', '471374084024861075', '471416369590599881', '471439763470057774']: # #
+    fitids_need_reprocess = find_non_archive_weather_fit_ids(details_folder)
+    for label_id in sorted(downloaded_ids, key=int, reverse=True): #to_generate_coros_ids + fitids_need_reprocess: ##['471348054109225065', '471374084024861075', '471416369590599881', '471439763470057774']: # #
       fit_path = os.path.join(folder, f"{label_id}.fit")
       print(f"Parsing fit file: {label_id}")
       run_data = parse_fit_file_garmin_sdk(fit_path)
   
       if run_data:
         json_id = run_data['run_id']
+        run_data['fit_id'] = label_id
         output_filename = os.path.join(details_folder, f"{json_id}.json")
         with open(output_filename, 'w', encoding='utf-8') as f:
             json.dump(run_data, f, indent=4, ensure_ascii=False)
@@ -259,68 +260,117 @@ def smooth_elevation_data(records, window_size=7):
     for i, record in enumerate(records):
         record['altitude'] = smoothed_altitudes[i]
 def get_weather_data(lat, lon, timestamp):
-    """Fetches historical weather, with a fallback to the forecast API for recent data."""
+    """
+    Fetches historical weather, falling back to the forecast API if the archive
+    data is incomplete, contains null values for the specific hour, or for very recent timestamps.
+    """
     if lat is None or lon is None or timestamp is None:
         return None
     
     dt_utc = timestamp.replace(tzinfo=timezone.utc)
     date_str = dt_utc.strftime("%Y-%m-%d")
-
-    # 1. First, try the Archive API (best for data older than a few hours)
-    archive_api_url = (
-        f"https://archive-api.open-meteo.com/v1/archive?latitude={lat:.4f}&longitude={lon:.4f}"
-        f"&start_date={date_str}&end_date={date_str}"
-        f"&hourly=temperature_2m,weathercode,windspeed_10m"
-    )
+    
+    # --- 1. First, try the Archive API ---
     try:
+        archive_api_url = (
+            f"https://archive-api.open-meteo.com/v1/archive?latitude={lat:.4f}&longitude={lon:.4f}"
+            f"&start_date={date_str}&end_date={date_str}"
+            f"&hourly=temperature_2m,weathercode,windspeed_10m"
+        )
         res = requests.get(archive_api_url, timeout=10)
         res.raise_for_status()
         data = res.json()
-        #print(json.dumps(data, indent=4, sort_keys=True))
-        if data.get('hourly') and data['hourly'].get('time'):
+
+        # Check if the API returned a valid 'hourly' dictionary
+        if data.get('hourly') and data['hourly'].get('time') and len(data['hourly']['time']) == 24:
             hour_index = dt_utc.hour
+            
+            # --- CORRECTED LOGIC ---
+            # Extract data for the specific hour first
             temp = data['hourly']['temperature_2m'][hour_index]
             code = data['hourly']['weathercode'][hour_index]
             wind_kmh = data['hourly']['windspeed_10m'][hour_index]
-            condition, icon = WMO_CODE_MAP_ZH.get(code, ("Unknown", ""))
-            print("Successfully fetched weather from Archive API.")
-            return {
-                "temperature_c": temp,
-                "condition": f"{condition} {icon}",
-                "wind_speed_kmh": wind_kmh
-            }
-    except Exception as e:
-        print(f"Archive API failed for {date_str}: {e}. Will try Forecast API as a fallback.")
 
-    # 2. Fallback to Forecast API for recent dates (within the last 5 days)
-    if (datetime.now(timezone.utc) - dt_utc).days < 5:
-        print("Date is recent, attempting Forecast API fallback...")
-        forecast_api_url = (
-            f"https://api.open-meteo.com/v1/forecast?latitude={lat:.4f}&longitude={lon:.4f}"
-            f"&hourly=temperature_2m,weathercode,windspeed_10m&past_days=5"
-        )
-        try:
-            res = requests.get(forecast_api_url, timeout=10)
-            res.raise_for_status()
-            data = res.json()
-            # Find the matching timestamp in the forecast data
-            target_iso_time = dt_utc.strftime("%Y-%m-%dT%H:00")
-            if target_iso_time in data['hourly']['time']:
-                idx = data['hourly']['time'].index(target_iso_time)
-                temp = data['hourly']['temperature_2m'][idx]
-                code = data['hourly']['weathercode'][idx]
-                wind_kmh = data['hourly']['windspeed_10m'][idx]
+            # NEW: Check if any of the crucial data points are null
+            if all(v is not None for v in [temp, code, wind_kmh]):
+                # This block only runs if all data points for the hour are valid
                 condition, icon = WMO_CODE_MAP_ZH.get(code, ("Unknown", ""))
-                print("Successfully fetched weather from Forecast API fallback.")
+                
+                print(f"Successfully fetched weather for {date_str} from Archive API.")
                 return {
+                    "type": "archive_api",
                     "temperature_c": temp,
                     "condition": f"{condition} {icon}",
                     "wind_speed_kmh": wind_kmh
                 }
-        except Exception as e:
+            else:
+                # This is the new fallback trigger for null data
+                print(f"Archive API returned null data for hour {hour_index}. Trying Forecast API.")
+        else:
+            # Fallback for incomplete day data (less than 24 hours)
+            print(f"Archive API returned incomplete day data for {date_str}. Trying Forecast API.")
+
+    except requests.exceptions.RequestException as e:
+        print(f"Archive API request failed for {date_str}: {e}. Trying Forecast API.")
+    except (KeyError, IndexError) as e:
+        print(f"Error parsing Archive API data for {date_str}: {e}. Trying Forecast API.")
+
+    # --- 2. Fallback to Forecast API ---
+    # This block now runs if the Archive API fails, is incomplete, or has null data for the specific hour.
+    if (datetime.now(timezone.utc) - dt_utc).days < 5:
+        print("Attempting Forecast API fallback...")
+        try:
+            forecast_api_url = (
+                f"https://api.open-meteo.com/v1/forecast?latitude={lat:.4f}&longitude={lon:.4f}"
+                f"&hourly=temperature_2m,weathercode,windspeed_10m&past_days=5"
+            )
+            res = requests.get(forecast_api_url, timeout=10)
+            res.raise_for_status()
+            data = res.json()
+
+            target_iso_time = dt_utc.strftime("%Y-%m-%dT%H:00")
+            if 'hourly' in data and 'time' in data['hourly'] and target_iso_time in data['hourly']['time']:
+                idx = data['hourly']['time'].index(target_iso_time)
+                temp = data['hourly']['temperature_2m'][idx]
+                code = data['hourly']['weathercode'][idx]
+                wind_kmh = data['hourly']['windspeed_10m'][idx]
+                
+                condition, icon = WMO_CODE_MAP_ZH.get(code, ("Unknown", ""))
+
+                print("Successfully fetched weather from Forecast API fallback.")
+                return {
+                    "type": "forecast_api",
+                    "temperature_c": temp,
+                    "condition": f"{condition} {icon}",
+                    "wind_speed_kmh": wind_kmh
+                }
+            else:
+                print(f"Timestamp {target_iso_time} not found in Forecast API response.")
+
+        except requests.exceptions.RequestException as e:
             print(f"Forecast API fallback also failed: {e}")
-            
+        except (KeyError, IndexError) as e:
+            print(f"Error parsing Forecast API data: {e}")
     return None
+def find_non_archive_weather_fit_ids(folder_path):
+    """
+    Scans all JSON files in a folder and returns a list of fit_ids
+    where weather.type is not 'archive_api'.
+    """
+    fit_ids = []
+    for filename in os.listdir(folder_path):
+        if not filename.endswith(".json"):
+            continue
+        file_path = os.path.join(folder_path, filename)
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            # Check weather type
+            if data.get("weather", {}).get("type") != "archive_api":
+                fit_ids.append(data.get("fit_id"))
+        except Exception as e:
+            print(f"Skipping {filename}: {e}")
+    return fit_ids
 
 def downsample_records(records, target_points):
     """Downsamples a list of record dictionaries with correct pace/speed averaging."""
