@@ -2803,7 +2803,10 @@ async function generateMarathonCalendar() {
                 
                 let weatherString = '';
                 if(data.weather) {
-                weatherString = `${data.weather.temperature_c}°C, ${data.weather.condition}`;
+                if(data.weather.type && data.weather.type == 'forcast_api'){
+                  weatherString = '[预] ';
+                }
+                weatherString += `${data.weather.temperature_c}°C, ${data.weather.condition}`;
                 if(data.weather.wind_speed_kmh) {
                     weatherString += ` | 风速: ${data.weather.wind_speed_kmh} km/h`;
 
