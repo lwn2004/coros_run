@@ -180,7 +180,7 @@ async def download_and_generate(account, password):
     await coros.req.aclose()
     make_activities_file(SQL_FILE, FIT_FOLDER, JSON_FILE, "fit", json_file2 = JSON_FILE2)
     fitids_need_reprocess = find_non_archive_weather_fit_ids(details_folder)
-    for label_id in sorted(downloaded_ids, key=int, reverse=True): #to_generate_coros_ids + fitids_need_reprocess: ##['471348054109225065', '471374084024861075', '471416369590599881', '471439763470057774']: # #
+    for label_id in to_generate_coros_ids + fitids_need_reprocess: #sorted(downloaded_ids, key=int, reverse=True): ##['471348054109225065', '471374084024861075', '471416369590599881', '471439763470057774']: # #
       fit_path = os.path.join(folder, f"{label_id}.fit")
       print(f"Parsing fit file: {label_id}")
       run_data = parse_fit_file_garmin_sdk(fit_path)
