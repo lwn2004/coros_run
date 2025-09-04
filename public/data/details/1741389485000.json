@@ -2,6 +2,7 @@
     "run_id": 1741389485000,
     "start_time": "2025-03-07T23:18:05+00:00",
     "weather": {
+        "type": "archive_api",
         "temperature_c": 10.0,
         "condition": "大部晴朗 🌤️",
         "wind_speed_kmh": 6.5
@@ -1056,5 +1057,6 @@
         {
             "url": "https://picsum.photos/seed/1741389485000_b/600/400"
         }
-    ]
+    ],
+    "fit_id": "467451911304413189"
 }

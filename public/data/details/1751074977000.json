@@ -1,7 +1,12 @@
 {
     "run_id": 1751074977000,
     "start_time": "2025-06-28T01:42:57+00:00",
-    "weather": null,
+    "weather": {
+        "type": "archive_api",
+        "temperature_c": 25.8,
+        "condition": "中雨 🌧️",
+        "wind_speed_kmh": 13.2
+    },
     "route": {
         "encoded_polyline": "k_{kC}rgrT@A@?@CBA@A@ABABABADADCBADADABADABCDABABADCBABABCBABCBC@CBC@EBC@CBE@CBC@CBCBC@CBCBCBC@ABCBCBCBCBCBC@CBABCBCBCBCBCBC@CBABCBCBC@CBCBCBCBCBC@CBCBCBC@CBCBCBC@CBCBC@CBC@CBCBC@CBCBCBC@CBCBCBCBCBCBEBCBCBABCBCBCBCBA@CBCBC@ABCBC@CBCBCBCBC@CBCBC@A@CBC@C"
     },
@@ -762,5 +767,6 @@
         {
             "url": "https://picsum.photos/seed/1751074977000_b/600/400"
         }
-    ]
+    ],
+    "fit_id": "470051259062190104"
 }

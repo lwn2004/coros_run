@@ -2,6 +2,7 @@
     "run_id": 1716712327000,
     "start_time": "2024-05-26T08:32:07+00:00",
     "weather": {
+        "type": "archive_api",
         "temperature_c": 30.2,
         "condition": "小毛毛雨 💧",
         "wind_speed_kmh": 19.2
@@ -970,5 +971,6 @@
         {
             "url": "https://picsum.photos/seed/1716712327000_b/600/400"
         }
-    ]
+    ],
+    "fit_id": "460827147827707907"
 }
