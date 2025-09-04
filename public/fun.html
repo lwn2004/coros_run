@@ -15347,7 +15347,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-09-04 15:11:53 
+         | Last updated: 2025-09-04 15:21:22 
     </small>
 </footer>
 
@@ -16656,7 +16656,10 @@ async function generateMarathonCalendar() {
                 
                 let weatherString = '';
                 if(data.weather) {
-                weatherString = `${data.weather.temperature_c}°C, ${data.weather.condition}`;
+                if(data.weather.type && data.weather.type == 'forcast_api'){
+                  weatherString = '[预] ';
+                }
+                weatherString += `${data.weather.temperature_c}°C, ${data.weather.condition}`;
                 if(data.weather.wind_speed_kmh) {
                     weatherString += ` | 风速: ${data.weather.wind_speed_kmh} km/h`;
 
