@@ -1143,7 +1143,11 @@
         </div>
     </div>
     <div class="tab-pane fade" id="marathon-pane" role="tabpanel" aria-labelledby="marathon-tab" tabindex="0">
-        <div class="d-flex justify-content-end mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="btn-group btn-group-sm" id="marathon-view-toggle" role="group">
+                <button type="button" class="btn active" data-view="calendar">日历模式</button>
+                <button type="button" class="btn" data-view="list">列表模式</button>
+            </div>
             <button id="editCalendarBtn" class="btn btn-sm" style="display: none;"><i class="bi bi-pencil-square"></i> 编辑赛历</button>
         </div>
         <div id="race-countdown-container" class="content-card text-center mb-4" style="display: none; border-color: var(--accent-color);">
@@ -1157,8 +1161,12 @@
             </div>
             <p id="countdown-race-date" class="text-body-secondary small mb-0">YYYY-MM-DD</p>
         </div>
-        <div id="marathon-calendar-container">
-            </div>
+        <div id="marathon-calendar-view">
+            <div id="marathon-calendar-container"></div>
+        </div>
+        <div id="marathon-list-view" style="display: none;">
+            <div id="marathon-list-container"></div>
+        </div>
     </div>
     <div class="tab-pane fade" id="events-pane" role="tabpanel" aria-labelledby="events-tab" tabindex="0">
         <div class="d-flex justify-content-end mb-4">
@@ -1811,7 +1819,8 @@
             const diff = targetDate - currentTime;
             if (diff <= 0) {
                 clearInterval(countdownInterval);
-                countdownContainer.innerHTML = `<h5 class="card-title my-3">${nextRace.name} 比赛进行中！</h5>`;
+                // Automatically find and start countdown for the next race
+                setTimeout(initializeRaceCountdown, 2000);
                 return;
             }
             const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -1826,6 +1835,48 @@
         updateCountdown();
         countdownInterval = setInterval(updateCountdown, 1000);
     }
+    async function generateMarathonList() {
+        const container = document.getElementById('marathon-list-container');
+        if (!container) return;
+        if (marathonEventsCache.length === 0) {
+            container.innerHTML = '<div class="content-card text-center text-body-secondary">暂无赛事计划</div>';
+            return;
+        }
+        const sortedEvents = [...marathonEventsCache].sort((a, b) => new Date(b.date) - new Date(a.date));
+        const statusBadges = {
+            '待比赛': 'text-bg-success',
+            '已完赛': 'text-bg-secondary',
+            '待抽签': 'text-bg-primary',
+            '未中签': 'text-bg-danger',
+            '待报名': 'text-bg-info',
+        };
+        container.innerHTML = sortedEvents.map(event => `
+            <div class="content-card mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="mb-0 fw-bold">${event.name} <small class="text-body-secondary fw-normal">(${event.category})</small></h6>
+                    <span class="badge ${statusBadges[event.status] || 'text-bg-light'}">${event.status}</span>
+                </div>
+                <hr class="my-2" style="border-color: var(--border-color) !important; opacity: 0.5;">
+                <div class="row g-2 small">
+                    <div class="col-sm-4">
+                        <i class="bi bi-flag-fill me-1" style="color:var(--marathon-color);"></i>
+                        <strong>比赛日期:</strong>
+                        <span class="text-body-secondary ms-1">${event.date || '待定'}</span>
+                    </div>
+                    <div class="col-sm-4">
+                        <i class="bi bi-pencil-square me-1" style="color:var(--accent-color);"></i>
+                        <strong>报名时段:</strong>
+                        <span class="text-body-secondary ms-1">${(event.registration_start && event.registration_end) ? `${event.registration_start} ~ ${event.registration_end}` : '待定'}</span>
+                    </div>
+                    <div class="col-sm-4">
+                        <i class="bi bi-ticket-detailed-fill me-1" style="color:var(--success-color);"></i>
+                        <strong>出签日期:</strong>
+                        <span class="text-body-secondary ms-1">${event.lottery_date || 'N/A'}</span>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
     async function generateMarathonCalendar() {
         const container = document.getElementById('marathon-calendar-container');
         if (!container) return;
@@ -1837,6 +1888,7 @@
                 marathonEventsCache = await response.json();
             }
             initializeRaceCountdown();
+            await generateMarathonList(); // Also generate list view data
         } catch (error) {
             console.error("Could not fetch marathon data:", error);
             container.innerHTML = '<div class="content-card text-center text-danger">无法加载赛历数据，请稍后重试。</div>';
@@ -2368,6 +2420,17 @@
                 const isCategory = e.target.dataset.view === 'category';
                 eventsPane.querySelector('#events-category-view').style.display = isCategory ? '' : 'none';
                 eventsPane.querySelector('#events-timeline-view').style.display = isCategory ? 'none' : 'block';
+            });
+        }
+        const marathonPane = document.getElementById('marathon-pane');
+        if (marathonPane) {
+            marathonPane.querySelector('#marathon-view-toggle').addEventListener('click', (e) => {
+                if (!e.target.matches('button')) return;
+                marathonPane.querySelector('#marathon-view-toggle .active').classList.remove('active');
+                e.target.classList.add('active');
+                const isCalendar = e.target.dataset.view === 'calendar';
+                document.getElementById('marathon-calendar-view').style.display = isCalendar ? 'block' : 'none';
+                document.getElementById('marathon-list-view').style.display = isCalendar ? 'none' : 'block';
             });
         }
         function renderCommentList(container, comments) {
