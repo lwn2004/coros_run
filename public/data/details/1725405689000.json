@@ -1,7 +1,12 @@
 {
     "run_id": 1725405689000,
     "start_time": "2024-09-03T23:21:29+00:00",
-    "weather": null,
+    "weather": {
+        "type": "archive_api",
+        "temperature_c": 26.2,
+        "condition": "局部多云 ⛅️",
+        "wind_speed_kmh": 5.9
+    },
     "route": {
         "encoded_polyline": "mkykCoejrTB?B@B?@@@?@@A??@??C?AACCACCCCACCEACCEACAE?CAC?CACAAACACAAACAAAAACAC?ACCAACAACEACACCCCCCCEAECCCECCCCACCECCACCAACCCACCCCACCCAACCCACACACACAE?EAC?EAEAECEACCEAECCAECCC?AACAA@A@C@CBC@C@C@C@E@E@E@E@C@E@C@E@C@E?C@C@E@CBC@E@C@C@E@C@C@CBE@C@CBE@E@E@C@GBI"
     },
