@@ -525,8 +525,8 @@
       transform: translateX(-50%);
       width: auto;
       min-width: 150%;
-      padding: 0.2rem;
-      background-color: var(--hover-bg);
+      padding: 0.5rem;
+      background-color: var(--card-bg);
       border: 1px solid var(--accent-color);
       border-radius: 6px;
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
@@ -1593,6 +1593,19 @@
                             <input type="text" class="form-control form-control-sm" id="event-category" required>
                         </div>
                         <div class="col-md">
+                            <label for="event-level" class="form-label">赛事等级</label>
+                            <select class="form-select form-select-sm" id="event-level">
+                                <option value="普通赛事" selected>普通赛事</option>
+                                <option value="世界田联白金标">世界田联白金标</option>
+                                <option value="世界田联金标">世界田联金标</option>
+                                <option value="世界田联精英标">世界田联精英标</option>
+                                <option value="中国田协A1">中国田协A1</option>
+                                <option value="中国田协A2">中国田协A2</option>
+                                <option value="中国田协B">中国田协B</option>
+								<option value="中国田协C">中国田协C</option>
+                            </select>
+                        </div>
+                        <div class="col-md">
                             <label for="event-status" class="form-label">状态</label>
                             <select class="form-select form-select-sm" id="event-status" required>
                                 <option value="待报名">待报名</option>
@@ -1842,7 +1855,7 @@
             container.innerHTML = '<div class="content-card text-center text-body-secondary">暂无赛事计划</div>';
             return;
         }
-        const sortedEvents = [...marathonEventsCache].sort((a, b) => new Date(b.date) - new Date(a.date));
+        const sortedEvents = [...marathonEventsCache].sort((a, b) => new Date(a.date) - new Date(b.date));
         const statusBadges = {
             '待比赛': 'text-bg-success',
             '已完赛': 'text-bg-secondary',
@@ -1850,10 +1863,14 @@
             '未中签': 'text-bg-danger',
             '待报名': 'text-bg-info',
         };
-        container.innerHTML = sortedEvents.map(event => `
+        container.innerHTML = sortedEvents.map(event => {
+            const levelBadge = (event.level && event.level !== '普通赛事') 
+                ? `<span class="badge rounded-pill text-bg-warning ms-2" style="font-size: 0.7em; vertical-align: middle;">${event.level}</span>` 
+                : '';
+            return `
             <div class="content-card mb-3">
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h6 class="mb-0 fw-bold">${event.name} <small class="text-body-secondary fw-normal">(${event.category})</small></h6>
+                    <h6 class="mb-0 fw-bold">${event.name} <small class="text-body-secondary fw-normal">(${event.category})</small>${levelBadge}</h6>
                     <span class="badge ${statusBadges[event.status] || 'text-bg-light'}">${event.status}</span>
                 </div>
                 <hr class="my-2" style="border-color: var(--border-color) !important; opacity: 0.5;">
@@ -1874,8 +1891,9 @@
                         <span class="text-body-secondary ms-1">${event.lottery_date || 'N/A'}</span>
                     </div>
                 </div>
-            </div>
-        `).join('');
+
+            </div>`;
+        }).join('');
     }
     async function generateMarathonCalendar() {
         const container = document.getElementById('marathon-calendar-container');
@@ -1960,6 +1978,7 @@
                                 let typeText = '';
                                 let eventTitleClass = '';
                                 let eventTitleAfterIcon = '';
+                                const levelInfo = (event.level && event.level !== '普通赛事') ? `<div class="popup-event-type" style="color: var(--trophy-color);">${event.level}</div>` : '';
                                 if(event.status === '待比赛') {
                                   eventTitleClass = 'text-success';
                                   eventTitleAfterIcon = '<i class="bi bi-person-walking"></i>';
@@ -1977,6 +1996,7 @@
                                 tbodyHtml += `<div class="popup-event-item">`;
                                 tbodyHtml += `<span class="popup-event-title ${eventTitleClass}">${event.name} ${eventTitleAfterIcon}</span>`;
                                 tbodyHtml += `<span class="popup-event-type">${typeText}</span>`;
+                                tbodyHtml += levelInfo;
                                 tbodyHtml += `</div>`;
                             });
                             tbodyHtml += '</div>';
@@ -2750,6 +2770,7 @@
             document.getElementById('event-name').value = event.name;
             document.getElementById('event-category').value = event.category;
             document.getElementById('event-status').value = event.status;
+            document.getElementById('event-level').value = event.level || '普通赛事';
             document.getElementById('event-date').value = event.date;
             document.getElementById('event-reg-start').value = event.registration_start || '';
             document.getElementById('event-reg-end').value = event.registration_end || '';
@@ -2777,6 +2798,7 @@
                 name: document.getElementById('event-name').value,
                 category: document.getElementById('event-category').value,
                 status: document.getElementById('event-status').value,
+                level: document.getElementById('event-level').value,
                 date: document.getElementById('event-date').value,
                 registration_start: document.getElementById('event-reg-start').value || null,
                 registration_end: document.getElementById('event-reg-end').value || null,
