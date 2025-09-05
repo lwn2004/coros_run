@@ -826,10 +826,10 @@
                         <div class="stat-card-content">
                           <div>
                             <div class="stat-label">继续坚持</div>
-                            <div class="stat-value">16年173天</div>
+                            <div class="stat-value">16年204天</div>
                           </div>
                           <div class="stat-details">
-                            <div class="stat-label"><small class="small-muted">预计</small>2042年02月21日<small>绕地球一圈</small></div>
+                            <div class="stat-label"><small class="small-muted">预计</small>2042年03月24日<small>绕地球一圈</small></div>
                           </div>
                         </div>
                       </div>
@@ -15232,7 +15232,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-09-05 14:15:55 
+         | Last updated: 2025-09-05 15:32:47 
     </small>
 </footer>
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
@@ -15782,6 +15782,12 @@
                             tbodyHtml += '<div class="day-popup-details">';
                             eventsOnThisDay.forEach(event => {
                                 let typeText = '';
+                                let eventTitleClass = '';
+                                let eventTitleAfterIcon = '';
+                                if(event.status === '待比赛') {
+                                  eventTitleClass = 'text-success';
+                                  eventTitleAfterIcon = '<i class="bi bi-person-walking"></i>';
+                                }                              
                                 switch(event.type) {
                                     case 'race': typeText = '比赛日'; break;
                                     case 'registration_start': 
@@ -15793,7 +15799,7 @@
                                     case 'lottery': typeText = '出签日'; break;
                                 }
                                 tbodyHtml += `<div class="popup-event-item">`;
-                                tbodyHtml += `<span class="popup-event-title">${event.name}</span>`;
+                                tbodyHtml += `<span class="popup-event-title ${eventTitleClass}">${event.name} ${eventTitleAfterIcon}</span>`;
                                 tbodyHtml += `<span class="popup-event-type">${typeText}</span>`;
                                 tbodyHtml += `</div>`;
                             });
