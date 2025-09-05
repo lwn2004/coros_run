@@ -2477,7 +2477,7 @@
                 document.getElementById('viewRouteBtn').style.display = currentPolyline ? 'block' : 'none';
                 let weatherString = '';
                 if(data.weather) {
-                if(data.weather.type && data.weather.type == 'forcast_api'){
+                if(data.weather.type && data.weather.type == 'forecast_api'){
                   weatherString = '[预] ';
                 }
                 weatherString += `${data.weather.temperature_c}°C, ${data.weather.condition}`;
