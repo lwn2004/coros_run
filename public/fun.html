@@ -15229,7 +15229,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-09-05 12:17:15 
+         | Last updated: 2025-09-05 13:10:21 
     </small>
 </footer>
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
@@ -15778,10 +15778,10 @@
                                 switch(event.type) {
                                     case 'race': typeText = '比赛日'; break;
                                     case 'registration_start': 
-                                        typeText = '报名开始';
+                                        typeText = '报名开始' + `<small class="small-muted">${event.registration_start} ~ ${event.registration_end}</small>`;
                                         break;
                                     case 'registration_end': 
-                                        typeText = '报名截止';
+                                        typeText = '报名截止' + `<small class="small-muted">${event.registration_start} ~ ${event.registration_end}</small>`;
                                         break;                                    
                                     case 'lottery': typeText = '出签日'; break;
                                 }
