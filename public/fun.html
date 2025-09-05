@@ -15229,7 +15229,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-09-05 12:05:23 
+         | Last updated: 2025-09-05 12:17:15 
     </small>
 </footer>
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
@@ -15461,9 +15461,7 @@
                             <label for="event-status" class="form-label">状态</label>
                             <select class="form-select form-select-sm" id="event-status" required>
                                 <option value="待报名">待报名</option>
-                                <option value="报名中">报名中</option>
                                 <option value="待抽签">待抽签</option>
-                                <option value="已中签">已中签</option>
                                 <option value="未中签">未中签</option>
                                 <option value="待比赛">待比赛</option>
                                 <option value="已完赛">已完赛</option>
@@ -15762,7 +15760,7 @@
                         const currentDateStr = `${year}-${String(month).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
                         const eventsOnThisDay = eventsByDate[currentDateStr] || [];
                         let cellClass = '';
-                        if (eventsOnThisDay.some(e => e.status === '已中签')) {
+                        if (eventsOnThisDay.some(e => e.status === '待比赛')) {
                             cellClass += ' lottery-win';
                         }
                         tbodyHtml += `<td class="${cellClass}">`;
