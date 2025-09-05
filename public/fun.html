@@ -15229,7 +15229,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-09-05 10:34:16 
+         | Last updated: 2025-09-05 12:05:23 
     </small>
 </footer>
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
@@ -15771,7 +15771,7 @@
                             const uniqueEventTypes = [...new Set(eventsOnThisDay.map(e => e.type))];
                             tbodyHtml += `<div class="day-markers">`;
                             uniqueEventTypes.forEach(type => {
-                                tbodyHtml += `<div class="day-marker ${type}"></div>`;
+                                tbodyHtml += `<div class="day-marker ${type.replaceAll('_', '-')}"></div>`;
                             });
                             tbodyHtml += `</div>`;
                             tbodyHtml += '<div class="day-popup-details">';
