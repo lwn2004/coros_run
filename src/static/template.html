@@ -1906,6 +1906,12 @@
                             tbodyHtml += '<div class="day-popup-details">';
                             eventsOnThisDay.forEach(event => {
                                 let typeText = '';
+                                let eventTitleClass = '';
+                                let eventTitleAfterIcon = '';
+                                if(event.status === '待比赛') {
+                                  eventTitleClass = 'text-success';
+                                  eventTitleAfterIcon = '<i class="bi bi-person-walking"></i>';
+                                }                              
                                 switch(event.type) {
                                     case 'race': typeText = '比赛日'; break;
                                     case 'registration_start': 
@@ -1917,7 +1923,7 @@
                                     case 'lottery': typeText = '出签日'; break;
                                 }
                                 tbodyHtml += `<div class="popup-event-item">`;
-                                tbodyHtml += `<span class="popup-event-title">${event.name}</span>`;
+                                tbodyHtml += `<span class="popup-event-title ${eventTitleClass}">${event.name} ${eventTitleAfterIcon}</span>`;
                                 tbodyHtml += `<span class="popup-event-type">${typeText}</span>`;
                                 tbodyHtml += `</div>`;
                             });
