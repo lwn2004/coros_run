@@ -741,6 +741,9 @@
         border: 1px solid var(--success-color);
         box-shadow: 0 0 8px 1px rgba(var(--success-color-rgb), 0.5);
     }
+    .caalendar-table td.today {
+      background-color: var(--bs-danger-bg-subtle);
+    }
     .btn-close-bottom {
         position: fixed;
         bottom: 25px;
@@ -1860,6 +1863,7 @@
         }
         let calendarHTML = '';
         const today = new Date();
+        const today_num = today.getDate();
         today.setDate(1); // Start from the first day of the current month
         for (let i = 0; i < 6; i++) {
             const year = today.getFullYear();
@@ -1880,12 +1884,15 @@
                 for (let col = 0; col < 7; col++) {
                     if ((row === 0 && col < startingDay) || date > daysInMonth) {
                         tbodyHtml += '<td class="empty"></td>';
-                    } else {
+                    } else {                        
                         const currentDateStr = `${year}-${String(month).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
                         const eventsOnThisDay = eventsByDate[currentDateStr] || [];
                         let cellClass = '';
                         if (eventsOnThisDay.some(e => e.status === '待比赛')) {
                             cellClass += ' lottery-win';
+                        }
+                        if(i === 0 && today_num === date ) {
+                          cellClass += ' today';
                         }
                         tbodyHtml += `<td class="${cellClass}">`;
                         tbodyHtml += `<div class="day-number">${date}</div>`;
