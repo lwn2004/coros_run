@@ -1895,7 +1895,7 @@
                             const uniqueEventTypes = [...new Set(eventsOnThisDay.map(e => e.type))];
                             tbodyHtml += `<div class="day-markers">`;
                             uniqueEventTypes.forEach(type => {
-                                tbodyHtml += `<div class="day-marker ${type}"></div>`;
+                                tbodyHtml += `<div class="day-marker ${type.replaceAll('_', '-')}"></div>`;
                             });
                             tbodyHtml += `</div>`;
                             tbodyHtml += '<div class="day-popup-details">';
