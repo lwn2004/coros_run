@@ -483,7 +483,7 @@
     }
     .calendar-table td {
         border: 1px solid var(--border-color);
-        height: 80px;
+        height: 50px;
         vertical-align: top;
         padding: 5px;
         transition: background-color 0.2s;
@@ -514,6 +514,8 @@
     }
     .day-marker.race { background-color: var(--marathon-color); }
     .day-marker.registration { background-color: var(--accent-color); }
+    .day-marker.registration-start { background-color: var(--accent-color); }
+    .day-marker.registration-end { background-color: var(--danger-color); }
     .day-marker.lottery { background-color: var(--success-color); }
     .day-popup-details {
       position: absolute;
@@ -523,7 +525,7 @@
       transform: translateX(-50%);
       width: auto;
       min-width: 150%;
-      padding: 0.6rem;
+      padding: 0.2rem;
       background-color: var(--hover-bg);
       border: 1px solid var(--accent-color);
       border-radius: 6px;
@@ -15227,7 +15229,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-09-05 10:02:20 
+         | Last updated: 2025-09-05 10:34:16 
     </small>
 </footer>
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
@@ -15726,8 +15728,8 @@
                 eventsByDate[date].push({ ...event, type });
             };
             addEvent(event.date, 'race');
-            addEvent(event.registration_start, 'registration');
-            addEvent(event.registration_end, 'registration');
+            addEvent(event.registration_start, 'registration_start');
+            addEvent(event.registration_end, 'registration_end');
             addEvent(event.lottery_date, 'lottery');
         });
         if (marathonEventsCache.length === 0) {
@@ -15777,9 +15779,12 @@
                                 let typeText = '';
                                 switch(event.type) {
                                     case 'race': typeText = '比赛日'; break;
-                                    case 'registration': 
-                                        typeText = (currentDateStr === event.registration_start) ? '报名开始' : '报名截止';
+                                    case 'registration_start': 
+                                        typeText = '报名开始';
                                         break;
+                                    case 'registration_end': 
+                                        typeText = '报名截止';
+                                        break;                                    
                                     case 'lottery': typeText = '出签日'; break;
                                 }
                                 tbodyHtml += `<div class="popup-event-item">`;
