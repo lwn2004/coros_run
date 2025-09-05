@@ -522,7 +522,7 @@
       left: 50%;
       transform: translateX(-50%);
       width: auto;
-      min-width: 220px;
+      min-width: 150%;
       padding: 0.6rem;
       background-color: var(--hover-bg);
       border: 1px solid var(--accent-color);
@@ -15227,7 +15227,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-09-05 09:47:05 
+         | Last updated: 2025-09-05 10:02:20 
     </small>
 </footer>
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
@@ -16353,7 +16353,7 @@
                 document.getElementById('viewRouteBtn').style.display = currentPolyline ? 'block' : 'none';
                 let weatherString = '';
                 if(data.weather) {
-                if(data.weather.type && data.weather.type == 'forcast_api'){
+                if(data.weather.type && data.weather.type == 'forecast_api'){
                   weatherString = '[预] ';
                 }
                 weatherString += `${data.weather.temperature_c}°C, ${data.weather.condition}`;
