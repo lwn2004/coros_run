@@ -558,60 +558,91 @@
     /* Countdown Timer Styles */
     #countdown-timer .time-block {
         text-align: center;
-        padding: 0 1rem;
+        padding: 0 0.5rem;
     }
     #countdown-timer .time-value {
-        font-size: 2.5rem;
+        font-size: 2rem;
         font-weight: 700;
         line-height: 1;
         color: var(--accent-color);
     }
     #countdown-timer .time-label {
-        font-size: 0.8rem;
+        font-size: 0.7rem;
         text-transform: uppercase;
         color: var(--text-secondary);
     }
-    .stat-filter-card {
+    .stat-filter-button {
+        padding: 0.25rem 0.75rem;
+        font-size: 0.8rem;
+        cursor: pointer;
+        border-radius: 0.5rem;
         background-color: var(--hover-bg);
         border: 1px solid var(--border-color);
-        border-radius: .5rem;
-        padding: .5rem .75rem;
-        text-align: center;
-        cursor: pointer;
         transition: all 0.2s ease;
+        color: var(--text-secondary);
     }
-    .stat-filter-card:hover {
+    .stat-filter-button:hover {
         border-color: var(--accent-color);
-        background-color: var(--card-bg);
     }
-    .stat-filter-card.active {
+    .stat-filter-button.active {
         background-color: var(--accent-color);
         border-color: var(--accent-color);
         color: var(--card-bg);
-        box-shadow: 0 0 10px rgba(var(--accent-color-rgb), 0.5);
+        font-weight: 500;
     }
-    .stat-filter-value {
-        font-size: 1.5rem;
+    .stat-filter-button .stat-filter-badge {
+        font-size: 0.8em;
+        padding: .1em .4em;
+        border-radius: .25rem;
+        background-color: rgba(0,0,0,0.1);
+    }
+    .stat-filter-button.active .stat-filter-badge {
+        background-color: rgba(255,255,255,0.2);
+    }
+    .marathon-list-item {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 1.25rem 1rem;
+        border-bottom: 1px solid var(--border-color);
+        transition: background-color 0.2s;
+    }
+    .marathon-list-item:last-child {
+        border-bottom: none;
+    }
+    .marathon-list-item:hover {
+        background-color: var(--hover-bg);
+    }
+    .marathon-list-item .race-date {
+        flex-shrink: 0;
+        text-align: center;
         font-weight: 700;
+        width: 50px;
     }
-    .stat-filter-card.active .stat-filter-value {
-        color: var(--bg-color);
-    }
-    .stat-filter-label {
-        font-size: 0.75rem;
+    .marathon-list-item .race-date .month {
+        font-size: 0.8rem;
+        color: var(--danger-color);
         text-transform: uppercase;
+        display: block;
+    }
+    .marathon-list-item .race-date .day {
+        font-size: 1.75rem;
+        color: var(--text-primary);
+        line-height: 1.1;
+        display: block;
+    }
+    .marathon-list-item .race-details {
+        font-size: 0.8rem;
         color: var(--text-secondary);
     }
-    .stat-filter-card.active .stat-filter-label {
-        color: var(--bg-color);
-        opacity: 0.8;
+    .marathon-list-item .race-status {
+        margin-left: auto;
     }
     @media (max-width: 767.98px) {
-        .marathon-calendar-container .month-grid { padding: 1rem; }
-        #countdown-timer .time-value { font-size: 2rem; }
-        #countdown-timer .time-block { padding: 0 0.5rem; }
-        .stat-filter-value { font-size: 1.25rem; }
-        .stat-filter-label { font-size: 0.65rem; }
+        #countdown-timer .time-value { font-size: 1.5rem; }
+        #countdown-timer .time-block { padding: 0 0.25rem; }
+        .marathon-list-item { gap: 1rem; padding: 1rem 0.5rem; }
+        .marathon-list-item .race-date .day { font-size: 1.5rem; }
     }
     .comment-media-thumb {
         max-width: 80px;
@@ -14716,54 +14747,38 @@
         </div>
     </div>
     <div class="tab-pane fade" id="marathon-pane" role="tabpanel" aria-labelledby="marathon-tab" tabindex="0">
-        <div id="marathon-stats-container" class="row g-2 mb-3">
-            <div class="col">
-                <div class="stat-filter-card active" data-status-filter="all">
-                    <div class="stat-filter-value" id="stat-total">0</div>
-                    <div class="stat-filter-label">计划参赛</div>
+        <div class="content-card mb-3" id="marathon-header">
+            <div class="d-flex flex-wrap justify-content-between align-items-center">
+                <div id="race-countdown-container" class="me-auto" style="display: none;">
+                    <p id="countdown-race-name" class="fw-bold mb-1">赛事名称</p>
+                    <div id="countdown-timer" class="d-flex align-items-center">
+                        <div class="time-block"><div id="cd-days" class="time-value">00</div><div class="time-label">天</div></div>
+                        <div class="time-block"><div id="cd-hours" class="time-value">00</div><div class="time-label">小时</div></div>
+                        <div class="time-block"><div id="cd-minutes" class="time-value">00</div><div class="time-label">分钟</div></div>
+                        <div class="time-block"><div id="cd-seconds" class="time-value">00</div><div class="time-label">秒</div></div>
+                    </div>
+                </div>
+                <div id="marathon-stats-container" class="d-flex gap-2 justify-content-end">
+                    <div class="stat-filter-button active" data-status-filter="all">所有 <span class="stat-filter-badge" id="stat-total">0</span></div>
+                    <div class="stat-filter-button" data-status-filter="待比赛">已中签 <span class="stat-filter-badge" id="stat-pending">0</span></div>
+                    <div class="stat-filter-button" data-status-filter="未中签">未中签 <span class="stat-filter-badge" id="stat-failed">0</span></div>
+                    <div class="stat-filter-button" data-status-filter="待抽签">待抽签 <span class="stat-filter-badge" id="stat-lottery">0</span></div>
                 </div>
             </div>
-            <div class="col">
-                <div class="stat-filter-card" data-status-filter="待比赛">
-                     <div class="stat-filter-value" id="stat-pending">0</div>
-                    <div class="stat-filter-label">已中签</div>
+            <hr class="my-3">
+            <div class="d-flex justify-content-end align-items-center">
+                 <div class="btn-group btn-group-sm me-auto" id="marathon-view-toggle" role="group">
+                    <button type="button" class="btn active" data-view="list">列表模式</button>
+                    <button type="button" class="btn" data-view="calendar">日历模式</button>
                 </div>
-            </div>
-            <div class="col">
-                <div class="stat-filter-card" data-status-filter="未中签">
-                    <div class="stat-filter-value" id="stat-failed">0</div>
-                    <div class="stat-filter-label">未中签</div>
-                </div>
-            </div>
-             <div class="col">
-                <div class="stat-filter-card" data-status-filter="待抽签">
-                    <div class="stat-filter-value" id="stat-lottery">0</div>
-                    <div class="stat-filter-label">待抽签</div>
-                </div>
+                <button id="editCalendarBtn" class="btn btn-sm" style="display: none;"><i class="bi bi-pencil-square"></i> 编辑赛历</button>
             </div>
         </div>
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <div class="btn-group btn-group-sm" id="marathon-view-toggle" role="group">
-                <button type="button" class="btn" data-view="calendar">日历模式</button>
-                <button type="button" class="btn active" data-view="list">列表模式</button>
-            </div>
-            <button id="editCalendarBtn" class="btn btn-sm" style="display: none;"><i class="bi bi-pencil-square"></i> 编辑赛历</button>
-        </div>
-        <div id="race-countdown-container" class="content-card text-center mb-4" style="display: none; border-color: var(--accent-color);">
-            <h6 class="card-title mb-1 text-body-secondary">下一场比赛倒计时</h6>
-            <p id="countdown-race-name" class="h4 accent-color-text fw-bold">赛事名称</p>
-            <div id="countdown-timer" class="d-flex justify-content-center my-3">
-                <div class="time-block"><div id="cd-days" class="time-value">00</div><div class="time-label">天</div></div>
-                <div class="time-block"><div id="cd-hours" class="time-value">00</div><div class="time-label">小时</div></div>
-                <div class="time-block"><div id="cd-minutes" class="time-value">00</div><div class="time-label">分钟</div></div>
-                <div class="time-block"><div id="cd-seconds" class="time-value">00</div><div class="time-label">秒</div></div>
-            </div>
-            <p id="countdown-race-date" class="text-body-secondary small mb-0">YYYY-MM-DD</p>
-        </div>
+       
         <div id="marathon-calendar-view" style="display: none;">
             <div id="marathon-calendar-container"></div>
         </div>
-        <div id="marathon-list-view">
+        <div id="marathon-list-view" class="content-card" style="padding:0;">
             <div id="marathon-list-container"></div>
         </div>
     </div>
@@ -15330,7 +15345,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-09-07 14:07:08 
+         | Last updated: 2025-09-07 18:14:10 
     </small>
 </footer>
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
@@ -15806,8 +15821,7 @@
         }
         const nextRace = upcomingRaces[0];
         const targetDate = new Date(nextRace.date + "T07:00:00"); // Assuming race starts at 7 AM
-        document.getElementById('countdown-race-name').textContent = `${nextRace.name} (${nextRace.category})`;
-        document.getElementById('countdown-race-date').textContent = nextRace.date;
+        document.getElementById('countdown-race-name').textContent = `下一场: ${nextRace.name}`;
         countdownContainer.style.display = 'block';
         const updateCountdown = () => {
             const currentTime = new Date();
@@ -15851,7 +15865,7 @@
         }
 
         if (eventsToDisplay.length === 0) {
-            container.innerHTML = `<div class="content-card text-center text-body-secondary">暂无${filterStatus === 'all' ? '' : `“${filterStatus}”状态的`}赛事计划</div>`;
+            container.innerHTML = `<div class="text-center p-5 text-body-secondary">暂无${filterStatus === 'all' ? '' : `“${filterStatus}”状态的`}赛事计划</div>`;
             return;
         }
 
@@ -15863,6 +15877,8 @@
             '未中签': 'text-bg-danger',
             '待报名': 'text-bg-info',
         };
+        const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+
         container.innerHTML = sortedEvents.map(event => {
             const levelBadge = (event.level && event.level !== '普通赛事') 
                 ? `<span class="badge rounded-pill text-bg-warning ms-2" style="font-size: 0.7em; vertical-align: middle;">${event.level}</span>` 
@@ -15884,38 +15900,36 @@
                 const channelContent = isLink
                     ? `<a href="${event.channel}" target="_blank" class="btn btn-sm btn-outline-primary py-0 px-1" style="font-size: 0.75rem;">前往报名</a>`
                     : `<span class="text-body-secondary">${event.channel}</span>`;
-                channelInfo = `<div class="mt-2 small"><i class="bi bi-link-45deg me-1"></i><strong>渠道:</strong> ${channelContent}</div>`;
+                channelInfo = `<div class="mt-1"><i class="bi bi-link-45deg me-1"></i><strong>渠道:</strong> ${channelContent}</div>`;
             }
 
+            const eventDate = new Date(event.date);
+            const month = monthNames[eventDate.getUTCMonth()];
+            const day = eventDate.getUTCDate();
+
             return `
-            <div class="content-card mb-3">
-                 <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="marathon-list-item">
+                <div class="race-date">
+                    <span class="month">${month}</span>
+                    <span class="day">${day}</span>
+                </div>
+                <div class="flex-grow-1">
                     <div class="d-flex align-items-center flex-wrap">
                         <h6 class="mb-0 fw-bold me-2">${event.name} <small class="text-body-secondary fw-normal">(${event.category})</small></h6>
                         ${levelBadge}
                         ${willingnessStars}
                     </div>
-                    <span class="badge ${statusBadges[event.status] || 'text-bg-light'} text-nowrap">${event.status}</span>
-                </div>
-                <hr class="my-2" style="border-color: var(--border-color) !important; opacity: 0.5;">
-                <div class="row g-2 small">
-                    <div class="col-sm-4">
-                        <i class="bi bi-flag-fill me-1" style="color:var(--marathon-color);"></i>
-                        <strong>比赛日期:</strong>
-                        <span class="text-body-secondary ms-1">${event.date || '待定'}</span>
-                    </div>
-                    <div class="col-sm-4">
-                        <i class="bi bi-pencil-square me-1" style="color:var(--accent-color);"></i>
-                        <strong>报名时段:</strong>
-                        <span class="text-body-secondary ms-1">${(event.registration_start && event.registration_end) ? `${event.registration_start} ~ ${event.registration_end}` : '待定'}</span>
-                    </div>
-                    <div class="col-sm-4">
-                        <i class="bi bi-ticket-detailed-fill me-1" style="color:var(--success-color);"></i>
-                        <strong>出签日期:</strong>
-                        <span class="text-body-secondary ms-1">${event.lottery_date || 'N/A'}</span>
+                    <div class="race-details">
+                        ${channelInfo}
                     </div>
                 </div>
-                ${channelInfo}
+                <div class="race-details d-none d-md-block mx-3">
+                    <div><strong>报名:</strong> ${event.registration_start || 'N/A'}</div>
+                    <div><strong>出签:</strong> ${event.lottery_date || 'N/A'}</div>
+                </div>
+                <div class="race-status">
+                     <span class="badge ${statusBadges[event.status] || 'text-bg-light'}">${event.status}</span>
+                </div>
             </div>`;
         }).join('');
     }
@@ -16477,12 +16491,12 @@
                 document.getElementById('marathon-calendar-view').style.display = isCalendar ? 'block' : 'none';
                 document.getElementById('marathon-list-view').style.display = isCalendar ? 'none' : 'block';
             });
-            document.getElementById('marathon-stats-container').addEventListener('click', (e) => {
-                const card = e.target.closest('.stat-filter-card');
-                if (!card) return;
+             document.getElementById('marathon-stats-container').addEventListener('click', (e) => {
+                const button = e.target.closest('.stat-filter-button');
+                if (!button) return;
                 document.querySelector('#marathon-stats-container .active').classList.remove('active');
-                card.classList.add('active');
-                const filter = card.dataset.statusFilter;
+                button.classList.add('active');
+                const filter = button.dataset.statusFilter;
                 generateMarathonList(filter);
             });
         }
