@@ -571,10 +571,47 @@
         text-transform: uppercase;
         color: var(--text-secondary);
     }
+    .stat-filter-card {
+        background-color: var(--hover-bg);
+        border: 1px solid var(--border-color);
+        border-radius: .5rem;
+        padding: .5rem .75rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .stat-filter-card:hover {
+        border-color: var(--accent-color);
+        background-color: var(--card-bg);
+    }
+    .stat-filter-card.active {
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+        color: var(--card-bg);
+        box-shadow: 0 0 10px rgba(var(--accent-color-rgb), 0.5);
+    }
+    .stat-filter-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+    .stat-filter-card.active .stat-filter-value {
+        color: var(--bg-color);
+    }
+    .stat-filter-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+    }
+    .stat-filter-card.active .stat-filter-label {
+        color: var(--bg-color);
+        opacity: 0.8;
+    }
     @media (max-width: 767.98px) {
         .marathon-calendar-container .month-grid { padding: 1rem; }
         #countdown-timer .time-value { font-size: 2rem; }
         #countdown-timer .time-block { padding: 0 0.5rem; }
+        .stat-filter-value { font-size: 1.25rem; }
+        .stat-filter-label { font-size: 0.65rem; }
     }
     .comment-media-thumb {
         max-width: 80px;
@@ -14679,6 +14716,32 @@
         </div>
     </div>
     <div class="tab-pane fade" id="marathon-pane" role="tabpanel" aria-labelledby="marathon-tab" tabindex="0">
+        <div id="marathon-stats-container" class="row g-2 mb-3">
+            <div class="col">
+                <div class="stat-filter-card active" data-status-filter="all">
+                    <div class="stat-filter-value" id="stat-total">0</div>
+                    <div class="stat-filter-label">计划参赛</div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="stat-filter-card" data-status-filter="待比赛">
+                     <div class="stat-filter-value" id="stat-pending">0</div>
+                    <div class="stat-filter-label">已中签</div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="stat-filter-card" data-status-filter="未中签">
+                    <div class="stat-filter-value" id="stat-failed">0</div>
+                    <div class="stat-filter-label">未中签</div>
+                </div>
+            </div>
+             <div class="col">
+                <div class="stat-filter-card" data-status-filter="待抽签">
+                    <div class="stat-filter-value" id="stat-lottery">0</div>
+                    <div class="stat-filter-label">待抽签</div>
+                </div>
+            </div>
+        </div>
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div class="btn-group btn-group-sm" id="marathon-view-toggle" role="group">
                 <button type="button" class="btn" data-view="calendar">日历模式</button>
@@ -15267,7 +15330,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-09-07 09:49:04 
+         | Last updated: 2025-09-07 14:07:08 
     </small>
 </footer>
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
@@ -15486,7 +15549,7 @@
                 <h6 id="calendarFormTitle">添加新赛事</h6>
                 <form id="calendarEventForm">
                     <input type="hidden" id="event-id">
-                    <div class="row g-2 mb-2">
+                     <div class="row g-2 mb-2">
                         <div class="col-md-8">
                             <label for="event-name" class="form-label">赛事名称</label>
                             <input type="text" class="form-control form-control-sm" id="event-name" required>
@@ -15515,18 +15578,13 @@
                             <label for="event-level" class="form-label">赛事等级</label>
                             <select class="form-select form-select-sm" id="event-level">
                                 <option value="普通赛事" selected>普通赛事</option>
-
-
-
-
-
-
                                 <option value="世界田联白金标">世界田联白金标</option>
                                 <option value="世界田联金标">世界田联金标</option>
                                 <option value="世界田联精英标">世界田联精英标</option>
-                                <option value="中国田协金牌">中国田协金牌</option>
-                                <option value="中国田协银牌">中国田协银牌</option>
-                                <option value="中国田协铜牌">中国田协铜牌</option>
+                                <option value="中国田协 A1">中国田协 A1</option>
+                                <option value="中国田协 A2">中国田协 A2</option>
+                                <option value="中国田协 B">中国田协 B</option>
+                                <option value="中国田协 C">中国田协 C</option>
                             </select>
                         </div>
                         <div class="col-md-4">
@@ -15756,7 +15814,6 @@
             const diff = targetDate - currentTime;
             if (diff <= 0) {
                 clearInterval(countdownInterval);
-
                 setTimeout(initializeRaceCountdown, 2000);
                 return;
             }
@@ -15772,14 +15829,33 @@
         updateCountdown();
         countdownInterval = setInterval(updateCountdown, 1000);
     }
-    async function generateMarathonList() {
+    async function updateMarathonStats() {
+        const statusesToCount = ['待比赛', '待抽签', '未中签'];
+        const total = marathonEventsCache.filter(e => statusesToCount.includes(e.status)).length;
+        const pending = marathonEventsCache.filter(e => e.status === '待比赛').length;
+        const failed = marathonEventsCache.filter(e => e.status === '未中签').length;
+        const lottery = marathonEventsCache.filter(e => e.status === '待抽签').length;
+
+        document.getElementById('stat-total').textContent = total;
+        document.getElementById('stat-pending').textContent = pending;
+        document.getElementById('stat-failed').textContent = failed;
+        document.getElementById('stat-lottery').textContent = lottery;
+    }
+    async function generateMarathonList(filterStatus = 'all') {
         const container = document.getElementById('marathon-list-container');
         if (!container) return;
-        if (marathonEventsCache.length === 0) {
-            container.innerHTML = '<div class="content-card text-center text-body-secondary">暂无赛事计划</div>';
+        
+        let eventsToDisplay = marathonEventsCache;
+        if (filterStatus !== 'all') {
+            eventsToDisplay = marathonEventsCache.filter(e => e.status === filterStatus);
+        }
+
+        if (eventsToDisplay.length === 0) {
+            container.innerHTML = `<div class="content-card text-center text-body-secondary">暂无${filterStatus === 'all' ? '' : `“${filterStatus}”状态的`}赛事计划</div>`;
             return;
         }
-        const sortedEvents = [...marathonEventsCache].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        const sortedEvents = [...eventsToDisplay].sort((a, b) => new Date(a.date) - new Date(b.date));
         const statusBadges = {
             '待比赛': 'text-bg-success',
             '已完赛': 'text-bg-secondary',
@@ -15795,10 +15871,11 @@
             let willingnessStars = '';
             const willingness = parseInt(event.willingness, 10) || 0;
             if (willingness > 0) {
+                let starsHtml = '';
                 for (let i = 1; i <= 5; i++) {
-                    willingnessStars += `<i class="bi ${i <= willingness ? 'bi-star-fill' : 'bi-star'}" style="color: var(--trophy-color); font-size: 0.9em;"></i>`;
+                    starsHtml += `<i class="bi ${i <= willingness ? 'bi-star-fill' : 'bi-star'}" style="color: var(--trophy-color); font-size: 0.9em;"></i>`;
                 }
-                willingnessStars = `<span class="ms-2">${willingnessStars}</span>`;
+                willingnessStars = `<span class="ms-2" title="意愿度: ${willingness}/5">${starsHtml}</span>`;
             }
 
             let channelInfo = '';
@@ -15812,9 +15889,13 @@
 
             return `
             <div class="content-card mb-3">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h6 class="mb-0 fw-bold">${event.name} <small class="text-body-secondary fw-normal">(${event.category})</small>${levelBadge}${willingnessStars}</h6>
-                    <span class="badge ${statusBadges[event.status] || 'text-bg-light'}">${event.status}</span>
+                 <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="d-flex align-items-center flex-wrap">
+                        <h6 class="mb-0 fw-bold me-2">${event.name} <small class="text-body-secondary fw-normal">(${event.category})</small></h6>
+                        ${levelBadge}
+                        ${willingnessStars}
+                    </div>
+                    <span class="badge ${statusBadges[event.status] || 'text-bg-light'} text-nowrap">${event.status}</span>
                 </div>
                 <hr class="my-2" style="border-color: var(--border-color) !important; opacity: 0.5;">
                 <div class="row g-2 small">
@@ -15834,7 +15915,6 @@
                         <span class="text-body-secondary ms-1">${event.lottery_date || 'N/A'}</span>
                     </div>
                 </div>
-
                 ${channelInfo}
             </div>`;
         }).join('');
@@ -15850,7 +15930,8 @@
                 marathonEventsCache = await response.json();
             }
             initializeRaceCountdown();
-            await generateMarathonList(); // Also generate list view data
+            await generateMarathonList(); 
+            await updateMarathonStats();
         } catch (error) {
             console.error("Could not fetch marathon data:", error);
             container.innerHTML = '<div class="content-card text-center text-danger">无法加载赛历数据，请稍后重试。</div>';
@@ -16396,6 +16477,14 @@
                 document.getElementById('marathon-calendar-view').style.display = isCalendar ? 'block' : 'none';
                 document.getElementById('marathon-list-view').style.display = isCalendar ? 'none' : 'block';
             });
+            document.getElementById('marathon-stats-container').addEventListener('click', (e) => {
+                const card = e.target.closest('.stat-filter-card');
+                if (!card) return;
+                document.querySelector('#marathon-stats-container .active').classList.remove('active');
+                card.classList.add('active');
+                const filter = card.dataset.statusFilter;
+                generateMarathonList(filter);
+            });
         }
         function renderCommentList(container, comments) {
             container.style.color = 'var(--text-primary)';
@@ -16712,11 +16801,11 @@
             const event = editorEvents[index];
             document.getElementById('event-id').value = index;
             document.getElementById('event-name').value = event.name;
+            document.getElementById('event-willingness').value = event.willingness || '3';
+            document.getElementById('event-channel').value = event.channel || '';
             document.getElementById('event-category').value = event.category;
             document.getElementById('event-status').value = event.status;
             document.getElementById('event-level').value = event.level || '普通赛事';
-            document.getElementById('event-willingness').value = event.willingness || '3';
-            document.getElementById('event-channel').value = event.channel || '';
             document.getElementById('event-date').value = event.date;
             document.getElementById('event-reg-start').value = event.registration_start || '';
             document.getElementById('event-reg-end').value = event.registration_end || '';
@@ -16740,13 +16829,12 @@
             e.preventDefault();
             const eventIndexStr = document.getElementById('event-id').value;
             const eventData = {
-
                 name: document.getElementById('event-name').value,
+                willingness: document.getElementById('event-willingness').value,
+                channel: document.getElementById('event-channel').value,
                 category: document.getElementById('event-category').value,
                 status: document.getElementById('event-status').value,
                 level: document.getElementById('event-level').value,
-                willingness: document.getElementById('event-willingness').value,
-                channel: document.getElementById('event-channel').value,
                 date: document.getElementById('event-date').value,
                 registration_start: document.getElementById('event-reg-start').value || null,
                 registration_end: document.getElementById('event-reg-end').value || null,
@@ -16757,13 +16845,11 @@
                 const originalEvent = editorEvents[index];
                 eventData.id = originalEvent ? originalEvent.id : `evt_${new Date().getTime()}`;
                 editorEvents[index] = eventData;
-
             } else {
                 eventData.id = `evt_${new Date().getTime()}`;
                 editorEvents.push(eventData);
             }
             renderCalendarEditor();
-
             document.getElementById('cancelEditBtn').click();
         });
         document.getElementById('saveAllCalendarChanges').addEventListener('click', async () => {
