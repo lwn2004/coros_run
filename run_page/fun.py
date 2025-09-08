@@ -282,8 +282,8 @@ def prepare_template_context(all_runs, fastest_run, pb_file, events_file):
         return {}
 
     events = load_events_data(events_file)
-    
-    recent_runs = list(reversed(all_runs[-3:]))
+    long_runs = [run for run in all_runs if run['distance'] > 1000]
+    recent_runs = list(reversed(long_runs[-3:]))
     
     city_stats_agg = defaultdict(lambda: {'count': 0, 'distance': 0.0, 'first_date': None})
     for run in all_runs:
@@ -541,4 +541,5 @@ def main():
 if __name__ == "__main__":
     parent = os.path.dirname(current) 
     main()
+
 
