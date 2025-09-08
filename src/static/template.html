@@ -1597,6 +1597,19 @@
     </div>
   </div>
 </div>
+<div class="modal fade" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="photoModalLabel">跑步照片</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="photoShow"></div>
+      </div>
+    </div>
+  </div>
+</div>  
 <div class="modal fade" id="calendarEditorModal" tabindex="-1" aria-labelledby="calendarEditorModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
@@ -2832,8 +2845,9 @@
             }
             gestureIsEligible = false;
         }, {passive: true});
-        document.getElementById('viewRouteBtn').addEventListener('click', () => {
-            bootstrap.Modal.getOrCreateInstance(document.getElementById('routeMapModal')).show();
+        document.getElementById('viewPhotoBtn').addEventListener('click', () => {
+            //bootstrap.Modal.getOrCreateInstance(document.getElementById('routeMapModal')).show();
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('photoModal')).show();
         });
         document.getElementById('routeMapModal').addEventListener('shown.bs.modal', () => {
             if (!modalMapInstance) {
