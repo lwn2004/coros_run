@@ -571,7 +571,7 @@
         text-transform: uppercase;
         color: var(--text-secondary);
     }
-    .stat-filter-button {
+     .stat-filter-button {
         padding: 0.25rem 0.75rem;
         font-size: 0.8rem;
         cursor: pointer;
@@ -1171,27 +1171,25 @@
         </div>
     </div>
     <div class="tab-pane fade" id="marathon-pane" role="tabpanel" aria-labelledby="marathon-tab" tabindex="0">
-        <div id="marathon-stats-container" class="d-flex flex-wrap gap-2 mb-3">
-            <div class="stat-filter-button active" data-status-filter="all">
-                所有 <span class="stat-filter-badge" id="stat-total">0</span>
-            </div>
-            <div class="stat-filter-button" data-status-filter="待比赛">
-                已中签 <span class="stat-filter-badge" id="stat-pending">0</span>
-            </div>
-            <div class="stat-filter-button" data-status-filter="未中签">
-                未中签 <span class="stat-filter-badge" id="stat-failed">0</span>
-            </div>
-            <div class="stat-filter-button" data-status-filter="待抽签">
-                待抽签 <span class="stat-filter-badge" id="stat-lottery">0</span>
-            </div>
-        </div>
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <div class="btn-group btn-group-sm" id="marathon-view-toggle" role="group">
-                <button type="button" class="btn" data-view="calendar">日历模式</button>
-                <button type="button" class="btn active" data-view="list">列表模式</button>
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <div id="marathon-stats-container" class="d-flex gap-2">
+                    <div class="stat-filter-button active" data-status-filter="all">
+                        所有 <span class="stat-filter-badge" id="stat-total">0</span>
+                    </div>
+                    <div class="stat-filter-button" data-status-filter="待比赛">
+                        已中签 <span class="stat-filter-badge" id="stat-pending">0</span>
+                    </div>
+                    <div class="stat-filter-button" data-status-filter="待抽签">
+                        待抽签 <span class="stat-filter-badge" id="stat-lottery">0</span>
+                    </div>
+                </div>
+                <div class="text-secondary mx-2">|</div>
+                <button type="button" class="btn btn-sm" id="view-toggle-button" data-view="calendar">日历模式</button>
             </div>
             <button id="editCalendarBtn" class="btn btn-sm" style="display: none;"><i class="bi bi-pencil-square"></i> 编辑赛历</button>
         </div>
+
         <div id="race-countdown-container" class="content-card text-center mb-4" style="display: none; border-color: var(--accent-color);">
             <h6 class="card-title mb-1 text-body-secondary">下一场比赛倒计时</h6>
             <p id="countdown-race-name" class="h4 accent-color-text fw-bold">赛事名称</p>
@@ -1203,6 +1201,7 @@
             </div>
             <p id="countdown-race-date" class="text-body-secondary small mb-0">YYYY-MM-DD</p>
         </div>
+
         <div id="marathon-calendar-view" style="display: none;">
             <div id="marathon-calendar-container"></div>
         </div>
@@ -1625,7 +1624,7 @@
                 <h6 id="calendarFormTitle">添加新赛事</h6>
                 <form id="calendarEventForm">
                     <input type="hidden" id="event-id">
-                    <div class="row g-2 mb-2">
+                     <div class="row g-2 mb-2">
                         <div class="col-md-8">
                             <label for="event-name" class="form-label">赛事名称</label>
                             <input type="text" class="form-control form-control-sm" id="event-name" required>
@@ -1906,22 +1905,20 @@
         updateCountdown();
         countdownInterval = setInterval(updateCountdown, 1000);
     }
-    async function updateMarathonStats() {
+     async function updateMarathonStats() {
         const statusesToCount = ['待比赛', '待抽签', '未中签'];
         const total = marathonEventsCache.filter(e => statusesToCount.includes(e.status)).length;
         const pending = marathonEventsCache.filter(e => e.status === '待比赛').length;
-        const failed = marathonEventsCache.filter(e => e.status === '未中签').length;
         const lottery = marathonEventsCache.filter(e => e.status === '待抽签').length;
 
         document.getElementById('stat-total').textContent = total;
         document.getElementById('stat-pending').textContent = pending;
-        document.getElementById('stat-failed').textContent = failed;
         document.getElementById('stat-lottery').textContent = lottery;
     }
     async function generateMarathonList(filterStatus = 'all') {
         const container = document.getElementById('marathon-list-container');
         if (!container) return;
-
+        
         let eventsToDisplay = marathonEventsCache;
         if (filterStatus !== 'all') {
             eventsToDisplay = marathonEventsCache.filter(e => e.status === filterStatus);
@@ -1966,7 +1963,7 @@
 
             return `
             <div class="content-card mb-3">
-                <div class="d-flex justify-content-between align-items-center mb-2">
+                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <div class="d-flex align-items-center flex-wrap">
                         <h6 class="mb-0 fw-bold me-2">${event.name} <small class="text-body-secondary fw-normal">(${event.category})</small></h6>
                         ${levelBadge}
@@ -2546,13 +2543,21 @@
         }
         const marathonPane = document.getElementById('marathon-pane');
         if (marathonPane) {
-            marathonPane.querySelector('#marathon-view-toggle').addEventListener('click', (e) => {
-                if (!e.target.matches('button')) return;
-                marathonPane.querySelector('#marathon-view-toggle .active').classList.remove('active');
-                e.target.classList.add('active');
-                const isCalendar = e.target.dataset.view === 'calendar';
+            document.getElementById('view-toggle-button').addEventListener('click', (e) => {
+                const button = e.currentTarget;
+                const currentView = button.dataset.view;
+                const isCalendar = currentView === 'calendar';
+                
                 document.getElementById('marathon-calendar-view').style.display = isCalendar ? 'block' : 'none';
                 document.getElementById('marathon-list-view').style.display = isCalendar ? 'none' : 'block';
+
+                if (isCalendar) {
+                    button.dataset.view = 'list';
+                    button.innerHTML = '列表模式';
+                } else {
+                    button.dataset.view = 'calendar';
+                    button.innerHTML = '日历模式';
+                }
             });
             document.getElementById('marathon-stats-container').addEventListener('click', (e) => {
                 const button = e.target.closest('.stat-filter-button');
