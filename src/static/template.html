@@ -2360,6 +2360,7 @@
         setTheme(getPreferredTheme());
         initializeUserProfile();
         loadCommentCounts();
+        updateRelativeTimestamps();
         createAllCharts(); 
         document.getElementById('editProfileTrigger').addEventListener('click', () => { new bootstrap.Modal(document.getElementById('profileModal')).show(); });
         document.getElementById('detailEditProfileTrigger').addEventListener('click', () => { new bootstrap.Modal(document.getElementById('profileModal')).show(); });
