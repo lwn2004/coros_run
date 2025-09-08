@@ -1175,7 +1175,7 @@
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
             <div id="marathon-controls-container" class="d-flex align-items-center gap-2 flex-wrap">
                 <div class="stat-filter-button active" data-filter-type="status" data-filter-value="all">
-                    所有 <span class="stat-filter-badge" id="stat-total">0</span>
+                    全部
                 </div>
                 <div class="stat-filter-button" data-filter-type="status" data-filter-value="待比赛">
                     已中签 <span class="stat-filter-badge" id="stat-pending">0</span>
@@ -1183,9 +1183,9 @@
                 <div class="stat-filter-button" data-filter-type="status" data-filter-value="待抽签">
                     待抽签 <span class="stat-filter-badge" id="stat-lottery">0</span>
                 </div>
-                <div class="stat-filter-button" data-filter-type="view" data-filter-value="calendar">日历模式</div>
+                <div class="stat-filter-button" data-filter-type="view" data-filter-value="calendar">日历</div>
+                <button id="editCalendarBtn" class="btn btn-sm" style="display: none;"><i class="bi bi-pencil-square"></i></button>
             </div>
-            <button id="editCalendarBtn" class="btn btn-sm" style="display: none;"><i class="bi bi-pencil-square"></i> 编辑赛历</button>
         </div>
 
         <div id="race-countdown-container" class="content-card text-center mb-4" style="display: none; border-color: var(--accent-color);">
@@ -1462,27 +1462,16 @@
                 </div>
                 <div id="runDetailContent">
                     <div class="container-fluid px-4">
-                        <div class="text-center my-4" id="detailHeroDistance">
+                        <!--<div class="text-center my-4" id="detailHeroDistance">
                             <span class="distance-value">--</span>
                             <span class="distance-unit">公里</span>
-                        </div>
-                        <div id="runMediaCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
-                            <div class="carousel-indicators"></div>
-                            <div class="carousel-inner"></div>
-                            <button class="carousel-control-prev" type="button" data-bs-target="#runMediaCarousel" data-bs-slide="prev">
-                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                <span class="visually-hidden">Previous</span>
-                            </button>
-                            <button class="carousel-control-next" type="button" data-bs-target="#runMediaCarousel" data-bs-slide="next">
-                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                <span class="visually-hidden">Next</span>
-                            </button>
-                        </div>
+                        </div>-->
+                        <div id="routeMapContainer" class="py-2"></div>
                         <div id="detailWeather" class="text-center small text-body-secondary mb-5"></div>
                         <div class="mb-5">
                             <div class="d-flex justify-content-between align-items-center">
                                 <h4 class="data-section-title">运动数据</h4>
-                                <button id="viewRouteBtn" class="btn btn-sm mb-3" style="display: none;"><i class="bi bi-map-fill"></i> 查看路线</button>
+                                <button id="viewPhotoBtn" class="btn btn-sm mb-3" style="display: none;"><i class="bi bi-images"></i> 跑步照片</button>
                             </div>
                             <div class="row g-4 text-center" id="detailDataGrid"></div>
                         </div>
@@ -1608,6 +1597,19 @@
     </div>
   </div>
 </div>
+<div class="modal fade" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="photoModalLabel">跑步照片</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="photoShow"></div>
+      </div>
+    </div>
+  </div>
+</div>  
 <div class="modal fade" id="calendarEditorModal" tabindex="-1" aria-labelledby="calendarEditorModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
@@ -1872,7 +1874,6 @@
         const diff = startOfToday - startOfRunDate;
         const diffInDays = diff / (1000 * 60 * 60 * 24);
         const timeStr = runDate.toTimeString().substring(0, 5);
-
         switch(diffInDays) {
             case 0: return `今天 ${timeStr}`;
             case 1: return `昨天 ${timeStr}`;
@@ -1880,14 +1881,14 @@
             default: return `${diffInDays}天前 ${timeStr}`;
         }
     }
-    function updateRelativeTimestamps() {
+	  function updateRelativeTimestamps() {
         document.querySelectorAll('.recent-run-timestamp').forEach(el => {
             const dateString = el.closest('.recent-run-card').dataset.date;
             if (dateString) {
                 el.textContent = formatRelativeDate(dateString);
             }
         });
-    }
+    }  
     function initializeRaceCountdown() {
         if (countdownInterval) {
             clearInterval(countdownInterval);
@@ -1933,7 +1934,7 @@
         const pending = marathonEventsCache.filter(e => e.status === '待比赛').length;
         const lottery = marathonEventsCache.filter(e => e.status === '待抽签').length;
 
-        document.getElementById('stat-total').textContent = total;
+        //document.getElementById('stat-total').textContent = total;
         document.getElementById('stat-pending').textContent = pending;
         document.getElementById('stat-lottery').textContent = lottery;
     }
@@ -1951,7 +1952,7 @@
             return;
         }
 
-        const sortedEvents = [...eventsToDisplay].sort((a, b) => new Date(b.date) - new Date(a.date));
+        const sortedEvents = [...eventsToDisplay].sort((a, b) => new Date(a.date) - new Date(b.date));
         const statusBadges = {
             '待比赛': 'text-bg-success',
             '已完赛': 'text-bg-secondary',
@@ -1980,7 +1981,7 @@
                 const channelContent = isLink
                     ? `<a href="${event.channel}" target="_blank" class="btn btn-sm btn-outline-primary py-0 px-1" style="font-size: 0.75rem;">前往报名</a>`
                     : `<span class="text-body-secondary">${event.channel}</span>`;
-                channelInfo = `<div class="mt-1"><i class="bi bi-link-45deg me-1"></i><strong>渠道:</strong> ${channelContent}</div>`;
+                channelInfo = `<div class="mt-1"><i class="bi bi-link-45deg me-1"></i><strong>报名渠道:</strong> ${channelContent}</div>`;
             }
 
             return `
@@ -2116,8 +2117,8 @@
                                 }
                                 tbodyHtml += `<div class="popup-event-item">`;
                                 tbodyHtml += `<span class="popup-event-title ${eventTitleClass}">${event.name} ${eventTitleAfterIcon}</span>`;
-                                tbodyHtml += `<span class="popup-event-type">${typeText}</span>`;
                                 tbodyHtml += levelInfo;
+                                tbodyHtml += `<span class="popup-event-type">${typeText}</span>`;
                                 tbodyHtml += `</div>`;
                             });
                             tbodyHtml += '</div>';
@@ -2359,7 +2360,6 @@
         setTheme(getPreferredTheme());
         initializeUserProfile();
         loadCommentCounts();
-        updateRelativeTimestamps();
         createAllCharts(); 
         document.getElementById('editProfileTrigger').addEventListener('click', () => { new bootstrap.Modal(document.getElementById('profileModal')).show(); });
         document.getElementById('detailEditProfileTrigger').addEventListener('click', () => { new bootstrap.Modal(document.getElementById('profileModal')).show(); });
@@ -2629,20 +2629,21 @@
             const modalEl = document.getElementById('runDetailModal');
             const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
             modal.show();
-            
             const runDate = new Date(preloadedData.date);
             const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
             const dayName = weekdays[runDate.getDay()];
             const formattedDate = preloadedData.date.replace(' ', ` (${dayName}) `);
             document.getElementById('detailTitle').textContent = `跑步详情: ${formattedDate}`;
-
-            document.getElementById('detailHeroDistance').querySelector('.distance-value').textContent = preloadedData.distanceFormatted || '--';
-            document.getElementById('detailDataGrid').innerHTML = `
-                <div class="col-4"><div class="data-point-value">${preloadedData.duration || '--'}</div><div class="data-point-label">训练时长</div></div>
+            //document.getElementById('detailTitle').textContent = `跑步详情: ${preloadedData.date}`;
+            //document.getElementById('detailHeroDistance').querySelector('.distance-value').textContent = preloadedData.distanceFormatted || '--';
+            const detailDataGrid = document.getElementById('detailDataGrid');
+            detailDataGrid.innerHTML = `
+                <div class="col-4"><div class="data-point-value">${preloadedData.distanceFormatted || '--'}</div><div class="data-point-label">总公里</div></div>
+                <div class="col-4"><div class="data-point-value">${preloadedData.duration || '--'}</div><div class="data-point-label">总时长</div></div>
                 <div class="col-4"><div class="data-point-value">${preloadedData.paceStr || '--'}</div><div class="data-point-label">平均配速</div></div>
                 <div class="col-4"><div class="data-point-value">${preloadedData.heartRate || '--'}</div><div class="data-point-label">平均心率</div></div>
             `;
-            document.getElementById('viewRouteBtn').style.display = 'none';
+            document.getElementById('viewPhotoBtn').style.display = 'none';
             document.getElementById('detailAnalysisSectionsLoading').style.display = 'block';
             document.getElementById('detailAnalysisSections').style.display = 'none';
             document.getElementById('detailLapsTableBody').innerHTML = '';
@@ -2653,30 +2654,48 @@
                 const response = await fetch(`https://run.linwn.net/data/details/${runId}.json`);
                 if (!response.ok) throw new Error(`Could not load run data. Status: ${response.status}`);
                 const data = await response.json();
+                if(data.summary) {
+                  const avg_cadence = data.summary.avg_cadence || '--';
+                  const calories = data.summary.calories_kcal || '--';
+                  const total_ascent = data.summary.total_ascent_m || '--';
+                  const avg_power = data.summary.avg_power_w || '--';
+                  const max_hr = data.summary.max_hr || '--';
+                  detailDataGrid.innerHTML += `
+                    <div class="col-4"><div class="data-point-value">${max_hr}</div><div class="data-point-label">最高心率</div></div>
+                    <div class="col-4"><div class="data-point-value">${calories}</div><div class="data-point-label">消耗千卡</div></div>
+                    <div class="col-4"><div class="data-point-value">${avg_cadence}</div><div class="data-point-label">平均步频</div></div>
+                    <div class="col-4"><div class="data-point-value">${total_ascent}</div><div class="data-point-label">累计上升(米)</div></div>
+                    <div class="col-4"><div class="data-point-value">${avg_power}</div><div class="data-point-label">平均功率</div></div>
+                  `
+                }
                 if(data.photos) {detailPhotoUrls = data.photos.map(p => p.url);}
                 currentPolyline = data.route.encoded_polyline;
-                const carouselInner = document.querySelector('#runMediaCarousel .carousel-inner');
-                const carouselIndicators = document.querySelector('#runMediaCarousel .carousel-indicators');
-                carouselInner.innerHTML = '';
-                carouselIndicators.innerHTML = '';
+                //const carouselInner = document.querySelector('#runMediaCarousel .carousel-inner');
+                //const carouselIndicators = document.querySelector('#runMediaCarousel .carousel-indicators');
+                //carouselInner.innerHTML = '';
+                //carouselIndicators.innerHTML = '';
+                const routeMapContainer = document.getElementById('routeMapContainer');
+                routeMapContainer.innerHTML = '';
                 if (detailMapInstance) {
                     detailMapInstance.remove();
                     detailMapInstance = null;
                 }
-                let activeSlideSet = false;
-                let slideIndex = 0;
+                //let activeSlideSet = false;
+                //let slideIndex = 0;
                 if (currentPolyline) {
                     const mapItem = document.createElement('div');
-                    mapItem.className = 'carousel-item';
-                    mapItem.innerHTML = `<div id="detail-map-item" class="d-block w-100"></div>`;
-                    carouselInner.appendChild(mapItem);
-                    carouselIndicators.innerHTML += `<button type="button" data-bs-target="#runMediaCarousel" data-bs-slide-to="${slideIndex}" class="text" aria-label="Slide ${slideIndex+1}">地图</button>`;
-                    if (!activeSlideSet) {
-                        mapItem.classList.add('active');
-                        carouselIndicators.querySelector('button').classList.add('active');
-                        activeSlideSet = true;
-                    }
-                    slideIndex++;
+                    mapItem.innerHTML = `<div id="detail-map-item" class="d-block w-100" style="z-index: 5;"></div>`;
+                    routeMapContainer.appendChild(mapItem);
+                    //mapItem.className = 'carousel-item';
+                    //mapItem.innerHTML = `<div id="detail-map-item" class="d-block w-100"></div>`;
+                    //carouselInner.appendChild(mapItem);
+                    //carouselIndicators.innerHTML += `<button type="button" data-bs-target="#runMediaCarousel" data-bs-slide-to="${slideIndex}" class="text" aria-label="Slide ${slideIndex+1}">地图</button>`;
+                    //if (!activeSlideSet) {
+                    //    mapItem.classList.add('active');
+                    //    carouselIndicators.querySelector('button').classList.add('active');
+                    //    activeSlideSet = true;
+                    //}
+                    //slideIndex++;
                     setTimeout(() => {
                         const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
                         const tileUrl = isDark ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
@@ -2691,7 +2710,7 @@
                         detailMapInstance.fitBounds(polyline.getBounds().pad(0.1));
                         detailMapInstance.invalidateSize();
                     }, 100); 
-                }
+                }/*
                 if (data.photos && data.photos.length > 0) {
                     data.photos.forEach((photo, index) => {
                         const photoItem = document.createElement('div');
@@ -2711,8 +2730,8 @@
                     document.getElementById('runMediaCarousel').style.display = 'none';
                 } else {
                     document.getElementById('runMediaCarousel').style.display = 'block';
-                }
-                document.getElementById('viewRouteBtn').style.display = currentPolyline ? 'block' : 'none';
+                }*/
+                document.getElementById('viewPhotoBtn').style.display = currentPolyline ? 'block' : 'none';
                 let weatherString = '';
                 if(data.weather) {
                 if(data.weather.type && data.weather.type == 'forecast_api'){
@@ -2854,8 +2873,9 @@
             }
             gestureIsEligible = false;
         }, {passive: true});
-        document.getElementById('viewRouteBtn').addEventListener('click', () => {
-            bootstrap.Modal.getOrCreateInstance(document.getElementById('routeMapModal')).show();
+        document.getElementById('viewPhotoBtn').addEventListener('click', () => {
+            //bootstrap.Modal.getOrCreateInstance(document.getElementById('routeMapModal')).show();
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('photoModal')).show();
         });
         document.getElementById('routeMapModal').addEventListener('shown.bs.modal', () => {
             if (!modalMapInstance) {
