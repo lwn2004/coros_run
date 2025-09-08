@@ -2617,14 +2617,14 @@
                   const avg_cadence = data.summary.avg_cadence || '--';
                   const calories = data.summary.calories_kcal || '--';
                   const total_ascent = data.summary.total_ascent_m || '--';
-                  const ave_power = data.summary.ave_power_w || '--';
+                  const avg_power = data.summary.avg_power_w || '--';
                   const max_hr = data.summary.max_hr || '--';
                   detailDataGrid.innerHTML += `
-                    <div class="col-4"><div class="data-point-value">${avg_cadence}</div><div class="data-point-label">平均步频</div></div>
-                    <div class="col-4"><div class="data-point-value">${calories}</div><div class="data-point-label">消耗千卡</div></div>
-                    <div class="col-4"><div class="data-point-value">${total_ascent}</div><div class="data-point-label">累计上升</div></div>
-                    <div class="col-4"><div class="data-point-value">${ave_power}</div><div class="data-point-label">平均功率</div></div>
                     <div class="col-4"><div class="data-point-value">${max_hr}</div><div class="data-point-label">最高心率</div></div>
+                    <div class="col-4"><div class="data-point-value">${calories}</div><div class="data-point-label">消耗千卡</div></div>
+                    <div class="col-4"><div class="data-point-value">${avg_cadence}</div><div class="data-point-label">平均步频</div></div>
+                    <div class="col-4"><div class="data-point-value">${total_ascent}</div><div class="data-point-label">累计上升(米)</div></div>
+                    <div class="col-4"><div class="data-point-value">${avg_power}</div><div class="data-point-label">平均功率</div></div>
                   `
                 }
                 if(data.photos) {detailPhotoUrls = data.photos.map(p => p.url);}
