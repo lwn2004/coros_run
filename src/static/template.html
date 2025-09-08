@@ -1175,7 +1175,7 @@
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
             <div id="marathon-controls-container" class="d-flex align-items-center gap-2 flex-wrap">
                 <div class="stat-filter-button active" data-filter-type="status" data-filter-value="all">
-                    所有 <span class="stat-filter-badge" id="stat-total">0</span>
+                    所有
                 </div>
                 <div class="stat-filter-button" data-filter-type="status" data-filter-value="待比赛">
                     已中签 <span class="stat-filter-badge" id="stat-pending">0</span>
@@ -1183,9 +1183,9 @@
                 <div class="stat-filter-button" data-filter-type="status" data-filter-value="待抽签">
                     待抽签 <span class="stat-filter-badge" id="stat-lottery">0</span>
                 </div>
-                <div class="stat-filter-button" data-filter-type="view" data-filter-value="calendar">日历模式</div>
+                <div class="stat-filter-button" data-filter-type="view" data-filter-value="calendar">日历</div>
+                <button id="editCalendarBtn" class="btn btn-sm" style="display: none;"><i class="bi bi-pencil-square"></i></button>
             </div>
-            <button id="editCalendarBtn" class="btn btn-sm" style="display: none;"><i class="bi bi-pencil-square"></i> 编辑赛历</button>
         </div>
 
         <div id="race-countdown-container" class="content-card text-center mb-4" style="display: none; border-color: var(--accent-color);">
@@ -1909,7 +1909,7 @@
         const pending = marathonEventsCache.filter(e => e.status === '待比赛').length;
         const lottery = marathonEventsCache.filter(e => e.status === '待抽签').length;
 
-        document.getElementById('stat-total').textContent = total;
+        //document.getElementById('stat-total').textContent = total;
         document.getElementById('stat-pending').textContent = pending;
         document.getElementById('stat-lottery').textContent = lottery;
     }
@@ -1927,7 +1927,7 @@
             return;
         }
 
-        const sortedEvents = [...eventsToDisplay].sort((a, b) => new Date(b.date) - new Date(a.date));
+        const sortedEvents = [...eventsToDisplay].sort((a, b) => new Date(a.date) - new Date(b.date));
         const statusBadges = {
             '待比赛': 'text-bg-success',
             '已完赛': 'text-bg-secondary',
@@ -2092,8 +2092,8 @@
                                 }
                                 tbodyHtml += `<div class="popup-event-item">`;
                                 tbodyHtml += `<span class="popup-event-title ${eventTitleClass}">${event.name} ${eventTitleAfterIcon}</span>`;
-                                tbodyHtml += `<span class="popup-event-type">${typeText}</span>`;
                                 tbodyHtml += levelInfo;
+                                tbodyHtml += `<span class="popup-event-type">${typeText}</span>`;
                                 tbodyHtml += `</div>`;
                             });
                             tbodyHtml += '</div>';
