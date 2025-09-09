@@ -2020,8 +2020,10 @@
     }
     async function generateMarathonCalendar() {
         const container = document.getElementById('marathon-calendar-container');
-        if (!container) return;
-        container.innerHTML = '<div class="content-card text-center text-body-secondary">加载赛历数据中...</div>';
+        const containerMarathonList = document.getElementById('marathon-list-container');
+      
+        if (!container || !containerMarathonList) return;
+        containerMarathonList.innerHTML = '<div class="content-card text-center text-body-secondary">加载赛历数据中...</div>';
         try {
             if (marathonEventsCache.length === 0) {
                 const response = await fetch(`${commentApiBase}/marathon-events`);
@@ -2033,7 +2035,7 @@
             await updateMarathonStats();
         } catch (error) {
             console.error("Could not fetch marathon data:", error);
-            container.innerHTML = '<div class="content-card text-center text-danger">无法加载赛历数据，请稍后重试。</div>';
+            containerMarathonList.innerHTML = '<div class="content-card text-center text-danger">无法加载赛历数据，请稍后重试。</div>';
             return;
         }
         // Process events into a date-keyed object
