@@ -1179,10 +1179,10 @@
                 <div class="stat-filter-button active" data-filter-type="status" data-filter-value="all">
                     全部
                 </div>
-                <div class="stat-filter-button" data-filter-type="status" data-filter-value="待比赛">
+                <div class="stat-filter-button" data-filter-type="status" data-filter-value="中签，参赛">
                     已中签 <span class="stat-filter-badge" id="stat-pending">0</span>
                 </div>
-                <div class="stat-filter-button" data-filter-type="status" data-filter-value="待抽签">
+                <div class="stat-filter-button" data-filter-type="status" data-filter-value="已报名，待抽签">
                     待抽签 <span class="stat-filter-badge" id="stat-lottery">0</span>
                 </div>
                 <div class="stat-filter-button" data-filter-type="view" data-filter-value="calendar">日历</div>
@@ -1667,10 +1667,12 @@
                         <div class="col-md-4">
                             <label for="event-status" class="form-label">状态</label>
                             <select class="form-select form-select-sm" id="event-status" required>
-                                <option value="待报名">待报名</option>
-                                <option value="待抽签">待抽签</option>
+                                <option value="未启动">未启动</option>
+                                <option value="报名中">报名中</option>
+                                <option value="已报名，待抽签">已报名，待抽签</option>
                                 <option value="未中签">未中签</option>
-                                <option value="待比赛">待比赛</option>
+                                <option value="中签，参赛">中签，参赛</option>
+                                <option value="中签，放弃">中签，放弃</option>
                                 <option value="已完赛">已完赛</option>
                             </select>
                         </div>
@@ -1931,10 +1933,10 @@
         countdownInterval = setInterval(updateCountdown, 1000);
     }
     async function updateMarathonStats() {
-        const statusesToCount = ['待比赛', '待抽签'];
-        const total = marathonEventsCache.filter(e => statusesToCount.includes(e.status)).length;
-        const pending = marathonEventsCache.filter(e => e.status === '待比赛').length;
-        const lottery = marathonEventsCache.filter(e => e.status === '待抽签').length;
+        //const statusesToCount = ['待比赛', '待抽签'];
+        //const total = marathonEventsCache.filter(e => statusesToCount.includes(e.status)).length;
+        const pending = marathonEventsCache.filter(e => e.status === '中签，参赛').length;
+        const lottery = marathonEventsCache.filter(e => e.status === '已报名，待抽签').length;
 
         //document.getElementById('stat-total').textContent = total;
         document.getElementById('stat-pending').textContent = pending;
@@ -1956,11 +1958,11 @@
 
         const sortedEvents = [...eventsToDisplay].sort((a, b) => new Date(a.date) - new Date(b.date));
         const statusBadges = {
-            '待比赛': 'text-bg-success',
+            '中签，参赛': 'text-bg-success',
             '已完赛': 'text-bg-secondary',
-            '待抽签': 'text-bg-primary',
+            '已报名，待抽签': 'text-bg-primary',
             '未中签': 'text-bg-danger',
-            '待报名': 'text-bg-info',
+            '报名中': 'text-bg-info',
         };
         container.innerHTML = sortedEvents.map(event => {
             const levelBadge = (event.level && event.level !== '普通赛事') 
