@@ -5,14 +5,14 @@
   <title>步履不停 - 已绕地球{{ "%.2f"|format(overall_stats.dist_km/40075.017) }}圈</title>
   <link rel="icon" type="image/png" href="https://run.linwn.net/images/favicon.png">
   <meta property="og:title" content="步履不停 - 我的四万公里跑量挑战" />
-  <meta property="og:description" content="当前累计跑量 {{overall_stats.dist_km}} 公里。{% if recent_runs %}最近一次跑步：🕐{{ recent_runs[0].date.strftime('%Y-%m-%d %H:%M') }}，🚩{{ recent_runs[0].city[:-1] if recent_runs[0].city and recent_runs[0].city.endswith("市") else recent_runs[0].city }}，{{ "%.2f"|format(recent_runs[0].distance / 1000) }}公里，用时 {{ format_duration(recent_runs[0].duration) }}，配速 {{ recent_runs[0].pace }}。
+  <meta property="og:description" content="当前累计跑量 {{ "%.2f"|overall_stats.dist_km }} 公里。{% if recent_runs %}最近一次跑步：🕐{{ recent_runs[0].date.strftime('%Y-%m-%d %H:%M') }}，🚩{{ recent_runs[0].city[:-1] if recent_runs[0].city and recent_runs[0].city.endswith("市") else recent_runs[0].city }}，{{ "%.2f"|format(recent_runs[0].distance / 1000) }}公里，用时 {{ format_duration(recent_runs[0].duration) }}，配速 {{ recent_runs[0].pace }}。
 {% endif %}" />
   <meta property="og:image" content="https://run.linwn.net/images/card.png" />
   <meta property="og:url" content="https://run.linwn.net/fun" />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="https://run.linwn.net/images/card.png" />
   <meta name="twitter:title" content="步履不停 - 我的四万公里跑量挑战" />
-  <meta name="twitter:description" content="当前累计跑量 {{overall_stats.dist_km}} 公里。{% if recent_runs %}最近一次跑步：🕐{{ recent_runs[0].date.strftime('%Y-%m-%d %H:%M') }}，🚩{{ recent_runs[0].city[:-1] if recent_runs[0].city and recent_runs[0].city.endswith("市") else recent_runs[0].city }}，{{ "%.2f"|format(recent_runs[0].distance / 1000) }}公里，用时 {{ format_duration(recent_runs[0].duration) }}，配速 {{ recent_runs[0].pace }}。
+  <meta name="twitter:description" content="当前累计跑量 {{ "%.2f"|overall_stats.dist_km }} 公里。{% if recent_runs %}最近一次跑步：🕐{{ recent_runs[0].date.strftime('%Y-%m-%d %H:%M') }}，🚩{{ recent_runs[0].city[:-1] if recent_runs[0].city and recent_runs[0].city.endswith("市") else recent_runs[0].city }}，{{ "%.2f"|format(recent_runs[0].distance / 1000) }}公里，用时 {{ format_duration(recent_runs[0].duration) }}，配速 {{ recent_runs[0].pace }}。
 {% endif %}" />
   <meta name="twitter:image" content="https://run.linwn.net/images/card.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
