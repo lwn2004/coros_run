@@ -2,10 +2,10 @@
 <html lang="zh-CN" data-bs-theme="dark">
 <head>
   <meta charset="UTF-8">
-  <title>步履不停 - 已绕地球{{ "%.2f"|format(overall_stats.dist_km/40075.017) }}圈</title>
+  <title>步履不停 - 我的四万公里跑量挑战</title>
   <link rel="icon" type="image/png" href="https://run.linwn.net/images/favicon.png">
   <meta property="og:title" content="步履不停 - 我的四万公里跑量挑战" />
-  <meta property="og:description" content="当前累计跑量 {{ "%.2f"|format(overall_stats.dist_km) }} 公里。{% if recent_runs %}最近一次跑步：🕐{{ recent_runs[0].date.strftime('%Y-%m-%d %H:%M') }}，🚩{{ recent_runs[0].city[:-1] if recent_runs[0].city and recent_runs[0].city.endswith("市") else recent_runs[0].city }}，{{ "%.2f"|format(recent_runs[0].distance / 1000) }}公里，用时 {{ format_duration(recent_runs[0].duration) }}，配速 {{ recent_runs[0].pace }}。
+  <meta property="og:description" content="累计跑量 {{ "%.2f"|format(overall_stats.dist_km) }} 公里。{% if recent_runs %}最近跑步：{{ recent_runs[0].date.strftime('%Y-%m-%d %H:%M') }}，{{ recent_runs[0].city[:-1] if recent_runs[0].city and recent_runs[0].city.endswith("市") else recent_runs[0].city }}，{{ "%.2f"|format(recent_runs[0].distance / 1000) }}公里，用时 {{ format_duration(recent_runs[0].duration) }}，配速 {{ recent_runs[0].pace }}。
 {% endif %}" />
   <meta property="og:image" content="https://run.linwn.net/images/card.png" />
   <meta property="og:url" content="https://run.linwn.net/fun" />
