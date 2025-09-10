@@ -194,6 +194,16 @@
         font-size: 0.8rem;
 		color: var(--text-secondary);
     }
+    .route-svg {
+      width: 100%;
+      height: 80px;
+      color: var(--accent-color);
+      transition: color 0.3s ease;
+    }
+    .recent-run-card .stat-label {
+      text-transform: none;
+      color: var(--text-secondary);
+    }    
     #saveProfileButton {
         --bs-btn-bg: var(--accent-color);
         --bs-btn-border-color: var(--accent-color);
@@ -953,37 +963,49 @@
                       data-city="{{ run.city[:-1] if run.city and run.city.endswith("市") else run.city }}"
                       data-duration="{{ format_duration(run.duration) }}"
                       data-heart-rate="{{ run.heart_rate }}"                      
-                      style="background-color: var(--hover-bg);
-                    ">
-                        <div class="text-center mb-2">
-                            <object data="/images/routesvg/{{ run.id }}.svg" type="image/svg+xml" style="height: 40px; max-width: 100%;"></object>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="fw-bold text-primary-emphasis">{{ "%.2f"|format(run.distance / 1000) }} km</span>
-                            <span class="small text-body-secondary recent-run-timestamp">{{ run.date.strftime('%Y-%m-%d %H:%M') }}</span>
-                        </div>
-                        <div class="d-flex justify-content-around text-center mt-3 flex-grow-1 align-items-center">
-                            <div>
-                                <div class="stat-label mb-1">配速</div>
-                                <div class="fw-bold">{{ run.pace }}</div>
+                      style="background-color: var(--hover-bg);">
+                      
+                        <div class="row g-2 h-100">
+                            <div class="col-5 d-flex align-items-center justify-content-center">
+                                <object class="route-svg" data="/images/routesvg/{{ run.id }}.svg" type="image/svg+xml">
+                                    <div class="text-center p-2">
+                                        <i class="bi bi-geo-alt-fill fs-2 text-body-secondary"></i>
+                                        <div class="fw-bold small mt-1 text-body-secondary" style="line-height: 1.2;">{{ run.city or 'N/A' }}</div>
+                                    </div>
+                                </object>
                             </div>
-                            <div>
-                                <div class="stat-label mb-1">用时</div>
-                                <div class="fw-bold">{{ format_duration(run.duration) }}</div>
-                            </div>
-                            <div>
-                                <div class="stat-label mb-1">心率</div>
-                                <div class="fw-bold">
-                                    {{ run.heart_rate or 'N/A' }}
+
+                            <div class="col-7 d-flex flex-column justify-content-between">
+                                <div>
+                                    <div class="mb-2">
+                                        <span class="fw-bold fs-4 text-primary-emphasis">{{ "%.2f"|format(run.distance / 1000) }}</span>
+                                        <small class="text-body-secondary">km</small>
+                                    </div>
+                                    <div class="row g-2 small text-body-secondary">
+                                        <div class="col-6">
+                                            <div class="stat-label mb-0">配速</div>
+                                            <div class="fw-bold text-primary-emphasis">{{ run.pace }}</div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="stat-label mb-0">用时</div>
+                                            <div class="fw-bold text-primary-emphasis">{{ format_duration(run.duration) }}</div>
+                                        </div>
+                                        <div class="col-6 mt-2">
+                                            <div class="stat-label mb-0">心率</div>
+                                            <div class="fw-bold text-primary-emphasis">{{ run.heart_rate or 'N/A' }}</div>
+                                        </div>
+                                        <div class="col-6 mt-2">
+                                            <div class="stat-label mb-0">日期</div>
+                                            <div class="fw-bold text-primary-emphasis">{{ run.date.strftime('%-m/%-d') }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-end mt-2">
+                                    <a href="#" class="comment-link small" data-run-id="{{ run.id }}" data-scroll-to-comment="true">
+                                        💬(<span class="comment-count" data-run-id="{{ run.id }}">0</span>)
+                                    </a>
                                 </div>
                             </div>
-                            <div>
-                                <div class="stat-label mb-1">城市</div>
-                                <div class="fw-bold">{{ run.city or 'N/A' }}</div>
-                            </div>
-                        </div>
-                        <div class="mt-auto pt-3 text-end">
-                          <a href="#" class="comment-link small text-body-secondary" data-run-id="{{ run.id }}" data-scroll-to-comment="true">💬 说点什么 (<span class="comment-count" data-run-id="{{ run.id }}">0</span>)</a>
                         </div>
                     </div>
                 </div>
