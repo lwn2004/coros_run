@@ -204,7 +204,7 @@ def polyline2svg(encoded_polyline, svgpath):
   path_data = "".join(path_cmds)
 
   #Write SVG ---
-  svg = f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}"><path d="{path_data}" fill="none" stroke="currentColor" stroke-width="2"/></svg>'
+  svg = f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}"><path d="{path_data}" fill="none" stroke="currentColor" stroke-width="8"/></svg>'
   with open(svgpath, "w") as f:
     f.write(svg)
 
