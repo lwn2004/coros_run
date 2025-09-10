@@ -20,7 +20,7 @@ from stravalib.exc import RateLimitExceeded
 cc = OpenCC('t2s')  # 繁体转简体
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
-routeSVG = os.path.join(parent, "assets", "routesvg")
+routeSVG = os.path.join(parent, "public", "images", "routesvg")
 
 def adjust_time(time, tz_name):
     tc_offset = datetime.now(pytz.timezone(tz_name)).utcoffset()
