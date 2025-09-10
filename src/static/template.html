@@ -955,6 +955,9 @@
                       data-heart-rate="{{ run.heart_rate }}"                      
                       style="background-color: var(--hover-bg);
                     ">
+                        <div class="text-center mb-2">
+                            <object data="/images/routesvg/{{ run.id }}.svg" type="image/svg+xml" style="height: 40px; max-width: 100%;"></object>
+                        </div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="fw-bold text-primary-emphasis">{{ "%.2f"|format(run.distance / 1000) }} km</span>
                             <span class="small text-body-secondary recent-run-timestamp">{{ run.date.strftime('%Y-%m-%d %H:%M') }}</span>
@@ -975,12 +978,8 @@
                                 </div>
                             </div>
                             <div>
-                                <div class="stat-label mb-1">路线</div>
-                                <div class="fw-bold">
-                                    <object data="/images/routesvg/{{ run.id }}.svg" type="image/svg+xml" style="height: 24px; max-width: 50px; vertical-align: middle;">
-                                      {{ run.city or 'N/A' }}
-                                    </object>
-                                </div>
+                                <div class="stat-label mb-1">城市</div>
+                                <div class="fw-bold">{{ run.city or 'N/A' }}</div>
                             </div>
                         </div>
                         <div class="mt-auto pt-3 text-end">
@@ -1103,7 +1102,7 @@
                                     <th class="sortable-header" data-sort="pace">
                                         配速 <span class="sort-icon"><i class="bi bi-arrow-down-up"></i><i class="bi bi-arrow-down"></i><i class="bi bi-arrow-up"></i></span>
                                     </th>
-                                    <th>路线</th>
+                                    <th>城市</th>
                                 </tr>
                             </thead>
                             <tbody id="summary-table-body">
@@ -1123,11 +1122,7 @@
                                         <td>{{ "%.2f"|format(r.distance / 1000) }} <span class="small-muted">km</span></td>
                                         <td class="d-none d-sm-table-cell">{{ format_duration(r.duration) }}</td>
                                         <td>{{ r.pace }}</td>
-                                        <td>
-                                            <object data="/images/routesvg/{{ r.id }}.svg" type="image/svg+xml" style="height: 24px; max-width: 80px; vertical-align: middle;">
-                                                {{ r.city[:-1] if r.city and r.city.endswith("市") else r.city }}
-                                            </object>
-                                        </td>
+                                        <td>{{ r.city[:-1] if r.city and r.city.endswith("市") else r.city }}</td>
                                     </tr>
                                     {% endfor %}
                                 {% endfor %}
