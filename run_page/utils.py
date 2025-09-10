@@ -180,11 +180,7 @@ def rdp(points, epsilon):
         return left[:-1] + right
     else:
         return [points[0], points[-1]]
-def scale_coords(x, y):
-    nx = (x - min_x) / (max_x - min_x) if max_x > min_x else 0.5
-    ny = (y - min_y) / (max_y - min_y) if max_y > min_y else 0.5
-    ny = 1 - ny
-    return int(nx * width), int(ny * height)  # integers only
+
 def polyline2svg(encoded_polyline, svgpath):
   points = polyline.decode(encoded_polyline)
   simplified = rdp(points, epsilon=0.0001)
@@ -193,6 +189,11 @@ def polyline2svg(encoded_polyline, svgpath):
   min_x, max_x = min(lngs), max(lngs)
   min_y, max_y = min(lats), max(lats)
   width, height = 500, 500
+  def scale_coords(x, y):
+    nx = (x - min_x) / (max_x - min_x) if max_x > min_x else 0.5
+    ny = (y - min_y) / (max_y - min_y) if max_y > min_y else 0.5
+    ny = 1 - ny
+    return int(nx * width), int(ny * height)  # integers only
   coords = [scale_coords(lng, lat) for lat, lng in simplified]
   #Build compact path ---
   path_cmds = [f"M{coords[0][0]},{coords[0][1]}"]
