@@ -1234,6 +1234,7 @@
                         {'name': '30000公里', 'distance': 30000, 'date': milestone_dates.get(30000)},
                         {'name': '40000公里', 'distance': 40000, 'date': milestone_dates.get(40000)}
                         ] %}
+                        {% set is_past_current_stage = 0 %}
                         {% for m in milestones %}
                         <div class="d-flex justify-content-between align-items-center py-2 pb-entry 
                                     {% if m.date %}border-success border-2{% endif %}">
@@ -1247,12 +1248,16 @@
                             </small>
                             </div>
                             <div class="text-end">
-                            <div class="fw-bold {% if m.date %}text-success{% elif not m.date and not m.is_first %}text-muted{% endif %}">
-                                {% if m.is_first %}{{ "%.2f"|format(m.distance) }} km{% else %}{{ "%.0f"|format(m.distance) }} km{% endif %}
-                            </div>
-                            <small class="{% if m.date %}text-success{% else %}small-muted{% endif %}">
-                                {% if m.is_first %}首跑{% elif m.date %}里程碑达成{% else %}进行中{% endif %}
-                            </small>
+                            <div class="">
+                                {% if not m.date and is_past_current_stage == 0 %}
+                              <div class="progress mt-1" style="height: 4px;">
+                                <div class="progress-bar" role="progressbar" style="width: {{ "%.4f"|format(overall_stats.dist_km/m.distance) }}%;"></div>
+                                </div>
+                              </div>
+                              <small class="small-muted">
+                                {{ "%.2f"|format(overall_stats.dist_km/m.distance) }}%;">
+                              </small>
+                              {% set is_current_stage = 1 %}{% endif %}
                             </div>
                         </div>
                         {% endfor %}
