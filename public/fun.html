@@ -955,7 +955,7 @@
                       data-heart-rate="152"                      
                       style="background-color: var(--hover-bg);
                     ">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
                             <span class="fw-bold text-primary-emphasis">11.06 km</span>
                             <span class="small text-body-secondary recent-run-timestamp">2025-09-09 06:04</span>
                         </div>
@@ -1002,7 +1002,7 @@
                       data-heart-rate="145"                      
                       style="background-color: var(--hover-bg);
                     ">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
                             <span class="fw-bold text-primary-emphasis">20.05 km</span>
                             <span class="small text-body-secondary recent-run-timestamp">2025-09-07 05:50</span>
                         </div>
@@ -1049,7 +1049,7 @@
                       data-heart-rate="142"                      
                       style="background-color: var(--hover-bg);
                     ">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
                             <span class="fw-bold text-primary-emphasis">10.24 km</span>
                             <span class="small text-body-secondary recent-run-timestamp">2025-09-05 05:56</span>
                         </div>
@@ -15350,7 +15350,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-09-10 17:07:32 
+         | Last updated: 2025-09-10 17:17:59 
     </small>
 </footer>
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
@@ -16323,9 +16323,9 @@
               const svgEl = svgDoc.documentElement;
       
               // 继承 <object> 的样式
-              if (obj.getAttribute("style")) {
-                svgEl.setAttribute("style", obj.getAttribute("style"));
-              }
+              //if (obj.getAttribute("style")) {
+              //  svgEl.setAttribute("style", obj.getAttribute("style"));
+              //}
       
               obj.replaceWith(svgEl);
             })
