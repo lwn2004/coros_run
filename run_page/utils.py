@@ -6,6 +6,8 @@ import json
 import re
 import pytz
 from opencc import OpenCC
+import polyline
+from math import sqrt
 
 try:
     from rich import print
@@ -16,6 +18,10 @@ from stravalib.client import Client
 from stravalib.exc import RateLimitExceeded
 
 cc = OpenCC('t2s')  # 繁体转简体
+current = os.path.dirname(os.path.realpath(__file__))
+parent = os.path.dirname(current)
+routeSVG = os.path.join(parent, "assets", "routesvg")
+
 def adjust_time(time, tz_name):
     tc_offset = datetime.now(pytz.timezone(tz_name)).utcoffset()
     return time + tc_offset
@@ -72,17 +78,18 @@ def make_activities_file(
         json.dump(activities_list, f)
     processed = []
     for activity in activities_list:
+      polyline2svg(activity["summary_polyline"], os.path.join(routeSVG, activity["run_id"]) + ".svg")
       #print(activity["start_date_local"])
       location = activity.get("location_country", "")
       city = get_city_name(location)
       #print(city)
       activity["city"] = city
       processed.append(activity)
-    skip_columns = {"summary_polyline", "start_date", "location_country"}
-    filtered_runs = [
-      {k: v for k, v in rec.items() if k not in skip_columns}
-      for rec in processed
-    ]
+      skip_columns = {"summary_polyline", "start_date", "location_country"}
+      filtered_runs = [
+        {k: v for k, v in rec.items() if k not in skip_columns}
+        for rec in processed
+      ]
     with open(json_file2, "w") as f:
       json.dump(filtered_runs,f)
 
@@ -148,3 +155,54 @@ def upload_file_to_strava(client, file_name, data_type, force_to_run=True):
         print(
             f"Uploading {data_type} file: {file_name} to strava, upload_id: {r.upload_id}."
         )
+# --- Step 1: Ramer–Douglas–Peucker simplification ---
+def perpendicular_distance(pt, line_start, line_end):
+    if line_start == line_end:
+        return sqrt((pt[0]-line_start[0])**2 + (pt[1]-line_start[1])**2)
+    x0,y0 = pt
+    x1,y1 = line_start
+    x2,y2 = line_end
+    num = abs((y2-y1)*x0 - (x2-x1)*y0 + x2*y1 - y2*x1)
+    den = sqrt((y2-y1)**2 + (x2-x1)**2)
+    return num/den
+
+def rdp(points, epsilon):
+    if len(points) < 3:
+        return points
+    dmax, index = 0, 0
+    for i in range(1, len(points)-1):
+        d = perpendicular_distance(points[i], points[0], points[-1])
+        if d > dmax:
+            index, dmax = i, d
+    if dmax > epsilon:
+        left = rdp(points[:index+1], epsilon)
+        right = rdp(points[index:], epsilon)
+        return left[:-1] + right
+    else:
+        return [points[0], points[-1]]
+def scale_coords(x, y):
+    nx = (x - min_x) / (max_x - min_x) if max_x > min_x else 0.5
+    ny = (y - min_y) / (max_y - min_y) if max_y > min_y else 0.5
+    ny = 1 - ny
+    return int(nx * width), int(ny * height)  # integers only
+def polyline2svg(polyline, svgpath):
+  points = polyline.decode(polyline)
+  simplified = rdp(points, epsilon=0.0001)
+  # Normalize + scale ---
+  lats, lngs = zip(*simplified)
+  min_x, max_x = min(lngs), max(lngs)
+  min_y, max_y = min(lats), max(lats)
+  width, height = 500, 500
+  coords = [scale_coords(lng, lat) for lat, lng in simplified]
+  #Build compact path ---
+  path_cmds = [f"M{coords[0][0]},{coords[0][1]}"]
+  for (x1,y1),(x2,y2) in zip(coords, coords[1:]):
+    dx, dy = x2-x1, y2-y1
+    path_cmds.append(f"l{dx},{dy}")
+  path_data = "".join(path_cmds)
+
+  #Write SVG ---
+  svg = f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}"><path d="{path_data}" fill="none" stroke="currentColor" stroke-width="2"/></svg>'
+  with open(svgpath, "w") as f:
+    f.write(svg)
+
