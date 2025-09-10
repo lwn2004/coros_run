@@ -961,17 +961,19 @@
                         </div>
                         <div class="row g-2 h-100">
                             <div class="col-4 d-flex align-items-center justify-content-center">
+                              <div class="route-img hidden">
                                 <object class="route-svg" data="/images/routesvg/{{ run.id }}.svg" type="image/svg+xml">
                                     <div class="text-center p-2">
                                         <i class="bi bi-geo-alt-fill fs-2 text-body-secondary"></i>
                                         <div class="fw-bold small mt-1 text-body-secondary" style="line-height: 1.2;"> {{ run.city or '未知地区' }} 跑步</div>
                                     </div>
                                 </object>
+                              </div>
                             </div>
 
                             <div class="col-8 d-flex flex-column justify-content-between">
                                 <div>
-                                    <div class="row g-2 small text-body-secondary">
+                                    <div class="row g-2 small text-body-secondary ms-2 mt-2">
                                         <div class="col-4">
                                             <div class="stat-label mb-0">配速</div>
                                             <div class="fw-bold text-primary-emphasis">{{ run.pace }}</div>
@@ -2372,7 +2374,10 @@
         createAllCharts();
     } 
     document.addEventListener('DOMContentLoaded', function() {
-        setTheme(getPreferredTheme());
+        setTheme(getPreferredTheme());        
+        initializeUserProfile();
+        loadCommentCounts();
+        updateRelativeTimestamps();
         document.querySelectorAll("object[type='image/svg+xml']").forEach(obj => {
           const url = obj.getAttribute("data");
           fetch(url)
@@ -2391,10 +2396,10 @@
               obj.replaceWith(svgEl);
             })
             .catch(err => console.error("SVG load error:", err));
-        });      
-        initializeUserProfile();
-        loadCommentCounts();
-        updateRelativeTimestamps();
+        });  
+        document.querySelectorAll(".route-img").forEach(el => {
+          el.classList.remove("hidden");
+        });
         createAllCharts(); 
         document.getElementById('editProfileTrigger').addEventListener('click', () => { new bootstrap.Modal(document.getElementById('profileModal')).show(); });
         document.getElementById('detailEditProfileTrigger').addEventListener('click', () => { new bootstrap.Modal(document.getElementById('profileModal')).show(); });
