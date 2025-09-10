@@ -78,7 +78,8 @@ def make_activities_file(
         json.dump(activities_list, f)
     processed = []
     for activity in activities_list:
-      polyline2svg(activity["summary_polyline"], os.path.join(routeSVG, str(activity["run_id"]) + ".svg"))
+      if(activity["summary_polyline"]):
+        polyline2svg(activity["summary_polyline"], os.path.join(routeSVG, str(activity["run_id"]) + ".svg"))
       #print(activity["start_date_local"])
       location = activity.get("location_country", "")
       city = get_city_name(location)
