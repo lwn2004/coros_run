@@ -185,8 +185,8 @@ def scale_coords(x, y):
     ny = (y - min_y) / (max_y - min_y) if max_y > min_y else 0.5
     ny = 1 - ny
     return int(nx * width), int(ny * height)  # integers only
-def polyline2svg(polyline, svgpath):
-  points = polyline.decode(polyline)
+def polyline2svg(encoded_polyline, svgpath):
+  points = polyline.decode(encoded_polyline)
   simplified = rdp(points, epsilon=0.0001)
   # Normalize + scale ---
   lats, lngs = zip(*simplified)
