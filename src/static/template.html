@@ -959,24 +959,33 @@
                             <span class="fw-bold text-primary-emphasis">{{ "%.2f"|format(run.distance / 1000) }} km</span>
                             <span class="small text-body-secondary recent-run-timestamp">{{ run.date.strftime('%Y-%m-%d %H:%M') }}</span>
                         </div>
-                        <div class="d-flex justify-content-around text-center mt-3 flex-grow-1 align-items-center">
-                            <div>
-                                <div class="stat-label mb-1">配速</div>
-                                <div class="fw-bold">{{ run.pace }}</div>
+                        <div class="row g-2 h-100">
+                            <div class="col-4 d-flex align-items-center justify-content-center">
+                                <object class="route-svg" data=`/images/routesvg/{{ run.id }}.svg` type="image/svg+xml">
+                                    <div class="text-center p-2">
+                                        <i class="bi bi-geo-alt-fill fs-2 text-body-secondary"></i>
+                                        <div class="fw-bold small mt-1 text-body-secondary" style="line-height: 1.2;"> {{ run.city or '未知地区' }} 跑步</div>
+                                    </div>
+                                </object>
                             </div>
-                            <div>
-                                <div class="stat-label mb-1">用时</div>
-                                <div class="fw-bold">{{ format_duration(run.duration) }}</div>
-                            </div>
-                            <div>
-                                <div class="stat-label mb-1">心率</div>
-                                <div class="fw-bold">
-                                    {{ run.heart_rate or 'N/A' }}
+
+                            <div class="col-8 d-flex flex-column justify-content-between">
+                                <div>
+                                    <div class="row g-2 small text-body-secondary">
+                                        <div class="col-4">
+                                            <div class="stat-label mb-0">配速</div>
+                                            <div class="fw-bold text-primary-emphasis">{{ run.pace }}</div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="stat-label mb-0">用时</div>
+                                            <div class="fw-bold text-primary-emphasis">{{ format_duration(run.duration) }}</div>
+                                        </div>
+                                        <div class="col-4 mt-2">
+                                            <div class="stat-label mb-0">心率</div>
+                                            <div class="fw-bold text-primary-emphasis">{{ run.heart_rate or 'N/A' }}</div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div>
-                                <div class="stat-label mb-1">城市</div>
-                                <div class="fw-bold">{{ run.city or 'N/A' }}</div>
                             </div>
                         </div>
                         <div class="mt-auto pt-3 text-end">
@@ -2364,6 +2373,25 @@
     } 
     document.addEventListener('DOMContentLoaded', function() {
         setTheme(getPreferredTheme());
+        document.querySelectorAll("object[type='image/svg+xml']").forEach(obj => {
+          const url = obj.getAttribute("data");
+          fetch(url)
+            .then(resp => resp.text())
+            .then(svgText => {
+              // 把 <object> 替换成 SVG 元素
+              const parser = new DOMParser();
+              const svgDoc = parser.parseFromString(svgText, "image/svg+xml");
+              const svgEl = svgDoc.documentElement;
+      
+              // 继承 <object> 的样式
+              if (obj.getAttribute("style")) {
+                svgEl.setAttribute("style", obj.getAttribute("style"));
+              }
+      
+              obj.replaceWith(svgEl);
+            })
+            .catch(err => console.error("SVG load error:", err));
+        });      
         initializeUserProfile();
         loadCommentCounts();
         updateRelativeTimestamps();
