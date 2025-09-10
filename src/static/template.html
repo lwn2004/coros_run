@@ -955,7 +955,7 @@
                       data-heart-rate="{{ run.heart_rate }}"                      
                       style="background-color: var(--hover-bg);
                     ">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
                             <span class="fw-bold text-primary-emphasis">{{ "%.2f"|format(run.distance / 1000) }} km</span>
                             <span class="small text-body-secondary recent-run-timestamp">{{ run.date.strftime('%Y-%m-%d %H:%M') }}</span>
                         </div>
@@ -2383,9 +2383,9 @@
               const svgEl = svgDoc.documentElement;
       
               // 继承 <object> 的样式
-              if (obj.getAttribute("style")) {
-                svgEl.setAttribute("style", obj.getAttribute("style"));
-              }
+              //if (obj.getAttribute("style")) {
+              //  svgEl.setAttribute("style", obj.getAttribute("style"));
+              //}
       
               obj.replaceWith(svgEl);
             })
