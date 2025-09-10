@@ -975,8 +975,12 @@
                                 </div>
                             </div>
                             <div>
-                                <div class="stat-label mb-1">城市</div>
-                                <div class="fw-bold">{{ run.city or 'N/A' }}</div>
+                                <div class="stat-label mb-1">路线</div>
+                                <div class="fw-bold">
+                                    <object data="/images/routesvg/{{ run.id }}.svg" type="image/svg+xml" style="height: 24px; max-width: 50px; vertical-align: middle;">
+                                      {{ run.city or 'N/A' }}
+                                    </object>
+                                </div>
                             </div>
                         </div>
                         <div class="mt-auto pt-3 text-end">
@@ -1099,7 +1103,7 @@
                                     <th class="sortable-header" data-sort="pace">
                                         配速 <span class="sort-icon"><i class="bi bi-arrow-down-up"></i><i class="bi bi-arrow-down"></i><i class="bi bi-arrow-up"></i></span>
                                     </th>
-                                    <th>城市</th>
+                                    <th>路线</th>
                                 </tr>
                             </thead>
                             <tbody id="summary-table-body">
@@ -1119,7 +1123,11 @@
                                         <td>{{ "%.2f"|format(r.distance / 1000) }} <span class="small-muted">km</span></td>
                                         <td class="d-none d-sm-table-cell">{{ format_duration(r.duration) }}</td>
                                         <td>{{ r.pace }}</td>
-                                        <td>{{ r.city[:-1] if r.city and r.city.endswith("市") else r.city }}</td>
+                                        <td>
+                                            <object data="/images/routesvg/{{ r.id }}.svg" type="image/svg+xml" style="height: 24px; max-width: 80px; vertical-align: middle;">
+                                                {{ r.city[:-1] if r.city and r.city.endswith("市") else r.city }}
+                                            </object>
+                                        </td>
                                     </tr>
                                     {% endfor %}
                                 {% endfor %}
@@ -1464,10 +1472,6 @@
                 </div>
                 <div id="runDetailContent">
                     <div class="container-fluid px-4">
-                        <!--<div class="text-center my-4" id="detailHeroDistance">
-                            <span class="distance-value">--</span>
-                            <span class="distance-unit">公里</span>
-                        </div>-->
                         <div id="routeMapContainer" class="py-2"></div>
                         <div id="detailWeather" class="text-center small text-body-secondary mb-5"></div>
                         <div class="mb-5">
@@ -1610,8 +1614,8 @@
         <div id="photoShow"></div>
       </div>
     </div>
-  </div>
-</div>  
+  </div>  
+</div>
 <div class="modal fade" id="calendarEditorModal" tabindex="-1" aria-labelledby="calendarEditorModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
