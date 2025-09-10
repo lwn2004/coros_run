@@ -961,7 +961,7 @@
                         </div>
                         <div class="row g-2 h-100">
                             <div class="col-4 d-flex align-items-center justify-content-center">
-                              <div class="route-img hidden">
+                              <div class="route-img" style="display:none">
                                 <object class="route-svg" data="/images/routesvg/{{ run.id }}.svg" type="image/svg+xml">
                                     <div class="text-center p-2">
                                         <i class="bi bi-geo-alt-fill fs-2 text-body-secondary"></i>
@@ -2398,7 +2398,7 @@
             .catch(err => console.error("SVG load error:", err));
         });  
         document.querySelectorAll(".route-img").forEach(el => {
-          el.classList.remove("hidden");
+              el.style.display = "block";
         });
         createAllCharts(); 
         document.getElementById('editProfileTrigger').addEventListener('click', () => { new bootstrap.Modal(document.getElementById('profileModal')).show(); });
