@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-bs-theme="dark">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <title>步履不停 - 我的四万公里跑量挑战</title>
@@ -24,6 +24,16 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" rel="stylesheet">
   </noscript>
+  <script>
+    // 页面最早阶段设置主题
+    (function() {
+      const storedTheme = localStorage.getItem('theme');
+      const preferredTheme = storedTheme 
+          ? storedTheme 
+          : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-bs-theme', preferredTheme);
+    })();
+  </script>
   <style>
     /* Light Theme Variables */
     [data-bs-theme="light"] {
@@ -52,6 +62,21 @@
       --hover-bg: #3a3b3c;
       --marathon-color: #ff8700;
       --danger-color: #ff6b6b;
+    }
+    /* 按钮图标用 Bootstrap Icons 的 content */
+    #theme-toggle::before {
+      font-family: "bootstrap-icons";
+      font-size: 1.2rem;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    /* Dark 模式 → 亮太阳图标 */
+    [data-bs-theme="dark"] #theme-toggle::before {
+      content: "\f1d1"; /* bi-brightness-high-fill */
+    }
+    /* Light 模式 → 月亮星星图标 */
+    [data-bs-theme="light"] #theme-toggle::before {
+      content: "\f495"; /* bi-moon-stars-fill */
     }
     html {
       scroll-behavior: smooth;
@@ -809,9 +834,7 @@
 <div class="container position-relative">
   <div class="main-title-container">
     <h1 class="main-title">步履不停 <small class="main-subtitle text-body-secondary"> — 我的四万公里跑量挑战</small></h1>
-    <button id="theme-toggle" class="theme-toggle-btn" title="切换主题">
-        <i class="bi bi-brightness-high-fill"></i>
-    </button>
+    <button id="theme-toggle" class="theme-toggle-btn" title="切换主题"></button>
   </div>
   <div class="nav-wrapper border-bottom border-secondary-subtle mb-4">
     <ul class="nav nav-tabs" id="main-nav-tabs" role="tablist">
@@ -15377,7 +15400,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-09-11 09:43:15 
+         | Last updated: 2025-09-11 10:33:05 
     </small>
 </footer>
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
@@ -15716,16 +15739,7 @@
         return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     };
     const setTheme = (theme) => {
-        const icon = themeToggle.querySelector('i');
-        if (theme === 'dark') {
-            document.documentElement.setAttribute('data-bs-theme', 'dark');
-            icon.classList.remove('bi-moon-stars-fill');
-            icon.classList.add('bi-brightness-high-fill');
-        } else {
-            document.documentElement.setAttribute('data-bs-theme', 'light');
-            icon.classList.remove('bi-brightness-high-fill');
-            icon.classList.add('bi-moon-stars-fill');
-        }
+        document.documentElement.setAttribute('data-bs-theme', theme);
         localStorage.setItem('theme', theme);
         updateRootColors();
         if (monthlyDistanceChart) {
@@ -15746,6 +15760,7 @@
         };
         ['bg-color', 'card-bg', 'text-primary', 'hover-bg', 'success-color', 'accent-color'].forEach(setRgbVar);
     };
+    setTheme(getPreferredTheme());
     themeToggle.addEventListener('click', () => {
         const currentTheme = document.documentElement.getAttribute('data-bs-theme');
         setTheme(currentTheme === 'dark' ? 'light' : 'dark');
