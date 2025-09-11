@@ -839,7 +839,7 @@
   <div class="nav-wrapper border-bottom border-secondary-subtle mb-4">
     <ul class="nav nav-tabs" id="main-nav-tabs" role="tablist">
         <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary-pane" type="button" role="tab" aria-controls="summary-pane" aria-selected="true" data-hash="summary">概览</button>
+        <button class="nav-link" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary-pane" type="button" role="tab" aria-controls="summary-pane" aria-selected="true" data-hash="summary">概览</button>
         </li>
         <li class="nav-item" role="presentation">
         <button class="nav-link" id="data-tab" data-bs-toggle="tab" data-bs-target="#data-pane" type="button" role="tab" aria-controls="data-pane" aria-selected="false" data-hash="data">记录</button>
@@ -856,7 +856,7 @@
     </ul>
   </div>
   <div class="tab-content" id="mainTabContent">
-    <div class="tab-pane fade show active" id="summary-pane" role="tabpanel" aria-labelledby="summary-tab" tabindex="0">
+    <div class="tab-pane fade" id="summary-pane" role="tabpanel" aria-labelledby="summary-tab" tabindex="0">
         <div class="row g-3 mb-4">
             <div class="col-12 col-md-6 col-lg-5">
                 <div class="stat-card-flip-container h-100" id="dist-card-container">
@@ -1249,36 +1249,59 @@
                 <div class="col-lg-6 mb-4">
                     <div class="content-card h-100 d-flex flex-column">
                         <h5 class="card-title mb-3"><i class="bi bi-flag-fill text-success"></i> 里程碑</h5>
-                        {% set milestones = [
-                        {'name': '踏出第一步', 'distance': first_run_distance, 'date': first_run_date, 'is_first': True},
-                        {'name': '1000公里', 'distance': 1000, 'date': milestone_dates.get(1000)},
-                        {'name': '10000公里', 'distance': 10000, 'date': milestone_dates.get(10000)},
-                        {'name': '20000公里', 'distance': 20000, 'date': milestone_dates.get(20000)},
-                        {'name': '30000公里', 'distance': 30000, 'date': milestone_dates.get(30000)},
-                        {'name': '40000公里', 'distance': 40000, 'date': milestone_dates.get(40000)}
-                        ] %}
-                        {% for m in milestones %}
-                        <div class="d-flex justify-content-between align-items-center py-2 pb-entry 
-                                    {% if m.date %}border-success border-2{% endif %}">
-                            <div>
-                            <div class="fw-bold {% if m.date %}text-success{% endif %}">
-                                {{ m.name }}
-                                {% if m.date %}<span class="badge bg-success ms-2">已完成</span>{% endif %}
-                            </div>
-                            <small class="{% if m.date %}text-success{% else %}small-muted{% endif %}">
-                                {% if m.date %}{{ m.date.strftime('%Y年%m月%d日') }}{% else %}{% if m.is_first %}初次跑步{% else %}未达成{% endif %}{% endif %}
-                            </small>
-                            </div>
-                            <div class="text-end">
-                            <div class="fw-bold {% if m.date %}text-success{% elif not m.date and not m.is_first %}text-muted{% endif %}">
-                                {% if m.is_first %}{{ "%.2f"|format(m.distance) }} km{% else %}{{ "%.0f"|format(m.distance) }} km{% endif %}
-                            </div>
-                            <small class="{% if m.date %}text-success{% else %}small-muted{% endif %}">
-                                {% if m.is_first %}首跑{% elif m.date %}里程碑达成{% else %}进行中{% endif %}
-                            </small>
-                            </div>
-                        </div>
-                        {% endfor %}
+                          {% set milestones = [
+                          {'name': '踏出第一步', 'distance': first_run_distance, 'date': first_run_date, 'is_first': True},
+                          {'name': '1000公里', 'distance': 1000, 'date': milestone_dates.get(1000)},
+                          {'name': '10000公里', 'distance': 10000, 'date': milestone_dates.get(10000)},
+                          {'name': '20000公里', 'distance': 20000, 'date': milestone_dates.get(20000)},
+                          {'name': '30000公里', 'distance': 30000, 'date': milestone_dates.get(30000)},
+                          {'name': '40000公里', 'distance': 40000, 'date': milestone_dates.get(40000)}
+                          ] %}
+                          
+                          {# Find the first uncompleted milestone which will be the one "in progress" #}
+                          {% set next_milestone_index = -1 %}
+                          {% for m in milestones %}
+                              {% if not m.date and not m.is_first and next_milestone_index == -1 %}
+                                  {% set next_milestone_index = loop.index0 %}
+                              {% endif %}
+                          {% endfor %}
+                          
+                          {# Loop through all milestones and display them based on their status #}
+                          {% for m in milestones %}
+                          <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
+                              <div>
+                                  <span class="fw-bold">{{ m.name }}</span>
+                                  {# Show a green "Completed" badge if there is a date #}
+                                  {% if m.date %}
+                                      <span class="badge bg-success ms-2" style="font-size: 0.8em; font-weight: 500;">已完成</span>
+                                  {# Show a blue "In Progress" badge for the current milestone #}
+                                  {% elif loop.index0 == next_milestone_index %}
+                                      <span class="badge ms-2" style="font-size: 0.8em; font-weight: 500; background-color: var(--accent-color); color: var(--card-bg);">进行中</span>
+                                  {% endif %}
+                              </div>
+                              <div class="text-end" style="min-width: 130px;">
+                                  {# If completed, show the date #}
+                                  {% if m.date %}
+                                      <small class="text-body-secondary">{{ m.date.strftime('%Y年%m月%d日') }}</small>
+                                  {# If in progress, calculate and show the progress bar #}
+                                  {% elif loop.index0 == next_milestone_index %}
+                                      {% set prev_milestone_dist = milestones[loop.index0 - 1].distance if loop.index0 > 0 else 0 %}
+                                      {% set progress = (overall_stats.dist_km - prev_milestone_dist) / (m.distance - prev_milestone_dist) * 100 %}
+                                      {% if progress > 100 %}{% set progress = 100 %}{% endif %}
+                                      {% if progress < 0 %}{% set progress = 0 %}{% endif %}
+                                      <div class="w-100">
+                                          <div class="progress mb-1" style="height: 6px; background-color: var(--hover-bg);">
+                                              <div class="progress-bar" role="progressbar" style="width: {{ '%.2f'|format(progress) }}%;" aria-valuenow="{{ '%.2f'|format(progress) }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                          </div>
+                                          <small class="text-body-secondary" style="font-size: 0.8em;">进度 {{ "%.2f"|format(progress) }}%</small>
+                                      </div>
+                                  {# Otherwise, show "Not Achieved" #}
+                                  {% else %}
+                                      <small class="text-body-secondary">未达成</small>
+                                  {% endif %}
+                              </div>
+                          </div>
+                          {% endfor %}
                     </div>
                 </div>
                 <div class="col-lg-6 mb-4">
