@@ -1249,59 +1249,59 @@
                 <div class="col-lg-6 mb-4">
                     <div class="content-card h-100 d-flex flex-column">
                         <h5 class="card-title mb-3"><i class="bi bi-flag-fill text-success"></i> 里程碑</h5>
-                          {% set milestones = [
-                          {'name': '踏出第一步', 'distance': first_run_distance, 'date': first_run_date, 'is_first': True},
-                          {'name': '1000公里', 'distance': 1000, 'date': milestone_dates.get(1000)},
-                          {'name': '10000公里', 'distance': 10000, 'date': milestone_dates.get(10000)},
-                          {'name': '20000公里', 'distance': 20000, 'date': milestone_dates.get(20000)},
-                          {'name': '30000公里', 'distance': 30000, 'date': milestone_dates.get(30000)},
-                          {'name': '40000公里', 'distance': 40000, 'date': milestone_dates.get(40000)}
-                          ] %}
-                          
-                          {# Find the first uncompleted milestone which will be the one "in progress" #}
-                          {% set next_milestone_index = -1 %}
-                          {% for m in milestones %}
-                              {% if not m.date and not m.is_first and next_milestone_index == -1 %}
-                                  {% set next_milestone_index = loop.index0 %}
-                              {% endif %}
-                          {% endfor %}
-                          
-                          {# Loop through all milestones and display them based on their status #}
-                          {% for m in milestones %}
-                          <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
-                              <div>
-                                  <span class="fw-bold">{{ m.name }}</span>
-                                  {# Show a green "Completed" badge if there is a date #}
-                                  {% if m.date %}
-                                      <span class="badge bg-success ms-2" style="font-size: 0.8em; font-weight: 500;">已完成</span>
-                                  {# Show a blue "In Progress" badge for the current milestone #}
-                                  {% elif loop.index0 == next_milestone_index %}
-                                      <span class="badge ms-2" style="font-size: 0.8em; font-weight: 500; background-color: var(--accent-color); color: var(--card-bg);">进行中</span>
-                                  {% endif %}
-                              </div>
-                              <div class="text-end" style="min-width: 130px;">
-                                  {# If completed, show the date #}
-                                  {% if m.date %}
-                                      <small class="text-body-secondary">{{ m.date.strftime('%Y年%m月%d日') }}</small>
-                                  {# If in progress, calculate and show the progress bar #}
-                                  {% elif loop.index0 == next_milestone_index %}
-                                      {% set prev_milestone_dist = milestones[loop.index0 - 1].distance if loop.index0 > 0 else 0 %}
-                                      {% set progress = (overall_stats.dist_km - prev_milestone_dist) / (m.distance - prev_milestone_dist) * 100 %}
-                                      {% if progress > 100 %}{% set progress = 100 %}{% endif %}
-                                      {% if progress < 0 %}{% set progress = 0 %}{% endif %}
-                                      <div class="w-100">
-                                          <div class="progress mb-1" style="height: 6px; background-color: var(--hover-bg);">
-                                              <div class="progress-bar" role="progressbar" style="width: {{ '%.2f'|format(progress) }}%;" aria-valuenow="{{ '%.2f'|format(progress) }}" aria-valuemin="0" aria-valuemax="100"></div>
-                                          </div>
-                                          <small class="text-body-secondary" style="font-size: 0.8em;">进度 {{ "%.2f"|format(progress) }}%</small>
-                                      </div>
-                                  {# Otherwise, show "Not Achieved" #}
-                                  {% else %}
-                                      <small class="text-body-secondary">未达成</small>
-                                  {% endif %}
-                              </div>
-                          </div>
-                          {% endfor %}
+                            {% set milestones = [
+                            {'name': '踏出第一步', 'distance': first_run_distance, 'date': first_run_date, 'is_first': True},
+                            {'name': '1000公里', 'distance': 1000, 'date': milestone_dates.get(1000)},
+                            {'name': '10000公里', 'distance': 10000, 'date': milestone_dates.get(10000)},
+                            {'name': '20000公里', 'distance': 20000, 'date': milestone_dates.get(20000)},
+                            {'name': '30000公里', 'distance': 30000, 'date': milestone_dates.get(30000)},
+                            {'name': '40000公里', 'distance': 40000, 'date': milestone_dates.get(40000)}
+                            ] %}
+                            
+                            {# CORRECTED: Use a namespace to correctly set the index from within the loop #}
+                            {% set ns = namespace(next_milestone_index=-1) %}
+                            {% for m in milestones %}
+                                {% if not m.date and not m.is_first and ns.next_milestone_index == -1 %}
+                                    {% set ns.next_milestone_index = loop.index0 %}
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {# Loop through all milestones and display them based on their status #}
+                            {% for m in milestones %}
+                            <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
+                                <div>
+                                    <span class="fw-bold">{{ m.name }}</span>
+                                    {# Show a green "Completed" badge if there is a date #}
+                                    {% if m.date %}
+                                        <span class="badge bg-success ms-2" style="font-size: 0.8em; font-weight: 500;">已完成</span>
+                                    {# CORRECTED: Check against the namespaced variable #}
+                                    {% elif loop.index0 == ns.next_milestone_index %}
+                                        <span class="badge ms-2" style="font-size: 0.8em; font-weight: 500; background-color: var(--accent-color); color: var(--card-bg);">进行中</span>
+                                    {% endif %}
+                                </div>
+                                <div class="text-end" style="min-width: 130px;">
+                                    {# If completed, show the date #}
+                                    {% if m.date %}
+                                        <small class="text-body-secondary">{{ m.date.strftime('%Y年%m月%d日') }}</small>
+                                    {# If in progress, calculate and show the progress bar #}
+                                    {% elif loop.index0 == ns.next_milestone_index %}
+                                        {% set prev_milestone_dist = milestones[loop.index0 - 1].distance if loop.index0 > 0 else 0 %}
+                                        {% set progress = (overall_stats.dist_km - prev_milestone_dist) / (m.distance - prev_milestone_dist) * 100 %}
+                                        {% if progress > 100 %}{% set progress = 100 %}{% endif %}
+                                        {% if progress < 0 %}{% set progress = 0 %}{% endif %}
+                                        <div class="w-100">
+                                            <div class="progress mb-1" style="height: 6px; background-color: var(--hover-bg);">
+                                                <div class="progress-bar" role="progressbar" style="width: {{ '%.2f'|format(progress) }}%;" aria-valuenow="{{ '%.2f'|format(progress) }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                            <small class="text-body-secondary" style="font-size: 0.8em;">进度 {{ "%.2f"|format(progress) }}%</small>
+                                        </div>
+                                    {# Otherwise, show "Not Achieved" #}
+                                    {% else %}
+                                        <small class="text-body-secondary">未达成</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
                     </div>
                 </div>
                 <div class="col-lg-6 mb-4">
