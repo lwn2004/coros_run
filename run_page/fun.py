@@ -626,7 +626,7 @@ def main():
     except FileNotFoundError:
         print(f"Error: failed to find run file {path}")
         recent_run_data = {}
-    if(recent_run_data)
+    if(recent_run_data):
       generate_share_card(bg_file, recent_run_data, sharecard_file)
   
     context = prepare_template_context(all_runs, fastest_run, pb_file, events_file)
@@ -651,6 +651,7 @@ def main():
 if __name__ == "__main__":
     parent = os.path.dirname(current) 
     main()
+
 
 
 
