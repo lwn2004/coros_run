@@ -513,11 +513,11 @@ def generate_share_card(bg_file, run_data, save_img_file):
   W, H = bg.size
   
   # ==== 2. run data ====
-  date_str = run_data['start_time']
-  distance = run_data['summary']['distance_km']
+  date_str = datetime.fromisoformat(run_data['start_time']).astimezone(timezone(timedelta(hours=8))).strftime("%b %d, %Y")
+  distance = str(run_data['summary']['distance_km'])
   duration = run_data['summary']['duration']
   pace = run_data['summary']['avg_pace']
-  kcals = run_data['summary']['calories_kcal']
+  kcals = str(run_data['summary']['calories_kcal'])
   print("Printing values from run data")
   print(date_str)
   print(distance)
@@ -667,6 +667,7 @@ def main():
 if __name__ == "__main__":
     parent = os.path.dirname(current) 
     main()
+
 
 
 
