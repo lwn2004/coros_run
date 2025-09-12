@@ -2333,6 +2333,7 @@
                 }
             });
             const yearlyDualAxisCtx = document.getElementById('yearlyDualAxisChart').getContext('2d');
+            const cumulativeTruncatedData = yearlyDualAxisData.cumulative_data.slice(0, currentMonth + 1);                                                                           
             yearlyDualAxisChart = new Chart(yearlyDualAxisCtx, {
                 type: 'bar',
                 data: {
