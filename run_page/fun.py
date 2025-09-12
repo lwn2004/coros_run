@@ -5,6 +5,9 @@ from jinja2 import Environment, FileSystemLoader
 import sys
 import locale
 import os
+from PIL import Image, ImageDraw, ImageFont, ImageEnhance
+import matplotlib.pyplot as plt
+import io
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 # --- Configuration ---
@@ -504,6 +507,100 @@ def prepare_template_context(all_runs, fastest_run, pb_file, events_file):
         "chart_month_over_month": chart_month_over_month,
         "chart_yearly_dual_axis": chart_yearly_dual_axis,
     }
+def generate_share_card(bg_file, run_data, save_img_file):
+  # ==== 1. open bg ====
+  bg = Image.open(bg_file.convert("RGBA")
+  W, H = bg.size
+  
+  # ==== 2. run data ====
+  date_str = run_data['start_time']
+  distance = run_data['summary']['distance_km']
+  duration = run_data['summary']['duration']
+  pace = run_data['summary']['avg_pace']
+  kcals = run_data['summary']['calories_kcal']
+  
+  # ==== 3. route ====
+  route_x = [0, 1, 2, 3, 4, 5, 6]
+  route_y = [0, 1, 0.5, 1.5, 1, 2, 1.5]
+  
+  plt.figure(figsize=(2,2))
+  plt.plot(route_x, route_y, color="white", linewidth=3)
+  plt.axis("off")
+  
+  buf = io.BytesIO()
+  plt.savefig(buf, format="PNG", bbox_inches="tight", transparent=True, pad_inches=0.05)
+  plt.close()
+  buf.seek(0)
+  route_img = Image.open(buf).convert("RGBA")
+  
+  # transparency + scale 
+  scale = 0.8
+  rw, rh = route_img.size
+  route_img = route_img.resize((int(rw*scale), int(rh*scale)))
+  alpha = route_img.split()[3]
+  alpha = ImageEnhance.Brightness(alpha).enhance(0.4)
+  route_img.putalpha(alpha)
+  bg.paste(route_img, ((W-route_img.size[0])//2, H-route_img.size[1]-60), route_img)
+  
+  # ==== 4. fonts ====
+  def get_font(preferred_fonts, size):
+      for f in preferred_fonts:
+          try:
+              return ImageFont.truetype(f, size)
+          except OSError:
+              continue
+      return ImageFont.load_default()
+  
+  preferred_fonts = [
+      "/System/Library/Fonts/Supplemental/Helvetica.ttc",  # macOS
+      "C:/Windows/Fonts/arial.ttf",                       # Windows
+      "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",  # Linux
+      "/usr/share/fonts/truetype/roboto/Roboto-Regular.ttf"
+  ]
+  
+  font_big   = get_font(preferred_fonts, 140)
+  font_km    = get_font(preferred_fonts, 50)
+  font_small = get_font(preferred_fonts, 42)
+  font_label = get_font(preferred_fonts, 28)
+  font_date  = get_font(preferred_fonts, 45)
+  
+  draw = ImageDraw.Draw(bg)
+  
+  # ==== 5. add text ====
+  
+  # date
+  tw, th = draw.textsize(date_str, font=font_date)
+  draw.text(((W-tw)//2, 100), date_str, font=font_date, fill=(200,200,200,255))
+  
+  # distance + KM
+  tw, th = draw.textsize(distance, font=font_big)
+  x = (W - tw) // 2
+  y = H//3
+  draw.text((x, y), distance, font=font_big, fill=(255,255,255,255))
+  
+  tw_km, th_km = draw.textsize("KM", font=font_km)
+  draw.text((x + tw + 15, y + 40), "KM", font=font_km, fill=(255,255,255,255))
+  
+  #  (TIME / PACE / KCALS)
+  labels = ["TIME", "PACE", "kCALS"]
+  values = [duration, pace, kcals]
+  spacing = W // 3
+  
+  for i, (label, value) in enumerate(zip(labels, values)):
+      # 
+      tw, th = draw.textsize(label, font=font_label)
+      xpos = spacing*i + (spacing - tw)//2
+      ypos = H//3 + 200
+      draw.text((xpos, ypos), label, font=font_label, fill=(180,180,180,255))
+  
+      #
+      tw, th = draw.textsize(value, font=font_small)
+      xpos = spacing*i + (spacing - tw)//2
+      ypos = H//3 + 240
+      draw.text((xpos, ypos), value, font=font_small, fill=(240,240,240,255))
+  
+  # ==== 6. save ====
+  bg.save(save_img_file)
 
 def main():
     runs_file = os.path.join(parent, "src", "static", "all.json")
@@ -511,6 +608,8 @@ def main():
     events_file = os.path.join(parent, "src", "static", "events.json")
     template_file = "template.html"
     output_file = os.path.join(parent, "public", "fun.html")
+    bg_file = os.path.join(parent, "public", "images", "sharecardbg.jpg")
+    sharecard_file = os.path.join(parent, "public", "images", "card.png")
 
     setup_locale()
 
@@ -518,7 +617,18 @@ def main():
     if not all_runs:
         print("No run data found. Aborting.")
         return
-
+    long_runs = [run for run in all_runs if run['distance'] > 1000]
+    recent_run = list(reversed(long_runs[-1]))
+    recent_run_json = os.path.join(parent, "public", "data", "details", recent_run['id'] + ".json")
+    try:
+        with open(recent_run_json, 'r', encoding='utf-8') as f:
+            recent_run_data = json.load(f)
+    except FileNotFoundError:
+        print(f"Error: failed to find run file {path}")
+        recent_run_data = {}
+    if(recent_run_data)
+      generate_share_card(bg_file, recent_run_data, sharecard_file)
+  
     context = prepare_template_context(all_runs, fastest_run, pb_file, events_file)
 
     env = Environment(loader=FileSystemLoader(os.path.join(current, '..', 'src', 'static')), autoescape=True)
@@ -541,5 +651,6 @@ def main():
 if __name__ == "__main__":
     parent = os.path.dirname(current) 
     main()
+
 
 
