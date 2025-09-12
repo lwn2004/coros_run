@@ -30,5 +30,5 @@ duckdb
 opencc-python-reimplemented
 jinja2
 fitparse
-pillow
+pillow==9.5.0
 matplotlib
