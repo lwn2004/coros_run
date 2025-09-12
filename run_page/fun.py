@@ -569,16 +569,22 @@ def generate_share_card(bg_file, run_data, save_img_file):
   # ==== 5. add text ====
   
   # date
-  tw, th = draw.textsize(date_str, font=font_date)
+  #tw, th = draw.textsize(date_str, font=font_date)
+  left, top, right, bottom = draw.textbbox((0,0), date_str, font=font_date)
+  tw, th = right, bottom
   draw.text(((W-tw)//2, 100), date_str, font=font_date, fill=(200,200,200,255))
   
   # distance + KM
-  tw, th = draw.textsize(distance, font=font_big)
+  #tw, th = draw.textsize(distance, font=font_big)
+  left, top, right, bottom = draw.textbbox((0,0), distance, font=font_big)
+  tw, th = right, bottom
   x = (W - tw) // 2
   y = H//3
   draw.text((x, y), distance, font=font_big, fill=(255,255,255,255))
   
-  tw_km, th_km = draw.textsize("KM", font=font_km)
+  #tw_km, th_km = draw.textsize("KM", font=font_km)
+  left, top, right, bottom = draw.textbbox((0,0), "KM", font=font_km)
+  tw, th = right, bottom
   draw.text((x + tw + 15, y + 40), "KM", font=font_km, fill=(255,255,255,255))
   
   #  (TIME / PACE / KCALS)
@@ -588,13 +594,17 @@ def generate_share_card(bg_file, run_data, save_img_file):
   
   for i, (label, value) in enumerate(zip(labels, values)):
       # 
-      tw, th = draw.textsize(label, font=font_label)
+      #tw, th = draw.textsize(label, font=font_label)
+      left, top, right, bottom = draw.textbbox((0,0), label, font=font_label)
+      tw, th = right, bottom
       xpos = spacing*i + (spacing - tw)//2
       ypos = H//3 + 200
       draw.text((xpos, ypos), label, font=font_label, fill=(180,180,180,255))
   
       #
-      tw, th = draw.textsize(value, font=font_small)
+      #tw, th = draw.textsize(value, font=font_small)
+      left, top, right, bottom = draw.textbbox((0,0), value, font=font_small)
+      tw, th = right, bottom
       xpos = spacing*i + (spacing - tw)//2
       ypos = H//3 + 240
       draw.text((xpos, ypos), value, font=font_small, fill=(240,240,240,255))
@@ -651,6 +661,7 @@ def main():
 if __name__ == "__main__":
     parent = os.path.dirname(current) 
     main()
+
 
 
 
