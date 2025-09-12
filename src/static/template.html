@@ -714,11 +714,11 @@
         font-size: 0.8rem;
         color: var(--text-secondary);
     }
-    #runDetailModal .analysis-summary {
+    #runDetailModal .analysis-summary, .analysis-summary {
         font-size: 0.9rem;
         color: var(--text-secondary);
     }
-    #runDetailModal .analysis-summary strong {
+    #runDetailModal .analysis-summary strong, .analysis-summary strong {
         color: var(--text-primary);
         font-weight: 600;
     }
@@ -796,7 +796,7 @@
     }
     @media (min-width: 992px) {
       .border-start-lg {
-        border-left: 1px solid var(--bs-border-color);
+        border-left: 1px solid;
       }
     }
   </style>
@@ -958,7 +958,6 @@
                                 <object class="route-svg" data="/images/routesvg/{{ run.id }}.svg" type="image/svg+xml" style="display:none;">
                                 </object>
                             </div>
-
                             <div class="col-9 d-flex flex-column justify-content-between">
                                 <div>
                                     <div class="row g-2 small text-body-secondary ms-2">
@@ -1005,20 +1004,35 @@
                 </div>
             </div>
             <div class="card-body">
-                <div id="monthOverMonthChartContainer" style="display: block; height: 300px;">
-                    <canvas id="monthOverMonthChart" aria-label="本月与上月跑量对比图表"></canvas>
+                <div id="monthOverMonthChartContainer" style="display: block;">
+                    <div id="monthOverMonthChartStats" class="analysis-summary mb-2 text-center"></div>
+                    <div style="height: 300px;">
+                        <canvas id="monthOverMonthChart" aria-label="本月与上月跑量对比图表"></canvas>
+                    </div>
                 </div>                
-				<div id="dailyChartContainer" style="display: none; height: 300px;">
-                    <canvas id="dailyDistanceChart" aria-label="最近30天跑步距离统计图表"></canvas>
+				<div id="dailyChartContainer" style="display: none;">
+                    <div id="dailyChartStats" class="analysis-summary mb-2 text-center"></div>
+                    <div style="height: 300px;">
+                        <canvas id="dailyDistanceChart" aria-label="最近30天跑步距离统计图表"></canvas>
+                    </div>
                 </div>
-                <div id="monthlyChartContainer" style="display: none; height: 300px;">
-                    <canvas id="monthlyDistanceChart" aria-label="最近12个月跑步距离统计图表"></canvas>
+                <div id="monthlyChartContainer" style="display: none;">
+                    <div id="monthlyChartStats" class="analysis-summary mb-2 text-center"></div>
+                    <div style="height: 300px;">
+                        <canvas id="monthlyDistanceChart" aria-label="最近12个月跑步距离统计图表"></canvas>
+                    </div>
                 </div>
-                <div id="yearlyDualAxisChartContainer" style="display: none; height: 300px;">
-                    <canvas id="yearlyDualAxisChart" aria-label="本年度累计跑量图表"></canvas>
+                <div id="yearlyDualAxisChartContainer" style="display: none;">
+                    <div id="yearlyDualAxisChartStats" class="analysis-summary mb-2 text-center"></div>
+                    <div style="height: 300px;">
+                        <canvas id="yearlyDualAxisChart" aria-label="本年度累计跑量图表"></canvas>
+                    </div>
                 </div>
-                <div id="yearlyChartContainer" style="display: none; height: 300px;">
-                    <canvas id="yearlyDistanceChart" aria-label="年度跑步距离统计图表"></canvas>
+                <div id="yearlyChartContainer" style="display: none;">
+                    <div id="yearlyChartStats" class="analysis-summary mb-2 text-center"></div>
+                    <div style="height: 300px;">
+                        <canvas id="yearlyDistanceChart" aria-label="年度跑步距离统计图表"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1188,7 +1202,6 @@
                 <button id="editCalendarBtn" class="btn btn-sm" style="display: none;"><i class="bi bi-pencil-square"></i></button>
             </div>
         </div>
-
         <div id="race-countdown-container" class="content-card text-center mb-4" style="display: none; border-color: var(--accent-color);">
             <h6 class="card-title mb-1 text-body-secondary">下一场比赛倒计时</h6>
             <p id="countdown-race-name" class="h4 accent-color-text fw-bold">赛事名称</p>
@@ -1200,7 +1213,6 @@
             </div>
             <p id="countdown-race-date" class="text-body-secondary small mb-0">YYYY-MM-DD</p>
         </div>
-
         <div id="marathon-calendar-view" style="display: none;">
             <div id="marathon-calendar-container"></div>
         </div>
@@ -1228,14 +1240,12 @@
                         {'name': '30000公里', 'distance': 30000, 'date': milestone_dates.get(30000)},
                         {'name': '40000公里', 'distance': 40000, 'date': milestone_dates.get(40000)}
                         ] %}
-                        
                         {% set ns = namespace(next_milestone_index=-1) %}
                         {% for m in milestones %}
                             {% if not m.date and not m.is_first and ns.next_milestone_index == -1 %}
                                 {% set ns.next_milestone_index = loop.index0 %}
                             {% endif %}
                         {% endfor %}
-                        
                         {% for m in milestones %}
                         <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
                             <div>
@@ -1947,12 +1957,10 @@
         if (filterStatus !== 'all') {
             eventsToDisplay = marathonEventsCache.filter(e => e.status === filterStatus);
         }
-        
         if (eventsToDisplay.length === 0) {
             container.innerHTML = `<div class="content-card text-center text-body-secondary">暂无${filterStatus === 'all' ? '' : `“${filterStatus}”状态的`}赛事计划</div>`;
             return;
         }
-
         const sortedEvents = [...eventsToDisplay].sort((a, b) => new Date(a.date) - new Date(b.date));
         const statusBadges = {
             '中签，参赛': 'text-bg-success',
@@ -1965,7 +1973,6 @@
             const levelBadge = (event.level && event.level !== '普通赛事') 
                 ? `<span class="badge rounded-pill text-bg-warning ms-2" style="font-size: 0.7em; vertical-align: middle;">${event.level}</span>` 
                 : '';
-            
             let willingnessStars = '';
             const willingness = parseInt(event.willingness, 10) || 0;
             if (willingness > 0) {
@@ -1975,7 +1982,6 @@
                 }
                 willingnessStars = `<span class="ms-2" title="意愿度: ${willingness}/5">${starsHtml}</span>`;
             }
-
             let channelInfo = '';
             if (event.channel) {
                 const isLink = event.channel.startsWith('http');
@@ -1984,7 +1990,6 @@
                     : `<span class="text-body-secondary">${event.channel}</span>`;
                 channelInfo = `<div class="mt-1"><i class="bi bi-link-45deg me-1"></i><strong>报名渠道:</strong> ${channelContent}</div>`;
             }
-
             return `
             <div class="content-card mb-3">
                  <div class="d-flex justify-content-between align-items-center mb-2">
@@ -2020,7 +2025,6 @@
     async function generateMarathonCalendar() {
         const container = document.getElementById('marathon-calendar-container');
         const containerMarathonList = document.getElementById('marathon-list-container');
-      
         if (!container || !containerMarathonList) return;
         containerMarathonList.innerHTML = '<div class="content-card text-center text-body-secondary">加载赛历数据中...</div>';
         try {
@@ -2263,41 +2267,26 @@
             const yearlyAvg = yearlyData.filter(d => d > 0).length > 0 ? (yearlyTotal / yearlyData.filter(d => d > 0).length) : 0;
             Chart.defaults.font.family = "'Noto Sans SC', sans-serif";
             const annotationDefaults = (avg) => ({ type: 'line', yMin: avg, yMax: avg, borderColor: colors.annotationColor, borderWidth: 1.5, borderDash: [6, 6] });
+            // Daily Chart
             const dailyCtx = document.getElementById('dailyDistanceChart').getContext('2d');
+            document.getElementById('dailyChartStats').innerHTML = `总跑量: <strong>${dailyTotal.toFixed(1)}</strong> km <span class="mx-2">|</span> 次均: <strong>${dailyAvg.toFixed(1)}</strong> km`;
             dailyDistanceChart = new Chart(dailyCtx, { 
                 type: 'bar', 
-                data: { 
-                    labels: dailyRawData.labels, 
-                    datasets: [{ 
-                        label: '距离 (km)', 
-                        data: dailyRawData.data, 
-                        backgroundColor: dailyRawData.colors, 
-                        borderColor: dailyRawData.colors.map(c => c.replace('0.6', '1')), 
-                        borderWidth: 1, 
-                        borderRadius: 2
-                    }] 
-                }, 
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    scales: { 
-                        y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.tickColor, callback: (v) => v + ' km'}}, 
-                        x: { grid: { display: false }, ticks: { color: colors.tickColor, maxRotation: 0, minRotation: 0 }}
-                    }, 
-                    plugins: { 
-                        legend: { display: false }, 
-                        title: { display: true, text: `总跑量: ${dailyTotal.toFixed(1)} km | 次均: ${dailyAvg.toFixed(1)} km`, align: 'start', color: colors.tickColor, font: { weight: 'normal' } },
-                        tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, 
-                        annotation: { annotations: { avgLine: annotationDefaults(dailyAvg) } } 
-                    } 
-                } 
+                data: { labels: dailyRawData.labels, datasets: [{ label: '距离 (km)', data: dailyRawData.data, backgroundColor: dailyRawData.colors, borderColor: dailyRawData.colors.map(c => c.replace('0.6', '1')), borderWidth: 1, borderRadius: 2 }] }, 
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: colors.tickColor, maxRotation: 0, minRotation: 0 }}}, plugins: { legend: { display: false }, title: { display: false }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(dailyAvg) } } } } 
             });
+            // Monthly Chart
             const monthlyCtx = document.getElementById('monthlyDistanceChart').getContext('2d');
-            monthlyDistanceChart = new Chart(monthlyCtx, { type: 'bar', data: { labels: {{ chart_monthly_labels|tojson }}, datasets: [{ label: '距离 (km)', data: monthlyData, backgroundColor: colors.accentColor + '99', borderColor: colors.accentColor, borderWidth: 1, borderRadius: 4, hoverBackgroundColor: colors.accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: colors.tickColor, maxRotation: 0, minRotation: 0 }}}, plugins: { legend: { display: false }, title: { display: true, text: `总跑量: ${monthlyTotal.toFixed(1)} km | 月均: ${monthlyAvg.toFixed(1)} km`, align: 'start', color: colors.tickColor, font: { weight: 'normal' } }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(monthlyAvg) } } } } });
+            document.getElementById('monthlyChartStats').innerHTML = `总跑量: <strong>${monthlyTotal.toFixed(1)}</strong> km <span class="mx-2">|</span> 月均: <strong>${monthlyAvg.toFixed(1)}</strong> km`;
+            monthlyDistanceChart = new Chart(monthlyCtx, { type: 'bar', data: { labels: {{ chart_monthly_labels|tojson }}, datasets: [{ label: '距离 (km)', data: monthlyData, backgroundColor: colors.accentColor + '99', borderColor: colors.accentColor, borderWidth: 1, borderRadius: 4, hoverBackgroundColor: colors.accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: colors.tickColor, maxRotation: 0, minRotation: 0 }}}, plugins: { legend: { display: false }, title: { display: false }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(monthlyAvg) } } } } });
+            // Yearly Chart
             const yearlyCtx = document.getElementById('yearlyDistanceChart').getContext('2d');
-            yearlyDistanceChart = new Chart(yearlyCtx, { type: 'bar', data: { labels: {{ chart_yearly_labels|tojson }}, datasets: [{ label: '距离 (km)', data: yearlyData, backgroundColor: colors.accentColor + '99', borderColor: colors.accentColor, borderWidth: 1, borderRadius: 4, hoverBackgroundColor: colors.accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: colors.tickColor, maxRotation: 0, minRotation: 0 } } }, plugins: { legend: { display: false }, title: { display: true, text: `总跑量: ${yearlyTotal.toFixed(1)} km | 年均: ${yearlyAvg.toFixed(1)} km`, align: 'start', color: colors.tickColor, font: { weight: 'normal' } }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(yearlyAvg) } } } } });
+            document.getElementById('yearlyChartStats').innerHTML = `总跑量: <strong>${yearlyTotal.toFixed(1)}</strong> km <span class="mx-2">|</span> 年均: <strong>${yearlyAvg.toFixed(1)}</strong> km`;
+            yearlyDistanceChart = new Chart(yearlyCtx, { type: 'bar', data: { labels: {{ chart_yearly_labels|tojson }}, datasets: [{ label: '距离 (km)', data: yearlyData, backgroundColor: colors.accentColor + '99', borderColor: colors.accentColor, borderWidth: 1, borderRadius: 4, hoverBackgroundColor: colors.accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: colors.tickColor, maxRotation: 0, minRotation: 0 } } }, plugins: { legend: { display: false }, title: { display: false }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(yearlyAvg) } } } } });
+            // Month-over-Month Chart
             const monthOverMonthCtx = document.getElementById('monthOverMonthChart').getContext('2d');
             const diffText = monthOverMonthData.summary.diff_km >= 0 ? `+${monthOverMonthData.summary.diff_km}` : monthOverMonthData.summary.diff_km;
+            document.getElementById('monthOverMonthChartStats').innerHTML = `本月跑量: <strong>${monthOverMonthData.summary.this_month_total}</strong> km <span class="mx-2">|</span> 较上月同期: <strong>${diffText}</strong> km`;
             const thisMonthTruncatedData = monthOverMonthData.this_month_data.slice(0, currentDay);
             monthOverMonthChart = new Chart(monthOverMonthCtx, {
                 type: 'line',
@@ -2308,32 +2297,12 @@
                         { label: '上月', data: monthOverMonthData.last_month_data, borderColor: 'rgba(128, 128, 128, 0.7)', borderWidth: 2, borderDash: [5, 5], pointRadius: 1, fill: false, tension: 0.1 }
                     ]
                 },
-                options: { 
-                    responsive: true, maintainAspectRatio: false, 
-                    scales: { 
-                        y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.tickColor, callback: v => v + ' km' } }, 
-                        x: { grid: { display: false }, ticks: { color: colors.tickColor } } 
-                    }, 
-                    plugins: { 
-                        legend: { labels: { color: colors.tickColor } }, 
-                        title: { display: true, text: `本月跑量: ${monthOverMonthData.summary.this_month_total} km | 较上月同期: ${diffText} km`, align: 'start', color: colors.tickColor, font: { weight: 'normal' } },
-                        annotation: {
-                            annotations: {
-                                todayLine: {
-                                    type: 'line',
-                                    xMin: currentDay - 1,
-                                    xMax: currentDay - 1,
-                                    borderColor: 'rgba(128, 128, 128, 0.5)',
-                                    borderWidth: 1.5,
-                                    borderDash: [6, 6]
-                                }
-                            }
-                        }
-                    } 
-                }
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.tickColor, callback: v => v + ' km' } }, x: { grid: { display: false }, ticks: { color: colors.tickColor } } }, plugins: { legend: { labels: { color: colors.tickColor } }, title: { display: false }, annotation: { annotations: { todayLine: { type: 'line', xMin: currentDay - 1, xMax: currentDay - 1, borderColor: 'rgba(128, 128, 128, 0.5)', borderWidth: 1.5, borderDash: [6, 6] } } } } }
             });
+            // Yearly Dual Axis Chart
             const yearlyDualAxisCtx = document.getElementById('yearlyDualAxisChart').getContext('2d');
-            const cumulativeTruncatedData = yearlyDualAxisData.cumulative_data.slice(0, currentMonth + 1);                                                                           
+            document.getElementById('yearlyDualAxisChartStats').innerHTML = `今年总跑量: <strong>${yearlyDualAxisData.total}</strong> km`;
+            const cumulativeTruncatedData = yearlyDualAxisData.cumulative_data.slice(0, currentMonth + 1);
             yearlyDualAxisChart = new Chart(yearlyDualAxisCtx, {
                 type: 'bar',
                 data: {
@@ -2343,15 +2312,7 @@
                         { type: 'line', label: '累计跑量', data: cumulativeTruncatedData, borderColor: colors.accentColorSecondary, borderWidth: 3, pointRadius: 2, fill: false, tension: 0.1, yAxisID: 'y1' }
                     ]
                 },
-                options: {
-                    responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-                    scales: {
-                        x: { grid: { display: false }, ticks: { color: colors.tickColor } },
-                        y: { type: 'linear', display: true, position: 'left', title: { display: true, text: '月度跑量 (km)', color: colors.tickColor }, grid: { color: colors.gridColor }, ticks: { color: colors.tickColor } },
-                        y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: '累计跑量 (km)', color: colors.tickColor }, grid: { drawOnChartArea: false }, ticks: { color: colors.tickColor } }
-                    },
-                    plugins: { legend: { labels: { color: colors.tickColor } }, title: { display: true, text: `今年总跑量: ${yearlyDualAxisData.total} km`, align: 'start', color: colors.tickColor, font: { weight: 'normal' } } }
-                }
+                options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, scales: { x: { grid: { display: false }, ticks: { color: colors.tickColor } }, y: { type: 'linear', display: true, position: 'left', title: { display: true, text: '月度跑量 (km)', color: colors.tickColor }, grid: { color: colors.gridColor }, ticks: { color: colors.tickColor } }, y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: '累计跑量 (km)', color: colors.tickColor }, grid: { drawOnChartArea: false }, ticks: { color: colors.tickColor } } }, plugins: { legend: { labels: { color: colors.tickColor } }, title: { display: false } } }
             });
         }
     }
@@ -2596,13 +2557,10 @@
             document.getElementById('marathon-controls-container').addEventListener('click', (e) => {
                 const button = e.target.closest('.stat-filter-button');
                 if (!button) return;
-
                 document.querySelectorAll('#marathon-controls-container .stat-filter-button').forEach(btn => btn.classList.remove('active'));
                 button.classList.add('active');
-
                 const filterType = button.dataset.filterType;
                 const filterValue = button.dataset.filterValue;
-
                 if (filterType === 'status') {
                     document.getElementById('marathon-list-view').style.display = 'block';
                     document.getElementById('marathon-calendar-view').style.display = 'none';
@@ -2706,7 +2664,6 @@
                     detailMapInstance.remove();
                     detailMapInstance = null;
                 }
-
                 if (currentPolyline) {
                     const mapItem = document.createElement('div');
                     mapItem.innerHTML = `<div id="detail-map-item" class="d-block w-100" style="z-index: 5;"></div>`;
@@ -2855,7 +2812,6 @@
                 grid.innerHTML = '<p class="text-secondary">此记录暂无照片</p>';
             }
         });
-
         const calendarEditorModalEl = document.getElementById('calendarEditorModal');
         const calendarEditorModal = bootstrap.Modal.getOrCreateInstance(calendarEditorModalEl);
         const calendarForm = document.getElementById('calendarEventForm');
