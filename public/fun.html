@@ -670,67 +670,27 @@
     #runDetailModal .modal-content {
         background-color: var(--bg-color);
         color: var(--text-primary);
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
     #runDetailModal .modal-body {
         padding: 0;
         overflow-y: auto;
     }
-    #runDetailModal .detail-header {
-        position: sticky;
-        top: 0;
-        background: rgba(var(--bg-color-rgb), 0.8);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        z-index: 10;
-        border-bottom: 1px solid var(--border-color);
-        padding: 0.75rem 1rem;
-        min-height: 50px; 
-        display: flex;
-        justify-content: center;
-        align-items: center;
+    #runDetailModal .modal-header {
+      background: rgba(var(--bg-color-rgb), 0.8);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 10;
+      border-bottom: 1px solid var(--border-color);
     }
-    #runDetailModal .detail-header .detail-title {
+    #runDetailModal .modal-title {
         font-weight: 600;
         font-size: 1.1rem;
         color: var(--text-primary);
     }
-    #runDetailModal #detailHeroDistance .distance-value {
-        font-size: 4.5rem;
-        font-weight: 700;
-        line-height: 1;
-        letter-spacing: -2px;
-        color: var(--text-primary);
-    }
-    #runDetailModal #detailHeroDistance .distance-unit {
-        font-size: 1rem;
-        color: var(--text-secondary);
-        margin-left: 0.25rem;
-    }
-    #runDetailModal .carousel-item img.gallery-item {
-        cursor: pointer;
-    }
-    #runDetailModal .carousel-item img,
-    #runDetailModal #detail-map-item {
+    #detail-map-item {
         height: 250px;
-        object-fit: cover;
         border-radius: 12px;
         background-color: var(--hover-bg);
-    }
-    #runDetailModal .carousel-control-prev,
-    #runDetailModal .carousel-control-next {
-        width: 10%;
-    }
-    #runDetailModal .carousel-control-prev-icon,
-    #runDetailModal .carousel-control-next-icon {
-        filter: invert(1) grayscale(0.5);
-    }
-    [data-bs-theme="light"] #runDetailModal .carousel-control-prev-icon,
-    [data-bs-theme="light"] #runDetailModal .carousel-control-next-icon {
-        filter: invert(0.8) grayscale(0.5);
-    }
-    #runDetailModal .carousel-indicators [data-bs-target] {
-        background-color: var(--text-secondary);
     }
     #runDetailModal h4.data-section-title {
         font-weight: 600;
@@ -800,33 +760,39 @@
     .calendar-table td.today {
       background-color: var(--bs-danger-bg-subtle);
     }
-    .btn-close-bottom {
-        position: fixed;
-        bottom: 25px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        background-color: rgba(var(--card-bg-rgb), 0.7);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        border: 1px solid rgba(var(--text-primary-rgb), 0.1);
-        color: var(--text-primary);
-        font-size: 1.2rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1056; 
-        cursor: pointer;
-        transition: all 0.2s ease-in-out;
-    }
-    .btn-close-bottom:hover {
-        background-color: rgba(var(--hover-bg-rgb), 0.9);
-        transform: translateX(-50%) scale(1.05);
-    }
     #profileModal {
         z-index: 1060;
+    }
+    /* Styles for Photo Management Modal */
+    #photo-manager-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 1rem;
+    }
+    .photo-manager-item {
+      position: relative;
+    }
+    .photo-manager-item img {
+      width: 100%;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 0.5rem;
+    }
+    .photo-manager-item .delete-photo-btn {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background-color: var(--danger-color);
+      color: white;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -839,7 +805,7 @@
   <div class="nav-wrapper border-bottom border-secondary-subtle mb-4">
     <ul class="nav nav-tabs" id="main-nav-tabs" role="tablist">
         <li class="nav-item" role="presentation">
-        <button class="nav-link" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary-pane" type="button" role="tab" aria-controls="summary-pane" aria-selected="true" data-hash="summary">概览</button>
+        <button class="nav-link" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary-pane" type="button" role="tab" aria-controls="summary-pane" aria-selected="false" data-hash="summary">概览</button>
         </li>
         <li class="nav-item" role="presentation">
         <button class="nav-link" id="data-tab" data-bs-toggle="tab" data-bs-target="#data-pane" type="button" role="tab" aria-controls="data-pane" aria-selected="false" data-hash="data">记录</button>
@@ -987,7 +953,6 @@
                                 <object class="route-svg" data="/images/routesvg/1757628199000.svg" type="image/svg+xml" style="display:none;">
                                 </object>
                             </div>
-
                             <div class="col-9 d-flex flex-column justify-content-between">
                                 <div>
                                     <div class="row g-2 small text-body-secondary ms-2">
@@ -1034,7 +999,6 @@
                                 <object class="route-svg" data="/images/routesvg/1757541396000.svg" type="image/svg+xml" style="display:none;">
                                 </object>
                             </div>
-
                             <div class="col-9 d-flex flex-column justify-content-between">
                                 <div>
                                     <div class="row g-2 small text-body-secondary ms-2">
@@ -1081,7 +1045,6 @@
                                 <object class="route-svg" data="/images/routesvg/1757369049000.svg" type="image/svg+xml" style="display:none;">
                                 </object>
                             </div>
-
                             <div class="col-9 d-flex flex-column justify-content-between">
                                 <div>
                                     <div class="row g-2 small text-body-secondary ms-2">
@@ -14846,7 +14809,6 @@
                 <button id="editCalendarBtn" class="btn btn-sm" style="display: none;"><i class="bi bi-pencil-square"></i></button>
             </div>
         </div>
-
         <div id="race-countdown-container" class="content-card text-center mb-4" style="display: none; border-color: var(--accent-color);">
             <h6 class="card-title mb-1 text-body-secondary">下一场比赛倒计时</h6>
             <p id="countdown-race-name" class="h4 accent-color-text fw-bold">赛事名称</p>
@@ -14858,7 +14820,6 @@
             </div>
             <p id="countdown-race-date" class="text-body-secondary small mb-0">YYYY-MM-DD</p>
         </div>
-
         <div id="marathon-calendar-view" style="display: none;">
             <div id="marathon-calendar-container"></div>
         </div>
@@ -14878,132 +14839,111 @@
                 <div class="col-lg-6 mb-4">
                     <div class="content-card h-100 d-flex flex-column">
                         <h5 class="card-title mb-3"><i class="bi bi-flag-fill text-success"></i> 里程碑</h5>
+                        
+                        
+                        
                             
+                        
                             
-                            
-                            
-                            
-                                
-                            
-                                
-                            
-                                
-                                    
-                                
+                        
                             
                                 
                             
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                        
+                        <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
+                            <div>
+                                <span class="fw-bold">踏出第一步</span>
                                 
-                            
+                                    <span class="badge bg-success ms-2" style="font-size: 0.8em; font-weight: 500;">已完成</span>
                                 
-                            
-                            
-                            
-                            
-                            <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
-                                <div>
-                                    <span class="fw-bold">踏出第一步</span>
-                                    
-                                    
-                                        <span class="badge bg-success ms-2" style="font-size: 0.8em; font-weight: 500;">已完成</span>
-                                    
-                                    
-                                </div>
-                                <div class="text-end" style="min-width: 130px;">
-                                    
-                                    
-                                        <small class="text-body-secondary">2021年03月24日</small>
-                                    
-                                    
-                                </div>
                             </div>
-                            
-                            <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
-                                <div>
-                                    <span class="fw-bold">1000公里</span>
-                                    
-                                    
-                                        <span class="badge bg-success ms-2" style="font-size: 0.8em; font-weight: 500;">已完成</span>
-                                    
-                                    
-                                </div>
-                                <div class="text-end" style="min-width: 130px;">
-                                    
-                                    
-                                        <small class="text-body-secondary">2024年02月11日</small>
-                                    
-                                    
-                                </div>
+                            <div class="text-end" style="min-width: 130px;">
+                                
+                                    <small class="text-body-secondary">2021年03月24日</small>
+                                
                             </div>
-                            
-                            <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
-                                <div>
-                                    <span class="fw-bold">10000公里</span>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
+                            <div>
+                                <span class="fw-bold">1000公里</span>
+                                
+                                    <span class="badge bg-success ms-2" style="font-size: 0.8em; font-weight: 500;">已完成</span>
+                                
+                            </div>
+                            <div class="text-end" style="min-width: 130px;">
+                                
+                                    <small class="text-body-secondary">2024年02月11日</small>
+                                
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
+                            <div>
+                                <span class="fw-bold">10000公里</span>
+                                
+                                    <span class="badge ms-2" style="font-size: 0.8em; font-weight: 500; background-color: var(--accent-color); color: var(--card-bg);">进行中</span>
+                                
+                            </div>
+                            <div class="text-end" style="min-width: 130px;">
+                                
                                     
                                     
-                                        <span class="badge ms-2" style="font-size: 0.8em; font-weight: 500; background-color: var(--accent-color); color: var(--card-bg);">进行中</span>
-                                    
-                                </div>
-                                <div class="text-end" style="min-width: 130px;">
                                     
                                     
-                                        
-                                        
-                                        
-                                        
-                                        <div class="w-100">
-                                            <div class="progress mb-1" style="height: 6px; background-color: var(--hover-bg);">
-                                                <div class="progress-bar" role="progressbar" style="width: 31.84%;" aria-valuenow="31.84" aria-valuemin="0" aria-valuemax="100"></div>
-                                            </div>
-                                            <small class="text-body-secondary" style="font-size: 0.8em;">进度 31.84%</small>
+                                    <div class="w-100">
+                                        <div class="progress mb-1" style="height: 6px; background-color: var(--hover-bg);">
+                                            <div class="progress-bar" role="progressbar" style="width: 31.84%;" aria-valuenow="31.84" aria-valuemin="0" aria-valuemax="100"></div>
                                         </div>
-                                    
-                                    
-                                </div>
+                                        <small class="text-body-secondary" style="font-size: 0.8em;">进度 31.84%</small>
+                                    </div>
+                                
                             </div>
-                            
-                            <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
-                                <div>
-                                    <span class="fw-bold">20000公里</span>
-                                    
-                                    
-                                </div>
-                                <div class="text-end" style="min-width: 130px;">
-                                    
-                                    
-                                        <small class="text-body-secondary">未达成</small>
-                                    
-                                </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
+                            <div>
+                                <span class="fw-bold">20000公里</span>
+                                
                             </div>
-                            
-                            <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
-                                <div>
-                                    <span class="fw-bold">30000公里</span>
-                                    
-                                    
-                                </div>
-                                <div class="text-end" style="min-width: 130px;">
-                                    
-                                    
-                                        <small class="text-body-secondary">未达成</small>
-                                    
-                                </div>
+                            <div class="text-end" style="min-width: 130px;">
+                                
+                                    <small class="text-body-secondary">未达成</small>
+                                
                             </div>
-                            
-                            <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
-                                <div>
-                                    <span class="fw-bold">40000公里</span>
-                                    
-                                    
-                                </div>
-                                <div class="text-end" style="min-width: 130px;">
-                                    
-                                    
-                                        <small class="text-body-secondary">未达成</small>
-                                    
-                                </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
+                            <div>
+                                <span class="fw-bold">30000公里</span>
+                                
                             </div>
-                            
+                            <div class="text-end" style="min-width: 130px;">
+                                
+                                    <small class="text-body-secondary">未达成</small>
+                                
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
+                            <div>
+                                <span class="fw-bold">40000公里</span>
+                                
+                            </div>
+                            <div class="text-end" style="min-width: 130px;">
+                                
+                                    <small class="text-body-secondary">未达成</small>
+                                
+                            </div>
+                        </div>
+                        
                     </div>
                 </div>
                 <div class="col-lg-6 mb-4">
@@ -15427,7 +15367,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-09-12 09:39:25 
+         | Last updated: 2025-09-12 12:51:24 
     </small>
 </footer>
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
@@ -15480,22 +15420,23 @@
 <div class="modal fade" id="runDetailModal" tabindex="-1" aria-labelledby="runDetailModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailTitle">跑步详情</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
             <div class="modal-body">
-                <div class="detail-header">
-                    <h5 class="detail-title" id="detailTitle">跑步详情</h5>
-                </div>
-                <div id="runDetailContent">
-                    <div class="container-fluid px-4">
-                        <!--<div class="text-center my-4" id="detailHeroDistance">
-                            <span class="distance-value">--</span>
-                            <span class="distance-unit">公里</span>
-                        </div>-->
+                <div id="runDetailContent" class="container-fluid">
+                  <div class="row">
+                    <div class="col-lg-7 order-lg-1">
                         <div id="routeMapContainer" class="py-2"></div>
-                        <div id="detailWeather" class="text-center small text-body-secondary mb-5"></div>
-                        <div class="mb-5">
+                        <div id="detailWeather" class="text-center small text-body-secondary mb-3"></div>
+                        <div class="mb-4">
                             <div class="d-flex justify-content-between align-items-center">
                                 <h4 class="data-section-title">运动数据</h4>
-                                <button id="viewPhotoBtn" class="btn btn-sm mb-3" style="display: none;"><i class="bi bi-images"></i> 跑步照片</button>
+                                <div>
+                                    <button id="viewPhotoBtn" class="btn btn-sm mb-3 me-2" style="display: none;"><i class="bi bi-images"></i> 跑步照片</button>
+                                    <button id="managePhotoBtn" class="btn btn-sm btn-outline-primary mb-3" style="display: none;"><i class="bi bi-pencil-square"></i> 管理照片</button>
+                                </div>
                             </div>
                             <div class="row g-4 text-center" id="detailDataGrid"></div>
                         </div>
@@ -15505,85 +15446,66 @@
                             </div>
                         </div>
                         <div id="detailAnalysisSections" style="display: none;">
-                            <div class="mb-5">
+                            <div class="mb-4">
                                 <h4 class="data-section-title">分段信息</h4>
-                                <div class="table-responsive">
+                                <div class="table-responsive" style="max-height: 250px;">
                                     <table class="table table-sm">
                                         <thead>
-                                            <tr>
-                                                <th>圈数</th>
-                                                <th>时间</th>
-                                                <th>距离</th>
-                                                <th>配速</th>
-                                                <th>心率</th>
-                                                <th>步频</th>
-                                            </tr>
+                                            <tr><th>圈数</th><th>时间</th><th>距离</th><th>配速</th><th>心率</th><th>步频</th></tr>
                                         </thead>
-                                        <tbody id="detailLapsTableBody">
-                                        </tbody>
+                                        <tbody id="detailLapsTableBody"></tbody>
                                     </table>
                                 </div>
                             </div>
-                            <div class="mb-5">
+                            <div class="mb-4">
                                 <h4 class="data-section-title">配速</h4>
-                                 <p class="analysis-summary mb-3">
-                                    平均配速: <strong id="detailAvgPace">--</strong>
-                                    <span class="mx-2">|</span>
-                                    最快配速: <strong id="detailBestPace">--</strong>
-                                </p>
+                                 <p class="analysis-summary mb-3">平均配速: <strong id="detailAvgPace">--</strong><span class="mx-2">|</span>最快配速: <strong id="detailBestPace">--</strong></p>
                                 <div style="height: 200px;"><canvas id="paceChart"></canvas></div>
                             </div>
-                            <div class="mb-5">
+                            <div class="mb-4">
                                 <h4 class="data-section-title">心率</h4>
-                                 <p class="analysis-summary mb-3">
-                                    平均心率: <strong id="detailAvgHr">--</strong>
-                                    <span class="mx-2">|</span>
-                                    最大心率: <strong id="detailMaxHr">--</strong>
-                                </p>
+                                 <p class="analysis-summary mb-3">平均心率: <strong id="detailAvgHr">--</strong><span class="mx-2">|</span>最大心率: <strong id="detailMaxHr">--</strong></p>
                                 <div style="height: 200px;"><canvas id="hrChart"></canvas></div>
                             </div>
-                            <div class="mb-5">
+                            <div class="mb-4">
                                 <h4 class="data-section-title">海拔</h4>
                                 <div style="height: 200px;"><canvas id="elevationChart"></canvas></div>
                             </div>
                         </div>
-                        <div id="runDetailTagsSection" class="mb-5">
-                            <h4 class="data-section-title">标签</h4>
-                            <div id="runDetailTagsContainer" class="mb-2">
-                            </div>
-                            <div class="input-group input-group-sm">
-                                <input type="text" class="form-control" id="runDetailTagInput" placeholder="添加新标签...">
-                                <button class="btn btn-outline-secondary" type="button" id="addTagButton" style="--bs-btn-border-color: var(--border-color); --bs-btn-hover-bg: var(--accent-color); --bs-btn-hover-border-color: var(--accent-color); --bs-btn-active-bg: var(--accent-color); --bs-btn-active-border-color: var(--accent-color); color: var(--text-secondary);">添加</button>
-                            </div>
-                            <div id="suggestedTagsContainer" class="mt-2">
-                            </div>
-                        </div>
-                        <div id="runDetailComments" class="pb-4">
-                            <hr>
-                            <h4 class="data-section-title mt-4">评论</h4>
-                            <div id="runDetailCommentList" class="mb-3"></div>
-                            <div id="runDetailCommentForm" class="p-3">
-                                <h6 class="mb-3">发表评论</h6>
-                                <textarea class="form-control" id="runDetailCommentText" rows="3" placeholder="写下你的感想吧..."></textarea>
-                                <div class="d-flex justify-content-between align-items-center mt-2">
-                                    <div id="detailEditProfileTrigger" style="cursor: pointer;" title="点击修改昵称">
-                                        <span class="small text-secondary">
-                                            发言身份: <span id="detailCommentUserIcon"></span> <span id="detailCommentUserNickname"></span>
-                                            <i class="bi bi-pencil-fill small ms-1"></i>
-                                        </span>
+                    </div>
+                    <div class="col-lg-5 order-lg-2 border-start-lg" style="--bs-border-color: var(--border-color);">
+                        <div class="py-3">
+                            <div id="runDetailTagsSection" class="mb-4">
+                                <h4 class="data-section-title">标签</h4>
+                                <div id="runDetailTagsContainer" class="mb-2"></div>
+                                <div id="runDetailTagsEditor" style="display:none;">
+                                    <div class="input-group input-group-sm">
+                                        <input type="text" class="form-control" id="runDetailTagInput" placeholder="添加新标签...">
+                                        <button class="btn btn-outline-secondary" type="button" id="addTagButton" style="--bs-btn-border-color: var(--border-color); --bs-btn-hover-bg: var(--accent-color); --bs-btn-hover-border-color: var(--accent-color); --bs-btn-active-bg: var(--accent-color); --bs-btn-active-border-color: var(--accent-color); color: var(--text-secondary);">添加</button>
                                     </div>
-                                    <button type="button" class="btn btn-primary btn-sm" id="submitRunDetailComment">
-                                        <i class="bi bi-send-fill"></i> 提交
-                                    </button>
+                                    <div id="suggestedTagsContainer" class="mt-2"></div>
+                                </div>
+                            </div>
+                            <div id="runDetailComments">
+                                <hr>
+                                <h4 class="data-section-title mt-4">评论</h4>
+                                <div id="runDetailCommentList" class="mb-3" style="max-height: 40vh; overflow-y: auto;"></div>
+                                <div id="runDetailCommentForm" class="p-3">
+                                    <h6 class="mb-3">发表评论</h6>
+                                    <textarea class="form-control" id="runDetailCommentText" rows="3" placeholder="写下你的感想吧..."></textarea>
+                                    <div class="d-flex justify-content-between align-items-center mt-2">
+                                        <div id="detailEditProfileTrigger" style="cursor: pointer;" title="点击修改昵称">
+                                            <span class="small text-secondary">发言身份: <span id="detailCommentUserIcon"></span> <span id="detailCommentUserNickname"></span><i class="bi bi-pencil-fill small ms-1"></i></span>
+                                        </div>
+                                        <button type="button" class="btn btn-primary btn-sm" id="submitRunDetailComment"><i class="bi bi-send-fill"></i> 提交</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                  </div>
                 </div>
             </div>
-            <button type="button" class="btn-close-bottom" data-bs-dismiss="modal" aria-label="Close">
-                <i class="bi bi-x-lg"></i>
-            </button>
         </div>
     </div>
 </div>
@@ -15608,18 +15530,30 @@
     </div>
   </div>
 </div>
-<div class="modal fade" id="routeMapModal" tabindex="-1" aria-labelledby="routeMapModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="routeMapModalLabel">跑步路线</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div id="routeMap"></div>
-      </div>
+<div class="modal fade" id="photoManagerModal" tabindex="-1" aria-labelledby="photoManagerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="photoManagerModalLabel">管理照片</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>已有照片</h6>
+                <div id="photo-manager-grid" class="mb-4">
+                    <p class="text-secondary">加载中...</p>
+                </div>
+                <hr>
+                <h6>上传新照片</h6>
+                <form id="photoUploadForm">
+                    <div class="mb-3">
+                        <input class="form-control" type="file" id="photo-upload-input" accept="image/*" multiple>
+                    </div>
+                    <div id="photo-upload-previews"></div>
+                    <button type="submit" class="btn btn-primary btn-sm">开始上传</button>
+                </form>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 <div class="modal fade" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -15951,7 +15885,6 @@
         //const total = marathonEventsCache.filter(e => statusesToCount.includes(e.status)).length;
         const pending = marathonEventsCache.filter(e => e.status === '中签，参赛').length;
         const lottery = marathonEventsCache.filter(e => e.status === '已报名，待抽签').length;
-
         //document.getElementById('stat-total').textContent = total;
         document.getElementById('stat-pending').textContent = pending;
         document.getElementById('stat-lottery').textContent = lottery;
@@ -15964,12 +15897,10 @@
         if (filterStatus !== 'all') {
             eventsToDisplay = marathonEventsCache.filter(e => e.status === filterStatus);
         }
-        
         if (eventsToDisplay.length === 0) {
             container.innerHTML = `<div class="content-card text-center text-body-secondary">暂无${filterStatus === 'all' ? '' : `“${filterStatus}”状态的`}赛事计划</div>`;
             return;
         }
-
         const sortedEvents = [...eventsToDisplay].sort((a, b) => new Date(a.date) - new Date(b.date));
         const statusBadges = {
             '中签，参赛': 'text-bg-success',
@@ -15982,7 +15913,6 @@
             const levelBadge = (event.level && event.level !== '普通赛事') 
                 ? `<span class="badge rounded-pill text-bg-warning ms-2" style="font-size: 0.7em; vertical-align: middle;">${event.level}</span>` 
                 : '';
-            
             let willingnessStars = '';
             const willingness = parseInt(event.willingness, 10) || 0;
             if (willingness > 0) {
@@ -15992,7 +15922,6 @@
                 }
                 willingnessStars = `<span class="ms-2" title="意愿度: ${willingness}/5">${starsHtml}</span>`;
             }
-
             let channelInfo = '';
             if (event.channel) {
                 const isLink = event.channel.startsWith('http');
@@ -16001,7 +15930,6 @@
                     : `<span class="text-body-secondary">${event.channel}</span>`;
                 channelInfo = `<div class="mt-1"><i class="bi bi-link-45deg me-1"></i><strong>报名渠道:</strong> ${channelContent}</div>`;
             }
-
             return `
             <div class="content-card mb-3">
                  <div class="d-flex justify-content-between align-items-center mb-2">
@@ -16037,7 +15965,6 @@
     async function generateMarathonCalendar() {
         const container = document.getElementById('marathon-calendar-container');
         const containerMarathonList = document.getElementById('marathon-list-container');
-      
         if (!container || !containerMarathonList) return;
         containerMarathonList.innerHTML = '<div class="content-card text-center text-body-secondary">加载赛历数据中...</div>';
         try {
@@ -16178,13 +16105,19 @@
         mediaGalleryModal.show();
     }
     function renderRunTags() {
+        const isAdmin = localStorage.getItem('run_role') === 'admin';
         const container = document.getElementById('runDetailTagsContainer');
-        container.innerHTML = currentRunTags.map((tag, index) =>
+        let tagsHtml = currentRunTags.map((tag, index) =>
             `<span class="badge rounded-pill text-bg-secondary me-1 mb-1" style="font-weight: 500; background-color: var(--hover-bg) !important; color: var(--text-secondary) !important; padding: 0.3em 0.5em;">
                 ${tag}
-                <button type="button" class="btn-close ms-1" aria-label="Remove tag" data-tag-index="${index}" style="font-size: 0.6em; filter: invert(0.8);"></button>
+                ${isAdmin ? `<button type="button" class="btn-close ms-1" aria-label="Remove tag" data-tag-index="${index}" style="font-size: 0.6em; filter: invert(0.8);"></button>` : ''}
             </span>`
         ).join('');
+        if (currentRunTags.length === 0) {
+            tagsHtml = '<p class="small text-body-secondary">暂无标签</p>';
+        }
+        container.innerHTML = tagsHtml;
+        document.getElementById('runDetailTagsEditor').style.display = isAdmin ? 'block' : 'none';
     }
     function renderSuggestedTags() {
         const container = document.getElementById('suggestedTagsContainer');
@@ -16209,6 +16142,7 @@
     }
     async function saveRunTags(runId) {
         try {
+            // NOTE: In a real app, this would require an admin secret key
             await fetch(`${commentApiBase}/tags`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -16390,12 +16324,10 @@
               const parser = new DOMParser();
               const svgDoc = parser.parseFromString(svgText, "image/svg+xml");
               const svgEl = svgDoc.documentElement;
-      
               // 继承 <object> 的样式
               //if (obj.getAttribute("style")) {
               //  svgEl.setAttribute("style", obj.getAttribute("style"));
               //}
-      
               obj.replaceWith(svgEl);
             })
             .catch(err => console.error("SVG load error:", err));
@@ -16456,16 +16388,23 @@
           }
         }, { passive: true });
         const activateTabFromHash = () => {
-          const hash = window.location.hash.substring(1);
-          if (hash) {
-            const tabTrigger = document.querySelector(`.nav-link[data-hash="${hash}"]`);
-            if (tabTrigger) { bootstrap.Tab.getOrCreateInstance(tabTrigger).show(); }
+          let hash = window.location.hash.substring(1);
+          if (!hash) {
+            hash = 'summary'; // Default to summary
+          }
+          const tabTrigger = document.querySelector(`.nav-link[data-hash="${hash}"]`);
+          if (tabTrigger) { 
+              bootstrap.Tab.getOrCreateInstance(tabTrigger).show(); 
+          } else { // Fallback to summary if hash is invalid
+              bootstrap.Tab.getOrCreateInstance(document.getElementById('summary-tab')).show();
           }
         };
         document.querySelectorAll('#main-nav-tabs .nav-link').forEach(tabEl => {
           tabEl.addEventListener('shown.bs.tab', event => {
             const hash = event.target.dataset.hash;
-            if (hash) { history.pushState(null, '', '#' + hash); }
+            if (hash && ('#' + hash) !== window.location.hash) { 
+                history.pushState(null, '', '#' + hash); 
+            }
             if (hash === 'marathon') { initMarathonView(); }
             if (hash === 'events' && !cityMap) {
                 const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
@@ -16493,7 +16432,7 @@
           });
         });
         window.addEventListener('popstate', activateTabFromHash);
-        activateTabFromHash();
+        activateTabFromHash(); // Initial load
         if (window.location.hash === '#marathon') { initMarathonView(); }
         document.querySelectorAll('.stat-card-flip-container').forEach(container => {
             container.addEventListener('click', (event) => {
@@ -16609,13 +16548,10 @@
             document.getElementById('marathon-controls-container').addEventListener('click', (e) => {
                 const button = e.target.closest('.stat-filter-button');
                 if (!button) return;
-
                 document.querySelectorAll('#marathon-controls-container .stat-filter-button').forEach(btn => btn.classList.remove('active'));
                 button.classList.add('active');
-
                 const filterType = button.dataset.filterType;
                 const filterValue = button.dataset.filterValue;
-
                 if (filterType === 'status') {
                     document.getElementById('marathon-list-view').style.display = 'block';
                     document.getElementById('marathon-calendar-view').style.display = 'none';
@@ -16674,16 +16610,15 @@
             const dayName = weekdays[runDate.getDay()];
             const formattedDate = preloadedData.date.replace(' ', ` (${dayName}) `);
             document.getElementById('detailTitle').textContent = `跑步详情: ${formattedDate}`;
-            //document.getElementById('detailTitle').textContent = `跑步详情: ${preloadedData.date}`;
-            //document.getElementById('detailHeroDistance').querySelector('.distance-value').textContent = preloadedData.distanceFormatted || '--';
             const detailDataGrid = document.getElementById('detailDataGrid');
             detailDataGrid.innerHTML = `
-                <div class="col-4"><div class="data-point-value">${preloadedData.distanceFormatted || '--'}</div><div class="data-point-label">总公里</div></div>
-                <div class="col-4"><div class="data-point-value">${preloadedData.duration || '--'}</div><div class="data-point-label">总时长</div></div>
-                <div class="col-4"><div class="data-point-value">${preloadedData.paceStr || '--'}</div><div class="data-point-label">平均配速</div></div>
-                <div class="col-4"><div class="data-point-value">${preloadedData.heartRate || '--'}</div><div class="data-point-label">平均心率</div></div>
+                <div class="col-6 col-md-4"><div class="data-point-value">${preloadedData.distanceFormatted || '--'}</div><div class="data-point-label">总公里</div></div>
+                <div class="col-6 col-md-4"><div class="data-point-value">${preloadedData.duration || '--'}</div><div class="data-point-label">总时长</div></div>
+                <div class="col-6 col-md-4"><div class="data-point-value">${preloadedData.paceStr || '--'}</div><div class="data-point-label">平均配速</div></div>
+                <div class="col-6 col-md-4"><div class="data-point-value">${preloadedData.heartRate || '--'}</div><div class="data-point-label">平均心率</div></div>
             `;
             document.getElementById('viewPhotoBtn').style.display = 'none';
+            document.getElementById('managePhotoBtn').style.display = localStorage.getItem('run_role') === 'admin' ? 'inline-block' : 'none';
             document.getElementById('detailAnalysisSectionsLoading').style.display = 'block';
             document.getElementById('detailAnalysisSections').style.display = 'none';
             document.getElementById('detailLapsTableBody').innerHTML = '';
@@ -16698,44 +16633,30 @@
                   const avg_cadence = data.summary.avg_cadence || '--';
                   const calories = data.summary.calories_kcal || '--';
                   const total_ascent = data.summary.total_ascent_m || '--';
-                  const avg_power = data.summary.avg_power_w || '--';
                   const max_hr = data.summary.max_hr || '--';
-                  detailDataGrid.innerHTML += `
-                    <div class="col-4"><div class="data-point-value">${max_hr}</div><div class="data-point-label">最高心率</div></div>
-                    <div class="col-4"><div class="data-point-value">${calories}</div><div class="data-point-label">消耗千卡</div></div>
-                    <div class="col-4"><div class="data-point-value">${avg_cadence}</div><div class="data-point-label">平均步频</div></div>
-                    <div class="col-4"><div class="data-point-value">${total_ascent}</div><div class="data-point-label">累计上升(米)</div></div>
-                    <div class="col-4"><div class="data-point-value">${avg_power}</div><div class="data-point-label">平均功率</div></div>
+                  detailDataGrid.innerHTML = `
+                    <div class="col-6 col-md-4"><div class="data-point-value">${preloadedData.distanceFormatted || '--'}</div><div class="data-point-label">总公里</div></div>
+                    <div class="col-6 col-md-4"><div class="data-point-value">${preloadedData.duration || '--'}</div><div class="data-point-label">总时长</div></div>
+                    <div class="col-6 col-md-4"><div class="data-point-value">${preloadedData.paceStr || '--'}</div><div class="data-point-label">平均配速</div></div>
+                    <div class="col-6 col-md-4"><div class="data-point-value">${preloadedData.heartRate || '--'}</div><div class="data-point-label">平均心率</div></div>
+                    <div class="col-6 col-md-4"><div class="data-point-value">${max_hr}</div><div class="data-point-label">最高心率</div></div>
+                    <div class="col-6 col-md-4"><div class="data-point-value">${calories}</div><div class="data-point-label">消耗千卡</div></div>
+                    <div class="col-6 col-md-4"><div class="data-point-value">${avg_cadence}</div><div class="data-point-label">平均步频</div></div>
+                    <div class="col-6 col-md-4"><div class="data-point-value">${total_ascent}</div><div class="data-point-label">累计上升(米)</div></div>
                   `
                 }
-                if(data.photos) {detailPhotoUrls = data.photos.map(p => p.url);}
+                detailPhotoUrls = data.photos ? data.photos.map(p => p.url) : [];
                 currentPolyline = data.route.encoded_polyline;
-                //const carouselInner = document.querySelector('#runMediaCarousel .carousel-inner');
-                //const carouselIndicators = document.querySelector('#runMediaCarousel .carousel-indicators');
-                //carouselInner.innerHTML = '';
-                //carouselIndicators.innerHTML = '';
                 const routeMapContainer = document.getElementById('routeMapContainer');
                 routeMapContainer.innerHTML = '';
                 if (detailMapInstance) {
                     detailMapInstance.remove();
                     detailMapInstance = null;
                 }
-                //let activeSlideSet = false;
-                //let slideIndex = 0;
                 if (currentPolyline) {
                     const mapItem = document.createElement('div');
                     mapItem.innerHTML = `<div id="detail-map-item" class="d-block w-100" style="z-index: 5;"></div>`;
                     routeMapContainer.appendChild(mapItem);
-                    //mapItem.className = 'carousel-item';
-                    //mapItem.innerHTML = `<div id="detail-map-item" class="d-block w-100"></div>`;
-                    //carouselInner.appendChild(mapItem);
-                    //carouselIndicators.innerHTML += `<button type="button" data-bs-target="#runMediaCarousel" data-bs-slide-to="${slideIndex}" class="text" aria-label="Slide ${slideIndex+1}">地图</button>`;
-                    //if (!activeSlideSet) {
-                    //    mapItem.classList.add('active');
-                    //    carouselIndicators.querySelector('button').classList.add('active');
-                    //    activeSlideSet = true;
-                    //}
-                    //slideIndex++;
                     setTimeout(() => {
                         const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
                         const tileUrl = isDark ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
@@ -16750,28 +16671,8 @@
                         detailMapInstance.fitBounds(polyline.getBounds().pad(0.1));
                         detailMapInstance.invalidateSize();
                     }, 100); 
-                }/*
-                if (data.photos && data.photos.length > 0) {
-                    data.photos.forEach((photo, index) => {
-                        const photoItem = document.createElement('div');
-                        photoItem.className = 'carousel-item';
-                        photoItem.innerHTML = `<img src="${photo.url}" class="d-block w-100 gallery-item" alt="跑步照片" data-photo-index="${index}">`;
-                        carouselInner.appendChild(photoItem);
-                        carouselIndicators.innerHTML += `<button type="button" data-bs-target="#runMediaCarousel" data-bs-slide-to="${slideIndex}" class="" aria-label="Slide ${slideIndex+1}"></button>`;
-                        if (!activeSlideSet) {
-                            photoItem.classList.add('active');
-                            carouselIndicators.querySelector(`button[data-bs-slide-to="${slideIndex}"]`).classList.add('active');
-                            activeSlideSet = true;
-                        }
-                        slideIndex++;
-                    });
                 }
-                if (slideIndex === 0) {
-                    document.getElementById('runMediaCarousel').style.display = 'none';
-                } else {
-                    document.getElementById('runMediaCarousel').style.display = 'block';
-                }*/
-                document.getElementById('viewPhotoBtn').style.display = currentPolyline ? 'block' : 'none';
+                document.getElementById('viewPhotoBtn').style.display = detailPhotoUrls.length > 0 ? 'inline-block' : 'none';
                 let weatherString = '';
                 if(data.weather) {
                 if(data.weather.type && data.weather.type == 'forecast_api'){
@@ -16790,14 +16691,7 @@
                         if (displayDuration && displayDuration.startsWith('00:')) {
                             displayDuration = displayDuration.substring(3);
                         }
-                        return `<tr>
-                            <td>${lap.lap_number}</td>
-                            <td>${displayDuration}</td>
-                            <td>${lap.distance_km} km</td>
-                            <td>${lap.pace}</td>
-                            <td>${lap.avg_hr || 'N/A'}</td>
-                            <td>${lap.avg_cadence || 'N/A'}</td>
-                        </tr>`
+                        return `<tr><td>${lap.lap_number}</td><td>${displayDuration}</td><td>${lap.distance_km} km</td><td>${lap.pace}</td><td>${lap.avg_hr || 'N/A'}</td><td>${lap.avg_cadence || 'N/A'}</td></tr>`
                     }).join('');
                 }
                 document.getElementById('detailAvgPace').textContent = data.summary.avg_pace || '--';
@@ -16886,51 +16780,27 @@
                 };          
                 const isCommentLink = e.target.closest('.comment-link');
                 showRunDetailModal(recentCard.dataset.runId, preloadedData, !!isCommentLink);
-            } else if (e.target.classList.contains('gallery-item')) {
-                const index = parseInt(e.target.dataset.photoIndex, 10);
-                if (!isNaN(index)) { openMediaGallery(detailPhotoUrls, index); }
             }
         });
-        const detailModalEl = document.getElementById('runDetailModal');
-        let gestureStartX = 0;
-        let gestureIsEligible = false;
-        const gestureThreshold = 50;
-        const gestureMinSwipe = 100;
-        detailModalEl.addEventListener('touchstart', e => {
-            if (e.touches.length !== 1 || e.target.closest('.carousel')) {
-                gestureIsEligible = false;
-                return;
-            }
-            gestureStartX = e.touches[0].clientX;
-            gestureIsEligible = gestureStartX < gestureThreshold;
-        }, {passive: true});
-        detailModalEl.addEventListener('touchend', e => {
-            if (!gestureIsEligible || e.changedTouches.length !== 1) return;
-            const endX = e.changedTouches[0].clientX;
-            const diffX = endX - gestureStartX;
-            if (diffX > gestureMinSwipe) {
-                bootstrap.Modal.getInstance(detailModalEl).hide();
-            }
-            gestureIsEligible = false;
-        }, {passive: true});
         document.getElementById('viewPhotoBtn').addEventListener('click', () => {
-            //bootstrap.Modal.getOrCreateInstance(document.getElementById('routeMapModal')).show();
-            bootstrap.Modal.getOrCreateInstance(document.getElementById('photoModal')).show();
+            if (detailPhotoUrls.length > 0) {
+                openMediaGallery(detailPhotoUrls, 0);
+            }
         });
-        document.getElementById('routeMapModal').addEventListener('shown.bs.modal', () => {
-            if (!modalMapInstance) {
-                const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
-                const tileUrl = isDark ? 
-                    'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' :
-                    'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-                modalMapInstance = L.map('routeMap', { attributionControl: false, zoomControl: true });
-                L.tileLayer(tileUrl, { subdomains: 'abcd' }).addTo(modalMapInstance);
+        document.getElementById('managePhotoBtn').addEventListener('click', () => {
+            const photoManagerModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('photoManagerModal'));
+            photoManagerModal.show();
+            // TODO: Populate existing photos here by fetching from your backend
+            const grid = document.getElementById('photo-manager-grid');
+            grid.innerHTML = detailPhotoUrls.map((url, index) => `
+                <div class="photo-manager-item">
+                    <img src="${url}" alt="photo ${index+1}">
+                    <button class="delete-photo-btn" data-url="${url}">&times;</button>
+                </div>
+            `).join('');
+            if (detailPhotoUrls.length === 0) {
+                grid.innerHTML = '<p class="text-secondary">此记录暂无照片</p>';
             }
-            if (currentPolyline) {
-                const polyline = L.polyline(decodePolyline(currentPolyline), { color: getComputedStyle(document.documentElement).getPropertyValue('--accent-color'), weight: 4 }).addTo(modalMapInstance);
-                modalMapInstance.fitBounds(polyline.getBounds().pad(0.1));
-            }
-            setTimeout(() => modalMapInstance.invalidateSize(), 10);
         });
         const calendarEditorModalEl = document.getElementById('calendarEditorModal');
         const calendarEditorModal = bootstrap.Modal.getOrCreateInstance(calendarEditorModalEl);
