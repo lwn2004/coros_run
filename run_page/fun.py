@@ -509,7 +509,7 @@ def prepare_template_context(all_runs, fastest_run, pb_file, events_file):
     }
 def generate_share_card(bg_file, run_data, save_img_file):
   # ==== 1. open bg ====
-  bg = Image.open(bg_file.convert("RGBA")
+  bg = Image.open(bg_file.convert("RGBA"))
   W, H = bg.size
   
   # ==== 2. run data ====
@@ -651,6 +651,7 @@ def main():
 if __name__ == "__main__":
     parent = os.path.dirname(current) 
     main()
+
 
 
 
