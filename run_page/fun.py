@@ -619,7 +619,7 @@ def main():
         return
     long_runs = [run for run in all_runs if run['distance'] > 1000]
     recent_run = long_runs[-1]
-    recent_run_json = os.path.join(parent, "public", "data", "details", recent_run['id'] + ".json")
+    recent_run_json = os.path.join(parent, "public", "data", "details", str(recent_run['id']) + ".json")
     try:
         with open(recent_run_json, 'r', encoding='utf-8') as f:
             recent_run_data = json.load(f)
@@ -651,6 +651,7 @@ def main():
 if __name__ == "__main__":
     parent = os.path.dirname(current) 
     main()
+
 
 
 
