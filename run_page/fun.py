@@ -518,7 +518,7 @@ def generate_share_card(bg_file, run_data, save_img_file):
   duration = run_data['summary']['duration']
   pace = run_data['summary']['avg_pace']
   kcals = run_data['summary']['calories_kcal']
-  pirnt("Printing values from run data")
+  print("Printing values from run data")
   print(date_str)
   print(distance)
   print(duration)
@@ -667,6 +667,7 @@ def main():
 if __name__ == "__main__":
     parent = os.path.dirname(current) 
     main()
+
 
 
 
