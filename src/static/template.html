@@ -841,9 +841,9 @@
                           <div class="stat-details">
                             <div class="stat-label" id="running-quote"></div>
                             <div class="progress mt-1" style="height: 4px;">
-                              <div class="progress-bar" role="progressbar" style="width: {{ '%.4f"|format(progress_around_earth) }}%;"></div>
+                              <div class="progress-bar" role="progressbar" style="width: {{ '%.4f'|format(progress_around_earth) }}%;"></div>
                             </div>
-                            <small class="small-muted">进度 {{ "%.4f"|format(progress_around_earth) }}%</small>
+                            <small class="small-muted">进度 {{ '%.4f'|format(progress_around_earth) }}%</small>
                           </div>
                         </div>
                       </div>
@@ -1256,9 +1256,9 @@
                                     {% if progress < 0 %}{% set progress = 0 %}{% endif %}
                                     <div class="w-100">
                                         <div class="progress mb-1" style="height: 6px; background-color: var(--hover-bg);">
-                                            <div class="progress-bar" role="progressbar" style="width: {{ '%.2f"|format(progress) }}%;" aria-valuenow="{{ '%.2f"|format(progress) }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                            <div class="progress-bar" role="progressbar" style="width: {{ '%.2f'|format(progress) }}%;" aria-valuenow="{{ '%.2f'|format(progress) }}" aria-valuemin="0" aria-valuemax="100"></div>
                                         </div>
-                                        <small class="text-body-secondary" style="font-size: 0.8em;">进度 {{ "%.2f"|format(progress) }}%</small>
+                                        <small class="text-body-secondary" style="font-size: 0.8em;">进度 {{ '%.2f'|format(progress) }}%</small>
                                     </div>
                                 {% else %}
                                     <small class="text-body-secondary">未达成</small>
