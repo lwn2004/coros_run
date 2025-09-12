@@ -513,7 +513,7 @@
         height: 50px;
         vertical-align: top;
         padding: 5px;
-        transition: background-color 0.2s;
+        transition: background-color: 0.2s;
         position: relative;
     }
     .calendar-table td.empty {
@@ -794,6 +794,11 @@
       font-size: 0.8rem;
       cursor: pointer;
     }
+    @media (min-width: 992px) {
+      .border-start-lg {
+        border-left: 1px solid var(--bs-border-color);
+      }
+    }
   </style>
 </head>
 <body>
@@ -836,7 +841,7 @@
                           <div class="stat-details">
                             <div class="stat-label" id="running-quote"></div>
                             <div class="progress mt-1" style="height: 4px;">
-                              <div class="progress-bar" role="progressbar" style="width: {{ '%.4f'|format(progress_around_earth) }}%;"></div>
+                              <div class="progress-bar" role="progressbar" style="width: {{ '%.4f"|format(progress_around_earth) }}%;"></div>
                             </div>
                             <small class="small-muted">进度 {{ "%.4f"|format(progress_around_earth) }}%</small>
                           </div>
@@ -953,6 +958,7 @@
                                 <object class="route-svg" data="/images/routesvg/{{ run.id }}.svg" type="image/svg+xml" style="display:none;">
                                 </object>
                             </div>
+
                             <div class="col-9 d-flex flex-column justify-content-between">
                                 <div>
                                     <div class="row g-2 small text-body-secondary ms-2">
@@ -1182,6 +1188,7 @@
                 <button id="editCalendarBtn" class="btn btn-sm" style="display: none;"><i class="bi bi-pencil-square"></i></button>
             </div>
         </div>
+
         <div id="race-countdown-container" class="content-card text-center mb-4" style="display: none; border-color: var(--accent-color);">
             <h6 class="card-title mb-1 text-body-secondary">下一场比赛倒计时</h6>
             <p id="countdown-race-name" class="h4 accent-color-text fw-bold">赛事名称</p>
@@ -1193,6 +1200,7 @@
             </div>
             <p id="countdown-race-date" class="text-body-secondary small mb-0">YYYY-MM-DD</p>
         </div>
+
         <div id="marathon-calendar-view" style="display: none;">
             <div id="marathon-calendar-container"></div>
         </div>
@@ -1220,12 +1228,14 @@
                         {'name': '30000公里', 'distance': 30000, 'date': milestone_dates.get(30000)},
                         {'name': '40000公里', 'distance': 40000, 'date': milestone_dates.get(40000)}
                         ] %}
+                        
                         {% set ns = namespace(next_milestone_index=-1) %}
                         {% for m in milestones %}
                             {% if not m.date and not m.is_first and ns.next_milestone_index == -1 %}
                                 {% set ns.next_milestone_index = loop.index0 %}
                             {% endif %}
                         {% endfor %}
+                        
                         {% for m in milestones %}
                         <div class="d-flex justify-content-between align-items-center py-2 pb-entry">
                             <div>
@@ -1246,7 +1256,7 @@
                                     {% if progress < 0 %}{% set progress = 0 %}{% endif %}
                                     <div class="w-100">
                                         <div class="progress mb-1" style="height: 6px; background-color: var(--hover-bg);">
-                                            <div class="progress-bar" role="progressbar" style="width: {{ '%.2f'|format(progress) }}%;" aria-valuenow="{{ '%.2f'|format(progress) }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                            <div class="progress-bar" role="progressbar" style="width: {{ '%.2f"|format(progress) }}%;" aria-valuenow="{{ '%.2f"|format(progress) }}" aria-valuemin="0" aria-valuemax="100"></div>
                                         </div>
                                         <small class="text-body-secondary" style="font-size: 0.8em;">进度 {{ "%.2f"|format(progress) }}%</small>
                                     </div>
@@ -1516,7 +1526,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-5 order-lg-2 border-start-lg" style="--bs-border-color: var(--border-color);">
+                    <div class="col-lg-5 order-lg-2 border-start-lg">
                         <div class="py-3">
                             <div id="runDetailTagsSection" class="mb-4">
                                 <h4 class="data-section-title">标签</h4>
@@ -1924,11 +1934,8 @@
         countdownInterval = setInterval(updateCountdown, 1000);
     }
     async function updateMarathonStats() {
-        //const statusesToCount = ['待比赛', '待抽签'];
-        //const total = marathonEventsCache.filter(e => statusesToCount.includes(e.status)).length;
         const pending = marathonEventsCache.filter(e => e.status === '中签，参赛').length;
         const lottery = marathonEventsCache.filter(e => e.status === '已报名，待抽签').length;
-        //document.getElementById('stat-total').textContent = total;
         document.getElementById('stat-pending').textContent = pending;
         document.getElementById('stat-lottery').textContent = lottery;
     }
@@ -1940,10 +1947,12 @@
         if (filterStatus !== 'all') {
             eventsToDisplay = marathonEventsCache.filter(e => e.status === filterStatus);
         }
+        
         if (eventsToDisplay.length === 0) {
             container.innerHTML = `<div class="content-card text-center text-body-secondary">暂无${filterStatus === 'all' ? '' : `“${filterStatus}”状态的`}赛事计划</div>`;
             return;
         }
+
         const sortedEvents = [...eventsToDisplay].sort((a, b) => new Date(a.date) - new Date(b.date));
         const statusBadges = {
             '中签，参赛': 'text-bg-success',
@@ -1956,6 +1965,7 @@
             const levelBadge = (event.level && event.level !== '普通赛事') 
                 ? `<span class="badge rounded-pill text-bg-warning ms-2" style="font-size: 0.7em; vertical-align: middle;">${event.level}</span>` 
                 : '';
+            
             let willingnessStars = '';
             const willingness = parseInt(event.willingness, 10) || 0;
             if (willingness > 0) {
@@ -1965,6 +1975,7 @@
                 }
                 willingnessStars = `<span class="ms-2" title="意愿度: ${willingness}/5">${starsHtml}</span>`;
             }
+
             let channelInfo = '';
             if (event.channel) {
                 const isLink = event.channel.startsWith('http');
@@ -1973,6 +1984,7 @@
                     : `<span class="text-body-secondary">${event.channel}</span>`;
                 channelInfo = `<div class="mt-1"><i class="bi bi-link-45deg me-1"></i><strong>报名渠道:</strong> ${channelContent}</div>`;
             }
+
             return `
             <div class="content-card mb-3">
                  <div class="d-flex justify-content-between align-items-center mb-2">
@@ -2008,6 +2020,7 @@
     async function generateMarathonCalendar() {
         const container = document.getElementById('marathon-calendar-container');
         const containerMarathonList = document.getElementById('marathon-list-container');
+      
         if (!container || !containerMarathonList) return;
         containerMarathonList.innerHTML = '<div class="content-card text-center text-body-secondary">加载赛历数据中...</div>';
         try {
@@ -2156,7 +2169,7 @@
                 ${isAdmin ? `<button type="button" class="btn-close ms-1" aria-label="Remove tag" data-tag-index="${index}" style="font-size: 0.6em; filter: invert(0.8);"></button>` : ''}
             </span>`
         ).join('');
-        if (currentRunTags.length === 0) {
+        if (currentRunTags.length === 0 && !isAdmin) {
             tagsHtml = '<p class="small text-body-secondary">暂无标签</p>';
         }
         container.innerHTML = tagsHtml;
@@ -2273,16 +2286,16 @@
                     }, 
                     plugins: { 
                         legend: { display: false }, 
-                        title: { display: true, text: `总 ${dailyTotal.toFixed(1)}km / 次均 ${dailyAvg.toFixed(1)}km`, align: 'start', color: colors.annotationColor, }, 
+                        title: { display: true, text: `总跑量: ${dailyTotal.toFixed(1)} km | 次均: ${dailyAvg.toFixed(1)} km`, align: 'start', color: colors.tickColor, font: { weight: 'normal' } },
                         tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, 
                         annotation: { annotations: { avgLine: annotationDefaults(dailyAvg) } } 
                     } 
                 } 
             });
             const monthlyCtx = document.getElementById('monthlyDistanceChart').getContext('2d');
-            monthlyDistanceChart = new Chart(monthlyCtx, { type: 'bar', data: { labels: {{ chart_monthly_labels|tojson }}, datasets: [{ label: '距离 (km)', data: monthlyData, backgroundColor: colors.accentColor + '99', borderColor: colors.accentColor, borderWidth: 1, borderRadius: 4, hoverBackgroundColor: colors.accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: colors.tickColor, maxRotation: 0, minRotation: 0 }}}, plugins: { legend: { display: false }, title: { display: true, text: `总 ${monthlyTotal.toFixed(1)}km / 月均 ${monthlyAvg.toFixed(1)}km`, align: 'start', color: colors.annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(monthlyAvg) } } } } });
+            monthlyDistanceChart = new Chart(monthlyCtx, { type: 'bar', data: { labels: {{ chart_monthly_labels|tojson }}, datasets: [{ label: '距离 (km)', data: monthlyData, backgroundColor: colors.accentColor + '99', borderColor: colors.accentColor, borderWidth: 1, borderRadius: 4, hoverBackgroundColor: colors.accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: colors.tickColor, maxRotation: 0, minRotation: 0 }}}, plugins: { legend: { display: false }, title: { display: true, text: `总跑量: ${monthlyTotal.toFixed(1)} km | 月均: ${monthlyAvg.toFixed(1)} km`, align: 'start', color: colors.tickColor, font: { weight: 'normal' } }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(monthlyAvg) } } } } });
             const yearlyCtx = document.getElementById('yearlyDistanceChart').getContext('2d');
-            yearlyDistanceChart = new Chart(yearlyCtx, { type: 'bar', data: { labels: {{ chart_yearly_labels|tojson }}, datasets: [{ label: '距离 (km)', data: yearlyData, backgroundColor: colors.accentColor + '99', borderColor: colors.accentColor, borderWidth: 1, borderRadius: 4, hoverBackgroundColor: colors.accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: colors.tickColor, maxRotation: 0, minRotation: 0 } } }, plugins: { legend: { display: false }, title: { display: true, text: `总 ${yearlyTotal.toFixed(1)}km / 年均 ${yearlyAvg.toFixed(1)}km`, align: 'start', color: colors.annotationColor, }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(yearlyAvg) } } } } });
+            yearlyDistanceChart = new Chart(yearlyCtx, { type: 'bar', data: { labels: {{ chart_yearly_labels|tojson }}, datasets: [{ label: '距离 (km)', data: yearlyData, backgroundColor: colors.accentColor + '99', borderColor: colors.accentColor, borderWidth: 1, borderRadius: 4, hoverBackgroundColor: colors.accentColor }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.tickColor, callback: (v) => v + ' km'}}, x: { grid: { display: false }, ticks: { color: colors.tickColor, maxRotation: 0, minRotation: 0 } } }, plugins: { legend: { display: false }, title: { display: true, text: `总跑量: ${yearlyTotal.toFixed(1)} km | 年均: ${yearlyAvg.toFixed(1)} km`, align: 'start', color: colors.tickColor, font: { weight: 'normal' } }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} km` }}, annotation: { annotations: { avgLine: annotationDefaults(yearlyAvg) } } } } });
             const monthOverMonthCtx = document.getElementById('monthOverMonthChart').getContext('2d');
             const diffText = monthOverMonthData.summary.diff_km >= 0 ? `+${monthOverMonthData.summary.diff_km}` : monthOverMonthData.summary.diff_km;
             const thisMonthTruncatedData = monthOverMonthData.this_month_data.slice(0, currentDay);
@@ -2303,7 +2316,7 @@
                     }, 
                     plugins: { 
                         legend: { labels: { color: colors.tickColor } }, 
-                        title: { display: true, text: `本月跑量: ${monthOverMonthData.summary.this_month_total}km (较上月同期: ${diffText}km)`, align: 'start', color: colors.annotationColor },
+                        title: { display: true, text: `本月跑量: ${monthOverMonthData.summary.this_month_total} km | 较上月同期: ${diffText} km`, align: 'start', color: colors.tickColor, font: { weight: 'normal' } },
                         annotation: {
                             annotations: {
                                 todayLine: {
@@ -2320,7 +2333,6 @@
                 }
             });
             const yearlyDualAxisCtx = document.getElementById('yearlyDualAxisChart').getContext('2d');
-            const cumulativeTruncatedData = yearlyDualAxisData.cumulative_data.slice(0, currentMonth + 1);
             yearlyDualAxisChart = new Chart(yearlyDualAxisCtx, {
                 type: 'bar',
                 data: {
@@ -2337,7 +2349,7 @@
                         y: { type: 'linear', display: true, position: 'left', title: { display: true, text: '月度跑量 (km)', color: colors.tickColor }, grid: { color: colors.gridColor }, ticks: { color: colors.tickColor } },
                         y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: '累计跑量 (km)', color: colors.tickColor }, grid: { drawOnChartArea: false }, ticks: { color: colors.tickColor } }
                     },
-                    plugins: { legend: { labels: { color: colors.tickColor } }, title: { display: true, text: `今年总跑量: ${yearlyDualAxisData.total}km`, align: 'start', color: colors.annotationColor } }
+                    plugins: { legend: { labels: { color: colors.tickColor } }, title: { display: true, text: `今年总跑量: ${yearlyDualAxisData.total} km`, align: 'start', color: colors.tickColor, font: { weight: 'normal' } } }
                 }
             });
         }
@@ -2363,14 +2375,9 @@
           fetch(url)
             .then(resp => resp.text())
             .then(svgText => {
-              // 把 <object> 替换成 SVG 元素
               const parser = new DOMParser();
               const svgDoc = parser.parseFromString(svgText, "image/svg+xml");
               const svgEl = svgDoc.documentElement;
-              // 继承 <object> 的样式
-              //if (obj.getAttribute("style")) {
-              //  svgEl.setAttribute("style", obj.getAttribute("style"));
-              //}
               obj.replaceWith(svgEl);
             })
             .catch(err => console.error("SVG load error:", err));
@@ -2432,13 +2439,10 @@
         }, { passive: true });
         const activateTabFromHash = () => {
           let hash = window.location.hash.substring(1);
-          if (!hash) {
-            hash = 'summary'; // Default to summary
-          }
           const tabTrigger = document.querySelector(`.nav-link[data-hash="${hash}"]`);
           if (tabTrigger) { 
               bootstrap.Tab.getOrCreateInstance(tabTrigger).show(); 
-          } else { // Fallback to summary if hash is invalid
+          } else {
               bootstrap.Tab.getOrCreateInstance(document.getElementById('summary-tab')).show();
           }
         };
@@ -2591,10 +2595,13 @@
             document.getElementById('marathon-controls-container').addEventListener('click', (e) => {
                 const button = e.target.closest('.stat-filter-button');
                 if (!button) return;
+
                 document.querySelectorAll('#marathon-controls-container .stat-filter-button').forEach(btn => btn.classList.remove('active'));
                 button.classList.add('active');
+
                 const filterType = button.dataset.filterType;
                 const filterValue = button.dataset.filterValue;
+
                 if (filterType === 'status') {
                     document.getElementById('marathon-list-view').style.display = 'block';
                     document.getElementById('marathon-calendar-view').style.display = 'none';
@@ -2655,10 +2662,10 @@
             document.getElementById('detailTitle').textContent = `跑步详情: ${formattedDate}`;
             const detailDataGrid = document.getElementById('detailDataGrid');
             detailDataGrid.innerHTML = `
-                <div class="col-6 col-md-4"><div class="data-point-value">${preloadedData.distanceFormatted || '--'}</div><div class="data-point-label">总公里</div></div>
-                <div class="col-6 col-md-4"><div class="data-point-value">${preloadedData.duration || '--'}</div><div class="data-point-label">总时长</div></div>
-                <div class="col-6 col-md-4"><div class="data-point-value">${preloadedData.paceStr || '--'}</div><div class="data-point-label">平均配速</div></div>
-                <div class="col-6 col-md-4"><div class="data-point-value">${preloadedData.heartRate || '--'}</div><div class="data-point-label">平均心率</div></div>
+                <div class="col-4"><div class="data-point-value">${preloadedData.distanceFormatted || '--'}</div><div class="data-point-label">总公里</div></div>
+                <div class="col-4"><div class="data-point-value">${preloadedData.duration || '--'}</div><div class="data-point-label">总时长</div></div>
+                <div class="col-4"><div class="data-point-value">${preloadedData.paceStr || '--'}</div><div class="data-point-label">平均配速</div></div>
+                <div class="col-4"><div class="data-point-value">${preloadedData.heartRate || '--'}</div><div class="data-point-label">平均心率</div></div>
             `;
             document.getElementById('viewPhotoBtn').style.display = 'none';
             document.getElementById('managePhotoBtn').style.display = localStorage.getItem('run_role') === 'admin' ? 'inline-block' : 'none';
@@ -2673,20 +2680,22 @@
                 if (!response.ok) throw new Error(`Could not load run data. Status: ${response.status}`);
                 const data = await response.json();
                 if(data.summary) {
-                  const avg_cadence = data.summary.avg_cadence || '--';
-                  const calories = data.summary.calories_kcal || '--';
-                  const total_ascent = data.summary.total_ascent_m || '--';
                   const max_hr = data.summary.max_hr || '--';
+                  const calories = data.summary.calories_kcal || '--';
+                  const avg_cadence = data.summary.avg_cadence || '--';
+                  const total_ascent = data.summary.total_ascent_m || '--';
+                  const avg_power = data.summary.avg_power_w || '--';
                   detailDataGrid.innerHTML = `
-                    <div class="col-6 col-md-4"><div class="data-point-value">${preloadedData.distanceFormatted || '--'}</div><div class="data-point-label">总公里</div></div>
-                    <div class="col-6 col-md-4"><div class="data-point-value">${preloadedData.duration || '--'}</div><div class="data-point-label">总时长</div></div>
-                    <div class="col-6 col-md-4"><div class="data-point-value">${preloadedData.paceStr || '--'}</div><div class="data-point-label">平均配速</div></div>
-                    <div class="col-6 col-md-4"><div class="data-point-value">${preloadedData.heartRate || '--'}</div><div class="data-point-label">平均心率</div></div>
-                    <div class="col-6 col-md-4"><div class="data-point-value">${max_hr}</div><div class="data-point-label">最高心率</div></div>
-                    <div class="col-6 col-md-4"><div class="data-point-value">${calories}</div><div class="data-point-label">消耗千卡</div></div>
-                    <div class="col-6 col-md-4"><div class="data-point-value">${avg_cadence}</div><div class="data-point-label">平均步频</div></div>
-                    <div class="col-6 col-md-4"><div class="data-point-value">${total_ascent}</div><div class="data-point-label">累计上升(米)</div></div>
-                  `
+                    <div class="col-4"><div class="data-point-value">${preloadedData.distanceFormatted || '--'}</div><div class="data-point-label">总公里</div></div>
+                    <div class="col-4"><div class="data-point-value">${preloadedData.duration || '--'}</div><div class="data-point-label">总时长</div></div>
+                    <div class="col-4"><div class="data-point-value">${preloadedData.paceStr || '--'}</div><div class="data-point-label">平均配速</div></div>
+                    <div class="col-4"><div class="data-point-value">${preloadedData.heartRate || '--'}</div><div class="data-point-label">平均心率</div></div>
+                    <div class="col-4"><div class="data-point-value">${max_hr}</div><div class="data-point-label">最高心率</div></div>
+                    <div class="col-4"><div class="data-point-value">${calories}</div><div class="data-point-label">消耗千卡</div></div>
+                    <div class="col-4"><div class="data-point-value">${avg_cadence}</div><div class="data-point-label">平均步频</div></div>
+                    <div class="col-4"><div class="data-point-value">${total_ascent}</div><div class="data-point-label">累计上升(米)</div></div>
+                    <div class="col-4"><div class="data-point-value">${avg_power}</div><div class="data-point-label">平均功率</div></div>
+                  `;
                 }
                 detailPhotoUrls = data.photos ? data.photos.map(p => p.url) : [];
                 currentPolyline = data.route.encoded_polyline;
@@ -2696,6 +2705,7 @@
                     detailMapInstance.remove();
                     detailMapInstance = null;
                 }
+
                 if (currentPolyline) {
                     const mapItem = document.createElement('div');
                     mapItem.innerHTML = `<div id="detail-map-item" class="d-block w-100" style="z-index: 5;"></div>`;
@@ -2833,7 +2843,6 @@
         document.getElementById('managePhotoBtn').addEventListener('click', () => {
             const photoManagerModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('photoManagerModal'));
             photoManagerModal.show();
-            // TODO: Populate existing photos here by fetching from your backend
             const grid = document.getElementById('photo-manager-grid');
             grid.innerHTML = detailPhotoUrls.map((url, index) => `
                 <div class="photo-manager-item">
@@ -2845,6 +2854,7 @@
                 grid.innerHTML = '<p class="text-secondary">此记录暂无照片</p>';
             }
         });
+
         const calendarEditorModalEl = document.getElementById('calendarEditorModal');
         const calendarEditorModal = bootstrap.Modal.getOrCreateInstance(calendarEditorModalEl);
         const calendarForm = document.getElementById('calendarEventForm');
