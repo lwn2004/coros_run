@@ -2,10 +2,11 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>{{ recent_runs[0].date.strftime('%Y-%m-%d') }} 跑步{{ "%.2f"|format(recent_runs[0].distance / 1000) }}公里</title>
+  <title>步履不停 - 我的四万公里跑量挑战</title>
   <link rel="icon" type="image/png" href="https://run.linwn.net/images/favicon.png">
-  <meta property="og:title" content="{{ recent_runs[0].date.strftime('%Y-%m-%d') }} 跑步{{ "%.2f"|format(recent_runs[0].distance / 1000) }}公里" />
-  <meta property="og:description" content="用时{{ format_duration(recent_runs[0].duration) }}<br>配速{{ recent_runs[0].pace }}<br>累计{{ "%.2f"|format(overall_stats.dist_km) }}公里" />
+  <meta property="og:title" content="步履不停 - 我的四万公里跑量挑战" />
+  <meta property="og:description" content="目前累计{{ "%.2f"|format(overall_stats.dist_km) }}公里 | {% if recent_runs %}最近跑步：{{ recent_runs[0].date.strftime('%m-%d') }}, {{ "%.2f"|format(recent_runs[0].distance / 1000) }}公里, 用时{{ format_duration(recent_runs[0].duration) }}, 配速{{ recent_runs[0].pace }}
+{% endif %}" />
   <meta property="og:image" content="https://run.linwn.net/images/card.png" />
   <meta property="og:url" content="https://run.linwn.net/fun" />
   <meta property="og:type" content="website" />
