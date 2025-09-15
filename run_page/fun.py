@@ -6,7 +6,7 @@ import sys
 import locale
 import os
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance
-import matplotlib.pyplot as plt
+import polyline
 import io
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
@@ -790,6 +790,7 @@ def main():
 if __name__ == "__main__":
     parent = os.path.dirname(current) 
     main()
+
 
 
 
