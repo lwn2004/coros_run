@@ -507,7 +507,7 @@ def prepare_template_context(all_runs, fastest_run, pb_file, events_file):
         "chart_month_over_month": chart_month_over_month,
         "chart_yearly_dual_axis": chart_yearly_dual_axis,
     }
-def draw_polyline_on_box(draw, poly_str, box, color="white", width=8, padding=40):
+def draw_polyline_on_box(draw, poly_str, box, color="white", width=1, padding=40):
     """
     在方框内绘制 polyline 路径 (保持纵横比，居中)
     """
@@ -553,90 +553,11 @@ def draw_polyline_on_box(draw, poly_str, box, color="white", width=8, padding=40
         points.append((x, y))
 
     # 绘制
-    draw.line(points, fill=color, width=width, joint="curve")
-
-def trim_time(s: str) -> str:
-    # parse string into datetime object
-    t = datetime.strptime(s, "%H:%M:%S").time()
-    # format back, then strip leading zero in hours
-    return t.strftime("%-H:%M:%S") if hasattr(t, "strftime") else t.strftime("%#H:%M:%S")    
-def generate_run_card(bg_path, run_data, output_path="nrc_card.png"):
-    """
-    生成 Nike Run Club 风格的跑步卡片 (里程带单位 KM)
-    """
-    date = datetime.fromisoformat(run_data['start_time']).astimezone(timezone(timedelta(hours=8))).strftime("%b %d, %Y")
-    mileage = run_data['summary']['distance_km']
-    duration = trim_time(run_data['summary']['duration'])
-    pace = run_data['summary']['avg_pace']
-    kcals = run_data['summary']['calories_kcal']
-    polyline_str = run_data['route']['encoded_polyline']
-    # 打开背景
-    bg = Image.open(bg_path).convert("RGBA")
-    draw = ImageDraw.Draw(bg)
-    W, H = bg.size
-
-    # 矩形区域
-    box_left = 190
-    box_top = 70
-    box_right = 460
-    box_bottom = 500
-    # --- 绘制 polyline 路径 ---
-    draw_polyline_on_box(draw, polyline_str, (box_left, box_top + 120, box_right, box_bottom),
-                         color="orange", width=1, padding=10)
-    # 字体（替换为实际路径）
-    font_mileage = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", int(H*0.1))   # 里程数字
-    font_unit = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", int(H*0.07))        # 单位 KM
-    font_regular = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", int(H*0.05))     # 其他信息
-    
-    # 单位 "KM" 放在数字右上角
-    km_text = "KM"
-    km_bbox = draw.textbbox((0, 0), km_text, font=font_unit)
-    km_w, km_h = km_bbox[2] - km_bbox[0], km_bbox[3] - km_bbox[1]
-
-    
-    # --- 绘制里程 + 单位 KM ---
-    mileage_text = mileage
-    bbox = draw.textbbox((0, 0), mileage_text, font=font_mileage)
-    text_w, text_h = bbox[2] - bbox[0], bbox[3] - bbox[1]
-    x = (box_left + box_right  - text_w -50) // 2
-    y = box_top + 50
-    draw.text((x, y), mileage_text, font=font_mileage, fill="white")
-    km_x = x + text_w + 10
-    km_y = y + text_h - km_h - 15
-    draw.text((km_x, km_y), km_text, font=font_unit, fill="white")
-
-
-    # --- 绘制其他信息 ---
-    info_texts = [
-        (" ",  duration),
-        ("Pace",      pace),
-        ("Calories",  f"{kcals}"),
-        (" ", date)
-    ]
-    y_offset = y + text_h + 80
-    for left_text, right_text in info_texts:  # info_texts 每个元素是 (左文字, 右文字) 的 tuple
-        # 左对齐
-        draw.text((box_left + 20, y_offset), left_text, font=font_regular, fill="white")
-
-        # 右对齐
-        bbox = draw.textbbox((0, 0), right_text, font=font_regular)
-        text_w = bbox[2] - bbox[0]
-        draw.text((box_right - text_w - 20, y_offset), right_text, font=font_regular, fill="white")
-
-        # y 方向偏移
-        y_offset += max(
-            draw.textbbox((0, 0), left_text, font=font_regular)[3] - draw.textbbox((0, 0), left_text, font=font_regular)[1],
-            draw.textbbox((0, 0), right_text, font=font_regular)[3] - draw.textbbox((0, 0), right_text, font=font_regular)[1]
-        ) + 35
-
-
-    # 保存结果
-    bg.save(output_path)
-    print(f"✅ 已生成: {output_path}")
-      
+    draw.line(points, fill=color, width=width, joint="curve")	
 def generate_share_card(bg_file, run_data, save_img_file):
   # ==== 1. open bg ====
   bg = Image.open(bg_file).convert("RGBA")
+  draw = ImageDraw.Draw(bg)
   W, H = bg.size
   
   # ==== 2. run data ====
@@ -645,36 +566,13 @@ def generate_share_card(bg_file, run_data, save_img_file):
   duration = run_data['summary']['duration']
   pace = run_data['summary']['avg_pace']
   kcals = str(run_data['summary']['calories_kcal'])
-  print("Printing values from run data")
-  print(date_str)
-  print(distance)
-  print(duration)
-  print(pace)
-  print(kcals)
+  polyline_str = run_data['route']['encoded_polyline']
   
   # ==== 3. route ====
-  route_x = [0, 1, 2, 3, 4, 5, 6]
-  route_y = [0, 1, 0.5, 1.5, 1, 2, 1.5]
+  draw_polyline_on_box(draw, polyline_str, (0, 120, W, 240),
+                         color="white", width=1, padding=10)
   
-  plt.figure(figsize=(2,2))
-  plt.plot(route_x, route_y, color="white", linewidth=3)
-  plt.axis("off")
-  
-  buf = io.BytesIO()
-  plt.savefig(buf, format="PNG", bbox_inches="tight", transparent=True, pad_inches=0.05)
-  plt.close()
-  buf.seek(0)
-  route_img = Image.open(buf).convert("RGBA")
-  
-  # transparency + scale 
-  scale = 0.8
-  rw, rh = route_img.size
-  route_img = route_img.resize((int(rw*scale), int(rh*scale)))
-  alpha = route_img.split()[3]
-  alpha = ImageEnhance.Brightness(alpha).enhance(0.4)
-  route_img.putalpha(alpha)
-  bg.paste(route_img, ((W-route_img.size[0])//2, H-route_img.size[1]-60), route_img)
-  
+ 
   # ==== 4. fonts ====
   def get_font(preferred_fonts, size):
       for f in preferred_fonts:
@@ -697,7 +595,6 @@ def generate_share_card(bg_file, run_data, save_img_file):
   font_label = get_font(preferred_fonts, 28)
   font_date  = get_font(preferred_fonts, 45)
   
-  draw = ImageDraw.Draw(bg)
   
   # ==== 5. add text ====
   
@@ -721,7 +618,7 @@ def generate_share_card(bg_file, run_data, save_img_file):
   draw.text((x + tw + 15, y + 40), "KM", font=font_km, fill=(255,255,255,255))
   
   #  (TIME / PACE / KCALS)
-  labels = ["TIME", "PACE", "kCALS"]
+  labels = ["TIME", "PACE", "CALS"]
   values = [duration, pace, kcals]
   spacing = W // 3
   
@@ -751,7 +648,7 @@ def main():
     events_file = os.path.join(parent, "src", "static", "events.json")
     template_file = "template.html"
     output_file = os.path.join(parent, "public", "fun.html")
-    bg_file = os.path.join(parent, "public", "images", "sharecardbg.png")
+    bg_file = os.path.join(parent, "public", "images", "sharecardbg.bak.png")
     sharecard_file = os.path.join(parent, "public", "images", "card.png")
 
     setup_locale()
@@ -770,7 +667,7 @@ def main():
         print(f"Error: failed to find run file {path}")
         recent_run_data = {}
     if(recent_run_data):
-      generate_run_card(bg_file, recent_run_data, sharecard_file)
+      generate_share_card(bg_file, recent_run_data, sharecard_file)
   
     context = prepare_template_context(all_runs, fastest_run, pb_file, events_file)
 
@@ -794,24 +691,3 @@ def main():
 if __name__ == "__main__":
     parent = os.path.dirname(current) 
     main()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
