@@ -608,9 +608,9 @@ def generate_run_card(bg_path, run_data, output_path="nrc_card.png"):
 
     # --- 绘制其他信息 ---
     info_texts = [
-        ("Duration",  duration),
+        (" ",  duration),
         ("Pace",      pace),
-        ("Calories(k)",  f"{kcals}"),
+        ("Calories",  f"{kcals}"),
         (" ", date)
     ]
     y_offset = y + text_h + 80
@@ -794,6 +794,7 @@ def main():
 if __name__ == "__main__":
     parent = os.path.dirname(current) 
     main()
+
 
 
 
