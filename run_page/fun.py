@@ -751,7 +751,7 @@ def main():
     events_file = os.path.join(parent, "src", "static", "events.json")
     template_file = "template.html"
     output_file = os.path.join(parent, "public", "fun.html")
-    bg_file = os.path.join(parent, "public", "images", "sharecardbg.jpg")
+    bg_file = os.path.join(parent, "public", "images", "sharecardbg.png")
     sharecard_file = os.path.join(parent, "public", "images", "card.png")
 
     setup_locale()
@@ -794,6 +794,7 @@ def main():
 if __name__ == "__main__":
     parent = os.path.dirname(current) 
     main()
+
 
 
 
