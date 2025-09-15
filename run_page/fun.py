@@ -555,14 +555,18 @@ def draw_polyline_on_box(draw, poly_str, box, color="white", width=8, padding=40
     # 绘制
     draw.line(points, fill=color, width=width, joint="curve")
 
-    
+def trim_time(s: str) -> str:
+    # parse string into datetime object
+    t = datetime.strptime(s, "%H:%M:%S").time()
+    # format back, then strip leading zero in hours
+    return t.strftime("%-H:%M:%S") if hasattr(t, "strftime") else t.strftime("%#H:%M:%S")    
 def generate_run_card(bg_path, run_data, output_path="nrc_card.png"):
     """
     生成 Nike Run Club 风格的跑步卡片 (里程带单位 KM)
     """
     date = datetime.fromisoformat(run_data['start_time']).astimezone(timezone(timedelta(hours=8))).strftime("%b %d, %Y")
     mileage = run_data['summary']['distance_km']
-    duration = run_data['summary']['duration']
+    duration = trim_time(run_data['summary']['duration'])
     pace = run_data['summary']['avg_pace']
     kcals = run_data['summary']['calories_kcal']
     polyline_str = run_data['route']['encoded_polyline']
@@ -591,7 +595,7 @@ def generate_run_card(bg_path, run_data, output_path="nrc_card.png"):
 
     
     # --- 绘制里程 + 单位 KM ---
-    mileage_text = f"{mileage:.2f}"
+    mileage_text = mileage
     bbox = draw.textbbox((0, 0), mileage_text, font=font_mileage)
     text_w, text_h = bbox[2] - bbox[0], bbox[3] - bbox[1]
     x = (box_left + box_right  - text_w -50) // 2
@@ -604,10 +608,10 @@ def generate_run_card(bg_path, run_data, output_path="nrc_card.png"):
 
     # --- 绘制其他信息 ---
     info_texts = [
-        ("Duration",  f"{duration}"),
-        ("Pace",      f"{pace}"),
+        ("Duration",  duration),
+        ("Pace",      pace),
         ("Calories(k)",  f"{kcals}"),
-        (" ", f"{date}")
+        (" ", date)
     ]
     y_offset = y + text_h + 80
     for left_text, right_text in info_texts:  # info_texts 每个元素是 (左文字, 右文字) 的 tuple
@@ -790,6 +794,7 @@ def main():
 if __name__ == "__main__":
     parent = os.path.dirname(current) 
     main()
+
 
 
 
