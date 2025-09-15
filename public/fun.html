@@ -30,7 +30,7 @@
       const storedTheme = localStorage.getItem('theme');
       const preferredTheme = storedTheme 
           ? storedTheme 
-          : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+          : (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
       document.documentElement.setAttribute('data-bs-theme', preferredTheme);
     })();
   </script>
@@ -15443,7 +15443,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-09-15 16:56:04 
+         | Last updated: 2025-09-15 22:40:09 
     </small>
 </footer>
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
@@ -15923,7 +15923,7 @@
         }
         const now = new Date();
         const upcomingRaces = marathonEventsCache
-            .filter(event => event.status === '待比赛' && new Date(event.date.replace(/-/g, '/')) > now)
+            .filter(event => event.status === '中签，参赛' && new Date(event.date.replace(/-/g, '/')) > now)
             .sort((a, b) => new Date(a.date.replace(/-/g, '/')) - new Date(b.date.replace(/-/g, '/')));
         const countdownContainer = document.getElementById('race-countdown-container');
         if (upcomingRaces.length === 0) {
