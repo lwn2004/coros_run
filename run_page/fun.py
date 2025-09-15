@@ -584,7 +584,7 @@ def generate_run_card(bg_path, run_data, output_path="nrc_card.png"):
     draw_polyline_on_box(draw, polyline_str, (box_left, box_top + 120, box_right, box_bottom),
                          color="orange", width=1, padding=10)
     # 字体（替换为实际路径）
-    font_mileage = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", int(H*0.12))   # 里程数字
+    font_mileage = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", int(H*0.1))   # 里程数字
     font_unit = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", int(H*0.07))        # 单位 KM
     font_regular = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", int(H*0.05))     # 其他信息
     
@@ -794,6 +794,7 @@ def main():
 if __name__ == "__main__":
     parent = os.path.dirname(current) 
     main()
+
 
 
 
