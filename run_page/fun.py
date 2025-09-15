@@ -561,10 +561,10 @@ def generate_run_card(bg_path, run_data, output_path="nrc_card.png"):
     生成 Nike Run Club 风格的跑步卡片 (里程带单位 KM)
     """
     date = datetime.fromisoformat(run_data['start_time']).astimezone(timezone(timedelta(hours=8))).strftime("%b %d, %Y")
-    mileage = str(run_data['summary']['distance_km'])
+    mileage = run_data['summary']['distance_km']
     duration = run_data['summary']['duration']
     pace = run_data['summary']['avg_pace']
-    kcals = str(run_data['summary']['calories_kcal'])
+    kcals = run_data['summary']['calories_kcal']
     polyline_str = run_data['route']['encoded_polyline']
     # 打开背景
     bg = Image.open(bg_path).convert("RGBA")
@@ -790,6 +790,7 @@ def main():
 if __name__ == "__main__":
     parent = os.path.dirname(current) 
     main()
+
 
 
 
