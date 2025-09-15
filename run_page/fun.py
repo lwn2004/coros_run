@@ -507,6 +507,129 @@ def prepare_template_context(all_runs, fastest_run, pb_file, events_file):
         "chart_month_over_month": chart_month_over_month,
         "chart_yearly_dual_axis": chart_yearly_dual_axis,
     }
+def draw_polyline_on_box(draw, poly_str, box, color="white", width=8, padding=40):
+    """
+    在方框内绘制 polyline 路径 (保持纵横比，居中)
+    """
+    coords = polyline.decode(poly_str)
+    if not coords:
+        return
+
+    lats = [c[0] for c in coords]
+    lons = [c[1] for c in coords]
+
+    min_lat, max_lat = min(lats), max(lats)
+    min_lon, max_lon = min(lons), max(lons)
+
+    route_w = max_lon - min_lon
+    route_h = max_lat - min_lat
+    route_aspect = route_w / route_h if route_h != 0 else 1
+
+    left, top, right, bottom = box
+    box_w, box_h = right - left - 2*padding, bottom - top - 2*padding
+    box_aspect = box_w / box_h if box_h != 0 else 1
+
+    # --- 计算缩放比例 ---
+    if route_aspect > box_aspect:
+        # 路径比方框更宽 → 以宽度为基准缩放
+        scale = box_w / route_w
+        scaled_w = box_w
+        scaled_h = route_h * scale
+        offset_x = left + padding
+        offset_y = top + padding + (box_h - scaled_h) / 2
+    else:
+        # 路径比方框更高 → 以高度为基准缩放
+        scale = box_h / route_h
+        scaled_h = box_h
+        scaled_w = route_w * scale
+        offset_x = left + padding + (box_w - scaled_w) / 2
+        offset_y = top + padding
+
+    # --- 坐标映射 ---
+    points = []
+    for lat, lon in coords:
+        x = offset_x + (lon - min_lon) * scale
+        y = offset_y + (max_lat - lat) * scale  # y 轴翻转
+        points.append((x, y))
+
+    # 绘制
+    draw.line(points, fill=color, width=width, joint="curve")
+
+    
+def generate_run_card(bg_path, run_data, output_path="nrc_card.png"):
+    """
+    生成 Nike Run Club 风格的跑步卡片 (里程带单位 KM)
+    """
+    date = datetime.fromisoformat(run_data['start_time']).astimezone(timezone(timedelta(hours=8))).strftime("%b %d, %Y")
+    mileage = str(run_data['summary']['distance_km'])
+    duration = run_data['summary']['duration']
+    pace = run_data['summary']['avg_pace']
+    kcals = str(run_data['summary']['calories_kcal'])
+    polyline_str = run_data['route']['encoded_polyline']
+    # 打开背景
+    bg = Image.open(bg_path).convert("RGBA")
+    draw = ImageDraw.Draw(bg)
+    W, H = bg.size
+
+    # 矩形区域
+    box_left = 190
+    box_top = 70
+    box_right = 460
+    box_bottom = 500
+    # --- 绘制 polyline 路径 ---
+    draw_polyline_on_box(draw, polyline_str, (box_left, box_top + 120, box_right, box_bottom),
+                         color="orange", width=1, padding=10)
+    # 字体（替换为实际路径）
+    font_mileage = ImageFont.truetype("arialbd.ttf", int(H*0.12))   # 里程数字
+    font_unit = ImageFont.truetype("arial.ttf", int(H*0.07))        # 单位 KM
+    font_regular = ImageFont.truetype("arial.ttf", int(H*0.05))     # 其他信息
+    
+    # 单位 "KM" 放在数字右上角
+    km_text = "KM"
+    km_bbox = draw.textbbox((0, 0), km_text, font=font_unit)
+    km_w, km_h = km_bbox[2] - km_bbox[0], km_bbox[3] - km_bbox[1]
+
+    
+    # --- 绘制里程 + 单位 KM ---
+    mileage_text = f"{mileage:.2f}"
+    bbox = draw.textbbox((0, 0), mileage_text, font=font_mileage)
+    text_w, text_h = bbox[2] - bbox[0], bbox[3] - bbox[1]
+    x = (box_left + box_right  - text_w -50) // 2
+    y = box_top + 50
+    draw.text((x, y), mileage_text, font=font_mileage, fill="white")
+    km_x = x + text_w + 10
+    km_y = y + text_h - km_h - 15
+    draw.text((km_x, km_y), km_text, font=font_unit, fill="white")
+
+
+    # --- 绘制其他信息 ---
+    info_texts = [
+        ("Duration",  f"{duration}"),
+        ("Pace",      f"{pace}"),
+        ("Calories(k)",  f"{kcals}"),
+        (" ", f"{date}")
+    ]
+    y_offset = y + text_h + 80
+    for left_text, right_text in info_texts:  # info_texts 每个元素是 (左文字, 右文字) 的 tuple
+        # 左对齐
+        draw.text((box_left + 20, y_offset), left_text, font=font_regular, fill="white")
+
+        # 右对齐
+        bbox = draw.textbbox((0, 0), right_text, font=font_regular)
+        text_w = bbox[2] - bbox[0]
+        draw.text((box_right - text_w - 20, y_offset), right_text, font=font_regular, fill="white")
+
+        # y 方向偏移
+        y_offset += max(
+            draw.textbbox((0, 0), left_text, font=font_regular)[3] - draw.textbbox((0, 0), left_text, font=font_regular)[1],
+            draw.textbbox((0, 0), right_text, font=font_regular)[3] - draw.textbbox((0, 0), right_text, font=font_regular)[1]
+        ) + 35
+
+
+    # 保存结果
+    bg.save(output_path)
+    print(f"✅ 已生成: {output_path}")
+      
 def generate_share_card(bg_file, run_data, save_img_file):
   # ==== 1. open bg ====
   bg = Image.open(bg_file).convert("RGBA")
@@ -624,7 +747,7 @@ def main():
     events_file = os.path.join(parent, "src", "static", "events.json")
     template_file = "template.html"
     output_file = os.path.join(parent, "public", "fun.html")
-    bg_file = os.path.join(parent, "public", "images", "sharecardbg.png")
+    bg_file = os.path.join(parent, "public", "images", "sharecardbg.jpg")
     sharecard_file = os.path.join(parent, "public", "images", "card.png")
 
     setup_locale()
@@ -643,7 +766,7 @@ def main():
         print(f"Error: failed to find run file {path}")
         recent_run_data = {}
     if(recent_run_data):
-      generate_share_card(bg_file, recent_run_data, sharecard_file)
+      generate_run_card(bg_file, recent_run_data, sharecard_file)
   
     context = prepare_template_context(all_runs, fastest_run, pb_file, events_file)
 
@@ -667,6 +790,7 @@ def main():
 if __name__ == "__main__":
     parent = os.path.dirname(current) 
     main()
+
 
 
 
