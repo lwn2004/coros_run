@@ -507,6 +507,20 @@ def prepare_template_context(all_runs, fastest_run, pb_file, events_file):
         "chart_month_over_month": chart_month_over_month,
         "chart_yearly_dual_axis": chart_yearly_dual_axis,
     }
+def trim_duration(duration_str: str) -> str:
+    parts = duration_str.split(":")
+    # Convert all to int to drop leading zeros
+    parts = [int(p) for p in parts]
+
+    # Drop leading zero fields until only 2 or 3 remain
+    while len(parts) > 2 and parts[0] == 0:
+        parts.pop(0)
+
+    # Format: hours:MM:SS or M:SS
+    if len(parts) == 3:
+        return f"{parts[0]}:{parts[1]:02}:{parts[2]:02}"
+    else:  # len == 2
+        return f"{parts[0]}:{parts[1]:02}"  
 def draw_polyline_on_box(draw, poly_str, box, color="white", width=1, padding=40):
     """
     在方框内绘制 polyline 路径 (保持纵横比，居中)
@@ -563,13 +577,13 @@ def generate_share_card(bg_file, run_data, save_img_file):
   # ==== 2. run data ====
   date_str = datetime.fromisoformat(run_data['start_time']).astimezone(timezone(timedelta(hours=8))).strftime("%b %d, %Y")
   distance = str(run_data['summary']['distance_km'])
-  duration = run_data['summary']['duration']
+  duration = trim_duration(run_data['summary']['duration'])
   pace = run_data['summary']['avg_pace']
   kcals = str(run_data['summary']['calories_kcal'])
   polyline_str = run_data['route']['encoded_polyline']
   
   # ==== 3. route ====
-  draw_polyline_on_box(draw, polyline_str, (0, 120, W, 240),
+  draw_polyline_on_box(draw, polyline_str, (0, 150, W, 240),
                          color="white", width=1, padding=10)
   
  
@@ -613,8 +627,8 @@ def generate_share_card(bg_file, run_data, save_img_file):
   draw.text((x, y), distance, font=font_big, fill=(255,255,255,255))
   
   #tw_km, th_km = draw.textsize("KM", font=font_km)
-  left, top, right, bottom = draw.textbbox((0,0), "KM", font=font_km)
-  tw, th = right, bottom
+  #left, top, right, bottom = draw.textbbox((0,0), "KM", font=font_km)
+  #tw, th = right, bottom
   draw.text((x + tw + 15, y + 40), "KM", font=font_km, fill=(255,255,255,255))
   
   #  (TIME / PACE / KCALS)
@@ -691,3 +705,4 @@ def main():
 if __name__ == "__main__":
     parent = os.path.dirname(current) 
     main()
+
