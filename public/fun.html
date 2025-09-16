@@ -1191,6 +1191,14 @@
                                     
                                 </select>
                             </div>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="" id="data-media-filter">
+                                    <label class="form-check-label small" for="data-media-filter">
+                                        只看有图/视频的记录
+                                    </label>
+                                </div>
+                            </div>                          
                             <button id="clear-filters-btn" class="btn btn-sm btn-outline-secondary w-100">清除所有筛选</button>
                         </div>
                     </div>
@@ -15472,7 +15480,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | Last updated: 2025-09-16 09:40:30 
+         | Last updated: 2025-09-16 17:09:32 
     </small>
 </footer>
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
@@ -15533,7 +15541,30 @@
                 <div id="runDetailContent" class="container-fluid">
                   <div class="row">
                     <div class="col-lg-7 order-lg-1">
-                        <div id="routeMapContainer" class="py-2"></div>
+                        <div class="d-flex justify-content-center mb-2">
+                            <div class="btn-group btn-group-sm" role="group" id="detail-view-toggle">
+                                <button type="button" class="btn active" data-view="map">
+                                    <i class="bi bi-map-fill me-1"></i> 路线地图
+                                </button>
+                                <button type="button" class="btn" data-view="media">
+                                    <i class="bi bi-images me-1"></i> 影音记录
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="detail-view-content" class="position-relative">
+                            <div id="routeMapContainer" class="py-2">
+                                </div>
+                        
+                            <div id="mediaViewerContainer" class="p-2" style="display: none;">
+                                <div class="text-center p-5">
+                                    <div class="spinner-border text-secondary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div id="detailWeather" class="text-center small text-body-secondary mb-3"></div>
                         <div class="mb-4">
                             <div class="d-flex justify-content-between align-items-center">
@@ -15792,6 +15823,9 @@
     let allRunRows = [];
     const commentApiBase = 'https://kv.linwn.net';
     const cityStatsData = [{"coordinates": [23.1291, 113.2644], "count": 449, "distance": 3775.79, "first_date": "2021-03-24", "name": "\u5e7f\u5dde\u5e02"}, {"coordinates": [21.6622, 110.9175], "count": 11, "distance": 81.6, "first_date": "2022-01-31", "name": "\u8302\u540d\u5e02"}, {"coordinates": [23.7, 113.05], "count": 1, "distance": 21.3, "first_date": "2025-03-16", "name": "\u6e05\u8fdc\u5e02"}, {"coordinates": [22.1987, 113.5439], "count": 1, "distance": 10.12, "first_date": "2024-11-10", "name": "\u6fb3\u95e8"}, {"coordinates": [22.5431, 114.0579], "count": 1, "distance": 5.01, "first_date": "2023-05-01", "name": "\u6df1\u5733\u5e02"}];
+    let currentRunMedia = null;
+    let hasFetchedMedia = false;
+    let mediaRunIds = new Set();
     let detailPhotoUrls = [];
     let currentDetailRunId = null;
     let currentRunTags = [];
@@ -16387,6 +16421,16 @@
             .catch(err => console.error("SVG load error:", err));
         });
         createAllCharts(); 
+        // Fetch the list of runs that have media
+        try {
+            const response = await fetch('/api/media/list'); // Replace with your actual API endpoint
+            if(response.ok) {
+                const ids = await response.json(); // Expecting an array like ["id1", "id2"]
+                mediaRunIds = new Set(ids);
+            }
+        } catch (error) {
+            console.error('Could not fetch media list:', error);
+        }      
         document.getElementById('editProfileTrigger').addEventListener('click', () => { new bootstrap.Modal(document.getElementById('profileModal')).show(); });
         document.getElementById('detailEditProfileTrigger').addEventListener('click', () => { new bootstrap.Modal(document.getElementById('profileModal')).show(); });
         document.getElementById('addTagButton').addEventListener('click', async () => {
@@ -16515,15 +16559,19 @@
                 const selectedCity = document.getElementById('data-city-filter').value;
                 const startDate = document.getElementById('date-filter-start').value;
                 const endDate = document.getElementById('date-filter-end').value;
+                const mediaOnly = document.getElementById('data-media-filter').checked;
                 const activeSortHeader = document.querySelector('.sortable-header[aria-sort]');
                 const sortProp = activeSortHeader ? activeSortHeader.dataset.sort : 'date';
                 const sortOrder = activeSortHeader ? activeSortHeader.getAttribute('aria-sort') : 'descending';
                 let filteredRows = allRunRows.filter(row => {
+                    const runId = row.dataset.runId;
+                    const mediaCondition = !mediaOnly || mediaRunIds.has(runId);
                     const isVisible = (parseFloat(row.dataset.distance) >= minDist) &&
                                     (parsePaceToSeconds(row.dataset.paceStr) <= maxPace) &&
                                     (selectedCity === 'all' || row.dataset.city === selectedCity) &&
                                     (!startDate || row.dataset.date >= startDate) &&
-                                    (!endDate || row.dataset.date <= endDate);
+                                    (!endDate || row.dataset.date <= endDate) &&
+                                    (mediaCondition);
                     row.style.display = isVisible ? '' : 'none';
                     return isVisible;
                 });
@@ -16578,7 +16626,7 @@
                     }
                 });
             });
-            ['data-city-filter', 'date-filter-start', 'date-filter-end'].forEach(id => {
+            ['data-city-filter', 'date-filter-start', 'date-filter-end', 'data-media-filter'].forEach(id => {
                 document.getElementById(id).addEventListener('change', updateDataView);
             });
             updateDataView();
@@ -16613,6 +16661,86 @@
                 }
             });
         }
+        const viewToggleButtonGroup = document.getElementById('detail-view-toggle');
+        const routeMapContainer = document.getElementById('routeMapContainer');
+        const mediaViewerContainer = document.getElementById('mediaViewerContainer');
+        
+        viewToggleButtonGroup.addEventListener('click', async (e) => {
+            const button = e.target.closest('button');
+            if (!button) return;
+        
+            // Update active button state
+            viewToggleButtonGroup.querySelector('.active').classList.remove('active');
+            button.classList.add('active');
+        
+            const view = button.dataset.view;
+            if (view === 'map') {
+                mediaViewerContainer.style.display = 'none';
+                routeMapContainer.style.display = 'block';
+                if (detailMapInstance) {
+                    detailMapInstance.invalidateSize(); // Important for Leaflet
+                }
+            } else if (view === 'media') {
+                routeMapContainer.style.display = 'none';
+                mediaViewerContainer.style.display = 'block';
+        
+                // Lazy load media data only on the first click
+                if (!hasFetchedMedia) {
+                    try {
+                        // This is a placeholder for your actual API call
+                        const response = await fetch(`/api/media/${currentDetailRunId}`); // Replace with your actual API endpoint
+                        if (response.ok) {
+                            currentRunMedia = await response.json();
+                        } else {
+                            currentRunMedia = { media: [] }; // Assume no media on 404
+                        }
+                    } catch (error) {
+                        console.error("Failed to fetch media:", error);
+                        currentRunMedia = { media: [] };
+                    } finally {
+                        hasFetchedMedia = true;
+                        renderMediaViewer();
+                    }
+                }
+            }
+        });
+        
+        function renderMediaViewer() {
+            const isAdmin = localStorage.getItem('run_role') === 'admin';
+            let content = '';
+        
+            if (currentRunMedia && currentRunMedia.media.length > 0) {
+                content = `<div class="row g-2">` + currentRunMedia.media.map(item => `
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100">
+                            <img src="${item.thumb_url || item.poster_url || item.url}" class="card-img-top" style="height: 150px; object-fit: cover;">
+                            <div class="card-body">
+                                <p class="card-text small">${item.description || ''}</p>
+                            </div>
+                            ${isAdmin ? `
+                            <div class="card-footer text-end">
+                                <button class="btn btn-sm btn-outline-primary py-0 px-1">编辑</button>
+                                <button class="btn btn-sm btn-outline-danger py-0 px-1">删除</button>
+                            </div>` : ''}
+                        </div>
+                    </div>
+                `).join('') + `</div>`;
+            } else {
+                content = `<div class="text-center p-5 text-body-secondary">
+                    <i class="bi bi-camera" style="font-size: 3rem;"></i>
+                    <p class="mt-2">暂无影音记录</p>
+                </div>`;
+            }
+        
+            // Add "Upload" button for admin
+            if (isAdmin) {
+                content += `<div class="text-center mt-4 border-top pt-3">
+                    <button class="btn btn-primary btn-sm"><i class="bi bi-upload me-1"></i> 上传/管理影音</button>
+                </div>`;
+            }
+        
+            mediaViewerContainer.innerHTML = content;
+        }      
         function renderCommentList(container, comments) {
             container.style.color = 'var(--text-primary)';
             if (Array.isArray(comments) && comments.length > 0) {
@@ -16653,6 +16781,14 @@
         }
         async function showRunDetailModal(runId, preloadedData = {}, scrollToComments = false) {
             currentDetailRunId = runId;
+            currentRunMedia = null;
+            hasFetchedMedia = false;
+            // Make sure to show the map and hide the media viewer by default
+            document.getElementById('routeMapContainer').style.display = 'block';
+            document.getElementById('mediaViewerContainer').style.display = 'none';
+            document.querySelector('#detail-view-toggle .btn[data-view="map"]').classList.add('active');
+            document.querySelector('#detail-view-toggle .btn[data-view="media"]').classList.remove('active');
+              
             const modalEl = document.getElementById('runDetailModal');
             const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
             modal.show();
