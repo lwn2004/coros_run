@@ -2380,15 +2380,20 @@
         });
         createAllCharts(); 
         // Fetch the list of runs that have media
-        try {
-            const response = await fetch('/api/media/list'); // Replace with your actual API endpoint
-            if(response.ok) {
-                const ids = await response.json(); // Expecting an array like ["id1", "id2"]
-                mediaRunIds = new Set(ids);
+        (async () => {
+            try {
+                const response = await fetch('/api/media/list');
+                if (response.ok) {
+                    const ids = await response.json();
+                    mediaRunIds = new Set(ids);
+                    console.log('Successfully loaded media list.', mediaRunIds);
+                } else {
+                    console.error('Server responded with an error for media list:', response.status);
+                }
+            } catch (error) {
+                console.error('Could not fetch media list:', error);
             }
-        } catch (error) {
-            console.error('Could not fetch media list:', error);
-        }      
+        })();      
         document.getElementById('editProfileTrigger').addEventListener('click', () => { new bootstrap.Modal(document.getElementById('profileModal')).show(); });
         document.getElementById('detailEditProfileTrigger').addEventListener('click', () => { new bootstrap.Modal(document.getElementById('profileModal')).show(); });
         document.getElementById('addTagButton').addEventListener('click', async () => {
