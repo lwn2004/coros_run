@@ -1499,7 +1499,7 @@
                 <div id="runDetailContent" class="container-fluid">
                   <div class="row">
                     <div class="col-lg-7 order-lg-1">
-                        <div class="d-flex justify-content-center mb-2">
+                        <div class="d-flex justify-content-center mb-2 mt-2">
                             <div class="btn-group btn-group-sm" role="group" id="detail-view-toggle">
                                 <button type="button" class="btn active" data-view="map">
                                     <i class="bi bi-map-fill me-1"></i> 路线地图
@@ -1624,44 +1624,38 @@
     </div>
   </div>
 </div>
-<div class="modal fade" id="photoManagerModal" tabindex="-1" aria-labelledby="photoManagerModalLabel" aria-hidden="true">
+<div class="modal fade" id="mediaManagerModal" tabindex="-1" aria-labelledby="mediaManagerModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="photoManagerModalLabel">管理照片</h5>
+                <h5 class="modal-title" id="mediaManagerModalLabel">管理影音记录</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <h6>已有照片</h6>
-                <div id="photo-manager-grid" class="mb-4">
+                <h6>已有媒体</h6>
+                <div id="media-manager-list" class="mb-4">
                     <p class="text-secondary">加载中...</p>
                 </div>
                 <hr>
-                <h6>上传新照片</h6>
-                <form id="photoUploadForm">
-                    <div class="mb-3">
-                        <input class="form-control" type="file" id="photo-upload-input" accept="image/*" multiple>
-                    </div>
-                    <div id="photo-upload-previews"></div>
-                    <button type="submit" class="btn btn-primary btn-sm">开始上传</button>
-                </form>
+                <h6>添加新媒体</h6>
+                <div class="p-3 rounded" style="background-color: var(--hover-bg);">
+                    <p class="small text-body-secondary">在此处粘贴媒体的 R2 公开 URL (一行一个)。系统会自动识别图片和视频。</p>
+                    <textarea id="new-media-urls" class="form-control" rows="3" placeholder="https://pub-your-r2-bucket.r2.dev/run123-photo2.jpg&#10;https://pub-your-r2-bucket.r2.dev/run123-video2.mp4"></textarea>
+                    <button id="add-media-from-urls" class="btn btn-sm btn-primary mt-2">
+                        <i class="bi bi-plus-circle me-1"></i> 添加到列表
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-success" id="saveMediaChanges">
+                    <i class="bi bi-check-circle me-1"></i> 保存更改到服务器
+                </button>
             </div>
         </div>
     </div>
 </div>
-<div class="modal fade" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="photoModalLabel">跑步照片</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div id="photoShow"></div>
-      </div>
-    </div>
-  </div>
-</div>  
+  
 <div class="modal fade" id="calendarEditorModal" tabindex="-1" aria-labelledby="calendarEditorModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
@@ -1786,6 +1780,8 @@
     let mediaRunIds = new Set();
     let detailPhotoUrls = [];
     let currentDetailRunId = null;
+    let mediaManagerModalInstance = null;
+    let currentEditingMedia = []; 
     let currentRunTags = [];
     const suggestedTags = ['长距离', '恢复跑', '节奏跑', '间歇跑', '越野', '比赛', '运动场'];
     let marathonEventsCache = [];
@@ -2429,6 +2425,99 @@
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         });
+        const mediaManagerModalEl = document.getElementById('mediaManagerModal');
+        if (mediaManagerModalEl) {
+            mediaManagerModalInstance = new bootstrap.Modal(mediaManagerModalEl);
+        }
+
+        const mediaManagerModalEl = document.getElementById('mediaManagerModal');
+        
+        // ---- 处理弹窗内的点击事件 ----
+        mediaManagerModalEl.addEventListener('click', (e) => {
+            const target = e.target;
+            const itemEl = target.closest('[data-index]');
+            const index = itemEl ? parseInt(itemEl.dataset.index, 10) : -1;
+        
+            // 删除
+            if (target.classList.contains('delete-media-btn')) {
+                if (confirm('确定要删除这个媒体项吗？')) {
+                    currentEditingMedia.splice(index, 1);
+                    renderMediaEditorList();
+                }
+            }
+            // 上移
+            else if (target.classList.contains('move-up-btn') && index > 0) {
+                [currentEditingMedia[index], currentEditingMedia[index - 1]] = [currentEditingMedia[index - 1], currentEditingMedia[index]];
+                renderMediaEditorList();
+            }
+            // 下移
+            else if (target.classList.contains('move-down-btn') && index < currentEditingMedia.length - 1) {
+                [currentEditingMedia[index], currentEditingMedia[index + 1]] = [currentEditingMedia[index + 1], currentEditingMedia[index]];
+                renderMediaEditorList();
+            }
+            // 从URL文本框添加新媒体
+            else if (target.id === 'add-media-from-urls') {
+                const urlsText = document.getElementById('new-media-urls');
+                const urls = urlsText.value.split('\n').map(u => u.trim()).filter(Boolean);
+                urls.forEach(url => {
+                    currentEditingMedia.push({
+                        id: `media-item-${Date.now()}-${Math.random()}`, // 临时唯一ID
+                        type: url.toLowerCase().endsWith('.mp4') ? 'video' : 'image',
+                        url: url,
+                        description: ''
+                    });
+                });
+                urlsText.value = '';
+                renderMediaEditorList();
+            }
+        });
+        
+        // ---- 处理弹窗内的输入事件 (实时更新数据) ----
+        mediaManagerModalEl.addEventListener('input', (e) => {
+            const target = e.target;
+            const itemEl = target.closest('[data-index]');
+            if (!itemEl) return;
+            const index = parseInt(itemEl.dataset.index, 10);
+        
+            if (target.classList.contains('description-input')) {
+                currentEditingMedia[index].description = target.value;
+            } else if (target.classList.contains('url-input')) {
+                currentEditingMedia[index].url = target.value;
+            }
+        });      
+
+        document.getElementById('saveMediaChanges').addEventListener('click', async () => {
+            const saveButton = document.getElementById('saveMediaChanges');
+            saveButton.disabled = true;
+            saveButton.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 保存中...`;
+        
+            try {
+                // 这是与你的后端API交互的地方
+                const response = await fetch(`/api/media/${currentDetailRunId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer YOUR_ADMIN_TOKEN' }, // 需要身份验证
+                    body: JSON.stringify({ media: currentEditingMedia })
+                });
+        
+                if (!response.ok) {
+                    throw new Error('保存失败，服务器返回错误。');
+                }
+        
+                // 保存成功后，更新主界面的数据并关闭弹窗
+                currentRunMedia.media = JSON.parse(JSON.stringify(currentEditingMedia));
+                renderMediaViewer(); // 重新渲染主界面的媒体视图
+                mediaManagerModalInstance.hide();
+                alert('保存成功！');
+        
+            } catch (error) {
+                console.error('保存媒体数据时出错:', error);
+                alert(`保存失败: ${error.message}`);
+            } finally {
+                saveButton.disabled = false;
+                saveButton.innerHTML = '<i class="bi bi-check-circle me-1"></i> 保存更改到服务器';
+            }
+        });
+      
         let startX = 0, startY = 0;
         const tabContent = document.querySelector('.tab-content');
         const minSwipeDistance = 100;
@@ -2627,7 +2716,20 @@
         const viewToggleButtonGroup = document.getElementById('detail-view-toggle');
         const routeMapContainer = document.getElementById('routeMapContainer');
         const mediaViewerContainer = document.getElementById('mediaViewerContainer');
+        mediaViewerContainer.addEventListener('click', (e) => {
+            // 检查点击的是否是“上传/管理”按钮
+            const uploadButton = e.target.closest('.btn-primary');
+            if (uploadButton) {
+                // 关键操作：深拷贝当前媒体数据到临时变量，避免直接修改原始数据
+                currentEditingMedia = JSON.parse(JSON.stringify(currentRunMedia.media || []));
         
+                // 渲染编辑器列表
+                renderMediaEditorList();
+        
+                // 显示弹窗
+                mediaManagerModalInstance.show();
+            }
+        });
         viewToggleButtonGroup.addEventListener('click', async (e) => {
             const button = e.target.closest('button');
             if (!button) return;
@@ -2717,6 +2819,32 @@
                 container.innerHTML = '<div class="text-secondary text-center py-2">暂无评论</div>';
             }
         }
+        function renderMediaEditorList() {
+            const listContainer = document.getElementById('media-manager-list');
+            if (currentEditingMedia.length === 0) {
+                listContainer.innerHTML = '<p class="text-secondary">此记录暂无媒体文件。</p>';
+                return;
+            }
+        
+            listContainer.innerHTML = currentEditingMedia.map((item, index) => `
+                <div class="d-flex align-items-start p-2 mb-2 rounded" style="background-color: var(--hover-bg);" data-index="${index}">
+                    <img src="${item.thumb_url || item.poster_url || item.url}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px;" class="me-3 flex-shrink-0">
+                    <div class="flex-grow-1">
+                        <textarea class="form-control form-control-sm description-input" rows="2" placeholder="添加描述...">${item.description || ''}</textarea>
+                        <div class="mt-1 input-group input-group-sm">
+                            <span class="input-group-text" style="font-size: 0.7rem;">URL</span>
+                            <input type="text" class="form-control url-input" value="${item.url}">
+                        </div>
+                    </div>
+                    <div class="ms-2 d-flex flex-column">
+                        <button class="btn btn-sm btn-outline-danger delete-media-btn mb-1" title="删除">&times;</button>
+                        <button class="btn btn-sm btn-secondary move-up-btn" title="上移" ${index === 0 ? 'disabled' : ''}>▲</button>
+                        <button class="btn btn-sm btn-secondary move-down-btn mt-1" title="下移" ${index === currentEditingMedia.length - 1 ? 'disabled' : ''}>▼</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+      
         function decodePolyline(encoded) {
             if (!encoded) return [];
             let index = 0, len = encoded.length, lat = 0, lng = 0, array = [];
