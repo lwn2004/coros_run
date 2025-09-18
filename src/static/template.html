@@ -1841,6 +1841,31 @@
         return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
     }  
     let isHandlingPopState = false; // A flag to prevent event loops
+    function decodePolyline(encoded) {
+        if (!encoded) return [];
+        let index = 0, len = encoded.length, lat = 0, lng = 0, array = [];
+        while (index < len) {
+            let b, shift = 0, result = 0;
+            do { b = encoded.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
+            let dlat = ((result & 1) ? ~(result >> 1) : (result >> 1)); lat += dlat;
+            shift = 0; result = 0;
+            do { b = encoded.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
+            let dlng = ((result & 1) ? ~(result >> 1) : (result >> 1)); lng += dlng;
+            array.push([lat * 1e-5, lng * 1e-5]);
+        }
+        return array;
+    }
+    async function refreshDetailComments(runId) {
+        const listContainer = document.getElementById('runDetailCommentList');
+        try {
+            const res = await fetch(`${API_BASE}/comments?runId=${encodeURIComponent(runId)}`);
+            if(!res.ok) throw new Error("Failed to fetch comments");
+            const data = await res.json();
+            renderCommentList(listContainer, data);
+        } catch(e) {
+            listContainer.innerHTML = '<div class="text-danger">评论加载失败</div>';
+        }
+    }  
     async function showRunDetailModal(runId, preloadedData = {}, scrollToComments = false) {
         const newHash = `#data/run/${runId}`;
         if (window.location.hash !== newHash) {
@@ -3187,32 +3212,7 @@
             }
         }
 
-      
-        function decodePolyline(encoded) {
-            if (!encoded) return [];
-            let index = 0, len = encoded.length, lat = 0, lng = 0, array = [];
-            while (index < len) {
-                let b, shift = 0, result = 0;
-                do { b = encoded.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
-                let dlat = ((result & 1) ? ~(result >> 1) : (result >> 1)); lat += dlat;
-                shift = 0; result = 0;
-                do { b = encoded.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
-                let dlng = ((result & 1) ? ~(result >> 1) : (result >> 1)); lng += dlng;
-                array.push([lat * 1e-5, lng * 1e-5]);
-            }
-            return array;
-        }
-        async function refreshDetailComments(runId) {
-            const listContainer = document.getElementById('runDetailCommentList');
-            try {
-                const res = await fetch(`${API_BASE}/comments?runId=${encodeURIComponent(runId)}`);
-                if(!res.ok) throw new Error("Failed to fetch comments");
-                const data = await res.json();
-                renderCommentList(listContainer, data);
-            } catch(e) {
-                listContainer.innerHTML = '<div class="text-danger">评论加载失败</div>';
-            }
-        }
+    
         document.getElementById('submitRunDetailComment').addEventListener('click', async () => {
             const runId = currentDetailRunId;
             const text = document.getElementById('runDetailCommentText').value.trim();
