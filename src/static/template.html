@@ -3151,16 +3151,34 @@
             let content = '';
         
             if (currentRunMedia && currentRunMedia.media.length > 0) {
-                content = `<div class="row g-2">` + currentRunMedia.media.map(item => `
-                    <div class="col-md-6 col-lg-4">
-                        <div class="card h-100">
-                            <img src="https://${sanitizeHTML(item.thumb_url || item.poster_url || item.url)}" class="card-img-top" style="height: 150px; object-fit: cover;">
-                            <div class="card-body">
-                                <p class="card-text small">${sanitizeHTML(item.description) || ''}</p>
-                            </div>
-                        </div>
-                    </div>
-                `).join('') + `</div>`;
+                content = `<div class="row g-2">` + currentRunMedia.media.map(item => {
+                  const isVideo = /\.(mp4|webm|ogg)$/i.test(item.url);
+                  const thumb = sanitizeHTML(item.thumb_url || item.poster_url || item.url);
+                  const fullUrl = sanitizeHTML(item.url);
+              
+                  return `
+                      <div class="col-md-6 col-lg-4">
+                          <div class="card h-100">
+                              <a href="https://${fullUrl}" target="_blank">
+                                  ${isVideo 
+                                      ? `<video class="card-img-top" style="height: 150px; object-fit: cover;" 
+                                                preload="metadata" 
+                                                ${item.poster_url ? `poster="https://${sanitizeHTML(item.poster_url)}"` : ''}>
+                                             <source src="https://${fullUrl}" type="video/mp4">
+                                             Your browser does not support the video tag.
+                                         </video>`
+                                      : `<img src="https://${thumb}" 
+                                              class="card-img-top" 
+                                              style="height: 150px; object-fit: cover;">`
+                                  }
+                              </a>
+                              <div class="card-body">
+                                  <p class="card-text small">${sanitizeHTML(item.description) || ''}</p>
+                              </div>
+                          </div>
+                      </div>
+                  `;
+              }).join('') + `</div>`;
             } else {
                 content = `<div class="text-center p-5 text-body-secondary">
                     <i class="bi bi-camera" style="font-size: 3rem;"></i>
