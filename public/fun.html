@@ -15507,7 +15507,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | <a href="?admin=true" text-decoration-none text-body-secondary>Admin</a>  | 2025-09-18 15:22:50 
+         | <a href="?admin=true" text-decoration-none text-body-secondary>Admin</a>  | 2025-09-18 16:14:38 
     </small>
 </footer>
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
@@ -15908,6 +15908,54 @@
     function sanitizeHTML(str) {
         if (!str) return '';
         return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }  
+    let isHandlingPopState = false; // A flag to prevent event loops
+    
+    /**
+     * Core router function. Reads the URL hash and updates the UI accordingly.
+     */
+    function handleStateFromHash() {
+        const hash = window.location.hash;
+        const parts = hash.replace(/^#/, '').split('/'); // e.g., ["data", "run", "RUN_ID"]
+    
+        const tabId = parts[0] || 'summary';
+        const tabTrigger = document.querySelector(`.nav-link[data-hash="${tabId}"]`);
+        
+        // Ensure the correct main tab is active
+        if (tabTrigger && !tabTrigger.classList.contains('active')) {
+            bootstrap.Tab.getOrCreateInstance(tabTrigger).show();
+        }
+    
+        const runDetailModalEl = document.getElementById('runDetailModal');
+        const modalInstance = bootstrap.Modal.getInstance(runDetailModalEl);
+    
+        // Check if the URL requests a specific run detail
+        if (parts[1] === 'run' && parts[2]) {
+            const runId = parts[2];
+            
+            // If the modal is not already shown for this run, open it
+            if (!modalInstance || !modalInstance._isShown || currentDetailRunId !== runId) {
+                const row = document.querySelector(`.run-detail-row[data-run-id="${runId}"], .recent-run-card[data-run-id="${runId}"]`);
+                if (row) {
+                    const preloadedData = {
+                        distanceFormatted: row.dataset.distanceFormatted,
+                        duration: row.dataset.duration,
+                        paceStr: row.dataset.paceStr,
+                        date: row.dataset.date,
+                        heartRate: row.dataset.heartRate,
+                    };
+                    showRunDetailModal(runId, preloadedData);
+                } else {
+                     console.warn(`Run ID ${runId} from URL not found in the currently loaded list.`);
+                }
+            }
+        } else {
+            // If the URL does NOT specify a run, ensure the modal is closed
+            if (modalInstance && modalInstance._isShown) {
+                isHandlingPopState = true; // Set flag to prevent history change on hide
+                modalInstance.hide();
+            }
+        }
     }  
     function setRandomQuote() {
         const quotes = [ "路漫漫其修远兮", "道阻且长" ];
@@ -16453,6 +16501,31 @@
         destroyAllCharts();
         createAllCharts();
     } 
+    function renderMediaEditorList() {
+        const listContainer = document.getElementById('media-manager-list');
+        if (currentEditingMedia.length === 0) {
+            listContainer.innerHTML = '<p class="text-secondary">此记录暂无媒体文件。</p>';
+            return;
+        }
+    
+        listContainer.innerHTML = currentEditingMedia.map((item, index) => `
+            <div class="d-flex align-items-start p-2 mb-2 rounded" style="background-color: var(--hover-bg);" data-index="${index}">
+                <img src="${sanitizeHTML(item.thumb_url || item.poster_url || item.url)}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px;" class="me-3 flex-shrink-0">
+                <div class="flex-grow-1">
+                    <textarea class="form-control form-control-sm description-input" rows="2" placeholder="添加描述...">${sanitizeHTML(item.description) || ''}</textarea>
+                    <div class="mt-1 input-group input-group-sm">
+                        <span class="input-group-text" style="font-size: 0.7rem;">URL</span>
+                        <input type="text" class="form-control url-input" value="${item.url}">
+                    </div>
+                </div>
+                <div class="ms-2 d-flex flex-column">
+                    <button class="btn btn-sm btn-outline-danger delete-media-btn mb-1" title="删除">&times;</button>
+                    <button class="btn btn-sm btn-secondary move-up-btn" title="上移" ${index === 0 ? 'disabled' : ''}>▲</button>
+                    <button class="btn btn-sm btn-secondary move-down-btn mt-1" title="下移" ${index === currentEditingMedia.length - 1 ? 'disabled' : ''}>▼</button>
+                </div>
+            </div>
+        `).join('');
+    }              
     async function uploadFile(file, progressContainer, adminSecret) {
         const progressId = `progress-${Date.now()}`;
         const progressHtml = `
@@ -16529,6 +16602,41 @@
             .catch(err => console.error("SVG load error:", err));
         });
         createAllCharts(); 
+        const runDetailModalEl = document.getElementById('runDetailModal');
+        runDetailModalEl.addEventListener('hidden.bs.modal', () => {
+            // This event fires when the modal has finished being hidden
+            if (isHandlingPopState) {
+                isHandlingPopState = false; // Reset flag and do nothing
+                return;
+            }
+            
+            // If the modal was closed manually (not by back button), update the URL
+            if (window.location.hash.includes('/run/')) {
+                const baseTabHash = '#' + document.querySelector('#main-nav-tabs .nav-link.active').dataset.hash;
+                history.pushState(null, "", baseTabHash);
+            }
+            currentDetailRunId = null; // Clear the current run ID
+        });
+        // Listen for browser back/forward button clicks
+        window.addEventListener('popstate', handleStateFromHash);
+    
+        // Handle the initial URL state when the page loads
+        // We wrap it in a setTimeout to ensure the rest of the page, especially the run list, has had a chance to render.
+        setTimeout(handleStateFromHash, 100);
+    
+        // The existing 'shown.bs.tab' listener for updating the hash when changing tabs is still good,
+        // but we need to make sure it doesn't interfere.
+        document.querySelectorAll('#main-nav-tabs .nav-link').forEach(tabEl => {
+            tabEl.addEventListener('shown.bs.tab', event => {
+                const newHash = '#' + event.target.dataset.hash;
+                // Only update the hash if we are not already in a detailed view
+                if (!window.location.hash.includes('/run/')) {
+                     if (window.location.hash !== newHash) {
+                        history.pushState(null, '', newHash);
+                     }
+                }
+            });
+        });      
         // Fetch the list of runs that have media
         (async () => {
             try {
@@ -16717,7 +16825,7 @@
             }
           }
         }, { passive: true });
-        const activateTabFromHash = () => {
+        /*const activateTabFromHash = () => {
           let hash = window.location.hash.substring(1);
           const tabTrigger = document.querySelector(`.nav-link[data-hash="${hash}"]`);
           if (tabTrigger) { 
@@ -16725,7 +16833,7 @@
           } else {
               bootstrap.Tab.getOrCreateInstance(document.getElementById('summary-tab')).show();
           }
-        };
+        };*/
         document.querySelectorAll('#main-nav-tabs .nav-link').forEach(tabEl => {
           tabEl.addEventListener('shown.bs.tab', event => {
             const hash = event.target.dataset.hash;
@@ -16758,8 +16866,8 @@
             }
           });
         });
-        window.addEventListener('popstate', activateTabFromHash);
-        activateTabFromHash(); // Initial load
+        //window.addEventListener('popstate', activateTabFromHash);
+        //activateTabFromHash(); // Initial load
         if (window.location.hash === '#marathon') { initMarathonView(); }
         document.querySelectorAll('.stat-card-flip-container').forEach(container => {
             container.addEventListener('click', (event) => {
@@ -16999,31 +17107,7 @@
                 container.innerHTML = '<div class="text-secondary text-center py-2">暂无评论</div>';
             }
         }
-        function renderMediaEditorList() {
-            const listContainer = document.getElementById('media-manager-list');
-            if (currentEditingMedia.length === 0) {
-                listContainer.innerHTML = '<p class="text-secondary">此记录暂无媒体文件。</p>';
-                return;
-            }
-        
-            listContainer.innerHTML = currentEditingMedia.map((item, index) => `
-                <div class="d-flex align-items-start p-2 mb-2 rounded" style="background-color: var(--hover-bg);" data-index="${index}">
-                    <img src="${sanitizeHTML(item.thumb_url || item.poster_url || item.url)}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px;" class="me-3 flex-shrink-0">
-                    <div class="flex-grow-1">
-                        <textarea class="form-control form-control-sm description-input" rows="2" placeholder="添加描述...">${sanitizeHTML(item.description) || ''}</textarea>
-                        <div class="mt-1 input-group input-group-sm">
-                            <span class="input-group-text" style="font-size: 0.7rem;">URL</span>
-                            <input type="text" class="form-control url-input" value="${item.url}">
-                        </div>
-                    </div>
-                    <div class="ms-2 d-flex flex-column">
-                        <button class="btn btn-sm btn-outline-danger delete-media-btn mb-1" title="删除">&times;</button>
-                        <button class="btn btn-sm btn-secondary move-up-btn" title="上移" ${index === 0 ? 'disabled' : ''}>▲</button>
-                        <button class="btn btn-sm btn-secondary move-down-btn mt-1" title="下移" ${index === currentEditingMedia.length - 1 ? 'disabled' : ''}>▼</button>
-                    </div>
-                </div>
-            `).join('');
-        }
+
       
         function decodePolyline(encoded) {
             if (!encoded) return [];
@@ -17051,6 +17135,10 @@
             }
         }
         async function showRunDetailModal(runId, preloadedData = {}, scrollToComments = false) {
+            const newHash = `#data/run/${runId}`;
+            if (window.location.hash !== newHash) {
+                    history.pushState({ runId: runId }, `跑步详情: ${runId}`, newHash);
+            }          
             currentDetailRunId = runId;
             currentRunMedia = null;
             hasFetchedMedia = false;
