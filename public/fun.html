@@ -15507,7 +15507,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | <a href="?admin=true" class="text-decoration-none text-body-secondary">Admin</a>  | 2025-09-18 16:54:43 
+         | <a href="?admin=true" class="text-decoration-none text-body-secondary">Admin</a>  | 2025-09-18 17:14:30 
     </small>
 </footer>
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
@@ -15596,10 +15596,6 @@
                         <div class="mb-4">
                             <div class="d-flex justify-content-between align-items-center">
                                 <h4 class="data-section-title">运动数据</h4>
-                                <div>
-                                    <button id="viewPhotoBtn" class="btn btn-sm mb-3 me-2" style="display: none;"><i class="bi bi-images"></i> 跑步照片</button>
-                                    <button id="managePhotoBtn" class="btn btn-sm btn-outline-primary mb-3" style="display: none;"><i class="bi bi-pencil-square"></i> 管理照片</button>
-                                </div>
                             </div>
                             <div class="row g-4 text-center" id="detailDataGrid"></div>
                         </div>
@@ -15964,8 +15960,6 @@
             <div class="col-4"><div class="data-point-value">${preloadedData.paceStr || '--'}</div><div class="data-point-label">平均配速</div></div>
             <div class="col-4"><div class="data-point-value">${preloadedData.heartRate || '--'}</div><div class="data-point-label">平均心率</div></div>
         `;
-        document.getElementById('viewPhotoBtn').style.display = 'none';
-        document.getElementById('managePhotoBtn').style.display = localStorage.getItem('run_role') === 'admin' ? 'inline-block' : 'none';
         document.getElementById('detailAnalysisSectionsLoading').style.display = 'block';
         document.getElementById('detailAnalysisSections').style.display = 'none';
         document.getElementById('detailLapsTableBody').innerHTML = '';
@@ -16021,7 +16015,6 @@
                     detailMapInstance.invalidateSize();
                 }, 100); 
             }
-            document.getElementById('viewPhotoBtn').style.display = detailPhotoUrls.length > 0 ? 'inline-block' : 'none';
             let weatherString = '';
             if(data.weather) {
             if(data.weather.type && data.weather.type == 'forecast_api'){
@@ -16501,21 +16494,7 @@
             await generateMarathonCalendar();
         }
     }
-    function openMediaGallery(photoUrls, startIndex) {
-        const galleryCarouselInner = document.getElementById('galleryCarouselInner');
-        galleryCarouselInner.innerHTML = '';
-        photoUrls.forEach((url, index) => {
-            const itemDiv = document.createElement('div');
-            itemDiv.className = 'carousel-item';
-            if (index === startIndex) {
-                itemDiv.classList.add('active');
-            }
-            itemDiv.innerHTML = `<img src="${url}" class="d-block" alt="gallery image">`;
-            galleryCarouselInner.appendChild(itemDiv);
-        });
-        const mediaGalleryModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('mediaGalleryModal'));
-        mediaGalleryModal.show();
-    }
+
     function renderRunTags() {
         const isAdmin = localStorage.getItem('run_role') === 'admin';
         const container = document.getElementById('runDetailTagsContainer');
@@ -17244,7 +17223,7 @@
                 content = `<div class="row g-2">` + currentRunMedia.media.map(item => `
                     <div class="col-md-6 col-lg-4">
                         <div class="card h-100">
-                            <img src="${sanitizeHTML(item.thumb_url || item.poster_url || item.url)}" class="card-img-top" style="height: 150px; object-fit: cover;">
+                            <img src="https://${sanitizeHTML(item.thumb_url || item.poster_url || item.url)}" class="card-img-top" style="height: 150px; object-fit: cover;">
                             <div class="card-body">
                                 <p class="card-text small">${sanitizeHTML(item.description) || ''}</p>
                             </div>
@@ -17324,25 +17303,7 @@
                 showRunDetailModal(recentCard.dataset.runId, preloadedData, !!isCommentLink);
             }
         });
-        document.getElementById('viewPhotoBtn').addEventListener('click', () => {
-            if (detailPhotoUrls.length > 0) {
-                openMediaGallery(detailPhotoUrls, 0);
-            }
-        });
-        document.getElementById('managePhotoBtn').addEventListener('click', () => {
-            const photoManagerModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('photoManagerModal'));
-            photoManagerModal.show();
-            const grid = document.getElementById('photo-manager-grid');
-            grid.innerHTML = detailPhotoUrls.map((url, index) => `
-                <div class="photo-manager-item">
-                    <img src="${url}" alt="photo ${index+1}">
-                    <button class="delete-photo-btn" data-url="${url}">&times;</button>
-                </div>
-            `).join('');
-            if (detailPhotoUrls.length === 0) {
-                grid.innerHTML = '<p class="text-secondary">此记录暂无照片</p>';
-            }
-        });
+
         const calendarEditorModalEl = document.getElementById('calendarEditorModal');
         const calendarEditorModal = bootstrap.Modal.getOrCreateInstance(calendarEditorModalEl);
         const calendarForm = document.getElementById('calendarEventForm');
