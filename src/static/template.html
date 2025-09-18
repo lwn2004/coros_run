@@ -1438,7 +1438,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; {% if summarized_by_year %}{{ summarized_by_year.keys()|max }}{% endif %}
-        {% if last_build_time %} | Last updated: {{ last_build_time }} {% endif %}
+         | <a href="?admin=true" text-decoration-none text-body-secondary>Admin</a> {% if last_build_time %} | {{ last_build_time }} {% endif %}
     </small>
 </footer>
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
@@ -1634,16 +1634,32 @@
             <div class="modal-body">
                 <h6>已有媒体</h6>
                 <div id="media-manager-list" class="mb-4">
-                    <p class="text-secondary">加载中...</p>
-                </div>
+                    </div>
                 <hr>
                 <h6>添加新媒体</h6>
+            
                 <div class="p-3 rounded" style="background-color: var(--hover-bg);">
-                    <p class="small text-body-secondary">在此处粘贴媒体的 R2 公开 URL (一行一个)。系统会自动识别图片和视频。</p>
-                    <textarea id="new-media-urls" class="form-control" rows="3" placeholder="https://pub-your-r2-bucket.r2.dev/run123-photo2.jpg&#10;https://pub-your-r2-bucket.r2.dev/run123-video2.mp4"></textarea>
-                    <button id="add-media-from-urls" class="btn btn-sm btn-primary mt-2">
-                        <i class="bi bi-plus-circle me-1"></i> 添加到列表
-                    </button>
+                    <p class="small text-body-secondary">直接上传文件 (推荐) 或 粘贴 R2 URL。</p>
+                    <div class="mb-2">
+                        <input class="form-control form-control-sm" type="file" id="media-file-input" multiple>
+                    </div>
+                    <div id="upload-progress-container"></div>
+                    
+                    <div class="accordion accordion-flush" id="pasteUrlAccordion">
+                      <div class="accordion-item" style="background: transparent;">
+                        <h2 class="accordion-header">
+                          <button class="accordion-button collapsed py-1 px-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne" style="background: transparent; box-shadow: none;">
+                            <small>或从 URL 添加</small>
+                          </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#pasteUrlAccordion">
+                          <div class="accordion-body p-0 pt-2">
+                            <textarea id="new-media-urls" class="form-control" rows="2" placeholder="一行一个 URL..."></textarea>
+                            <button id="add-media-from-urls" class="btn btn-sm btn-secondary mt-2">添加到列表</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -1773,7 +1789,7 @@
     let countdownInterval = null;
     let currentPolyline = null;
     let allRunRows = [];
-    const commentApiBase = 'https://kv.linwn.net';
+    const API_BASE = 'https://workerrunapi.linwn.net';
     const cityStatsData = {{ city_stats|tojson }};
     let currentRunMedia = null;
     let hasFetchedMedia = false;
@@ -1820,6 +1836,10 @@
         setTheme(currentTheme === 'dark' ? 'light' : 'dark');
     });
     // --- END THEME SWITCHER LOGIC ---
+    function sanitizeHTML(str) {
+        if (!str) return '';
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }  
     function setRandomQuote() {
         const quotes = [ "路漫漫其修远兮", "道阻且长" ];
         const quoteElement = document.getElementById('running-quote');
@@ -1861,10 +1881,17 @@
         document.getElementById('nicknameInput').disabled = isAdmin;
         document.getElementById('saveProfileButton').style.display = isAdmin ? 'none' : 'inline-block';
     }
+    // Helper function to get the admin secret via a prompt
+    function getAdminSecret() {
+        // This will show a dialog box asking for the password.
+        // If the user clicks "Cancel", it returns null.
+        const secret = prompt("请输入管理员密钥:");
+        return secret;
+    }
     function initializeUserProfile() {
         const params = new URLSearchParams(window.location.search);
-        const adminKey = params.get('admin_key');
-        if (adminKey === 'runpage123') { 
+        const admin = params.get('admin');
+        if (admin === 'yes') { 
             localStorage.setItem('run_role', 'admin');
             const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + window.location.hash;
             window.history.replaceState({path: newUrl}, '', newUrl);
@@ -1903,7 +1930,7 @@
         document.querySelectorAll('.comment-count').forEach(async (el) => {
             const runId = el.dataset.runId;
             try {
-                const res = await fetch(`${commentApiBase}/count?runId=${encodeURIComponent(runId)}`);
+                const res = await fetch(`${API_BASE}/count?runId=${encodeURIComponent(runId)}`);
                 const data = await res.json();
                 el.textContent = data.count ?? 0;
             } catch {
@@ -2059,7 +2086,7 @@
         containerMarathonList.innerHTML = '<div class="content-card text-center text-body-secondary">加载赛历数据中...</div>';
         try {
             if (marathonEventsCache.length === 0) {
-                const response = await fetch(`${commentApiBase}/marathon-events`);
+                const response = await fetch(`${API_BASE}/marathon-events`);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 marathonEventsCache = await response.json();
             }
@@ -2199,7 +2226,7 @@
         const container = document.getElementById('runDetailTagsContainer');
         let tagsHtml = currentRunTags.map((tag, index) =>
             `<span class="badge rounded-pill text-bg-secondary me-1 mb-1" style="font-weight: 500; background-color: var(--hover-bg) !important; color: var(--text-secondary) !important; padding: 0.3em 0.5em;">
-                ${tag}
+                ${sanitizeHTML(tag)}
                 ${isAdmin ? `<button type="button" class="btn-close ms-1" aria-label="Remove tag" data-tag-index="${index}" style="font-size: 0.6em; filter: invert(0.8);"></button>` : ''}
             </span>`
         ).join('');
@@ -2217,7 +2244,7 @@
     }
     async function loadRunTags(runId) {
         try {
-            const res = await fetch(`${commentApiBase}/tags?runId=${encodeURIComponent(runId)}`);
+            const res = await fetch(`${API_BASE}/tags?runId=${encodeURIComponent(runId)}`);
             if (res.ok) {
                 const data = await res.json();
                 currentRunTags = data.tags || [];
@@ -2233,7 +2260,7 @@
     async function saveRunTags(runId) {
         try {
             // NOTE: In a real app, this would require an admin secret key
-            await fetch(`${commentApiBase}/tags`, {
+            await fetch(`${API_BASE}/tags`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ runId: runId, tags: currentRunTags })
@@ -2357,6 +2384,64 @@
         destroyAllCharts();
         createAllCharts();
     } 
+    async function uploadFile(file, progressContainer, adminSecret) {
+        const progressId = `progress-${Date.now()}`;
+        const progressHtml = `
+            <div id="${progressId}" class="progress mt-2" style="height: 5px;">
+                <div class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <small class="text-secondary">${file.name}</small>
+        `;
+        progressContainer.innerHTML += progressHtml;
+        const progressBar = document.querySelector(`#${progressId} .progress-bar`);
+        // Simulate progress for better UX as fetch doesn't support it natively
+        let width = 0;
+        const interval = setInterval(() => {
+            if (width < 90) {
+                width += 5;
+                progressBar.style.width = width + '%';
+            }
+        }, 100);
+    
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+    
+            const response = await fetch(`${API_BASE}/api/upload`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${adminSecret}` },
+                body: formData,
+            });
+    
+            clearInterval(interval);
+            progressBar.style.width = '100%';
+    
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.error || 'Upload failed');
+            }
+    
+            const result = await response.json();
+            
+            // Add new media to the editing list
+            currentEditingMedia.push({
+                id: `media-item-${Date.now()}`,
+                type: file.type.startsWith('video/') ? 'video' : 'image',
+                url: result.url,
+                thumb_url: result.url, // For simplicity, thumb is same as full
+                poster_url: '',
+                description: ''
+            });
+            
+            renderMediaEditorList(); // Refresh the list
+            document.getElementById(progressId).remove(); // Clean up progress bar
+    
+        } catch (error) {
+            clearInterval(interval);
+            progressBar.classList.add('bg-danger');
+            alert(`Upload failed for ${file.name}: ${error.message}`);
+        }
+    }              
     document.addEventListener('DOMContentLoaded', function() {
         setTheme(getPreferredTheme());        
         initializeUserProfile();
@@ -2378,11 +2463,11 @@
         // Fetch the list of runs that have media
         (async () => {
             try {
-                const response = await fetch('/api/media/list');
+                const response = await fetch(`${API_BASE}/api/media/list`);
                 if (response.ok) {
                     const ids = await response.json();
                     mediaRunIds = new Set(ids);
-                    console.log('Successfully loaded media list.', mediaRunIds);
+                    //console.log('Successfully loaded media list.', mediaRunIds);
                 } else {
                     console.error('Server responded with an error for media list:', response.status);
                 }
@@ -2428,7 +2513,30 @@
         const mediaManagerModalEl = document.getElementById('mediaManagerModal');
         if (mediaManagerModalEl) {
             mediaManagerModalInstance = new bootstrap.Modal(mediaManagerModalEl);
-        }        
+        }  
+        // Listen for file selection
+        document.getElementById('media-file-input')?.addEventListener('change', async (e) => {
+            const files = e.target.files;
+            const progressContainer = document.getElementById('upload-progress-container');
+            if (!files.length) return;
+        
+            // Prompt for the secret ONCE before uploading all selected files.
+            const adminSecret = getAdminSecret();
+            if (!adminSecret) {
+                alert("未提供密钥，上传操作已取消。");
+                e.target.value = ''; // Reset the file input
+                return;
+            }
+            
+            e.target.disabled = true;
+            for (const file of files) {
+                // Pass the prompted secret to the upload function
+                await uploadFile(file, progressContainer, adminSecret);
+            }
+            e.target.disabled = false;
+            e.target.value = ''; // Reset file input
+        });
+      
         // ---- 处理弹窗内的点击事件 ----
         mediaManagerModalEl.addEventListener('click', (e) => {
             const target = e.target;
@@ -2485,26 +2593,32 @@
 
         document.getElementById('saveMediaChanges').addEventListener('click', async () => {
             const saveButton = document.getElementById('saveMediaChanges');
+            const adminSecret = getAdminSecret();
+            if (!adminSecret) {
+                alert("操作已取消。");
+                return; // Abort if the user cancels the prompt
+            }          
             saveButton.disabled = true;
             saveButton.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 保存中...`;
         
             try {
-                // 这是与你的后端API交互的地方
-                const response = await fetch(`/api/media/${currentDetailRunId}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer YOUR_ADMIN_TOKEN' }, // 需要身份验证
-                    body: JSON.stringify({ media: currentEditingMedia })
-                });
-        
-                if (!response.ok) {
-                    throw new Error('保存失败，服务器返回错误。');
-                }
-        
-                // 保存成功后，更新主界面的数据并关闭弹窗
-                currentRunMedia.media = JSON.parse(JSON.stringify(currentEditingMedia));
-                renderMediaViewer(); // 重新渲染主界面的媒体视图
-                mediaManagerModalInstance.hide();
-                alert('保存成功！');
+              const response = await fetch(`${API_BASE}/api/media/${currentDetailRunId}`, {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${adminSecret}`
+                  },
+                  body: JSON.stringify({ media: currentEditingMedia })
+              });
+      
+              if (!response.ok) throw new Error('Save failed, server returned an error.');
+      
+              // Success
+              currentRunMedia.media = JSON.parse(JSON.stringify(currentEditingMedia));
+              renderMediaViewer(); // Re-render the main view
+              mediaManagerModalInstance.hide();
+              // Also update the main page filter data
+              mediaRunIds.add(currentDetailRunId);
         
             } catch (error) {
                 console.error('保存媒体数据时出错:', error);
@@ -2750,7 +2864,7 @@
                 if (!hasFetchedMedia) {
                     try {
                         // This is a placeholder for your actual API call
-                        const response = await fetch(`/api/media/${currentDetailRunId}`); // Replace with your actual API endpoint
+                        const response = await fetch(`${API_BASE}/api/media/${currentDetailRunId}`);
                         if (response.ok) {
                             currentRunMedia = await response.json();
                         } else {
@@ -2775,9 +2889,9 @@
                 content = `<div class="row g-2">` + currentRunMedia.media.map(item => `
                     <div class="col-md-6 col-lg-4">
                         <div class="card h-100">
-                            <img src="${item.thumb_url || item.poster_url || item.url}" class="card-img-top" style="height: 150px; object-fit: cover;">
+                            <img src="${sanitizeHTML(item.thumb_url || item.poster_url || item.url)}" class="card-img-top" style="height: 150px; object-fit: cover;">
                             <div class="card-body">
-                                <p class="card-text small">${item.description || ''}</p>
+                                <p class="card-text small">${sanitizeHTML(item.description) || ''}</p>
                             </div>
                             ${isAdmin ? `
                             <div class="card-footer text-end">
@@ -2808,8 +2922,8 @@
             if (Array.isArray(comments) && comments.length > 0) {
                 container.innerHTML = comments.map(c => 
                     `<div class="border-bottom py-2" style="border-color: var(--border-color) !important;">
-                        <small class="text-secondary">${c.nickname || '🌱 匿名'} · ${new Date(c.ts).toLocaleString()}</small>
-                        <div class="mt-1" style="color: var(--text-primary);">${c.text}</div>
+                        <small class="text-secondary">${sanitizeHTML(c.nickname) || '🌱 匿名'} · ${new Date(c.ts).toLocaleString()}</small>
+                        <div class="mt-1" style="color: var(--text-primary);">${sanitizeHTML(c.text)}</div>
                     </div>`
                 ).join('');
             } else {
@@ -2825,9 +2939,9 @@
         
             listContainer.innerHTML = currentEditingMedia.map((item, index) => `
                 <div class="d-flex align-items-start p-2 mb-2 rounded" style="background-color: var(--hover-bg);" data-index="${index}">
-                    <img src="${item.thumb_url || item.poster_url || item.url}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px;" class="me-3 flex-shrink-0">
+                    <img src="${sanitizeHTML(item.thumb_url || item.poster_url || item.url)}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px;" class="me-3 flex-shrink-0">
                     <div class="flex-grow-1">
-                        <textarea class="form-control form-control-sm description-input" rows="2" placeholder="添加描述...">${item.description || ''}</textarea>
+                        <textarea class="form-control form-control-sm description-input" rows="2" placeholder="添加描述...">${sanitizeHTML(item.description) || ''}</textarea>
                         <div class="mt-1 input-group input-group-sm">
                             <span class="input-group-text" style="font-size: 0.7rem;">URL</span>
                             <input type="text" class="form-control url-input" value="${item.url}">
@@ -2859,7 +2973,7 @@
         async function refreshDetailComments(runId) {
             const listContainer = document.getElementById('runDetailCommentList');
             try {
-                const res = await fetch(`${commentApiBase}/comments?runId=${encodeURIComponent(runId)}`);
+                const res = await fetch(`${API_BASE}/comments?runId=${encodeURIComponent(runId)}`);
                 if(!res.ok) throw new Error("Failed to fetch comments");
                 const data = await res.json();
                 renderCommentList(listContainer, data);
@@ -3023,7 +3137,7 @@
             if (!text || !runId) return;
             const profile = JSON.parse(localStorage.getItem('run_profile')) || generateRandomProfile();
             const nicknameForComment = `${profile.icon} ${profile.nickname}`;
-            const res = await fetch(`${commentApiBase}/comment`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ runId, text, nickname: nicknameForComment }) });
+            const res = await fetch(`${API_BASE}/comment`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ runId, text, nickname: nicknameForComment }) });
             if (res.ok) {
                 document.getElementById('runDetailCommentText').value = '';
                 await refreshDetailComments(runId);
@@ -3168,7 +3282,7 @@
             const secret = prompt("请输入管理员密钥:");
             if (!secret) return;
             try {
-                const res = await fetch(`${commentApiBase}/marathon-events`, {
+                const res = await fetch(`${API_BASE}/marathon-events`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ events: editorEvents, secret: secret })
