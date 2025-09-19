@@ -15536,7 +15536,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | <a href="?admin=true" class="text-decoration-none text-body-secondary">Admin</a>  | 2025-09-19 17:02:06 
+         | <a href="?admin=true" class="text-decoration-none text-body-secondary">Admin</a>  | 2025-09-19 17:19:02 
     </small>
 </footer>
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
@@ -16025,7 +16025,7 @@
                         attributionControl: false, 
                         dragging: false, zoomControl: false, scrollWheelZoom: false, 
                         doubleClickZoom: false, boxZoom: false, keyboard: false, 
-                        tap: false, touchZoom: false
+                        //tap: false, touchZoom: false
                     });
                     L.tileLayer(tileUrl, { subdomains: 'abcd' }).addTo(detailMapInstance);
                     const polyline = L.polyline(decodePolyline(currentPolyline), { color: getComputedStyle(document.documentElement).getPropertyValue('--accent-color'), weight: 4 }).addTo(detailMapInstance);
@@ -16039,7 +16039,13 @@
                            photoMarkersLayer = L.layerGroup().addTo(detailMapInstance);
                         }
                     }
-
+                    const photoIcon = L.icon({
+                        iconUrl: 'https://cdn-icons-png.flaticon.com/512/3589/3589920.png',
+                        
+                        iconSize:     [32, 32], // 图标的尺寸 [宽, 高] (像素)
+                        iconAnchor:   [16, 16], // 图标的 "锚点"，即图标图像中对应地理坐标的点。对于一个32x32的图标，[16, 16] 表示中心点。
+                        popupAnchor:  [0, -16]   // 弹出窗口 (popup) 相对于锚点的位置。
+                    });
                     fetch(`${API_BASE}/api/media/${runId}`)
                         .then(response => response.ok ? response.json() : { media: [] })
                         .then(mediaData => {
@@ -16050,7 +16056,7 @@
 
 
                                     if (photo.location && photo.location.lat && photo.location.lng) {
-                                        const marker = L.marker([photo.location.lat, photo.location.lng]);
+                                        const marker = L.marker([photo.location.lat, photo.location.lng],  { icon: photoIcon });
                                         let popupContent = `<img src="${photo.thumb_url || photo.url}" style="width:150px; height:auto; border-radius:4px; margin-bottom:5px;">`;
                                         if (photo.description) {
                                             popupContent += `<br><strong>${sanitizeHTML(photo.description)}</strong>`;
