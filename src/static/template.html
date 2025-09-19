@@ -1860,10 +1860,10 @@
         currentRunMedia = null;
         hasFetchedMedia = false;
         // Make sure to show the map and hide the media viewer by default
-        document.getElementById('routeMapContainer').style.display = 'block';
-        document.getElementById('mediaViewerContainer').style.display = 'none';
-        document.querySelector('#detail-view-toggle .btn[data-view="map"]').classList.add('active');
-        document.querySelector('#detail-view-toggle .btn[data-view="media"]').classList.remove('active');
+        //document.getElementById('routeMapContainer').style.display = 'block';
+        //document.getElementById('mediaViewerContainer').style.display = 'none';
+        //document.querySelector('#detail-view-toggle .btn[data-view="map"]').classList.add('active');
+        //document.querySelector('#detail-view-toggle .btn[data-view="media"]').classList.remove('active');
           
         const modalEl = document.getElementById('runDetailModal');
         const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
@@ -2984,7 +2984,7 @@
       
               // Success
               currentRunMedia.media = JSON.parse(JSON.stringify(currentEditingMedia));
-              renderMediaViewer(); // Re-render the main view
+              //renderMediaViewer(); // Re-render the main view
               mediaManagerModalInstance.hide();
               // Also update the main page filter data
               mediaRunIds.add(currentDetailRunId);
@@ -3195,8 +3195,8 @@
         }
         const viewToggleButtonGroup = document.getElementById('detail-view-toggle');
         const routeMapContainer = document.getElementById('routeMapContainer');
-        const mediaViewerContainer = document.getElementById('mediaViewerContainer');
-        mediaViewerContainer.addEventListener('click', (e) => {
+        //const mediaViewerContainer = document.getElementById('mediaViewerContainer');
+        routeMapContainer.addEventListener('click', (e) => {
             // 检查点击的是否是“上传/管理”按钮
             const uploadButton = e.target.closest('.btn-primary');
             if (uploadButton) {
@@ -3209,7 +3209,7 @@
                 // 显示弹窗
                 mediaManagerModalInstance.show();
             }
-        });
+        });/*
         viewToggleButtonGroup.addEventListener('click', async (e) => {
             const button = e.target.closest('button');
             if (!button) return;
@@ -3248,7 +3248,7 @@
                     }
                 }
             }
-        });
+        });*/
         
         function renderMediaViewer() {
             const isAdmin = localStorage.getItem('run_role') === 'admin';
