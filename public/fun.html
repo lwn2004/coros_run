@@ -15536,7 +15536,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | <a href="?admin=true" class="text-decoration-none text-body-secondary">Admin</a>  | 2025-09-19 16:50:10 
+         | <a href="?admin=true" class="text-decoration-none text-body-secondary">Admin</a>  | 2025-09-19 17:02:06 
     </small>
 </footer>
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
@@ -16012,6 +16012,7 @@
             if (detailMapInstance) {
                 detailMapInstance.remove();
                 detailMapInstance = null;
+                photoMarkersLayer = null;
             }
             if (currentPolyline) {
                 const mapItem = document.createElement('div');
@@ -16049,10 +16050,6 @@
 
 
                                     if (photo.location && photo.location.lat && photo.location.lng) {
-                                          const routePoints = decodePolyline(currentPolyline);
-                                          if (routePoints.length > 0) {
-                                              L.marker(routePoints[0], { zIndexOffset: 1000 }).bindPopup("这是一个测试点").addTo(detailMapInstance);
-                                          }
                                         const marker = L.marker([photo.location.lat, photo.location.lng]);
                                         let popupContent = `<img src="${photo.thumb_url || photo.url}" style="width:150px; height:auto; border-radius:4px; margin-bottom:5px;">`;
                                         if (photo.description) {
