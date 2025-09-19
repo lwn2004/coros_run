@@ -15536,7 +15536,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | <a href="?admin=true" class="text-decoration-none text-body-secondary">Admin</a>  | 2025-09-19 17:42:02 
+         | <a href="?admin=true" class="text-decoration-none text-body-secondary">Admin</a>  | 2025-09-19 17:59:16 
     </small>
 </footer>
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
@@ -16039,13 +16039,8 @@
                            photoMarkersLayer = L.layerGroup().addTo(detailMapInstance);
                         }
                     }
-                    const photoIcon = L.icon({
-                        iconUrl: 'https://cdn-icons-png.flaticon.com/512/1527/1527531.png',
-                        
-                        iconSize:     [32, 32], // 图标的尺寸 [宽, 高] (像素)
-                        iconAnchor:   [16, 16], // 图标的 "锚点"，即图标图像中对应地理坐标的点。对于一个32x32的图标，[16, 16] 表示中心点。
-                        popupAnchor:  [0, -16]   // 弹出窗口 (popup) 相对于锚点的位置。
-                    });
+                    let photoIcon = null;
+                     
                     fetch(`${API_BASE}/api/media/${runId}`)
                         .then(response => response.ok ? response.json() : { media: [] })
                         .then(mediaData => {
@@ -16053,17 +16048,20 @@
                             hasFetchedMedia = true;
                             if (mediaData.media && Array.isArray(mediaData.media)) {
                                 mediaData.media.forEach(photo => {
-
-
                                     if (photo.location && photo.location.lat && photo.location.lng) {
+                                        let iconUrl = photo.thumb_url? photo.thumb_url : 'https://cdn-icons-png.flaticon.com/512/1527/1527531.png';
+                                        photoIcon = L.icon({
+                                              iconUrl: `'${iconUrl}'`,                                              
+                                              iconSize:     [32, 32], // 图标的尺寸 [宽, 高] (像素)
+                                              iconAnchor:   [16, 16], // 图标的 "锚点"，即图标图像中对应地理坐标的点。对于一个32x32的图标，[16, 16] 表示中心点。
+                                              popupAnchor:  [0, -16]   // 弹出窗口 (popup) 相对于锚点的位置。
+                                        });
                                         const marker = L.marker([photo.location.lat, photo.location.lng],  { icon: photoIcon });
                                         let popupContent = `<img src="${photo.thumb_url || photo.url}" style="width:150px; height:auto; border-radius:4px; margin-bottom:5px;">`;
                                         if (photo.description) {
                                             popupContent += `<br><strong>${sanitizeHTML(photo.description)}</strong>`;
                                         }
                                         if (photo.metadata) {
-
-
                                             const meta = photo.metadata;
                                             let metaDetails = '';
 
@@ -16071,8 +16069,6 @@
                                             if (meta.datetime) metaDetails += `<li><strong>时间:</strong> ${new Date(meta.datetime).toLocaleString()}</li>`;
                                             
                                             let exposureDetails = [];
-
-
                                             if (meta.fnumber) exposureDetails.push(`f/${meta.fnumber}`);
                                             if (meta.exposure) exposureDetails.push(`${meta.exposure}s`);
                                             if (meta.iso) exposureDetails.push(`ISO ${meta.iso}`);
