@@ -688,7 +688,7 @@
         color: var(--text-primary);
     }
     #detail-map-item {
-        height: 600px;
+        height: 500px;
         /*border-radius: 12px;*/
         background-color: var(--hover-bg);
     }
@@ -1954,9 +1954,9 @@
                                         let iconUrl = photo.thumb_url? photo.thumb_url : 'https://cdn-icons-png.flaticon.com/512/1527/1527531.png';
                                         photoIcon = L.icon({
                                               iconUrl: `${iconUrl}`,                                              
-                                              iconSize:     [32, 32], // 图标的尺寸 [宽, 高] (像素)
-                                              iconAnchor:   [16, 16], // 图标的 "锚点"，即图标图像中对应地理坐标的点。对于一个32x32的图标，[16, 16] 表示中心点。
-                                              popupAnchor:  [0, -16]   // 弹出窗口 (popup) 相对于锚点的位置。
+                                              iconSize:     [64, 64], // 图标的尺寸 [宽, 高] (像素)
+                                              iconAnchor:   [32, 32], // 图标的 "锚点"，即图标图像中对应地理坐标的点。对于一个32x32的图标，[16, 16] 表示中心点。
+                                              popupAnchor:  [0, -32]   // 弹出窗口 (popup) 相对于锚点的位置。
                                         });
                                         const marker = L.marker([photo.location.lat, photo.location.lng],  { icon: photoIcon });
                                         let popupContent = `<img src="${photo.thumb_url || photo.url}" style="width:150px; height:auto; border-radius:4px; margin-bottom:5px;">`;
@@ -3201,7 +3201,7 @@
         //const mediaViewerContainer = document.getElementById('mediaViewerContainer');
         routeMapContainer.addEventListener('click', (e) => {
             // 检查点击的是否是“上传/管理”按钮
-            const uploadButton = e.target.closest('.btn-primary');
+            const uploadButton = e.target.closest('.btn-sm');
             if (uploadButton) {
                 // 关键操作：深拷贝当前媒体数据到临时变量，避免直接修改原始数据
                 currentEditingMedia = JSON.parse(JSON.stringify(currentRunMedia.media || []));
