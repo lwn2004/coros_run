@@ -15536,7 +15536,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | <a href="?admin=true" class="text-decoration-none text-body-secondary">Admin</a>  | 2025-09-19 13:16:23 
+         | <a href="?admin=true" class="text-decoration-none text-body-secondary">Admin</a>  | 2025-09-19 14:55:52 
     </small>
 </footer>
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
@@ -15597,34 +15597,17 @@
                 <div id="runDetailContent" class="container-fluid">
                   <div class="row">
                     <div class="col-lg-7 order-lg-1">
-                        <div class="d-flex justify-content-center mb-2 mt-2">
-                            <div class="btn-group btn-group-sm" role="group" id="detail-view-toggle">
-                                <button type="button" class="btn active" data-view="map">
-                                    <i class="bi bi-map-fill me-1"></i> 路线地图
-                                </button>
-                                <button type="button" class="btn" data-view="media">
-                                    <i class="bi bi-images me-1"></i> 影音记录
-                                </button>
-                            </div>
-                        </div>
-                        
+                 
                         <div id="detail-view-content" class="position-relative">
                             <div id="routeMapContainer" class="py-2">
                                 </div>
-                        
-                            <div id="mediaViewerContainer" class="p-2" style="display: none;">
-                                <div class="text-center p-5">
-                                    <div class="spinner-border text-secondary" role="status">
-                                        <span class="visually-hidden">Loading...</span>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                         
                         <div id="detailWeather" class="text-center small text-body-secondary mb-3"></div>
                         <div class="mb-4">
                             <div class="d-flex justify-content-between align-items-center">
                                 <h4 class="data-section-title">运动数据</h4>
+                                <button id="viewPhotoBtn" class="btn btn-sm mb-3"> <i class="bi bi-upload me-1"></i> 上传/管理影音</button>
                             </div>
                             <div class="row g-4 text-center" id="detailDataGrid"></div>
                         </div>
@@ -15884,6 +15867,7 @@
     let cityMap = null;
     let modalMapInstance = null;
     let detailMapInstance = null;
+    let photoMarkersLayer = null;
     let countdownInterval = null;
     let currentPolyline = null;
     let allRunRows = [];
@@ -15892,7 +15876,6 @@
     let currentRunMedia = null;
     let hasFetchedMedia = false;
     let mediaRunIds = new Set();
-    let detailPhotoUrls = [];
     let currentDetailRunId = null;
     let mediaManagerModalInstance = null;
     let currentEditingMedia = []; 
@@ -16023,7 +16006,6 @@
                 <div class="col-4"><div class="data-point-value">${avg_power}</div><div class="data-point-label">平均功率</div></div>
               `;
             }
-            detailPhotoUrls = data.photos ? data.photos.map(p => p.url) : [];
             currentPolyline = data.route.encoded_polyline;
             const routeMapContainer = document.getElementById('routeMapContainer');
             routeMapContainer.innerHTML = '';
@@ -16048,6 +16030,74 @@
                     const polyline = L.polyline(decodePolyline(currentPolyline), { color: getComputedStyle(document.documentElement).getPropertyValue('--accent-color'), weight: 4 }).addTo(detailMapInstance);
                     detailMapInstance.fitBounds(polyline.getBounds().pad(0.1));
                     detailMapInstance.invalidateSize();
+
+                    if (photoMarkersLayer) {
+                        photoMarkersLayer.clearLayers();
+                    } else {
+                        if(detailMapInstance) {
+                           photoMarkersLayer = L.layerGroup().addTo(detailMapInstance);
+                        }
+                    }
+
+                    fetch(`${API_BASE}/api/media/${runId}`)
+                        .then(response => response.ok ? response.json() : { media: [] })
+                        .then(mediaData => {
+                            currentRunMedia = mediaData;
+                            hasFetchedMedia = true;
+                            if (mediaData.media && Array.isArray(mediaData.media)) {
+                                mediaData.media.forEach(photo => {
+
+
+                                    if (photo.location && photo.location.lat && photo.location.lng) {
+                                        const marker = L.marker([photo.location.lat, photo.location.lng]);
+                                        let popupContent = `<img src="${photo.thumb_url || photo.url}" style="width:150px; height:auto; border-radius:4px; margin-bottom:5px;">`;
+                                        if (photo.description) {
+                                            popupContent += `<br><strong>${sanitizeHTML(photo.description)}</strong>`;
+                                        }
+                                        if (photo.metadata) {
+
+
+                                            const meta = photo.metadata;
+                                            let metaDetails = '';
+
+                                            if (meta.model) metaDetails += `<li><strong>相机:</strong> ${sanitizeHTML(meta.model)}</li>`;
+                                            if (meta.datetime) metaDetails += `<li><strong>时间:</strong> ${new Date(meta.datetime).toLocaleString()}</li>`;
+                                            
+                                            let exposureDetails = [];
+
+
+                                            if (meta.fnumber) exposureDetails.push(`f/${meta.fnumber}`);
+                                            if (meta.exposure) exposureDetails.push(`${meta.exposure}s`);
+                                            if (meta.iso) exposureDetails.push(`ISO ${meta.iso}`);
+                                            if (exposureDetails.length > 0) {
+                                                 metaDetails += `<li><strong>参数:</strong> ${exposureDetails.join(', ')}</li>`;
+                                            }
+                                           
+                                            if (metaDetails) {
+                                                popupContent += `<ul style="list-style:none; padding:0; margin-top:5px; font-size:0.8em;">${metaDetails}</ul>`;
+                                            }
+                                        }
+                                        marker.bindPopup(popupContent, { minWidth: 160 });
+                                        if(photoMarkersLayer) {
+                                            photoMarkersLayer.addLayer(marker);
+                                        }
+                                    }
+                                });
+
+
+
+
+
+
+
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error fetching media for map markers:", error);
+                            hasFetchedMedia = false;
+                        });
+
+
                 }, 100); 
             }
             let weatherString = '';
