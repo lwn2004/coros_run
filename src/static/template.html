@@ -1914,6 +1914,7 @@
             if (detailMapInstance) {
                 detailMapInstance.remove();
                 detailMapInstance = null;
+                photoMarkersLayer = null;
             }
             if (currentPolyline) {
                 const mapItem = document.createElement('div');
@@ -1951,10 +1952,6 @@
 
 
                                     if (photo.location && photo.location.lat && photo.location.lng) {
-                                          const routePoints = decodePolyline(currentPolyline);
-                                          if (routePoints.length > 0) {
-                                              L.marker(routePoints[0], { zIndexOffset: 1000 }).bindPopup("这是一个测试点").addTo(detailMapInstance);
-                                          }
                                         const marker = L.marker([photo.location.lat, photo.location.lng]);
                                         let popupContent = `<img src="${photo.thumb_url || photo.url}" style="width:150px; height:auto; border-radius:4px; margin-bottom:5px;">`;
                                         if (photo.description) {
