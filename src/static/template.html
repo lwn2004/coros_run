@@ -2715,7 +2715,7 @@
           id: `media-item-${Date.now()}`,
           type: file.type.startsWith('video/') ? 'video' : 'image',
           url: result.url,
-          thumb_url: result.url,
+          thumb_url: result.url.replace('/uploads/', '/thumbnails/'),
           poster_url: '',
           description: file.name,
           location: null
@@ -3259,9 +3259,9 @@
         
             if (currentRunMedia && currentRunMedia.media.length > 0) {
                 content = `<div class="row g-2">` + currentRunMedia.media.map(item => {
-                  const isVideo = /\.(mp4|webm|ogg)$/i.test(item.url);
+                  const isVideo = (item.type === 'video');
                   const thumb = sanitizeHTML(item.thumb_url || item.poster_url || item.url);
-                  const fullUrl = sanitizeHTML(item.url);
+                  const fullUrl = sanitizeHTML(item.url.replace('/uploads/', '/transcoded/'));
               
                   return `
                       <div class="col-md-6 col-lg-4">
