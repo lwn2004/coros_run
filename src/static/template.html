@@ -1509,7 +1509,7 @@
                         <div class="mb-4">
                             <div class="d-flex justify-content-between align-items-center">
                                 <h4 class="data-section-title">运动数据</h4>
-                                <button id="viewPhotoBtn" class="btn btn-sm mb-3"> <i class="bi bi-upload me-1"></i> 上传/管理影音</button>
+                                <button id="editPhotoBtn" class="btn btn-sm mb-3"> <i class="bi bi-upload me-1"></i> 上传/管理影音</button>
                             </div>
                             <div class="row g-4 text-center" id="detailDataGrid"></div>
                         </div>
@@ -3199,10 +3199,11 @@
         const viewToggleButtonGroup = document.getElementById('detail-view-toggle');
         const routeMapContainer = document.getElementById('routeMapContainer');
         //const mediaViewerContainer = document.getElementById('mediaViewerContainer');
-        routeMapContainer.addEventListener('click', (e) => {
+        const editPhotoBtn = document.getElementById('editPhotoBtn')
+        editPhotoBtn.addEventListener('click', (e) => {
             // 检查点击的是否是“上传/管理”按钮
-            const uploadButton = e.target.closest('.btn-sm');
-            if (uploadButton) {
+            //const uploadButton = e.target.closest('.btn-sm');
+            //if (uploadButton) {
                 // 关键操作：深拷贝当前媒体数据到临时变量，避免直接修改原始数据
                 currentEditingMedia = JSON.parse(JSON.stringify(currentRunMedia.media || []));
         
@@ -3211,7 +3212,7 @@
         
                 // 显示弹窗
                 mediaManagerModalInstance.show();
-            }
+            //}
         });/*
         viewToggleButtonGroup.addEventListener('click', async (e) => {
             const button = e.target.closest('button');
