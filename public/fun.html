@@ -851,10 +851,10 @@
                         <div class="stat-card-content">
                           <div>
                             <div class="stat-label">继续坚持</div>
-                            <div class="stat-value">15年297天</div>
+                            <div class="stat-value">15年310天</div>
                           </div>
                           <div class="stat-details">
-                            <div class="stat-label"><small class="small-muted">预计</small>2041年07月13日<small>绕地球一圈</small></div>
+                            <div class="stat-label"><small class="small-muted">预计</small>2041年07月26日<small>绕地球一圈</small></div>
                           </div>
                         </div>
                       </div>
@@ -15592,7 +15592,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | <a href="?admin=true" class="text-decoration-none text-body-secondary">Admin</a>  | 2025-09-23 09:41:19 
+         | <a href="?admin=true" class="text-decoration-none text-body-secondary">Admin</a>  | 2025-09-23 21:46:17 
     </small>
 </footer>
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
@@ -16112,7 +16112,7 @@
                                               iconAnchor:   [32, 32], // 图标的 "锚点"，即图标图像中对应地理坐标的点。对于一个32x32的图标，[16, 16] 表示中心点。
                                               popupAnchor:  [0, -32]   // 弹出窗口 (popup) 相对于锚点的位置。
                                         });
-                                        const marker = L.marker([photo.location.lat, photo.location.lng],  { icon: photoIcon });
+                                        const marker = L.marker([photo.location.lat, photo.location.lng],  { icon: photoIcon, zIndexOffset: -10 });
                                         let popupContent = `<img src="https://${photo.thumb_url || photo.url}" style="width:150px; height:auto; border-radius:4px; margin-bottom:5px;">`;
                                         if (photo.description) {
                                             popupContent += `<br><strong>${sanitizeHTML(photo.description)}</strong>`;
