@@ -1958,7 +1958,7 @@
                                               iconAnchor:   [32, 32], // 图标的 "锚点"，即图标图像中对应地理坐标的点。对于一个32x32的图标，[16, 16] 表示中心点。
                                               popupAnchor:  [0, -32]   // 弹出窗口 (popup) 相对于锚点的位置。
                                         });
-                                        const marker = L.marker([photo.location.lat, photo.location.lng],  { icon: photoIcon });
+                                        const marker = L.marker([photo.location.lat, photo.location.lng],  { icon: photoIcon, zIndexOffset: -10 });
                                         let popupContent = `<img src="https://${photo.thumb_url || photo.url}" style="width:150px; height:auto; border-radius:4px; margin-bottom:5px;">`;
                                         if (photo.description) {
                                             popupContent += `<br><strong>${sanitizeHTML(photo.description)}</strong>`;
