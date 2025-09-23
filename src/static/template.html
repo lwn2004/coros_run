@@ -2722,7 +2722,7 @@
         };
     
         // 提取 EXIF
-        if (TRUE || file.type.startsWith('image/')) {
+        if (true || file.type.startsWith('image/')) {
           try {
             const exifData = await exifr.gps(file);
             if (exifData && exifData.latitude && exifData.longitude) {
