@@ -15592,7 +15592,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | <a href="?admin=true" class="text-decoration-none text-body-secondary">Admin</a>  | 2025-09-24 18:58:49 
+         | <a href="?admin=true" class="text-decoration-none text-body-secondary">Admin</a>  | 2025-09-24 20:02:05 
     </small>
 </footer>
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
@@ -16109,11 +16109,11 @@
                                         photoIcon = L.icon({
                                               iconUrl: `https://${iconUrl}`,                                              
                                               iconSize:     [32, 32], // 图标的尺寸 [宽, 高] (像素)
-                                              iconAnchor:   [16, 16], // 图标的 "锚点"，即图标图像中对应地理坐标的点。对于一个32x32的图标，[16, 16] 表示中心点。
+                                              iconAnchor:   [32, 0], // 图标的 "锚点"，即图标图像中对应地理坐标的点。对于一个32x32的图标，[16, 16] 表示中心点。
                                               popupAnchor:  [0, -16]   // 弹出窗口 (popup) 相对于锚点的位置。
                                         });
-                                        const marker = L.marker([photo.location.lat, photo.location.lng]);                                      
-                                        //const marker = L.marker([photo.location.lat, photo.location.lng],  { icon: photoIcon });
+                                        //const marker = L.marker([photo.location.lat, photo.location.lng]);                                      
+                                        const marker = L.marker([photo.location.lat, photo.location.lng],  { icon: photoIcon });
                                         let popupContent = `<img src="https://${photo.thumb_url || photo.url}" style="width:150px; height:auto; border-radius:4px; margin-bottom:5px;">`;
                                         if (photo.description) {
                                             popupContent += `<br><strong>${sanitizeHTML(photo.description)}</strong>`;
