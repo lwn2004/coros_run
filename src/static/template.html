@@ -1851,6 +1851,19 @@
             listContainer.innerHTML = '<div class="text-danger">评论加载失败</div>';
         }
     }  
+    function renderCommentList(container, comments) {
+        container.style.color = 'var(--text-primary)';
+        if (Array.isArray(comments) && comments.length > 0) {
+            container.innerHTML = comments.map(c => 
+                `<div class="border-bottom py-2" style="border-color: var(--border-color) !important;">
+                    <small class="text-secondary">${sanitizeHTML(c.nickname) || '🌱 匿名'} · ${new Date(c.ts).toLocaleString()}</small>
+                    <div class="mt-1" style="color: var(--text-primary);">${sanitizeHTML(c.text)}</div>
+                </div>`
+            ).join('');
+        } else {
+            container.innerHTML = '<div class="text-secondary text-center py-2">暂无评论</div>';
+        }
+    }
     async function showRunDetailModal(runId, preloadedData = {}, scrollToComments = false) {
         const newHash = `#data/run/${runId}`;
         if (window.location.hash !== newHash) {
@@ -3312,19 +3325,7 @@
         
             mediaViewerContainer.innerHTML = content;
         }      
-        function renderCommentList(container, comments) {
-            container.style.color = 'var(--text-primary)';
-            if (Array.isArray(comments) && comments.length > 0) {
-                container.innerHTML = comments.map(c => 
-                    `<div class="border-bottom py-2" style="border-color: var(--border-color) !important;">
-                        <small class="text-secondary">${sanitizeHTML(c.nickname) || '🌱 匿名'} · ${new Date(c.ts).toLocaleString()}</small>
-                        <div class="mt-1" style="color: var(--text-primary);">${sanitizeHTML(c.text)}</div>
-                    </div>`
-                ).join('');
-            } else {
-                container.innerHTML = '<div class="text-secondary text-center py-2">暂无评论</div>';
-            }
-        }
+
 
     
         document.getElementById('submitRunDetailComment').addEventListener('click', async () => {
