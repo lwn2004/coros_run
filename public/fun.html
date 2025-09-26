@@ -15648,7 +15648,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | <a href="?admin=true" class="text-decoration-none text-body-secondary">Admin</a>  | 2025-09-26 09:42:33 
+         | <a href="?admin=true" class="text-decoration-none text-body-secondary">Admin</a>  | 2025-09-26 17:08:45 
     </small>
 </footer>
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
@@ -16922,12 +16922,19 @@
         }
     
         const result = await response.json();
-    
+        const type = file.type.startsWith('video/') ? 'video' : 'image';
+        let newExt;
+        if (type === 'video') {
+          newExt = "mp4";
+        } 
+        } else {
+          newExt = "jpg";
+        }
         const mediaItem = {
           id: `media-item-${Date.now()}`,
-          type: file.type.startsWith('video/') ? 'video' : 'image',
+          type: type,
           url: result.url,
-          thumb_url: result.url.replace('/uploads/', '/thumbnails/'),
+          thumb_url: result.url.replace('/uploads/', '/thumbnails/').replace(/\.[^/.]+$/, "." + newExt),
           poster_url: '',
           description: file.name,
           location: null
