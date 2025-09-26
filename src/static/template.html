@@ -2712,12 +2712,19 @@
         }
     
         const result = await response.json();
-    
+        const type = file.type.startsWith('video/') ? 'video' : 'image';
+        let newExt;
+        if (type === 'video') {
+          newExt = "mp4";
+        } 
+        } else {
+          newExt = "jpg";
+        }
         const mediaItem = {
           id: `media-item-${Date.now()}`,
-          type: file.type.startsWith('video/') ? 'video' : 'image',
+          type: type,
           url: result.url,
-          thumb_url: result.url.replace('/uploads/', '/thumbnails/'),
+          thumb_url: result.url.replace('/uploads/', '/thumbnails/').replace(/\.[^/.]+$/, "." + newExt),
           poster_url: '',
           description: file.name,
           location: null
