@@ -15648,7 +15648,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | <a href="?admin=true" class="text-decoration-none text-body-secondary">Admin</a>  | 2025-09-26 17:19:47 
+         | <a href="?admin=true" class="text-decoration-none text-body-secondary">Admin</a>  | 2025-09-26 18:00:33 
     </small>
 </footer>
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
@@ -16061,6 +16061,19 @@
             listContainer.innerHTML = '<div class="text-danger">评论加载失败</div>';
         }
     }  
+    function renderCommentList(container, comments) {
+        container.style.color = 'var(--text-primary)';
+        if (Array.isArray(comments) && comments.length > 0) {
+            container.innerHTML = comments.map(c => 
+                `<div class="border-bottom py-2" style="border-color: var(--border-color) !important;">
+                    <small class="text-secondary">${sanitizeHTML(c.nickname) || '🌱 匿名'} · ${new Date(c.ts).toLocaleString()}</small>
+                    <div class="mt-1" style="color: var(--text-primary);">${sanitizeHTML(c.text)}</div>
+                </div>`
+            ).join('');
+        } else {
+            container.innerHTML = '<div class="text-secondary text-center py-2">暂无评论</div>';
+        }
+    }
     async function showRunDetailModal(runId, preloadedData = {}, scrollToComments = false) {
         const newHash = `#data/run/${runId}`;
         if (window.location.hash !== newHash) {
@@ -17522,19 +17535,7 @@
         
             mediaViewerContainer.innerHTML = content;
         }      
-        function renderCommentList(container, comments) {
-            container.style.color = 'var(--text-primary)';
-            if (Array.isArray(comments) && comments.length > 0) {
-                container.innerHTML = comments.map(c => 
-                    `<div class="border-bottom py-2" style="border-color: var(--border-color) !important;">
-                        <small class="text-secondary">${sanitizeHTML(c.nickname) || '🌱 匿名'} · ${new Date(c.ts).toLocaleString()}</small>
-                        <div class="mt-1" style="color: var(--text-primary);">${sanitizeHTML(c.text)}</div>
-                    </div>`
-                ).join('');
-            } else {
-                container.innerHTML = '<div class="text-secondary text-center py-2">暂无评论</div>';
-            }
-        }
+
 
     
         document.getElementById('submitRunDetailComment').addEventListener('click', async () => {
