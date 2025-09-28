@@ -145,29 +145,29 @@
       color: var(--text-secondary);
       text-transform: uppercase;
       margin-bottom: 0.5rem;
-	  min-height: 1.0rem;
+    min-height: 1.0rem;
     }
     .stat-value {
       font-size: 2rem;
       font-weight: 700;
       color: var(--text-primary);
       line-height: 1.2;
-	  min-height: 2.4rem;
+    min-height: 2.4rem;
     }
     .stat-value-small {
         font-size: 1.5rem;
     }
     .stat-details {
-	  margin-top: auto;
-	  width: 100%;
-	}
+    margin-top: auto;
+    width: 100%;
+  }
     .stat-card-flip-container {
         perspective: 1000px;
         min-height: 140px;
         cursor: pointer;
     }
     .stat-card-flipper {
-		text-align: center;
+    text-align: center;
         position: relative;
         width: 100%;
         height: 100%;
@@ -215,9 +215,9 @@
         --bs-btn-hover-border-color: var(--accent-color);
         --bs-btn-active-bg: var(--accent-color);
         --bs-btn-active-border-color: var(--accent-color);
-		--bs-btn-active-color: var(--text-primary);
+    --bs-btn-active-color: var(--text-primary);
         font-size: 0.8rem;
-		color: var(--text-secondary);
+    color: var(--text-secondary);
     }
     #saveProfileButton {
         --bs-btn-bg: var(--accent-color);
@@ -227,9 +227,9 @@
         color: var(--text-primary);
     }
     .btn-group .btn.active {
-		color: var(--text-primary);
-		font-weight: 500;
-	}
+    color: var(--text-primary);
+    font-weight: 500;
+  }
     @media (max-width: 767.98px) {
       .stat-value { font-size: 1.8rem; }
     }
@@ -799,6 +799,10 @@
         border-left: 1px solid;
       }
     }
+    .map-photo-icon {
+        background: transparent;
+        border: none;
+    }
   </style>
 </head>
 <body>
@@ -851,10 +855,10 @@
                         <div class="stat-card-content">
                           <div>
                             <div class="stat-label">继续坚持</div>
-                            <div class="stat-value">15年281天</div>
+                            <div class="stat-value">15年306天</div>
                           </div>
                           <div class="stat-details">
-                            <div class="stat-label"><small class="small-muted">预计</small>2041年07月02日<small>绕地球一圈</small></div>
+                            <div class="stat-label"><small class="small-muted">预计</small>2041年07月27日<small>绕地球一圈</small></div>
                           </div>
                         </div>
                       </div>
@@ -890,13 +894,13 @@
                       </div>
                       <div class="stat-card-back">
                         <div class="stat-card-content">
-						  <div>
-							  <div class="stat-label">最快配速</div>
-							  <div class="stat-value">4&#39;07&#34;</div>
-						  </div>
+              <div>
+                <div class="stat-label">最快配速</div>
+                <div class="stat-value">4&#39;07&#34;</div>
+              </div>
                           <div class="stat-details">
                             <small class="small-muted">2025-08-17</small>
-                          </div>						  
+                          </div>              
                         </div>
                       </div>
                     </div>
@@ -1102,7 +1106,7 @@
                         <canvas id="monthOverMonthChart" aria-label="本月与上月跑量对比图表"></canvas>
                     </div>
                 </div>                
-				<div id="dailyChartContainer" style="display: none;">
+        <div id="dailyChartContainer" style="display: none;">
                     <div id="dailyChartStats" class="analysis-summary mb-2 text-center"></div>
                     <div style="height: 300px;">
                         <canvas id="dailyDistanceChart" aria-label="最近30天跑步距离统计图表"></canvas>
@@ -15677,7 +15681,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | <a href="?admin=true" class="text-decoration-none text-body-secondary">Admin</a>  | 2025-09-28 09:50:56 
+         | <a href="?admin=true" class="text-decoration-none text-body-secondary">Admin</a>  | 2025-09-28 16:40:41 
     </small>
 </footer>
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
@@ -15738,12 +15742,14 @@
                 <div id="runDetailContent" class="container-fluid">
                   <div class="row">
                     <div class="col-lg-7 order-lg-1">
-                 
                         <div id="detail-view-content" class="position-relative">
                             <div id="routeMapContainer" class="py-2">
                                 </div>
+                            <div id="detailMediaGalleryContainer" class="content-card p-2 mt-2" style="display: none;">
+                                <div id="detailMediaGallery" class="d-flex" style="overflow-x: auto; gap: 0.5rem;">
+                                </div>
+                            </div>
                         </div>
-                        
                         <div id="detailWeather" class="text-center small text-body-secondary mb-3"></div>
                         <div class="mb-4">
                             <div class="d-flex justify-content-between align-items-center">
@@ -15855,14 +15861,12 @@
                     </div>
                 <hr>
                 <h6>添加新媒体</h6>
-            
                 <div class="p-3 rounded" style="background-color: var(--hover-bg);">
                     <p class="small text-body-secondary">直接上传文件 (推荐) 或 粘贴 R2 URL。</p>
                     <div class="mb-2">
                         <input class="form-control form-control-sm" type="file" id="media-file-input" multiple>
                     </div>
                     <div id="upload-progress-container"></div>
-                    
                     <div class="accordion accordion-flush" id="pasteUrlAccordion">
                       <div class="accordion-item" style="background: transparent;">
                         <h2 class="accordion-header">
@@ -15892,7 +15896,6 @@
         </div>
     </div>
 </div>
-  
 <div class="modal fade" id="calendarEditorModal" tabindex="-1" aria-labelledby="calendarEditorModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
@@ -16111,12 +16114,10 @@
         currentDetailRunId = runId;
         currentRunMedia = null;
         hasFetchedMedia = false;
-        // Make sure to show the map and hide the media viewer by default
-        //document.getElementById('routeMapContainer').style.display = 'block';
-        //document.getElementById('mediaViewerContainer').style.display = 'none';
-        //document.querySelector('#detail-view-toggle .btn[data-view="map"]').classList.add('active');
-        //document.querySelector('#detail-view-toggle .btn[data-view="media"]').classList.remove('active');
-          
+        const mediaGalleryContainer = document.getElementById('detailMediaGalleryContainer');
+        const mediaGallery = document.getElementById('detailMediaGallery');
+        mediaGalleryContainer.style.display = 'none';
+        mediaGallery.innerHTML = '';
         const modalEl = document.getElementById('runDetailModal');
         const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
         modal.show();
@@ -16185,7 +16186,6 @@
                     const polyline = L.polyline(decodePolyline(currentPolyline), { color: getComputedStyle(document.documentElement).getPropertyValue('--accent-color'), weight: 4 }).addTo(detailMapInstance);
                     detailMapInstance.fitBounds(polyline.getBounds().pad(0.1));
                     detailMapInstance.invalidateSize();
-
                     if (photoMarkersLayer) {
                         photoMarkersLayer.clearLayers();
                     } else {
@@ -16193,70 +16193,59 @@
                            photoMarkersLayer = L.layerGroup().addTo(detailMapInstance);
                         }
                     }
-                    let photoIcon = null;
-                     
                     fetch(`${API_BASE}/api/media/${runId}`)
                         .then(response => response.ok ? response.json() : { media: [] })
                         .then(mediaData => {
                             currentRunMedia = mediaData;
                             hasFetchedMedia = true;
-                            if (mediaData.media && Array.isArray(mediaData.media)) {
-                                mediaData.media.forEach(photo => {
+                            if (photoMarkersLayer) {
+                                photoMarkersLayer.clearLayers();
+                            } else if (detailMapInstance) {
+                               photoMarkersLayer = L.layerGroup().addTo(detailMapInstance);
+                            }
+                            if (mediaData.media && Array.isArray(mediaData.media) && mediaData.media.length > 0) {
+                                mediaGallery.innerHTML = mediaData.media.map((photo, index) => {
+                                    const thumbSrc = photo.thumb_url || photo.poster_url || photo.url;
+                                    return `<img src="https://${thumbSrc}"
+                                                 class="comment-media-thumb" 
+                                                 data-media-index="${index}" 
+                                                 style="height: 100px; width: 100px; cursor: pointer;"
+                                                 alt="Media thumbnail ${index + 1}">`;
+                                }).join('');
+                                mediaData.media.forEach((photo, index) => {
                                     if (photo.location && photo.location.lat && photo.location.lng) {
-                                        let iconUrl = photo.thumb_url? photo.thumb_url : 'https://cdn-icons-png.flaticon.com/512/1527/1527531.png';
-                                        //iconUrl = 'https://cdn-icons-png.flaticon.com/512/1527/1527531.png';
-                                        photoIcon = L.icon({
-                                              iconUrl: `https://${iconUrl}`,                                              
-                                              iconSize:     [32, 32], // 图标的尺寸 [宽, 高] (像素)
-                                              iconAnchor:   [16, 32], // 图标的 "锚点"，即图标图像中对应地理坐标的点。对于一个32x32的图标，[16, 16] 表示中心点。
-                                              popupAnchor:  [0, -16]   // 弹出窗口 (popup) 相对于锚点的位置。
+                                        const photoIcon = L.divIcon({
+                                            html: '<i class="bi bi-camera-fill" style="font-size: 1.5rem; color: var(--accent-color); text-shadow: 0 0 3px var(--card-bg);"></i>',
+                                            className: 'map-photo-icon',
+                                            iconSize: [24, 24],
+                                            iconAnchor: [12, 24]
                                         });
-                                        //const marker = L.marker([photo.location.lat, photo.location.lng]);                                      
-                                        const marker = L.marker([photo.location.lat, photo.location.lng],  { icon: photoIcon });
-                                        let popupContent = `<img src="https://${photo.thumb_url || photo.url}" style="width:150px; height:auto; border-radius:4px; margin-bottom:5px;">`;
-                                        if (photo.description) {
-                                            popupContent += `<br><strong>${sanitizeHTML(photo.description)}</strong>`;
-                                        }
-                                        if (photo.metadata) {
-                                            const meta = photo.metadata;
-                                            let metaDetails = '';
-
-                                            if (meta.model) metaDetails += `<li><strong>相机:</strong> ${sanitizeHTML(meta.model)}</li>`;
-                                            if (meta.datetime) metaDetails += `<li><strong>时间:</strong> ${new Date(meta.datetime).toLocaleString()}</li>`;
-                                            
-                                            let exposureDetails = [];
-                                            if (meta.fnumber) exposureDetails.push(`f/${meta.fnumber}`);
-                                            if (meta.exposure) exposureDetails.push(`${meta.exposure}s`);
-                                            if (meta.iso) exposureDetails.push(`ISO ${meta.iso}`);
-                                            if (exposureDetails.length > 0) {
-                                                 metaDetails += `<li><strong>参数:</strong> ${exposureDetails.join(', ')}</li>`;
+                                        const marker = L.marker([photo.location.lat, photo.location.lng], { icon: photoIcon });
+                                        marker.on('click', () => {
+                                            mediaGalleryContainer.style.display = 'block';
+                                            const thumb = mediaGallery.querySelector(`[data-media-index="${index}"]`);
+                                            if (thumb) {
+                                                thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                                                thumb.style.transition = 'all 0.3s ease-in-out';
+                                                thumb.style.boxShadow = '0 0 8px 3px var(--accent-color)';
+                                                thumb.style.transform = 'scale(1.05)';
+                                                setTimeout(() => {
+                                                    thumb.style.boxShadow = '';
+                                                    thumb.style.transform = '';
+                                                }, 2000);
                                             }
-                                           
-                                            if (metaDetails) {
-                                                popupContent += `<ul style="list-style:none; padding:0; margin-top:5px; font-size:0.8em;">${metaDetails}</ul>`;
-                                            }
-                                        }
-                                        marker.bindPopup(popupContent, { minWidth: 160 });
-                                        if(photoMarkersLayer) {
+                                        });
+                                        if (photoMarkersLayer) {
                                             photoMarkersLayer.addLayer(marker);
                                         }
                                     }
                                 });
-
-
-
-
-
-
-
                             }
                         })
                         .catch(error => {
                             console.error("Error fetching media for map markers:", error);
                             hasFetchedMedia = false;
                         });
-
-
                 }, 100); 
             }
             let weatherString = '';
@@ -16332,22 +16321,17 @@
     function handleStateFromHash() {
         const hash = window.location.hash;
         const parts = hash.replace(/^#/, '').split('/'); // e.g., ["data", "run", "RUN_ID"]
-    
         const tabId = parts[0] || 'summary';
         const tabTrigger = document.querySelector(`.nav-link[data-hash="${tabId}"]`);
-        
         // Ensure the correct main tab is active
         if (tabTrigger && !tabTrigger.classList.contains('active')) {
             bootstrap.Tab.getOrCreateInstance(tabTrigger).show();
         }
-    
         const runDetailModalEl = document.getElementById('runDetailModal');
         const modalInstance = bootstrap.Modal.getInstance(runDetailModalEl);
-    
         // Check if the URL requests a specific run detail
         if (parts[1] === 'run' && parts[2]) {
             const runId = parts[2];
-            
             // If the modal is not already shown for this run, open it
             if (!modalInstance || !modalInstance._isShown || currentDetailRunId !== runId) {
                 const row = document.querySelector(`.run-detail-row[data-run-id="${runId}"], .recent-run-card[data-run-id="${runId}"]`);
@@ -16485,7 +16469,7 @@
             default: return `${diffInDays}天前 ${timeStr}`;
         }
     }
-	  function updateRelativeTimestamps() {
+    function updateRelativeTimestamps() {
         document.querySelectorAll('.recent-run-timestamp').forEach(el => {
             const dateString = el.closest('.recent-run-card').dataset.date;
             if (dateString) {
@@ -16738,7 +16722,6 @@
             await generateMarathonCalendar();
         }
     }
-
     function renderRunTags() {
         const isAdmin = localStorage.getItem('run_role') === 'admin';
         const container = document.getElementById('runDetailTagsContainer');
@@ -16908,7 +16891,6 @@
             listContainer.innerHTML = '<p class="text-secondary">此记录暂无媒体文件。</p>';
             return;
         }
-    
         listContainer.innerHTML = currentEditingMedia.map((item, index) => `
             <div class="d-flex align-items-start p-2 mb-2 rounded" style="background-color: var(--hover-bg);" data-index="${index}">
                 <img src="${sanitizeHTML(item.thumb_url || item.poster_url || item.url)}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px;" class="me-3 flex-shrink-0">
@@ -16944,25 +16926,20 @@
           progressBar.style.width = width + '%';
         }
       }, 100);
-    
       try {
         const formData = new FormData();
         formData.append('file', file);
-    
         const response = await fetch(`${API_BASE}/api/upload`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${adminSecret}` },
           body: formData,
         });
-    
         clearInterval(interval);
         progressBar.style.width = '100%';
-    
         if (!response.ok) {
           const err = await response.json();
           throw new Error(err.error || 'Upload failed');
         }
-    
         const result = await response.json();
         const type = file.type.startsWith('video/') ? 'video' : 'image';
         let newExt;
@@ -16981,7 +16958,6 @@
           description: file.name,
           location: null
         };
-    
         // 提取 EXIF
         if (true || file.type.startsWith('image/')) {
           try {
@@ -16996,11 +16972,9 @@
             console.warn('EXIF 解析失败:', e);
           }
         }
-    
         currentEditingMedia.push(mediaItem);
         renderMediaEditorList();
         document.getElementById(progressId).remove();
-    
       } catch (error) {
         clearInterval(interval);
         progressBar.classList.add('bg-danger');
@@ -17047,7 +17021,6 @@
                 isHandlingPopState = false; // Reset flag and do nothing
                 return;
             }
-            
             // If the modal was closed manually (not by back button), update the URL
             if (window.location.hash.includes('/run/')) {
                 const baseTabHash = '#' + document.querySelector('#main-nav-tabs .nav-link.active').dataset.hash;
@@ -17057,11 +17030,9 @@
         });
         // Listen for browser back/forward button clicks
         window.addEventListener('popstate', handleStateFromHash);
-    
         // Handle the initial URL state when the page loads
         // We wrap it in a setTimeout to ensure the rest of the page, especially the run list, has had a chance to render.
         setTimeout(handleStateFromHash, 100);
-    
         // The existing 'shown.bs.tab' listener for updating the hash when changing tabs is still good,
         // but we need to make sure it doesn't interfere.
         document.querySelectorAll('#main-nav-tabs .nav-link').forEach(tabEl => {
@@ -17129,7 +17100,6 @@
         if (mediaManagerModalEl) {
             mediaManagerModalInstance = new bootstrap.Modal(mediaManagerModalEl);
         }  
-
         mediaManagerModalEl.addEventListener('shown.bs.modal', () => {
           if (!mediaMap) {
             const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
@@ -17138,7 +17108,6 @@
                 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png';            
             mediaMap = L.map('media-map', { center: [36, 108], zoom: 2 });
             L.tileLayer(tileUrl, { attribution: '', minZoom: 3, maxZoom: 18  }).addTo(mediaMap);
-        
             // 用户点击地图时，给“最近上传的文件”加 marker
             mediaMap.on('click', e => {
               if (currentEditingMedia.length === 0) return;
@@ -17152,7 +17121,6 @@
             const files = e.target.files;
             const progressContainer = document.getElementById('upload-progress-container');
             if (!files.length) return;
-        
             // Prompt for the secret ONCE before uploading all selected files.
             const adminSecret = getAdminSecret();
             if (!adminSecret) {
@@ -17160,7 +17128,6 @@
                 e.target.value = ''; // Reset the file input
                 return;
             }
-            
             e.target.disabled = true;
             for (const file of files) {
                 // Pass the prompted secret to the upload function
@@ -17169,13 +17136,11 @@
             e.target.disabled = false;
             e.target.value = ''; // Reset file input
         });
-      
         // ---- 处理弹窗内的点击事件 ----
         mediaManagerModalEl.addEventListener('click', (e) => {
             const target = e.target;
             const itemEl = target.closest('[data-index]');
             const index = itemEl ? parseInt(itemEl.dataset.index, 10) : -1;
-        
             // 删除
             if (target.classList.contains('delete-media-btn')) {
                 if (confirm('确定要删除这个媒体项吗？')) {
@@ -17209,21 +17174,18 @@
                 renderMediaEditorList();
             }
         });
-        
         // ---- 处理弹窗内的输入事件 (实时更新数据) ----
         mediaManagerModalEl.addEventListener('input', (e) => {
             const target = e.target;
             const itemEl = target.closest('[data-index]');
             if (!itemEl) return;
             const index = parseInt(itemEl.dataset.index, 10);
-        
             if (target.classList.contains('description-input')) {
                 currentEditingMedia[index].description = target.value;
             } else if (target.classList.contains('url-input')) {
                 currentEditingMedia[index].url = target.value;
             }
         });      
-
         document.getElementById('saveMediaChanges').addEventListener('click', async () => {
             const saveButton = document.getElementById('saveMediaChanges');
             const adminSecret = getAdminSecret();
@@ -17233,7 +17195,6 @@
             }          
             saveButton.disabled = true;
             saveButton.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 保存中...`;
-        
             try {
               const response = await fetch(`${API_BASE}/api/media/${currentDetailRunId}`, {
                   method: 'POST',
@@ -17243,16 +17204,13 @@
                   },
                   body: JSON.stringify({ media: currentEditingMedia })
               });
-      
               if (!response.ok) throw new Error('Save failed, server returned an error.');
-      
               // Success
               currentRunMedia.media = JSON.parse(JSON.stringify(currentEditingMedia));
               //renderMediaViewer(); // Re-render the main view
               mediaManagerModalInstance.hide();
               // Also update the main page filter data
               mediaRunIds.add(currentDetailRunId);
-        
             } catch (error) {
                 console.error('保存媒体数据时出错:', error);
                 alert(`保存失败: ${error.message}`);
@@ -17261,7 +17219,6 @@
                 saveButton.innerHTML = '<i class="bi bi-check-circle me-1"></i> 保存更改到服务器';
             }
         });
-      
         let startX = 0, startY = 0;
         const tabContent = document.querySelector('.tab-content');
         const minSwipeDistance = 100;
@@ -17457,116 +17414,48 @@
                 }
             });
         }
-        const viewToggleButtonGroup = document.getElementById('detail-view-toggle');
-        const routeMapContainer = document.getElementById('routeMapContainer');
-        //const mediaViewerContainer = document.getElementById('mediaViewerContainer');
         const editPhotoBtn = document.getElementById('editPhotoBtn')
         editPhotoBtn.addEventListener('click', (e) => {
-            // 检查点击的是否是“上传/管理”按钮
-            //const uploadButton = e.target.closest('.btn-sm');
-            //if (uploadButton) {
-                // 关键操作：深拷贝当前媒体数据到临时变量，避免直接修改原始数据
                 currentEditingMedia = JSON.parse(JSON.stringify(currentRunMedia.media || []));
-        
-                // 渲染编辑器列表
                 renderMediaEditorList();
-        
-                // 显示弹窗
                 mediaManagerModalInstance.show();
-            //}
-        });/*
-        viewToggleButtonGroup.addEventListener('click', async (e) => {
-            const button = e.target.closest('button');
-            if (!button) return;
-        
-            // Update active button state
-            viewToggleButtonGroup.querySelector('.active').classList.remove('active');
-            button.classList.add('active');
-        
-            const view = button.dataset.view;
-            if (view === 'map') {
-                mediaViewerContainer.style.display = 'none';
-                routeMapContainer.style.display = 'block';
-                if (detailMapInstance) {
-                    detailMapInstance.invalidateSize(); // Important for Leaflet
-                }
-            } else if (view === 'media') {
-                routeMapContainer.style.display = 'none';
-                mediaViewerContainer.style.display = 'block';
-        
-                // Lazy load media data only on the first click
-                if (!hasFetchedMedia) {
-                    try {
-                        // This is a placeholder for your actual API call
-                        const response = await fetch(`${API_BASE}/api/media/${currentDetailRunId}`);
-                        if (response.ok) {
-                            currentRunMedia = await response.json();
+        });
+        document.getElementById('detailMediaGallery')?.addEventListener('click', (e) => {
+            if (e.target.matches('.comment-media-thumb')) {
+                const startIndex = parseInt(e.target.dataset.mediaIndex, 10);
+                if (currentRunMedia && currentRunMedia.media && currentRunMedia.media.length > 0) {
+                    const galleryInner = document.getElementById('galleryCarouselInner');
+                    galleryInner.innerHTML = currentRunMedia.media.map((item, index) => {
+                        const activeClass = index === startIndex ? ' active' : '';
+                        const fullUrl = item.url.startsWith('http') ? item.url : `https://${item.url}`;
+                        const posterUrl = item.poster_url ? (item.poster_url.startsWith('http') ? item.poster_url : `https://${item.poster_url}`) : '';
+                        if (item.type === 'video') {
+                            const videoUrl = fullUrl.includes('/uploads/') ? fullUrl.replace('/uploads/', '/transcoded/') : fullUrl;
+                            return `
+                            <div class="carousel-item${activeClass}">
+                                <video class="d-block" style="margin: 0 auto; max-height: 85vh; width: auto; max-width: 100%;" controls preload="auto" poster="${posterUrl}">
+                                    <source src="${videoUrl}" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                            </div>`;
                         } else {
-                            currentRunMedia = { media: [] }; // Assume no media on 404
+                            return `
+                            <div class="carousel-item${activeClass}">
+                                <img src="${fullUrl}" class="d-block w-auto" style="margin: 0 auto;" alt="Run media content">
+                            </div>`;
                         }
-                    } catch (error) {
-                        console.error("Failed to fetch media:", error);
-                        currentRunMedia = { media: [] };
-                    } finally {
-                        hasFetchedMedia = true;
-                        renderMediaViewer();
-                    }
+                    }).join('');
+                    const galleryModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('mediaGalleryModal'));
+                    const mediaGalleryModalEl = document.getElementById('mediaGalleryModal');
+                    mediaGalleryModalEl.addEventListener('hidden.bs.modal', () => {
+                        galleryInner.querySelectorAll('video').forEach(video => {
+                            video.pause();
+                        });
+                    }, { once: true });
+                    galleryModal.show();
                 }
             }
-        });*/
-        
-        function renderMediaViewer() {
-            const isAdmin = localStorage.getItem('run_role') === 'admin';
-            let content = '';
-        
-            if (currentRunMedia && currentRunMedia.media.length > 0) {
-                content = `<div class="row g-2">` + currentRunMedia.media.map(item => {
-                  const isVideo = (item.type === 'video');
-                  const thumb = sanitizeHTML(item.thumb_url || item.poster_url || item.url);
-                  const fullUrl = sanitizeHTML(item.url.replace('/uploads/', '/transcoded/'));
-              
-                  return `
-                      <div class="col-md-6 col-lg-4">
-                          <div class="card h-100">
-                              <a href="https://${fullUrl}" target="_blank">
-                                  ${isVideo 
-                                      ? `<video class="card-img-top" style="height: 150px; object-fit: cover;" 
-                                                preload="metadata" 
-                                                ${item.poster_url ? `poster="https://${sanitizeHTML(item.poster_url)}"` : ''}>
-                                             <source src="https://${fullUrl}" type="video/mp4">
-                                             Your browser does not support the video tag.
-                                         </video>`
-                                      : `<img src="https://${thumb}" 
-                                              class="card-img-top" 
-                                              style="height: 150px; object-fit: cover;">`
-                                  }
-                              </a>
-                              <div class="card-body">
-                                  <p class="card-text small">${sanitizeHTML(item.description) || ''}</p>
-                              </div>
-                          </div>
-                      </div>
-                  `;
-              }).join('') + `</div>`;
-            } else {
-                content = `<div class="text-center p-5 text-body-secondary">
-                    <i class="bi bi-camera" style="font-size: 3rem;"></i>
-                    <p class="mt-2">暂无影音记录</p>
-                </div>`;
-            }
-        
-            // Add "Upload" button for admin
-            if (isAdmin) {
-                content += `<div class="text-center mt-4 border-top pt-3">
-                    <button class="btn btn-primary btn-sm"><i class="bi bi-upload me-1"></i> 上传/管理影音</button>
-                </div>`;
-            }
-        
-            mediaViewerContainer.innerHTML = content;
-        }      
-
-
-    
+        });
         document.getElementById('submitRunDetailComment').addEventListener('click', async () => {
             const runId = currentDetailRunId;
             const text = document.getElementById('runDetailCommentText').value.trim();
@@ -17609,7 +17498,6 @@
                 showRunDetailModal(recentCard.dataset.runId, preloadedData, !!isCommentLink);
             }
         });
-
         const calendarEditorModalEl = document.getElementById('calendarEditorModal');
         const calendarEditorModal = bootstrap.Modal.getOrCreateInstance(calendarEditorModalEl);
         const calendarForm = document.getElementById('calendarEventForm');
