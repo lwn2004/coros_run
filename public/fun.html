@@ -15681,7 +15681,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | <a href="?admin=true" class="text-decoration-none text-body-secondary">Admin</a>  | 2025-09-28 17:34:20 
+         | <a href="?admin=true" class="text-decoration-none text-body-secondary">Admin</a>  | 2025-09-28 18:05:55 
     </small>
 </footer>
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
@@ -17430,18 +17430,20 @@
                         const fullUrl = item.url.startsWith('http') ? item.url : `https://${item.url}`;
                         const transcodedUrl = fullUrl.includes('/uploads/') ? fullUrl.replace('/uploads/', '/transcoded/') : fullUrl
                         const posterUrl = item.poster_url ? (item.poster_url.startsWith('http') ? item.poster_url : `https://${item.poster_url}`) : '';
-                        if (item.type === 'video') {                            
+                        if (item.type === 'video') {
+                            const videoUrl = transcodedUrl.replace(/\.[^/.]+$/, ".mp4");
                             return `
                             <div class="carousel-item${activeClass}">
                                 <video class="d-block" style="margin: 0 auto; max-height: 85vh; width: auto; max-width: 100%;" controls preload="auto" poster="${posterUrl}">
-                                    <source src="${transcodedUrl}" type="video/mp4">
+                                    <source src="${videoUrl}" type="video/mp4">
                                     Your browser does not support the video tag.
                                 </video>
                             </div>`;
                         } else {
+                            const imgUrl = transcodedUrl.replace(/\.[^/.]+$/, ".jpg");
                             return `
                             <div class="carousel-item${activeClass}">
-                                <img src="${transcodedUrl}" class="d-block w-auto" style="margin: 0 auto;" alt="Run media content">
+                                <img src="${imgUrl}" class="d-block w-auto" style="margin: 0 auto;" alt="Run media content">
                             </div>`;
                         }
                     }).join('');
