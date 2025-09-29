@@ -647,6 +647,53 @@
         transform: scale(1.05);
         box-shadow: 0 0 5px var(--accent-color);
     }
+    /* New Media List Styles */
+    .media-list-item {
+        display: flex;
+        gap: 1rem;
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        transition: background-color 0.3s;
+        border-radius: 0.5rem;
+    }
+    .media-list-item:last-child {
+        border-bottom: none;
+    }
+    .media-list-item.highlighted {
+        background-color: var(--hover-bg);
+    }
+    .media-list-thumb {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 0.5rem;
+        flex-shrink: 0;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+    }
+    .media-list-thumb:hover {
+        transform: scale(1.05);
+    }
+    .media-list-details {
+        flex-grow: 1;
+    }
+    .media-description {
+        font-size: 0.95rem;
+        color: var(--text-primary);
+        margin-bottom: 0.75rem;
+    }
+    .exif-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 0.5rem;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+    .exif-item .exif-label {
+        display: block;
+        font-size: 0.7rem;
+        opacity: 0.8;
+    }    
     #mediaGalleryModal .modal-content {
       background-color: rgba(0,0,0,0.85);
       backdrop-filter: blur(5px);
@@ -688,8 +735,7 @@
         color: var(--text-primary);
     }
     #detail-map-item {
-        height: 500px;
-        /*border-radius: 12px;*/
+        height: 400px;
         background-color: var(--hover-bg);
     }
     #runDetailModal h4.data-section-title {
@@ -802,6 +848,7 @@
     .map-photo-icon {
         background: transparent;
         border: none;
+        transition: all 0.2s ease-in-out;
     }
   </style>
 </head>
@@ -15708,7 +15755,7 @@
 <footer class="container text-center py-4 mt-4">
     <small class="text-body-secondary">
         步履不停 &copy; 2025
-         | <a href="?admin=true" class="text-decoration-none text-body-secondary">Admin</a>  | 2025-09-29 09:45:29 
+         | <a href="?admin=true" class="text-decoration-none text-body-secondary">Admin</a>  | 2025-09-29 14:19:55 
     </small>
 </footer>
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
@@ -15773,7 +15820,8 @@
                             <div id="routeMapContainer" class="py-2">
                                 </div>
                             <div id="detailMediaGalleryContainer" class="content-card p-2 mt-2" style="display: none;">
-                                <div id="detailMediaGallery" class="d-flex" style="overflow-x: auto; gap: 0.5rem;">
+                                <h5 class="data-section-title fs-6 mb-3">影像记录</h5>
+                                <div id="detailMediaGallery">
                                 </div>
                             </div>
                         </div>
@@ -16141,6 +16189,8 @@
         currentDetailRunId = runId;
         currentRunMedia = null;
         hasFetchedMedia = false;
+        let photoMarkers = {}; // Reset markers for this modal instance
+        let activeMarkerIndex = null;        
         const mediaGalleryContainer = document.getElementById('detailMediaGalleryContainer');
         const mediaGallery = document.getElementById('detailMediaGallery');
         mediaGalleryContainer.style.display = 'none';
@@ -16166,6 +16216,47 @@
         if(paceChart) paceChart.destroy();
         if(elevationChart) elevationChart.destroy();
         if(hrChart) hrChart.destroy();
+        // --- Marker Interaction Functions ---
+        const defaultIcon = L.divIcon({
+            html: '<i class="bi bi-camera-fill" style="font-size: 1.5rem; color: var(--marathon-color); text-shadow: 0 0 3px var(--card-bg);"></i>',
+            className: 'map-photo-icon', iconSize: [24, 24], iconAnchor: [12, 24]
+        });
+        const highlightedIcon = L.divIcon({
+            html: `<i class="bi bi-camera-fill" style="font-size: 2.5rem; color: var(--danger-color); text-shadow: 0 0 5px var(--card-bg); transform: scale(1.2);"></i>`,
+            className: 'map-photo-icon', iconSize: [36, 36], iconAnchor: [18, 36]
+        });
+        function highlightMarker(index, isClick = false) {
+            if (activeMarkerIndex !== null && activeMarkerIndex !== index) {
+                unhighlightMarker(activeMarkerIndex); 
+            }
+            const marker = photoMarkers[index];
+            if (marker) {
+                marker.setIcon(highlightedIcon);
+                marker.setZIndexOffset(1000);
+                if(isClick) {
+                  detailMapInstance.panTo(marker.getLatLng());
+                }
+                activeMarkerIndex = index;
+            }
+        }
+        function unhighlightMarker(index) {
+            if (index === null || activeMarkerIndex !== index) return;
+            const marker = photoMarkers[index];
+            if (marker) {
+                marker.setIcon(defaultIcon);
+                marker.setZIndexOffset(0);
+            }
+            activeMarkerIndex = null;
+        }
+        function highlightListItem(index) {
+            document.querySelectorAll('.media-list-item.highlighted').forEach(el => el.classList.remove('highlighted'));
+            const item = mediaGallery.querySelector(`.media-list-item[data-media-index="${index}"]`);
+            if (item) {
+                item.classList.add('highlighted');
+                setTimeout(() => item.classList.remove('highlighted'), 2000);
+            }
+        }
+        // --- End Marker Interaction ---        
         try {
             const response = await fetch(`https://run.linwn.net/data/details/${runId}.json`);
             if (!response.ok) throw new Error(`Could not load run data. Status: ${response.status}`);
@@ -16213,58 +16304,46 @@
                     const polyline = L.polyline(decodePolyline(currentPolyline), { color: getComputedStyle(document.documentElement).getPropertyValue('--accent-color'), weight: 4 }).addTo(detailMapInstance);
                     detailMapInstance.fitBounds(polyline.getBounds().pad(0.1));
                     detailMapInstance.invalidateSize();
-                    if (photoMarkersLayer) {
-                        photoMarkersLayer.clearLayers();
-                    } else {
-                        if(detailMapInstance) {
-                           photoMarkersLayer = L.layerGroup().addTo(detailMapInstance);
-                        }
-                    }
+                    photoMarkersLayer = L.layerGroup().addTo(detailMapInstance);
                     fetch(`${API_BASE}/api/media/${runId}`)
                         .then(response => response.ok ? response.json() : { media: [] })
                         .then(mediaData => {
                             currentRunMedia = mediaData;
                             hasFetchedMedia = true;
-                            if (photoMarkersLayer) {
-                                photoMarkersLayer.clearLayers();
-                            } else if (detailMapInstance) {
-                               photoMarkersLayer = L.layerGroup().addTo(detailMapInstance);
-                            }
+                            photoMarkersLayer.clearLayers();
                             if (mediaData.media && Array.isArray(mediaData.media) && mediaData.media.length > 0) {
-                                mediaGallery.innerHTML = mediaData.media.map((photo, index) => {
-                                    const thumbSrc = photo.thumb_url || photo.poster_url || photo.url;
-                                    return `<img src="https://${thumbSrc}"
-                                                 class="comment-media-thumb" 
-                                                 data-media-index="${index}" 
-                                                 style="height: 100px; width: 100px; cursor: pointer;"
-                                                 alt="Media thumbnail ${index + 1}">`;
+                                mediaGalleryContainer.style.display = 'block';
+                                mediaGallery.innerHTML = mediaData.media.map((item, index) => {
+                                    const thumbSrc = item.thumb_url || item.poster_url || item.url;
+                                    const formatExifDate = (d) => d ? new Date(d).toLocaleString() : 'N/A';
+                                    let exifHtml = '<div class="exif-grid">';
+                                    if (item.exif) {
+                                        if (item.exif.DateTimeOriginal) exifHtml += `<div class="exif-item"><span class="exif-label">拍摄时间</span>${formatExifDate(item.exif.DateTimeOriginal)}</div>`;
+                                        if (item.exif.Make || item.exif.Model) exifHtml += `<div class="exif-item"><span class="exif-label">设备</span>${[sanitizeHTML(item.exif.Make), sanitizeHTML(item.exif.Model)].filter(Boolean).join(' ')}</div>`;
+                                        if (item.exif.FNumber) exifHtml += `<div class="exif-item"><span class="exif-label">光圈</span>f/${item.exif.FNumber}</div>`;
+                                        if (item.exif.ExposureTime) exifHtml += `<div class="exif-item"><span class="exif-label">快门</span>${item.exif.ExposureTime < 1 ? `1/${Math.round(1/item.exif.ExposureTime)}` : item.exif.ExposureTime}s</div>`;
+                                        if (item.exif.ISOSpeedRatings) exifHtml += `<div class="exif-item"><span class="exif-label">ISO</span>${item.exif.ISOSpeedRatings}</div>`;
+                                    }
+                                    exifHtml += '</div>';
+                                    return `
+                                    <div class="media-list-item" data-media-index="${index}">
+                                        <img src="https://${thumbSrc}" class="media-list-thumb" data-media-index="${index}" alt="Media thumbnail ${index + 1}">
+                                        <div class="media-list-details">
+                                            <p class="media-description">${sanitizeHTML(item.description) || '暂无简介'}</p>
+                                            ${exifHtml}
+                                        </div>
+                                    </div>`;
                                 }).join('');
                                 mediaData.media.forEach((photo, index) => {
                                     if (photo.location && photo.location.lat && photo.location.lng) {
-                                        const photoIcon = L.divIcon({
-                                            html: '<i class="bi bi-camera-fill" style="font-size: 1.5rem; color: var(--marathon-color); text-shadow: 0 0 3px var(--card-bg);"></i>',
-                                            className: 'map-photo-icon',
-                                            iconSize: [24, 24],
-                                            iconAnchor: [12, 24]
-                                        });
-                                        const marker = L.marker([photo.location.lat, photo.location.lng], { icon: photoIcon });
+                                        const marker = L.marker([photo.location.lat, photo.location.lng], { icon: defaultIcon });
                                         marker.on('click', () => {
-                                            mediaGalleryContainer.style.display = 'block';
-                                            const thumb = mediaGallery.querySelector(`[data-media-index="${index}"]`);
-                                            if (thumb) {
-                                                thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                                                thumb.style.transition = 'all 0.3s ease-in-out';
-                                                thumb.style.boxShadow = '0 0 8px 3px var(--accent-color)';
-                                                thumb.style.transform = 'scale(1.05)';
-                                                setTimeout(() => {
-                                                    thumb.style.boxShadow = '';
-                                                    thumb.style.transform = '';
-                                                }, 2000);
-                                            }
+                                            highlightListItem(index);
+                                            const thumb = mediaGallery.querySelector(`.media-list-item[data-media-index="${index}"]`);
+                                            if (thumb) thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                                         });
-                                        if (photoMarkersLayer) {
-                                            photoMarkersLayer.addLayer(marker);
-                                        }
+                                        photoMarkers[index] = marker;
+                                        photoMarkersLayer.addLayer(marker);
                                     }
                                 });
                             }
@@ -16333,6 +16412,39 @@
             await loadRunTags(runId);
             renderSuggestedTags();
             await refreshDetailComments(runId);
+            // Add delegated event listeners for media gallery interaction
+            mediaGallery.addEventListener('mouseover', (e) => {
+                const item = e.target.closest('.media-list-item');
+                if (item) highlightMarker(item.dataset.mediaIndex);
+            });
+            mediaGallery.addEventListener('mouseout', (e) => {
+                const item = e.target.closest('.media-list-item');
+                if (item) unhighlightMarker(item.dataset.mediaIndex);
+            });
+            mediaGallery.addEventListener('click', (e) => {
+                const item = e.target.closest('.media-list-item');
+                const thumb = e.target.closest('.media-list-thumb');
+                if (item) {
+                   highlightMarker(item.dataset.mediaIndex, true); // True for sticky highlight + pan on click/tap
+                }
+                if (thumb) { // If the click was on the thumbnail itself, open the gallery
+                    const startIndex = parseInt(thumb.dataset.mediaIndex, 10);
+                    if (currentRunMedia && currentRunMedia.media.length > 0) {
+                         const galleryInner = document.getElementById('galleryCarouselInner');
+                         galleryInner.innerHTML = currentRunMedia.media.map((media, index) => {
+                             const active = index === startIndex ? ' active' : '';
+                             const fullUrl = media.url.startsWith('http') ? media.url : `https://${media.url}`;
+                             const transcodedUrl = fullUrl.includes('/uploads/') ? fullUrl.replace('/uploads/', '/transcoded/') : fullUrl;
+                             const posterUrl = media.poster_url ? `https://${media.poster_url}` : '';
+                             return media.type === 'video' ?
+                             `<div class="carousel-item${active}"><video controls preload="auto" poster="${posterUrl}"><source src="${transcodedUrl.replace(/\.[^/.]+$/, ".mp4")}" type="video/mp4"></video></div>` :
+                             `<div class="carousel-item${active}"><img src="${transcodedUrl.replace(/\.[^/.]+$/, ".jpg")}" alt="Run media"></div>`;
+                         }).join('');
+                         const galleryModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('mediaGalleryModal'));
+                         galleryModal.show();
+                    }
+                }
+            });            
             if (scrollToComments) {
                 document.getElementById('runDetailComments').scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
@@ -17446,44 +17558,6 @@
                 currentEditingMedia = JSON.parse(JSON.stringify(currentRunMedia.media || []));
                 renderMediaEditorList();
                 mediaManagerModalInstance.show();
-        });
-        document.getElementById('detailMediaGallery')?.addEventListener('click', (e) => {
-            if (e.target.matches('.comment-media-thumb')) {
-                const startIndex = parseInt(e.target.dataset.mediaIndex, 10);
-                if (currentRunMedia && currentRunMedia.media && currentRunMedia.media.length > 0) {
-                    const galleryInner = document.getElementById('galleryCarouselInner');
-                    galleryInner.innerHTML = currentRunMedia.media.map((item, index) => {
-                        const activeClass = index === startIndex ? ' active' : '';
-                        const fullUrl = item.url.startsWith('http') ? item.url : `https://${item.url}`;
-                        const transcodedUrl = fullUrl.includes('/uploads/') ? fullUrl.replace('/uploads/', '/transcoded/') : fullUrl
-                        const posterUrl = item.poster_url ? (item.poster_url.startsWith('http') ? item.poster_url : `https://${item.poster_url}`) : '';
-                        if (item.type === 'video') {
-                            const videoUrl = transcodedUrl.replace(/\.[^/.]+$/, ".mp4");
-                            return `
-                            <div class="carousel-item${activeClass}">
-                                <video class="d-block" style="margin: 0 auto; max-height: 85vh; width: auto; max-width: 100%;" controls preload="auto" poster="${posterUrl}">
-                                    <source src="${videoUrl}" type="video/mp4">
-                                    Your browser does not support the video tag.
-                                </video>
-                            </div>`;
-                        } else {
-                            const imgUrl = transcodedUrl.replace(/\.[^/.]+$/, ".jpg");
-                            return `
-                            <div class="carousel-item${activeClass}">
-                                <img src="${imgUrl}" class="d-block w-auto" style="margin: 0 auto;" alt="Run media content">
-                            </div>`;
-                        }
-                    }).join('');
-                    const galleryModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('mediaGalleryModal'));
-                    const mediaGalleryModalEl = document.getElementById('mediaGalleryModal');
-                    mediaGalleryModalEl.addEventListener('hidden.bs.modal', () => {
-                        galleryInner.querySelectorAll('video').forEach(video => {
-                            video.pause();
-                        });
-                    }, { once: true });
-                    galleryModal.show();
-                }
-            }
         });
         document.getElementById('submitRunDetailComment').addEventListener('click', async () => {
             const runId = currentDetailRunId;
