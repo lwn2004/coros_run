@@ -2063,7 +2063,7 @@
                                     <div class="media-list-item" data-media-index="${index}">
                                         <img src="https://${thumbSrc}" class="media-list-thumb" data-media-index="${index}" alt="Media thumbnail ${index + 1}">
                                         <div class="media-list-details">
-                                            <p class="media-description">${sanitizeHTML(item.description) || '暂无简介'}</p>
+                                            <p class="media-description text-break">${sanitizeHTML(item.description) || '暂无简介'}</p>
                                             ${exifHtml}
                                         </div>
                                     </div>`;
