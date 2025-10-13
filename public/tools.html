@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>马拉松配速与完成时间转换工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+        }
+        
+        h1 {
+            margin-bottom: 10px;
+            font-size: 2.2em;
+        }
+        
+        .description {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 25px;
+        }
+        
+        .mode-selector {
+            display: flex;
+            margin-bottom: 25px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .mode-btn {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            background-color: #f8f9fa;
+            border: none;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .mode-btn.active {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .calculator {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        .section {
+            background-color: #f9f9f9;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+            display: flex;
+            align-items: center;
+        }
+        
+        h2 i {
+            margin-right: 10px;
+            color: #3498db;
+        }
+        
+        .input-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        label {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1em;
+        }
+        
+        .ios-picker {
+            display: flex;
+            justify-content: space-between;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: white;
+        }
+        
+        .picker-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            height: 150px;
+            overflow: hidden;
+        }
+        
+        .picker-column:not(:last-child) {
+            border-right: 1px solid #eee;
+        }
+        
+        .picker-items {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100%;
+        }
+        
+        .picker-item {
+            padding: 8px 0;
+            font-size: 1.2em;
+            color: #7f8c8d;
+            transition: all 0.2s;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .picker-item.selected {
+            color: #3498db;
+            font-weight: bold;
+            font-size: 1.4em;
+        }
+        
+        .picker-highlight {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 40px;
+            transform: translateY(-50%);
+            background-color: rgba(52, 152, 219, 0.1);
+            border-top: 1px solid #3498db;
+            border-bottom: 1px solid #3498db;
+            pointer-events: none;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #e8f4fc;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+            display: none;
+        }
+        
+        .result.show {
+            display: block;
+        }
+        
+        .reference {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 12px;
+        }
+        
+        .reference h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .reference h3 i {
+            margin-right: 10px;
+            color: #3498db;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 10px 15px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #e9ecef;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        .distance-info {
+            text-align: center;
+            margin-top: 10px;
+            font-weight: 600;
+            color: #3498db;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                border-radius: 10px;
+            }
+            
+            .content {
+                padding: 15px;
+            }
+            
+            .ios-picker {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .picker-column {
+                height: 100px;
+            }
+            
+            .picker-column:not(:last-child) {
+                border-right: none;
+                border-bottom: 1px solid #eee;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>马拉松配速计算器</h1>
+            <p class="description">全马/半马配速与完成时间转换工具</p>
+        </header>
+        
+        <div class="content">
+            <div class="mode-selector">
+                <button class="mode-btn active" id="full-marathon">全程马拉松 (42.195km)</button>
+                <button class="mode-btn" id="half-marathon">半程马拉松 (21.0975km)</button>
+            </div>
+            
+            <div class="calculator">
+                <div class="section">
+                    <h2><i class="fas fa-tachometer-alt"></i> 根据配速计算完成时间</h2>
+                    <div class="input-container">
+                        <div class="input-group">
+                            <label>配速 (分钟/公里)</label>
+                            <div class="ios-picker" id="pace-picker">
+                                <div class="picker-column">
+                                    <div class="picker-highlight"></div>
+                                    <div class="picker-items" id="pace-minutes">
+                                        <!-- 分钟选项将通过JS生成 -->
+                                    </div>
+                                </div>
+                                <div class="picker-column">
+                                    <div class="picker-highlight"></div>
+                                    <div class="picker-items" id="pace-seconds">
+                                        <!-- 秒选项将通过JS生成 -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="calculate-time">计算完成时间</button>
+                    <div class="result" id="time-result">
+                        <strong>预计完成时间:</strong> <span id="time-value"></span>
+                        <div class="distance-info" id="distance-info-1"></div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2><i class="far fa-clock"></i> 根据目标时间计算所需配速</h2>
+                    <div class="input-container">
+                        <div class="input-group">
+                            <label>目标完成时间</label>
+                            <div class="ios-picker" id="time-picker">
+                                <div class="picker-column">
+                                    <div class="picker-highlight"></div>
+                                    <div class="picker-items" id="time-hours">
+                                        <!-- 小时选项将通过JS生成 -->
+                                    </div>
+                                </div>
+                                <div class="picker-column">
+                                    <div class="picker-highlight"></div>
+                                    <div class="picker-items" id="time-minutes">
+                                        <!-- 分钟选项将通过JS生成 -->
+                                    </div>
+                                </div>
+                                <div class="picker-column">
+                                    <div class="picker-highlight"></div>
+                                    <div class="picker-items" id="time-seconds">
+                                        <!-- 秒选项将通过JS生成 -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="calculate-pace">计算所需配速</button>
+                    <div class="result" id="pace-result">
+                        <strong>所需配速:</strong> <span id="pace-value"></span> 分钟/公里
+                        <div class="distance-info" id="distance-info-2"></div>
+                    </div>
+                </div>
+                
+                <div class="reference">
+                    <h3><i class="fas fa-list-alt"></i> 配速参考表</h3>
+                    <table id="pace-table">
+                        <thead>
+                            <tr>
+                                <th>配速 (分钟/公里)</th>
+                                <th>全马完成时间</th>
+                                <th>半马完成时间</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- 表格内容将通过JS生成 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 马拉松距离
+            const distances = {
+                full: 42.195,
+                half: 21.0975
+            };
+            
+            let currentDistance = distances.full;
+            let currentMode = 'full';
+            
+            // 初始化iOS风格选择器
+            function initPicker(pickerId, options, initialValue) {
+                const picker = document.getElementById(pickerId);
+                const itemsContainer = picker.querySelector('.picker-items');
+                
+                // 清空现有选项
+                itemsContainer.innerHTML = '';
+                
+                // 添加选项
+                options.forEach(value => {
+                    const item = document.createElement('div');
+                    item.className = 'picker-item';
+                    item.textContent = value;
+                    item.dataset.value = value;
+                    itemsContainer.appendChild(item);
+                    
+                    // 设置初始选中项
+                    if (parseInt(value) === initialValue) {
+                        item.classList.add('selected');
+                    }
+                });
+                
+                // 添加滚动事件
+                let isScrolling = false;
+                let scrollTimeout;
+                
+                itemsContainer.addEventListener('scroll', function() {
+                    if (!isScrolling) {
+                        isScrolling = true;
+                    }
+                    
+                    clearTimeout(scrollTimeout);
+                    scrollTimeout = setTimeout(() => {
+                        isScrolling = false;
+                        adjustSelection(this);
+                    }, 100);
+                });
+                
+                // 添加触摸事件
+                let startY = 0;
+                let currentY = 0;
+                
+                itemsContainer.addEventListener('touchstart', function(e) {
+                    startY = e.touches[0].clientY;
+                });
+                
+                itemsContainer.addEventListener('touchmove', function(e) {
+                    currentY = e.touches[0].clientY;
+                    const diff = startY - currentY;
+                    this.scrollTop += diff;
+                    startY = currentY;
+                });
+                
+                // 初始调整选中项
+                adjustSelection(itemsContainer);
+            }
+            
+            // 调整选中项
+            function adjustSelection(container) {
+                const items = container.querySelectorAll('.picker-item');
+                const containerHeight = container.parentElement.offsetHeight;
+                const itemHeight = items[0].offsetHeight;
+                
+                // 找到最接近中心的项
+                let closestItem = null;
+                let minDistance = Infinity;
+                
+                items.forEach(item => {
+                    const itemRect = item.getBoundingClientRect();
+                    const containerRect = container.parentElement.getBoundingClientRect();
+                    const itemCenter = itemRect.top + itemRect.height / 2;
+                    const containerCenter = containerRect.top + containerRect.height / 2;
+                    const distance = Math.abs(itemCenter - containerCenter);
+                    
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        closestItem = item;
+                    }
+                });
+                
+                // 更新选中状态
+                items.forEach(item => item.classList.remove('selected'));
+                if (closestItem) {
+                    closestItem.classList.add('selected');
+                    
+                    // 平滑滚动到选中项
+                    const scrollTo = closestItem.offsetTop - (containerHeight - itemHeight) / 2;
+                    container.scrollTo({
+                        top: scrollTo,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+            
+            // 获取选中值
+            function getPickerValue(pickerId) {
+                const picker = document.getElementById(pickerId);
+                const selectedItems = picker.querySelectorAll('.picker-item.selected');
+                const values = [];
+                
+                selectedItems.forEach(item => {
+                    values.push(parseInt(item.dataset.value));
+                });
+                
+                return values;
+            }
+            
+            // 初始化所有选择器
+            function initAllPickers() {
+                // 配速选择器 - 分钟 (3-10分钟)
+                const paceMinutes = Array.from({length: 8}, (_, i) => i + 3);
+                initPicker('pace-minutes', paceMinutes, 5);
+                
+                // 配速选择器 - 秒 (0-59秒，每5秒一个间隔)
+                const paceSeconds = Array.from({length: 12}, (_, i) => i * 5);
+                initPicker('pace-seconds', paceSeconds, 0);
+                
+                // 时间选择器 - 小时 (0-6小时)
+                const timeHours = Array.from({length: 7}, (_, i) => i);
+                initPicker('time-hours', timeHours, 3);
+                
+                // 时间选择器 - 分钟 (0-59分钟)
+                const timeMinutes = Array.from({length: 60}, (_, i) => i);
+                initPicker('time-minutes', timeMinutes, 30);
+                
+                // 时间选择器 - 秒 (0-59秒)
+                const timeSeconds = Array.from({length: 60}, (_, i) => i);
+                initPicker('time-seconds', timeSeconds, 0);
+            }
+            
+            // 根据配速计算完成时间
+            document.getElementById('calculate-time').addEventListener('click', function() {
+                const [paceMinutes, paceSeconds] = getPickerValue('pace-picker');
+                const paceInMinutes = paceMinutes + paceSeconds / 60;
+                
+                // 计算完成时间
+                const totalMinutes = paceInMinutes * currentDistance;
+                const hours = Math.floor(totalMinutes / 60);
+                const minutes = Math.floor(totalMinutes % 60);
+                const seconds = Math.round((totalMinutes * 60) % 60);
+                
+                // 显示结果
+                const resultDiv = document.getElementById('time-result');
+                const resultSpan = document.getElementById('time-value');
+                const distanceInfo = document.getElementById('distance-info-1');
+                
+                resultSpan.textContent = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                distanceInfo.textContent = `距离: ${currentDistance} 公里`;
+                resultDiv.classList.add('show');
+            });
+            
+            // 根据完成时间计算配速
+            document.getElementById('calculate-pace').addEventListener('click', function() {
+                const [timeHours, timeMinutes, timeSeconds] = getPickerValue('time-picker');
+                const totalMinutes = timeHours * 60 + timeMinutes + timeSeconds / 60;
+                
+                // 计算配速
+                const paceInMinutes = totalMinutes / currentDistance;
+                const paceMinutes = Math.floor(paceInMinutes);
+                const paceSeconds = Math.round((paceInMinutes % 1) * 60);
+                
+                // 显示结果
+                const resultDiv = document.getElementById('pace-result');
+                const resultSpan = document.getElementById('pace-value');
+                const distanceInfo = document.getElementById('distance-info-2');
+                
+                resultSpan.textContent = `${paceMinutes}:${paceSeconds.toString().padStart(2, '0')}`;
+                distanceInfo.textContent = `距离: ${currentDistance} 公里`;
+                resultDiv.classList.add('show');
+            });
+            
+            // 模式切换
+            document.getElementById('full-marathon').addEventListener('click', function() {
+                this.classList.add('active');
+                document.getElementById('half-marathon').classList.remove('active');
+                currentDistance = distances.full;
+                currentMode = 'full';
+                updatePaceTable();
+            });
+            
+            document.getElementById('half-marathon').addEventListener('click', function() {
+                this.classList.add('active');
+                document.getElementById('full-marathon').classList.remove('active');
+                currentDistance = distances.half;
+                currentMode = 'half';
+                updatePaceTable();
+            });
+            
+            // 更新配速参考表
+            function updatePaceTable() {
+                const tableBody = document.querySelector('#pace-table tbody');
+                tableBody.innerHTML = '';
+                
+                // 生成配速从3:00到8:00的参考数据
+                for (let minutes = 3; minutes <= 8; minutes++) {
+                    for (let seconds = 0; seconds < 60; seconds += 15) {
+                        if (minutes === 8 && seconds > 0) break;
+                        
+                        const paceInMinutes = minutes + seconds / 60;
+                        const fullTime = calculateTime(paceInMinutes, distances.full);
+                        const halfTime = calculateTime(paceInMinutes, distances.half);
+                        
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${minutes}:${seconds.toString().padStart(2, '0')}</td>
+                            <td>${fullTime}</td>
+                            <td>${halfTime}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    }
+                }
+            }
+            
+            // 计算完成时间
+            function calculateTime(pace, distance) {
+                const totalMinutes = pace * distance;
+                const hours = Math.floor(totalMinutes / 60);
+                const minutes = Math.floor(totalMinutes % 60);
+                const seconds = Math.round((totalMinutes * 60) % 60);
+                
+                return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+            
+            // 初始化应用
+            initAllPickers();
+            updatePaceTable();
+        });
+    </script>
+</body>
+</html>
