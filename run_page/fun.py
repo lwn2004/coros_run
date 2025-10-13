@@ -8,6 +8,9 @@ import os
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance
 import polyline
 import io
+import shutil
+
+
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 # --- Configuration ---
@@ -658,6 +661,7 @@ def generate_share_card(bg_file, run_data, save_img_file):
 
 def main():
     runs_file = os.path.join(parent, "src", "static", "all.json")
+    shutil.copyfile(runs_file, os.path.join(parent, "public", "data", "all.json"))
     pb_file = os.path.join(parent, "src", "static", "pb.json")
     events_file = os.path.join(parent, "src", "static", "events.json")
     template_file = "template.html"
@@ -705,4 +709,5 @@ def main():
 if __name__ == "__main__":
     parent = os.path.dirname(current) 
     main()
+
 
