@@ -79,6 +79,18 @@
         tr:nth-child(even) {
             background-color: #f9f9f9;
         }
+        .elite {
+            background-color: #FFDDC4;
+            font-weight: bold;
+        }
+        .level-one {
+            background-color: #C4E4FF;
+            font-weight: bold;
+        }
+        .level-two {
+            background-color: #D4FFC4;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -122,6 +134,12 @@
         </div>
 
         <h2>常见配速与完赛时间对应表</h2>
+        <p style="text-align: center; font-size: 0.9em;">
+            <span style="background-color: #FFDDC4; padding: 2px 5px; border-radius: 3px;">精英级</span>
+            <span style="background-color: #C4E4FF; padding: 2px 5px; border-radius: 3px;">一级</span>
+            <span style="background-color: #D4FFC4; padding: 2px 5px; border-radius: 3px;">二级</span>
+            是40-44岁大众跑者等级标准
+        </p>
         <table>
             <thead>
                 <tr>
@@ -133,13 +151,19 @@
             <tbody>
                 <tr><td>4:00</td><td>1:24:23</td><td>2:48:45</td></tr>
                 <tr><td>4:15</td><td>1:29:34</td><td>2:59:08</td></tr>
+                <tr class="elite"><td>4:22</td><td class="elite">1:32:00 (半马精英)</td><td>3:04:02</td></tr>
                 <tr><td>4:30</td><td>1:34:45</td><td>3:09:30</td></tr>
+                <tr class="elite"><td>4:37</td><td>1:37:30</td><td class="elite">3:15:00 (全马精英)</td></tr>
                 <tr><td>4:45</td><td>1:39:56</td><td>3:19:53</td></tr>
+                <tr class="level-one"><td>4:50</td><td class="level-one">1:42:00 (半马一级)</td><td>3:23:57</td></tr>
                 <tr><td>5:00</td><td>1:45:07</td><td>3:30:15</td></tr>
                 <tr><td>5:15</td><td>1:50:18</td><td>3:40:38</td></tr>
+                <tr class="level-one"><td>5:20</td><td>1:52:30</td><td class="level-one">3:45:00 (全马一级)</td></tr>
                 <tr><td>5:30</td><td>1:55:29</td><td>3:51:00</td></tr>
                 <tr><td>5:45</td><td>2:00:40</td><td>4:01:23</td></tr>
+                <tr class="level-two"><td>5:47</td><td class="level-two">2:02:00 (半马二级)</td><td>4:04:00</td></tr>
                 <tr><td>6:00</td><td>2:05:51</td><td>4:11:45</td></tr>
+                <tr class="level-two"><td>6:03</td><td>2:07:30</td><td class="level-two">4:15:00 (全马二级)</td></tr>
                 <tr><td>6:15</td><td>2:11:02</td><td>4:22:08</td></tr>
                 <tr><td>6:30</td><td>2:16:13</td><td>4:32:30</td></tr>
                 <tr><td>6:45</td><td>2:21:24</td><td>4:42:53</td></tr>
@@ -164,8 +188,8 @@
             const distance = document.getElementById('distance1').value;
             const hours = parseInt(document.getElementById('hours1').value) || 0;
             const minutes = parseInt(document.getElementById('minutes1').value) || 0;
-            //const seconds = parseInt(document.getElementById('seconds1').value) || 0;
             const seconds = 0;
+
 
             const totalSeconds = (hours * 3600) + (minutes * 60) + seconds;
             if (totalSeconds === 0) {
