@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>我的跑步仪表盘 🏃‍♂️</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.24.2/bootstrap-table.min.css">
+
+    <style>
+        body {
+            background-color: #f4f7f6;
+        }
+        .stat-card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+        .stat-card .card-body {
+            display: flex;
+            align-items: center;
+        }
+        .stat-card .icon {
+            font-size: 2.5rem;
+            padding: 15px;
+            border-radius: 50%;
+            margin-right: 20px;
+            color: white;
+        }
+        .table-hover tbody tr:hover {
+            background-color: #e9ecef;
+            cursor: pointer;
+        }
+        .modal-header {
+            border-bottom: none;
+        }
+        .modal-footer {
+            border-top: none;
+        }
+        h1, h2, h3 {
+            font-weight: 600;
+        }
+        .pb-badge {
+            font-size: 1.2rem;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid p-4">
+        <div class="d-flex align-items-center mb-4">
+            <h1 class="mb-0">跑步仪表盘</h1>
+            <i class="bi bi-person-running h1 ms-3 text-primary"></i>
+        </div>
+
+        <div class="row g-4 mb-4" id="summary-stats">
+            </div>
+
+        <div class="card stat-card mb-4">
+            <div class="card-body">
+                <canvas id="monthlyChart" height="100"></canvas>
+            </div>
+        </div>
+
+        <div class="card stat-card">
+            <div class="card-body">
+                <h3 class="card-title mb-3">详细记录</h3>
+                <table id="runTable"></table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="runDetailModal" tabindex="-1" aria-labelledby="runDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="runDetailModalLabel">跑步详情</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="modalBodyContent">
+                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.24.2/bootstrap-table.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/locale/zh-cn.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js"></script>
+
+    <script>
+        // 设置 moment.js 为中文
+        moment.locale('zh-cn');
+
+        // ===================================
+        // 格式化函数 (Formatters)
+        // ===================================
+        function paceFormatter(value) {
+            if (!value || value <= 0) return '-';
+            const paceSeconds = 1000 / value;
+            const minutes = Math.floor(paceSeconds / 60);
+            const seconds = String(Math.round(paceSeconds % 60)).padStart(2, '0');
+            return `${minutes}'${seconds}"`;
+        }
+
+        function durationFormatter(value) {
+            if (!value) return '-';
+            const duration = moment.duration(value, 'seconds');
+            const hours = Math.floor(duration.asHours());
+            const minutes = duration.minutes();
+            const seconds = duration.seconds();
+            return `${hours > 0 ? hours + ':' : ''}${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function dateFormatter(value) {
+            if (!value) return '-';
+            return moment(value).format('YYYY-MM-DD');
+        }
+
+        function distanceFormatter(value) {
+            if (!value || value <= 0) return '-';
+            return (value / 1000).toFixed(2);
+        }
+
+        function elevationFormatter(value) {
+            if (!value || value < 0) return '-';
+            return `<i class="bi bi-mountain me-1 text-success"></i>${Math.round(value)}m`;
+        }
+
+        function typeFormatter(value) {
+            const icons = {
+                'Race': '<i class="bi bi-trophy-fill text-warning me-2"></i>比赛',
+                'Long Run': '<i class="bi bi-sign-turn-right-fill text-info me-2"></i>长距离',
+                'Easy Run': '<i class="bi bi-wind text-success me-2"></i>轻松跑',
+                'Interval': '<i class="bi bi-hourglass-split text-danger me-2"></i>间歇跑',
+                'Workout': '<i class="bi bi-lightning-fill text-primary me-2"></i>训练',
+                'default': '<i class="bi bi-activity me-2"></i>跑步'
+            };
+            return icons[value] || icons['default'];
+        }
+
+        function nameFormatter(value, row) {
+            let pbBadge = '';
+            if (row.is_pb_5k || row.is_pb_10k || row.is_pb_hm || row.is_pb_m) {
+                pbBadge = '<span class="pb-badge ms-2" title="个人最佳纪录!">🏅</span>';
+            }
+            return `<strong>${value || '未命名跑步'}</strong>${pbBadge}`;
+        }
+
+        // ===================================
+        // 主逻辑
+        // ===================================
+        $(document).ready(function() {
+            // 使用fetch加载数据，以便多处使用
+            fetch('data/all.json')
+                .then(response => response.json())
+                .then(data => {
+                    // 1. 更新总览卡片
+                    updateSummaryCards(data);
+
+                    // 2. 渲染月度图表
+                    renderMonthlyChart(data);
+                    
+                    // 3. 初始化表格
+                    initializeRunTable(data);
+                })
+                .catch(error => {
+                    console.error('加载跑步数据失败:', error);
+                    $('#summary-stats').html('<div class="col"><p class="text-danger">无法加载数据，请检查all.json文件是否存在或格式是否正确。</p></div>');
+                });
+        });
+        
+        // 更新总览数据卡片
+        function updateSummaryCards(data) {
+            if (!data || data.length === 0) return;
+
+            const totalRuns = data.length;
+            const totalDistance = data.reduce((sum, run) => sum + run.distance, 0);
+            const totalDuration = data.reduce((sum, run) => sum + run.moving_time, 0);
+            const avgPaceSeconds = totalDuration / (totalDistance / 1000);
+
+            const cardsHtml = `
+                <div class="col-md-3">
+                    <div class="card stat-card">
+                        <div class="card-body">
+                            <div class="icon" style="background-color: #0d6efd;"><i class="bi bi-sign-merge-right-fill"></i></div>
+                            <div>
+                                <h6 class="card-subtitle mb-2 text-muted">总里程</h6>
+                                <h3 class="card-title">${(totalDistance / 1000).toFixed(2)} km</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card">
+                        <div class="card-body">
+                            <div class="icon" style="background-color: #198754;"><i class="bi bi-calendar-check-fill"></i></div>
+                            <div>
+                                <h6 class="card-subtitle mb-2 text-muted">总次数</h6>
+                                <h3 class="card-title">${totalRuns} 次</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card">
+                        <div class="card-body">
+                            <div class="icon" style="background-color: #ffc107;"><i class="bi bi-hourglass-top"></i></div>
+                            <div>
+                                <h6 class="card-subtitle mb-2 text-muted">总时长</h6>
+                                <h3 class="card-title">${durationFormatter(totalDuration)}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card">
+                        <div class="card-body">
+                            <div class="icon" style="background-color: #dc3545;"><i class="bi bi-speedometer2"></i></div>
+                            <div>
+                                <h6 class="card-subtitle mb-2 text-muted">平均配速</h6>
+                                <h3 class="card-title">${paceFormatter(1000/avgPaceSeconds)} /km</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            $('#summary-stats').html(cardsHtml);
+        }
+
+        // 渲染月度跑量图表
+        function renderMonthlyChart(data) {
+            const monthlyData = {};
+            data.forEach(run => {
+                const month = moment(run.start_date_local).format('YYYY-MM');
+                if (!monthlyData[month]) {
+                    monthlyData[month] = 0;
+                }
+                monthlyData[month] += run.distance / 1000;
+            });
+
+            // 获取最近12个月的数据
+            const sortedMonths = Object.keys(monthlyData).sort().slice(-12);
+            const chartLabels = sortedMonths.map(m => moment(m).format('MMM'));
+            const chartData = sortedMonths.map(m => monthlyData[m].toFixed(2));
+            
+            const ctx = document.getElementById('monthlyChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: '月度跑量 (km)',
+                        data: chartData,
+                        backgroundColor: 'rgba(13, 110, 253, 0.6)',
+                        borderColor: 'rgba(13, 110, 253, 1)',
+                        borderWidth: 1,
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '最近12个月跑量统计',
+                            font: { size: 18 }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '公里 (km)'}
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 初始化表格
+        function initializeRunTable(data) {
+            $('#runTable').bootstrapTable({
+                data: data,
+                classes: 'table table-hover table-striped',
+                search: true,
+                pagination: true,
+                pageSize: 10,
+                pageList: [10, 25, 50, 'all'],
+                sortName: 'start_date_local',
+                sortOrder: 'desc',
+                columns: [{
+                    field: 'name',
+                    title: '跑步名称',
+                    formatter: nameFormatter,
+                    sortable: true
+                }, {
+                    field: 'start_date_local',
+                    title: '日期',
+                    formatter: dateFormatter,
+                    sortable: true
+                }, {
+                    field: 'distance',
+                    title: '距离(km)',
+                    formatter: distanceFormatter,
+                    sortable: true
+                }, {
+                    field: 'moving_time',
+                    title: '时长',
+                    formatter: durationFormatter,
+                    sortable: true
+                }, {
+                    field: 'average_speed',
+                    title: '配速(/km)',
+                    formatter: paceFormatter,
+                    sortable: true,
+                    cellStyle: { classes: 'fw-bold' }
+                }, {
+                    field: 'average_heartrate',
+                    title: '<i class="bi bi-heart-pulse-fill text-danger"></i> 心率',
+                    sortable: true
+                }, {
+                    field: 'total_elevation_gain',
+                    title: '爬升',
+                    formatter: elevationFormatter,
+                    sortable: true
+                }, {
+                    field: 'type',
+                    title: '类型',
+                    formatter: typeFormatter,
+                    sortable: true
+                }],
+                // 点击行事件
+                onClickRow: function (row, $element) {
+                    showRunDetails(row);
+                }
+            });
+        }
+
+        // 显示跑步详情模态框
+        function showRunDetails(run) {
+            $('#runDetailModalLabel').text(run.name || '跑步详情');
+            const modalBody = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4><i class="bi bi-calendar3"></i> ${moment(run.start_date_local).format('YYYY年M月D日 dddd HH:mm')}</h4>
+                        <hr>
+                        <p><strong><i class="bi bi-sign-merge-right-fill text-primary"></i> 距离:</strong> ${distanceFormatter(run.distance)} km</p>
+                        <p><strong><i class="bi bi-hourglass-split text-warning"></i> 时长:</strong> ${durationFormatter(run.moving_time)}</p>
+                        <p><strong><i class="bi bi-speedometer2 text-danger"></i> 配速:</strong> ${paceFormatter(run.average_speed)} /km</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h4><i class="bi bi-graph-up"></i> 更多数据</h4>
+                        <hr>
+                        <p><strong><i class="bi bi-heart-pulse-fill text-danger"></i> 平均心率:</strong> ${run.average_heartrate || '-'} bpm</p>
+                        <p><strong><i class="bi bi-mountain text-success"></i> 累计爬升:</strong> ${Math.round(run.total_elevation_gain || 0)} 米</p>
+                        <p><strong><i class="bi bi-activity"></i> 跑步类型:</strong> ${typeFormatter(run.type)}</p>
+                    </div>
+                </div>
+                <div class="mt-3 bg-light p-3 rounded">
+                    <h6><i class="bi bi-map"></i> 跑步地图 (占位)</h6>
+                    <p class="text-muted small">此处未来可集成地图服务来显示跑步轨迹。</p>
+                </div>
+            `;
+            $('#modalBodyContent').html(modalBody);
+            $('#runDetailModal').modal('show');
+        }
+
+    </script>
+</body>
+</html>
