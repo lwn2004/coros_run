@@ -164,7 +164,8 @@
             const distance = document.getElementById('distance1').value;
             const hours = parseInt(document.getElementById('hours1').value) || 0;
             const minutes = parseInt(document.getElementById('minutes1').value) || 0;
-            const seconds = parseInt(document.getElementById('seconds1').value) || 0;
+            //const seconds = parseInt(document.getElementById('seconds1').value) || 0;
+            const seconds = 0;
 
             const totalSeconds = (hours * 3600) + (minutes * 60) + seconds;
             if (totalSeconds === 0) {
