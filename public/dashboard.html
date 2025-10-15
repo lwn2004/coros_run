@@ -8,114 +8,108 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.24.2/bootstrap-table.min.css">
     <style>
-        body {
-            background-color: #f4f7f6;
-        }
+        body { background-color: #f4f7f6; }
         .stat-card {
-            border: none;
-            border-radius: 12px;
+            border: none; border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
             transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            width: 100%; /* 确保卡片充满轮播项 */
         }
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-        }
-        .stat-card .card-body {
-            display: flex;
-            align-items: center;
-        }
-        .stat-card .icon {
-            font-size: 2.5rem;
-            padding: 15px;
-            border-radius: 50%;
-            margin-right: 20px;
-            color: white;
-        }
-        .table-hover tbody tr:hover {
-            background-color: #e9ecef;
-            cursor: pointer;
-        }
-        .modal-header { border-bottom: none; }
-        .modal-footer { border-top: none; }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
+        .stat-card .card-body { display: flex; align-items: center; }
+        .stat-card .icon { font-size: 2.5rem; padding: 15px; border-radius: 50%; margin-right: 20px; color: white; }
         h1, h2, h3 { font-weight: 600; }
-        .pb-badge {
-            font-size: 1.2rem;
-            animation: pulse 1.5s infinite;
+        .carousel-container {
+            position: relative;
         }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+        @media (min-width: 768px) {
+            #statsCarousel .carousel-inner, #chartsCarousel .carousel-inner {
+                display: flex;
+            }
+            #statsCarousel .carousel-item, #chartsCarousel .carousel-item {
+                display: block;
+                margin-right: 1.5rem; /* g-4 in bootstrap */
+            }
+            #statsCarousel .carousel-item:last-child, #chartsCarousel .carousel-item:last-child {
+                margin-right: 0;
+            }
+            .carousel-control-prev, .carousel-control-next, .carousel-indicators {
+                display: none !important;
+            }
         }
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 1.8rem;
+        @media (max-width: 767.98px) {
+            #statsCarousel, #chartsCarousel {
+                margin-left: -0.75rem; /* 抵消 container-fluid 的 p-3 */
+                margin-right: -0.75rem;
             }
-            .stat-card .icon {
-                font-size: 1.8rem;
-                padding: 12px;
-                margin-right: 15px;
+            .carousel-item {
+                padding: 0 0.5rem; /* 给卡片之间留出一点空隙 */
             }
-            .stat-card .card-title {
-                font-size: 1.25rem;
-            }
-            .card-body {
-                padding: 1rem;
-            }
-            .bootstrap-table .pagination-detail,
-            .bootstrap-table .page-list {
-                display: none;
+            .carousel-indicators [data-bs-target] {
+                background-color: #0d6efd;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container-fluid p-3 p-md-4"> <div class="d-flex align-items-center mb-4">
+    <div class="container-fluid p-3 p-md-4">
+        <div class="d-flex align-items-center mb-4">
             <h1 class="mb-0">跑步仪表盘</h1>
             <i class="bi bi-person-running h1 ms-3 text-primary"></i>
         </div>
-        <div class="row g-3 g-md-4 mb-4" id="summary-stats">
+        <div id="statsCarousel" class="carousel slide d-md-flex mb-4" data-bs-ride="false">
+            <div class="carousel-inner" id="summary-stats-container">
+                </div>
+            <div class="d-md-none">
+                <button class="carousel-control-prev" type="button" data-bs-target="#statsCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#statsCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
             </div>
-        <div class="card stat-card mb-4">
-            <div class="card-body">
-                <canvas id="monthlyChart" height="120"></canvas>
+        </div>
+        <div id="chartsCarousel" class="carousel slide d-md-block mb-4" data-bs-ride="false">
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#chartsCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                <button type="button" data-bs-target="#chartsCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+            </div>
+            <div class="carousel-inner" id="charts-container">
+                <div class="carousel-item active">
+                    <div class="card stat-card">
+                        <div class="card-body" style="display:block;">
+                            <canvas id="monthlyChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                     <div class="card stat-card">
+                        <div class="card-body" style="display:block;">
+                            <canvas id="paceTrendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="card stat-card">
-            <div class="card-body" style="display: block;"> <h3 class="card-title mb-3">详细记录</h3>
+             <div class="card-body" style="display: block;">
+                <h3 class="card-title mb-3">详细记录</h3>
                 <div class="table-responsive">
                     <table id="runTable"></table>
                 </div>
             </div>
         </div>
     </div>
-    <div class="modal fade" id="runDetailModal" tabindex="-1" aria-labelledby="runDetailModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="runDetailModalLabel">跑步详情</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" id="modalBodyContent">
-                    </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
-                </div>
-            </div>
-        </div>
-        </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.24.2/bootstrap-table.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/locale/zh-cn.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/4.4.1/chart.umd.min.js"></script>
     <script>
         moment.locale('zh-cn');
-        // ===================================
-        // 格式化函数 (Formatters)
-        // ===================================
         function paceFormatter(value) {
             if (!value || value <= 0) return '-';
             const paceSeconds = 1000 / value;
@@ -165,111 +159,163 @@
             fetch('data/all.json')
                 .then(response => response.json())
                 .then(data => {
-                    updateSummaryCards(data);
-                    renderMonthlyChart(data);
-                    initializeRunTable(data); // 调用初始化函数
+                    updateSummaryCarousel(data);
+                    renderAllCharts(data);
+                    initializeRunTable(data);
                 })
                 .catch(error => {
 				    console.error('加载跑步数据失败:', error);
                     $('#summary-stats').html('<div class="col"><p class="text-danger">无法加载数据，请检查all.json文件是否存在或格式是否正确。</p></div>');
 				});
         });
-        // 更新总览数据卡片
-        function updateSummaryCards(data) {
+        function updateSummaryCarousel(data) {
             if (!data || data.length === 0) return;
             const totalRuns = data.length;
             const totalDistance = data.reduce((sum, run) => sum + run.distance, 0);
             const totalDuration = data.reduce((sum, run) => sum + run.moving_time, 0);
+            const totalElevation = data.reduce((sum, run) => sum + run.total_elevation_gain, 0);
             const avgPaceSeconds = totalDuration / (totalDistance / 1000);
-            const cardsHtml = `
-                <div class="col-md-3">
-                    <div class="card stat-card">
-                        <div class="card-body">
-                            <div class="icon" style="background-color: #0d6efd;"><i class="bi bi-sign-merge-right-fill"></i></div>
-                            <div>
-                                <h6 class="card-subtitle mb-2 text-muted">总里程</h6>
-                                <h3 class="card-title">${(totalDistance / 1000).toFixed(2)} km</h3>
+            const stats = [
+                {
+                    label: '总里程',
+                    value: `${(totalDistance / 1000).toFixed(2)} km`,
+                    icon: 'bi-sign-merge-right-fill',
+                    color: '#0d6efd'
+                },
+                {
+                    label: '总次数',
+                    value: `${totalRuns} 次`,
+                    icon: 'bi-calendar-check-fill',
+                    color: '#198754'
+                },
+                {
+                    label: '总时长',
+                    value: durationFormatter(totalDuration),
+                    icon: 'bi-hourglass-top',
+                    color: '#ffc107'
+                },
+                {
+                    label: '平均配速',
+                    value: `${paceFormatter(1000/avgPaceSeconds)} /km`,
+                    icon: 'bi-speedometer2',
+                    color: '#dc3545'
+                },
+                {
+                    label: '总爬升',
+                    value: `${Math.round(totalElevation)} 米`,
+                    icon: 'bi-mountain',
+                    color: '#6f42c1'
+                }
+            ];
+            let cardsHtml = '';
+            stats.forEach((stat, index) => {
+                // 第一个item需要加 'active' 类
+                const activeClass = index === 0 ? 'active' : '';
+                cardsHtml += `
+                    <div class="carousel-item ${activeClass} col-md">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <div class="icon" style="background-color: ${stat.color};"><i class="bi ${stat.icon}"></i></div>
+                                <div>
+                                    <h6 class="card-subtitle mb-2 text-muted">${stat.label}</h6>
+                                    <h3 class="card-title">${stat.value}</h3>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card stat-card">
-                        <div class="card-body">
-                            <div class="icon" style="background-color: #198754;"><i class="bi bi-calendar-check-fill"></i></div>
-                            <div>
-                                <h6 class="card-subtitle mb-2 text-muted">总次数</h6>
-                                <h3 class="card-title">${totalRuns} 次</h3>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card stat-card">
-                        <div class="card-body">
-                            <div class="icon" style="background-color: #ffc107;"><i class="bi bi-hourglass-top"></i></div>
-                            <div>
-                                <h6 class="card-subtitle mb-2 text-muted">总时长</h6>
-                                <h3 class="card-title">${durationFormatter(totalDuration)}</h3>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card stat-card">
-                        <div class="card-body">
-                            <div class="icon" style="background-color: #dc3545;"><i class="bi bi-speedometer2"></i></div>
-                            <div>
-                                <h6 class="card-subtitle mb-2 text-muted">平均配速</h6>
-                                <h3 class="card-title">${paceFormatter(1000/avgPaceSeconds)} /km</h3>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            $('#summary-stats').html(cardsHtml);
+                `;
+            });
+            $('#summary-stats-container').html(cardsHtml);
         }
-        // 渲染月度跑量图表
+        // 新增/修改: 渲染所有图表的函数
+        function renderAllCharts(data) {
+            renderMonthlyChart(data);
+            renderPaceTrendChart(data); // 新增的图表
+        }
         function renderMonthlyChart(data) {
             const monthlyData = {};
             data.forEach(run => {
                 const month = moment(run.start_date_local).format('YYYY-MM');
-                if (!monthlyData[month]) {
-                    monthlyData[month] = 0;
-                }
+                if (!monthlyData[month]) monthlyData[month] = 0;
                 monthlyData[month] += run.distance / 1000;
             });
-            // 获取最近12个月的数据
             const sortedMonths = Object.keys(monthlyData).sort().slice(-12);
             const chartLabels = sortedMonths.map(m => moment(m).format('MMM'));
             const chartData = sortedMonths.map(m => monthlyData[m].toFixed(2));
-            const ctx = document.getElementById('monthlyChart').getContext('2d');
-            new Chart(ctx, {
+            new Chart($('#monthlyChart'), {
                 type: 'bar',
                 data: {
                     labels: chartLabels,
                     datasets: [{
                         label: '月度跑量 (km)',
                         data: chartData,
-                        backgroundColor: 'rgba(13, 110, 253, 0.6)',
-                        borderColor: 'rgba(13, 110, 253, 1)',
-                        borderWidth: 1,
-                        borderRadius: 5
+                        backgroundColor: 'rgba(13, 110, 253, 0.6)'
                     }]
                 },
                 options: {
-                    responsive: true,
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { title: { display: true, text: '最近12个月跑量统计' } }
+                }
+            });
+        }
+        // 新增: 渲染配速趋势图表
+        function renderPaceTrendChart(data) {
+            const monthlyAvgPace = {};
+            const monthlyRunCounts = {};
+            data.forEach(run => {
+                const month = moment(run.start_date_local).format('YYYY-MM');
+                if(!monthlyAvgPace[month]) {
+                    monthlyAvgPace[month] = 0;
+                    monthlyRunCounts[month] = 0;
+                }
+                // 累加每次跑步的配速（秒/公里）
+                monthlyAvgPace[month] += 1000 / run.average_speed;
+                monthlyRunCounts[month]++;
+            });
+            const sortedMonths = Object.keys(monthlyAvgPace).sort().slice(-12);
+            const chartLabels = sortedMonths.map(m => moment(m).format('MMM'));
+            const chartData = sortedMonths.map(m => {
+                // 计算月平均配速
+                const avgPaceInSeconds = monthlyAvgPace[m] / monthlyRunCounts[m];
+                return avgPaceInSeconds;
+            });
+            new Chart($('#paceTrendChart'), {
+                type: 'line',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: '月平均配速',
+                        data: chartData,
+                        borderColor: 'rgba(220, 53, 69, 0.8)',
+                        tension: 0.1,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
                     plugins: {
-                        title: {
-                            display: true,
-                            text: '最近12个月跑量统计',
-                            font: { size: 18 }
+                        title: { display: true, text: '月平均配速趋势' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const paceSeconds = context.raw;
+                                    const minutes = Math.floor(paceSeconds / 60);
+                                    const seconds = String(Math.round(paceSeconds % 60)).padStart(2, '0');
+                                    return `配速: ${minutes}'${seconds}" /km`;
+                                }
+                            }
                         }
                     },
                     scales: {
                         y: {
-                            beginAtZero: true,
-                            title: { display: true, text: '公里 (km)'}
+                            ticks: {
+                                callback: function(value, index, values) {
+                                    // 自定义Y轴标签，显示为 M'SS" 格式
+                                    const minutes = Math.floor(value / 60);
+                                    const seconds = String(Math.round(value % 60)).padStart(2, '0');
+                                    return `${minutes}'${seconds}"`;
+                                }
+                            }
                         }
                     }
                 }
