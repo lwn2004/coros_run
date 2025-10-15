@@ -4,11 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>我的跑步仪表盘 🏃‍♂️</title>
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.24.2/bootstrap-table.min.css">
-
     <style>
         body {
             background-color: #f4f7f6;
@@ -38,15 +36,9 @@
             background-color: #e9ecef;
             cursor: pointer;
         }
-        .modal-header {
-            border-bottom: none;
-        }
-        .modal-footer {
-            border-top: none;
-        }
-        h1, h2, h3 {
-            font-weight: 600;
-        }
+        .modal-header { border-bottom: none; }
+        .modal-footer { border-top: none; }
+        h1, h2, h3 { font-weight: 600; }
         .pb-badge {
             font-size: 1.2rem;
             animation: pulse 1.5s infinite;
@@ -56,33 +48,48 @@
             50% { transform: scale(1.1); }
             100% { transform: scale(1); }
         }
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            .stat-card .icon {
+                font-size: 1.8rem;
+                padding: 12px;
+                margin-right: 15px;
+            }
+            .stat-card .card-title {
+                font-size: 1.25rem;
+            }
+            .card-body {
+                padding: 1rem;
+            }
+            .bootstrap-table .pagination-detail,
+            .bootstrap-table .page-list {
+                display: none;
+            }
+        }
     </style>
 </head>
-
 <body>
-    <div class="container-fluid p-4">
-        <div class="d-flex align-items-center mb-4">
+    <div class="container-fluid p-3 p-md-4"> <div class="d-flex align-items-center mb-4">
             <h1 class="mb-0">跑步仪表盘</h1>
             <i class="bi bi-person-running h1 ms-3 text-primary"></i>
         </div>
-
-        <div class="row g-4 mb-4" id="summary-stats">
+        <div class="row g-3 g-md-4 mb-4" id="summary-stats">
             </div>
-
         <div class="card stat-card mb-4">
             <div class="card-body">
-                <canvas id="monthlyChart" height="100"></canvas>
+                <canvas id="monthlyChart" height="120"></canvas>
             </div>
         </div>
-
         <div class="card stat-card">
-            <div class="card-body">
-                <h3 class="card-title mb-3">详细记录</h3>
-                <table id="runTable"></table>
+            <div class="card-body" style="display: block;"> <h3 class="card-title mb-3">详细记录</h3>
+                <div class="table-responsive">
+                    <table id="runTable"></table>
+                </div>
             </div>
         </div>
     </div>
-
     <div class="modal fade" id="runDetailModal" tabindex="-1" aria-labelledby="runDetailModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -97,20 +104,15 @@
                 </div>
             </div>
         </div>
-    </div>
-
-
+        </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.24.2/bootstrap-table.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/locale/zh-cn.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js"></script>
-
     <script>
-        // 设置 moment.js 为中文
         moment.locale('zh-cn');
-
         // ===================================
         // 格式化函数 (Formatters)
         // ===================================
@@ -121,7 +123,6 @@
             const seconds = String(Math.round(paceSeconds % 60)).padStart(2, '0');
             return `${minutes}'${seconds}"`;
         }
-
         function durationFormatter(value) {
             if (!value) return '-';
             const duration = moment.duration(value, 'seconds');
@@ -130,22 +131,18 @@
             const seconds = duration.seconds();
             return `${hours > 0 ? hours + ':' : ''}${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         }
-
         function dateFormatter(value) {
             if (!value) return '-';
             return moment(value).format('YYYY-MM-DD');
         }
-
         function distanceFormatter(value) {
             if (!value || value <= 0) return '-';
             return (value / 1000).toFixed(2);
         }
-
         function elevationFormatter(value) {
             if (!value || value < 0) return '-';
             return `<i class="bi bi-mountain me-1 text-success"></i>${Math.round(value)}m`;
         }
-
         function typeFormatter(value) {
             const icons = {
                 'Race': '<i class="bi bi-trophy-fill text-warning me-2"></i>比赛',
@@ -157,7 +154,6 @@
             };
             return icons[value] || icons['default'];
         }
-
         function nameFormatter(value, row) {
             let pbBadge = '';
             if (row.is_pb_5k || row.is_pb_10k || row.is_pb_hm || row.is_pb_m) {
@@ -165,39 +161,26 @@
             }
             return `<strong>${value || '未命名跑步'}</strong>${pbBadge}`;
         }
-
-        // ===================================
-        // 主逻辑
-        // ===================================
         $(document).ready(function() {
-            // 使用fetch加载数据，以便多处使用
-            fetch('data/all.json')
+            fetch('all.json')
                 .then(response => response.json())
                 .then(data => {
-                    // 1. 更新总览卡片
                     updateSummaryCards(data);
-
-                    // 2. 渲染月度图表
                     renderMonthlyChart(data);
-                    
-                    // 3. 初始化表格
-                    initializeRunTable(data);
+                    initializeRunTable(data); // 调用初始化函数
                 })
                 .catch(error => {
-                    console.error('加载跑步数据失败:', error);
+				    console.error('加载跑步数据失败:', error);
                     $('#summary-stats').html('<div class="col"><p class="text-danger">无法加载数据，请检查all.json文件是否存在或格式是否正确。</p></div>');
-                });
+				});
         });
-        
         // 更新总览数据卡片
         function updateSummaryCards(data) {
             if (!data || data.length === 0) return;
-
             const totalRuns = data.length;
             const totalDistance = data.reduce((sum, run) => sum + run.distance, 0);
             const totalDuration = data.reduce((sum, run) => sum + run.moving_time, 0);
             const avgPaceSeconds = totalDuration / (totalDistance / 1000);
-
             const cardsHtml = `
                 <div class="col-md-3">
                     <div class="card stat-card">
@@ -246,7 +229,6 @@
             `;
             $('#summary-stats').html(cardsHtml);
         }
-
         // 渲染月度跑量图表
         function renderMonthlyChart(data) {
             const monthlyData = {};
@@ -257,12 +239,10 @@
                 }
                 monthlyData[month] += run.distance / 1000;
             });
-
             // 获取最近12个月的数据
             const sortedMonths = Object.keys(monthlyData).sort().slice(-12);
             const chartLabels = sortedMonths.map(m => moment(m).format('MMM'));
             const chartData = sortedMonths.map(m => monthlyData[m].toFixed(2));
-            
             const ctx = document.getElementById('monthlyChart').getContext('2d');
             new Chart(ctx, {
                 type: 'bar',
@@ -295,8 +275,6 @@
                 }
             });
         }
-        
-        // 初始化表格
         function initializeRunTable(data) {
             $('#runTable').bootstrapTable({
                 data: data,
@@ -307,6 +285,8 @@
                 pageList: [10, 25, 50, 'all'],
                 sortName: 'start_date_local',
                 sortOrder: 'desc',
+                // 新增/修改: 启用此选项来更好地处理移动端分页栏
+                smartDisplay: true, 
                 columns: [{
                     field: 'name',
                     title: '跑步名称',
@@ -323,38 +303,43 @@
                     formatter: distanceFormatter,
                     sortable: true
                 }, {
+                    field: 'average_speed',
+                    title: '配速',
+                    formatter: paceFormatter,
+                    sortable: true
+                }, {
                     field: 'moving_time',
                     title: '时长',
                     formatter: durationFormatter,
-                    sortable: true
-                }, {
-                    field: 'average_speed',
-                    title: '配速(/km)',
-                    formatter: paceFormatter,
                     sortable: true,
-                    cellStyle: { classes: 'fw-bold' }
+                    // 新增/修改: 使用Bootstrap的响应式显示类
+                    // d-none: 默认隐藏
+                    // d-md-table-cell: 在中等屏幕(>=768px)及以上尺寸，以表格单元格形式显示
+                    class: 'd-none d-md-table-cell'
                 }, {
                     field: 'average_heartrate',
-                    title: '<i class="bi bi-heart-pulse-fill text-danger"></i> 心率',
-                    sortable: true
+                    title: '<i class="bi bi-heart-pulse-fill text-danger"></i>',
+                    sortable: true,
+                    class: 'd-none d-md-table-cell'
                 }, {
                     field: 'total_elevation_gain',
                     title: '爬升',
                     formatter: elevationFormatter,
-                    sortable: true
+                    sortable: true,
+                    // 新增/修改: 在大屏幕(>=992px)及以上才显示
+                    class: 'd-none d-lg-table-cell'
                 }, {
                     field: 'type',
                     title: '类型',
                     formatter: typeFormatter,
-                    sortable: true
+                    sortable: true,
+                    class: 'd-none d-lg-table-cell'
                 }],
-                // 点击行事件
                 onClickRow: function (row, $element) {
                     showRunDetails(row);
                 }
             });
         }
-
         // 显示跑步详情模态框
         function showRunDetails(run) {
             $('#runDetailModalLabel').text(run.name || '跑步详情');
@@ -383,7 +368,6 @@
             $('#modalBodyContent').html(modalBody);
             $('#runDetailModal').modal('show');
         }
-
     </script>
 </body>
 </html>
