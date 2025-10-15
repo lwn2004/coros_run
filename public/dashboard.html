@@ -162,7 +162,7 @@
             return `<strong>${value || '未命名跑步'}</strong>${pbBadge}`;
         }
         $(document).ready(function() {
-            fetch('all.json')
+            fetch('data/all.json')
                 .then(response => response.json())
                 .then(data => {
                     updateSummaryCards(data);
