@@ -166,14 +166,14 @@
         
           return (hours * 3600) + (minutes * 60) + seconds + fractionalSeconds;
         }      
-        function paceFormatter(value) {// from "m/s" to `x'y"`
+        function paceFormatter(value) {// from "m/s" to pace `x'y"`
             if (!value || value <= 0) return '-';
             const paceSeconds = 1000 / value;
             const minutes = Math.floor(paceSeconds / 60);
             const seconds = String(Math.round(paceSeconds % 60)).padStart(2, '0');
             return `${minutes}'${seconds}"`;
         }
-        function durationFormatter(value) { //from seconds to h:m:s
+        function durationFormatter(value) {
             if (!value) return '-';
             const duration = moment.duration(value, 'seconds');
             const hours = Math.floor(duration.asHours());
@@ -241,10 +241,10 @@
             if (!data || data.length === 0) return;
             const totalRuns = data.length;
             const totalDistance = data.reduce((sum, run) => sum + run.distance, 0);
-            const totalDuration = data.reduce((sum, run) => sum + moment.duration(timeToSeconds(run.moving_time), 'seconds'), 0);
+            const totalDuration = data.reduce((sum, run) => sum + moment.duration(run.moving_time).asSeconds, 0);
             const totalElevation = data.reduce((sum, run) => sum + run.total_elevation_gain, 0);
             const avgPaceSeconds = totalDuration / (totalDistance / 1000);
-            const aveSpeed = totalDistance/totalDuration;//"m/s"
+            const avgSpeed = totalDistance/totalDuration;//"m/s"
             const stats = [
                 {
                     label: '总里程',
@@ -266,7 +266,7 @@
                 },
                 {
                     label: '平均配速',
-                    value: `${paceFormatter(aveSpeed)} /km`,
+                    value: `${paceFormatter(avgSpeed)} /km`,
                     icon: 'bi-speedometer2',
                     color: '#dc3545'
                 },/*
@@ -339,7 +339,7 @@
                     monthlyDuration[month] = 0;
                 }
                 monthlyDistance[month] += run.distance;
-                monthlyDuration[month] += moment.duration(timeToSeconds(run.moving_time), 'seconds');
+                monthlyDuration[month] += moment.duration(run.moving_time).asSeconds();
             });
             const sortedMonths = Object.keys(monthlyDistance).sort().slice(-12);
             const chartLabels = sortedMonths.map(m => moment(m).format('MMM'));
