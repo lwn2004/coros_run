@@ -110,20 +110,20 @@
                         <button type="button" class="btn btn-primary active" data-filter="all">
                             <i class="bi bi-list-ul me-1"></i> 全部记录
                         </button>
+                        <button type="button" class="btn btn-outline-primary" data-filter="this-month">
+                            <i class="bi bi-calendar-month me-1"></i> 本月
+                        </button> 
+                        <button type="button" class="btn btn-outline-primary" data-filter="on-this-day">
+                            <i class="bi bi-clock-history me-1"></i> 历史上的今天
+                        </button>                      
                         <button type="button" class="btn btn-outline-primary" data-filter="race">
                             <i class="bi bi-trophy me-1"></i> 比赛
                         </button>
                         <button type="button" class="btn btn-outline-primary" data-filter="hm">
                             <i class="bi bi-signpost-split me-1"></i> ≥ 半马
                         </button>
-                        <button type="button" class="btn btn-outline-primary" data-filter="pb">
-                            <i class="bi bi-award me-1"></i> 个人最佳
-                        </button>
-                        <button type="button" class="btn btn-outline-primary" data-filter="this-month">
-                            <i class="bi bi-calendar-month me-1"></i> 本月
-                        </button>
-                        <button type="button" class="btn btn-outline-primary" data-filter="on-this-day">
-                            <i class="bi bi-clock-history me-1"></i> 历史上的今天
+                        <button type="button" class="btn btn-outline-primary" data-filter="fm">
+                            <i class="bi bi-signpost-split me-1"></i> ≥ 全马
                         </button>
                     </div>
                 </div>
@@ -497,6 +497,10 @@
                     // 筛选距离在21km到42km之间的记录，以包含GPS误差
                     filteredData = allRunsData.filter(run => run.distance >= 21000 && run.distance < 42000);
                     break;
+                case 'fm':
+                    // 筛选距离在42km以上的记录
+                    filteredData = allRunsData.filter(run => run.distance >= 42000);
+                    break;                
                 case 'pb':
                     // 筛选任何一项PB为true的记录
                     filteredData = allRunsData.filter(run => run.is_pb_5k || run.is_pb_10k || run.is_pb_hm || run.is_pb_m);
