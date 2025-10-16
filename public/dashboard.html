@@ -48,6 +48,8 @@
             .carousel-indicators [data-bs-target] {
                 background-color: #0d6efd;
             }
+        #filter-buttons .btn {
+            margin-bottom: 0.5rem; /* 在移动端换行时提供间距 */
         }
     </style>
 </head>
@@ -96,12 +98,49 @@
         <div class="card stat-card">
              <div class="card-body" style="display: block;">
                 <h3 class="card-title mb-3">详细记录</h3>
+                <div id="filter-buttons" class="btn-toolbar mb-3" role="toolbar">
+                    <div class="btn-group flex-wrap" role="group">
+                        <button type="button" class="btn btn-primary active" data-filter="all">
+                            <i class="bi bi-list-ul me-1"></i> 全部记录
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" data-filter="race">
+                            <i class="bi bi-trophy me-1"></i> 比赛
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" data-filter="hm">
+                            <i class="bi bi-signpost-split me-1"></i> 半马
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" data-filter="pb">
+                            <i class="bi bi-award me-1"></i> 个人最佳
+                        </button>
+                         <button type="button" class="btn btn-outline-primary" data-filter="this-month">
+                            <i class="bi bi-calendar-month me-1"></i> 本月
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" data-filter="on-this-day">
+                            <i class="bi bi-clock-history me-1"></i> 历史上的今天
+                        </button>
+                    </div>
+                </div>
                 <div class="table-responsive">
                     <table id="runTable"></table>
                 </div>
             </div>
         </div>
     </div>
+    <div class="modal fade" id="runDetailModal" tabindex="-1" aria-labelledby="runDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="runDetailModalLabel">跑步详情</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="modalBodyContent">
+                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>	
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.24.2/bootstrap-table.min.js"></script>
@@ -155,19 +194,32 @@
             }
             return `<strong>${value || '未命名跑步'}</strong>${pbBadge}`;
         }
+        // 新增/修改: 创建一个全局变量来存储所有跑步数据
+        let allRunsData = [];
         $(document).ready(function() {
             fetch('data/all.json')
                 .then(response => response.json())
                 .then(data => {
-                    updateSummaryCarousel(data);
-                    renderAllCharts(data);
-                    initializeRunTable(data);
+                    // 将获取的数据存储到全局变量中
+                    allRunsData = data;
+                    // 页面加载时，使用完整数据初始化所有组件
+                    updateSummaryCarousel(allRunsData);
+                    renderAllCharts(allRunsData);
+                    initializeRunTable(allRunsData);
                 })
                 .catch(error => {
 				    console.error('加载跑步数据失败:', error);
                     $('#summary-stats').html('<div class="col"><p class="text-danger">无法加载数据，请检查all.json文件是否存在或格式是否正确。</p></div>');
 				});
-        });
+            $('#filter-buttons').on('click', '.btn', function() {
+                // 设置按钮的激活状态
+                $(this).addClass('active').siblings().removeClass('active');
+                $(this).removeClass('btn-outline-primary').addClass('btn-primary')
+                    .siblings().removeClass('btn-primary').addClass('btn-outline-primary');
+                const filterType = $(this).data('filter');
+                applyTableFilter(filterType);
+            });
+		});
         function updateSummaryCarousel(data) {
             if (!data || data.length === 0) return;
             const totalRuns = data.length;
@@ -337,7 +389,8 @@
                     field: 'name',
                     title: '跑步名称',
                     formatter: nameFormatter,
-                    sortable: true
+                    sortable: true,
+                    class: 'd-none d-md-table-cell'					
                 }, {
                     field: 'start_date_local',
                     title: '日期',
@@ -385,7 +438,7 @@
                     showRunDetails(row);
                 }
             });
-        }
+		}
         // 显示跑步详情模态框
         function showRunDetails(run) {
             $('#runDetailModalLabel').text(run.name || '跑步详情');
@@ -413,7 +466,47 @@
             `;
             $('#modalBodyContent').html(modalBody);
             $('#runDetailModal').modal('show');
-        }
+        }        
+        // 新增/修改: 应用表格筛选的核心函数
+        function applyTableFilter(filterType) {
+            let filteredData = [];
+            switch (filterType) {
+                case 'race':
+                    filteredData = allRunsData.filter(run => run.type === 'Race');
+                    break;
+                case 'hm':
+                    // 筛选距离在21km到22km之间的记录，以包含GPS误差
+                    filteredData = allRunsData.filter(run => run.distance >= 21000 && run.distance < 22000);
+                    break;
+                case 'pb':
+                    // 筛选任何一项PB为true的记录
+                    filteredData = allRunsData.filter(run => run.is_pb_5k || run.is_pb_10k || run.is_pb_hm || run.is_pb_m);
+                    break;
+                case 'this-month':
+                    const startOfMonth = moment().startOf('month');
+                    const endOfMonth = moment().endOf('month');
+                    filteredData = allRunsData.filter(run => {
+                        return moment(run.start_date_local).isBetween(startOfMonth, endOfMonth);
+                    });
+                    break;
+                case 'on-this-day':
+                    const today = moment();
+                    const month = today.month(); // 0-11
+                    const day = today.date();
+                    filteredData = allRunsData.filter(run => {
+                        const runDate = moment(run.start_date_local);
+                        // 比较月和日，忽略年份
+                        return runDate.month() === month && runDate.date() === day;
+                    });
+                    break;
+                case 'all':
+                default:
+                    filteredData = allRunsData; // 恢复显示全部数据
+                    break;
+            }
+            // 使用筛选后的数据重新加载表格
+            $('#runTable').bootstrapTable('load', filteredData);
+        }        
     </script>
 </body>
 </html>
