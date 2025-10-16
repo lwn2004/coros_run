@@ -22,7 +22,7 @@
         .carousel-container {
             position: relative;
         }
-        .chart-container { height: 250px; }
+        .chart-container { height: 300px; }
         @media (min-width: 768px) {
             #statsCarousel .carousel-inner, #chartsCarousel .carousel-inner {
                 display: flex;
@@ -62,16 +62,6 @@
         </div>
         <div id="statsCarousel" class="carousel slide d-md-flex mb-4" data-bs-ride="false">
             <div class="carousel-inner" id="summary-stats-container">
-                </div>
-            <div class="d-md-none">
-                <button class="carousel-control-prev" type="button" data-bs-target="#statsCarousel" data-bs-slide="prev">
-                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Previous</span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#statsCarousel" data-bs-slide="next">
-                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Next</span>
-                </button>
             </div>
         </div>
         <div id="chartsCarousel" class="carousel slide d-md-block mb-4" data-bs-ride="false">
@@ -225,7 +215,7 @@
             if (!data || data.length === 0) return;
             const totalRuns = data.length;
             const totalDistance = data.reduce((sum, run) => sum + run.distance, 0);
-            const totalDuration = data.reduce((sum, run) => sum + run.moving_time, 0);
+            const totalDuration = data.reduce((sum, run) => sum + moment.duration(run.moving_time, 'seconds'), 0);
             const totalElevation = data.reduce((sum, run) => sum + run.total_elevation_gain, 0);
             const avgPaceSeconds = totalDuration / (totalDistance / 1000);
             const stats = [
