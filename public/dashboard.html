@@ -33,6 +33,23 @@
             position: relative;
         }
         .chart-container { height: 300px; }
+        .carousel-indicators {
+          bottom: -20px;
+        }
+        .carousel-indicators [data-bs-target] {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background-color: #999;  /* dot color */
+          opacity: 0.6;
+          transition: opacity 0.3s, transform 0.3s;
+        }
+
+        .carousel-indicators .active {
+          background-color: #fff;  /* active dot color */
+          opacity: 1;
+          /*transform: scale(1.3);   /* slightly enlarge active dot */
+        }
         @media (min-width: 768px) {
             #statsCarousel .carousel-inner, #chartsCarousel .carousel-inner {
                 display: flex;
@@ -57,7 +74,7 @@
                 padding: 0 0.5rem; /* 给卡片之间留出一点空隙 */
             }
             .carousel-indicators [data-bs-target] {
-                background-color: #0d6efd;
+                background-color: #999;
             }
         #filter-buttons .btn {
             margin-bottom: 0.5rem; /* 在移动端换行时提供间距 */
@@ -75,10 +92,10 @@
                 <button type="button" data-bs-target="#statsCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
                 <button type="button" data-bs-target="#statsCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
                 <button type="button" data-bs-target="#statsCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
-                <button type="button" data-bs-target="#statsCarousel" data-bs-slide-to="3" aria-label="Slide 4"></button>              
-            </div>          
+                <button type="button" data-bs-target="#statsCarousel" data-bs-slide-to="3" aria-label="Slide 4"></button>                
+            </div>            
             <div class="carousel-inner" id="summary-stats-container">
-            </div>
+            </div>           
         </div>
         <div id="chartsCarousel" class="carousel slide d-md-block mb-4" data-bs-ride="false">
             <div class="carousel-indicators">
@@ -100,7 +117,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div>           
         </div>
         <div class="card stat-card">
              <div class="card-body" style="display: block;">
@@ -296,11 +313,13 @@
                 `;
             });
             $('#summary-stats-container').html(cardsHtml);
+            bootstrap.Carousel.getOrCreateInstance('#statsCarousel');
         }
         // 新增/修改: 渲染所有图表的函数
         function renderAllCharts(data) {
             renderMonthlyChart(data);
-            renderPaceTrendChart(data); // 新增的图表
+            renderPaceTrendChart(data);
+            bootstrap.Carousel.getOrCreateInstance('#chartsCarousel');
         }
         function renderMonthlyChart(data) {
             const monthlyData = {};
