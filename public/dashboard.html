@@ -244,7 +244,7 @@
             const totalDuration = data.reduce((sum, run) => sum + moment.duration(timeToSeconds(run.moving_time), 'seconds'), 0);
             const totalElevation = data.reduce((sum, run) => sum + run.total_elevation_gain, 0);
             const avgPaceSeconds = totalDuration / (totalDistance / 1000);
-            const aveSpeed = totalDistance*1000/totalDuration;//"m/s"
+            const aveSpeed = totalDistance/totalDuration;//"m/s"
             const stats = [
                 {
                     label: '总里程',
@@ -338,15 +338,14 @@
                     monthlyDistance[month] = 0;
                     monthlyDuration[month] = 0;
                 }
-                // 累加每次跑步的配速（秒/公里）
-                monthlyDistance[month] += run.distance/1000;
+                monthlyDistance[month] += run.distance;
                 monthlyDuration[month] += moment.duration(timeToSeconds(run.moving_time), 'seconds');
             });
             const sortedMonths = Object.keys(monthlyDistance).sort().slice(-12);
             const chartLabels = sortedMonths.map(m => moment(m).format('MMM'));
             const chartData = sortedMonths.map(m => {
                 // 计算月平均配速
-                const avgPaceInSeconds = monthlyDistance[m] / monthlyDuration[m];
+                const avgPaceInSeconds = monthlyDuration[m]/(monthlyDistance[m]*1000);
                 return avgPaceInSeconds;
             });
             new Chart($('#paceTrendChart'), {
