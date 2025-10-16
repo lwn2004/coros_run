@@ -17,7 +17,17 @@
         }
         .stat-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
         .stat-card .card-body { display: flex; align-items: center; }
-        .stat-card .icon { font-size: 2.5rem; padding: 15px; border-radius: 50%; margin-right: 20px; color: white; }
+        .stat-card .icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: white;
+            margin-right: 20px;
+        }     
         h1, h2, h3 { font-weight: 600; }
         .carousel-container {
             position: relative;
@@ -64,6 +74,8 @@
             <div class="carousel-indicators">
                 <button type="button" data-bs-target="#statsCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
                 <button type="button" data-bs-target="#statsCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                <button type="button" data-bs-target="#statsCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+                <button type="button" data-bs-target="#statsCarousel" data-bs-slide-to="3" aria-label="Slide 4"></button>              
             </div>          
             <div class="carousel-inner" id="summary-stats-container">
             </div>
@@ -144,14 +156,24 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <script>
         moment.locale('zh-cn');
-        function paceFormatter(value) {
+        function timeToSeconds(timeStr) {
+          // Split the main H:M:S part from the (unused) microseconds
+          const parts = timeStr.split('.');
+          const [hours, minutes, seconds] = parts[0].split(':').map(Number);
+          
+          // Handle fractional seconds from the original string if needed
+          const fractionalSeconds = parts[1] ? parseFloat(`0.${parts[1]}`) : 0;
+        
+          return (hours * 3600) + (minutes * 60) + seconds + fractionalSeconds;
+        }      
+        function paceFormatter(value) {// from "m/s" to `x'y"`
             if (!value || value <= 0) return '-';
             const paceSeconds = 1000 / value;
             const minutes = Math.floor(paceSeconds / 60);
             const seconds = String(Math.round(paceSeconds % 60)).padStart(2, '0');
             return `${minutes}'${seconds}"`;
         }
-        function durationFormatter(value) {
+        function durationFormatter(value) { //from seconds to h:m:s
             if (!value) return '-';
             const duration = moment.duration(value, 'seconds');
             const hours = Math.floor(duration.asHours());
@@ -219,9 +241,10 @@
             if (!data || data.length === 0) return;
             const totalRuns = data.length;
             const totalDistance = data.reduce((sum, run) => sum + run.distance, 0);
-            const totalDuration = data.reduce((sum, run) => sum + moment.duration(run.moving_time, 'seconds'), 0);
+            const totalDuration = data.reduce((sum, run) => sum + moment.duration(timeToSeconds(run.moving_time), 'seconds'), 0);
             const totalElevation = data.reduce((sum, run) => sum + run.total_elevation_gain, 0);
             const avgPaceSeconds = totalDuration / (totalDistance / 1000);
+            const aveSpeed = totalDistance*1000/totalDuration;//"m/s"
             const stats = [
                 {
                     label: '总里程',
@@ -243,7 +266,7 @@
                 },
                 {
                     label: '平均配速',
-                    value: `${paceFormatter(1000/avgPaceSeconds)} /km`,
+                    value: `${paceFormatter(aveSpeed)} /km`,
                     icon: 'bi-speedometer2',
                     color: '#dc3545'
                 },/*
@@ -294,7 +317,7 @@
                 data: {
                     labels: chartLabels,
                     datasets: [{
-                        //label: '月度跑量 (km)',
+                        label: '月度跑量 (km)',
                         data: chartData,
                         backgroundColor: 'rgba(13, 110, 253, 0.6)'
                     }]
@@ -317,7 +340,7 @@
                 }
                 // 累加每次跑步的配速（秒/公里）
                 monthlyDistance[month] += run.distance/1000;
-                monthlyDuration[month] += moment.duration(run.moving_time, 'seconds');
+                monthlyDuration[month] += moment.duration(timeToSeconds(run.moving_time), 'seconds');
             });
             const sortedMonths = Object.keys(monthlyDistance).sort().slice(-12);
             const chartLabels = sortedMonths.map(m => moment(m).format('MMM'));
@@ -331,7 +354,7 @@
                 data: {
                     labels: chartLabels,
                     datasets: [{
-                        //label: '月平均配速',
+                        label: '月平均配速',
                         data: chartData,
                         borderColor: 'rgba(220, 53, 69, 0.8)',
                         tension: 0.1,
