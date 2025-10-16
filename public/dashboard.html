@@ -147,7 +147,7 @@
                 </div>
             </div>
         </div>
-    </div>	
+    </div>  
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.24.2/bootstrap-table.min.js"></script>
@@ -225,9 +225,9 @@
                     initializeRunTable(allRunsData);
                 })
                 .catch(error => {
-				    console.error('加载跑步数据失败:', error);
+                    console.error('加载跑步数据失败:', error);
                     $('#summary-stats').html('<div class="col"><p class="text-danger">无法加载数据，请检查all.json文件是否存在或格式是否正确。</p></div>');
-				});
+                });
             $('#filter-buttons').on('click', '.btn', function() {
                 // 设置按钮的激活状态
                 $(this).addClass('active').siblings().removeClass('active');
@@ -236,12 +236,12 @@
                 const filterType = $(this).data('filter');
                 applyTableFilter(filterType);
             });
-		});
+        });
         function updateSummaryCarousel(data) {
             if (!data || data.length === 0) return;
             const totalRuns = data.length;
             const totalDistance = data.reduce((sum, run) => sum + run.distance, 0);
-            const totalDuration = data.reduce((sum, run) => sum + moment.duration(run.moving_time).asSeconds, 0);
+            const totalDuration = data.reduce((sum, run) => sum + moment.duration(run.moving_time).asSeconds(), 0);
             const totalElevation = data.reduce((sum, run) => sum + run.total_elevation_gain, 0);
             const avgPaceSeconds = totalDuration / (totalDistance / 1000);
             const avgSpeed = totalDistance/totalDuration;//"m/s"
@@ -324,7 +324,7 @@
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    plugins: { title: { display: true, text: '最近12个月跑量统计' } }
+                    plugins: { title: { display: true, text: '最近12个月跑量统计' }, legend: { display: false }, }
                 }
             });
         }
@@ -345,7 +345,7 @@
             const chartLabels = sortedMonths.map(m => moment(m).format('MMM'));
             const chartData = sortedMonths.map(m => {
                 // 计算月平均配速
-                const avgPaceInSeconds = monthlyDuration[m]/(monthlyDistance[m]*1000);
+                const avgPaceInSeconds = monthlyDuration[m]/(monthlyDistance[m]/1000);
                 return avgPaceInSeconds;
             });
             new Chart($('#paceTrendChart'), {
@@ -364,6 +364,7 @@
                     responsive: true, maintainAspectRatio: false,
                     plugins: {
                         title: { display: true, text: '月平均配速趋势' },
+                        legend: { display: false },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
@@ -377,6 +378,7 @@
                     },
                     scales: {
                         y: {
+                            reverse: true,
                             ticks: {
                                 callback: function(value, index, values) {
                                     // 自定义Y轴标签，显示为 M'SS" 格式
@@ -407,7 +409,7 @@
                     title: '跑步名称',
                     formatter: nameFormatter,
                     sortable: true,
-                    class: 'd-none d-md-table-cell'					
+                    class: 'd-none d-md-table-cell'                 
                 }, {
                     field: 'start_date_local',
                     title: '日期',
@@ -455,7 +457,7 @@
                     showRunDetails(row);
                 }
             });
-		}
+        }
         // 显示跑步详情模态框
         function showRunDetails(run) {
             $('#runDetailModalLabel').text(run.name || '跑步详情');
