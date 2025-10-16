@@ -396,10 +396,10 @@
             $('#runTable').bootstrapTable({
                 data: data,
                 classes: 'table table-hover table-striped',
-                search: true,
-                pagination: true,
-                pageSize: 10,
-                pageList: [10, 25, 50, 'all'],
+                search: false,
+                //pagination: true,
+                //pageSize: 10,
+                //pageList: [10, 25, 50, 'all'],
                 sortName: 'start_date_local',
                 sortOrder: 'desc',
                 // 新增/修改: 启用此选项来更好地处理移动端分页栏
@@ -417,7 +417,7 @@
                     sortable: true
                 }, {
                     field: 'distance',
-                    title: '距离(km)',
+                    title: '距离',
                     formatter: distanceFormatter,
                     sortable: true
                 }, {
@@ -436,7 +436,7 @@
                     class: 'd-none d-md-table-cell'
                 }, {
                     field: 'average_heartrate',
-                    title: '<i class="bi bi-heart-pulse-fill text-danger"></i>',
+                    title: '心率',
                     sortable: true,
                     //class: 'd-none d-md-table-cell'
                 }, {
