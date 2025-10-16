@@ -61,6 +61,10 @@
             <i class="bi bi-person-running h1 ms-3 text-primary"></i>
         </div>
         <div id="statsCarousel" class="carousel slide d-md-flex mb-4" data-bs-ride="false">
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#statsCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                <button type="button" data-bs-target="#statsCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+            </div>          
             <div class="carousel-inner" id="summary-stats-container">
             </div>
         </div>
@@ -98,7 +102,7 @@
                             <i class="bi bi-trophy me-1"></i> 比赛
                         </button>
                         <button type="button" class="btn btn-outline-primary" data-filter="hm">
-                            <i class="bi bi-signpost-split me-1"></i> > 半马
+                            <i class="bi bi-signpost-split me-1"></i> ≥ 半马
                         </button>
                         <button type="button" class="btn btn-outline-primary" data-filter="pb">
                             <i class="bi bi-award me-1"></i> 个人最佳
@@ -290,7 +294,7 @@
                 data: {
                     labels: chartLabels,
                     datasets: [{
-                        label: '月度跑量 (km)',
+                        //label: '月度跑量 (km)',
                         data: chartData,
                         backgroundColor: 'rgba(13, 110, 253, 0.6)'
                     }]
@@ -303,23 +307,23 @@
         }
         // 新增: 渲染配速趋势图表
         function renderPaceTrendChart(data) {
-            const monthlyAvgPace = {};
-            const monthlyRunCounts = {};
+            const monthlyDistance = {};
+            const monthlyDuration = {};
             data.forEach(run => {
                 const month = moment(run.start_date_local).format('YYYY-MM');
-                if(!monthlyAvgPace[month]) {
-                    monthlyAvgPace[month] = 0;
-                    monthlyRunCounts[month] = 0;
+                if(!monthlyDistance[month]) { 
+                    monthlyDistance[month] = 0;
+                    monthlyDuration[month] = 0;
                 }
                 // 累加每次跑步的配速（秒/公里）
-                monthlyAvgPace[month] += 1000 / run.average_speed;
-                monthlyRunCounts[month]++;
+                monthlyDistance[month] += run.distance/1000;
+                monthlyDuration[month] += moment.duration(run.moving_time, 'seconds');
             });
-            const sortedMonths = Object.keys(monthlyAvgPace).sort().slice(-12);
+            const sortedMonths = Object.keys(monthlyDistance).sort().slice(-12);
             const chartLabels = sortedMonths.map(m => moment(m).format('MMM'));
             const chartData = sortedMonths.map(m => {
                 // 计算月平均配速
-                const avgPaceInSeconds = monthlyAvgPace[m] / monthlyRunCounts[m];
+                const avgPaceInSeconds = monthlyDistance[m] / monthlyDuration[m];
                 return avgPaceInSeconds;
             });
             new Chart($('#paceTrendChart'), {
@@ -327,7 +331,7 @@
                 data: {
                     labels: chartLabels,
                     datasets: [{
-                        label: '月平均配速',
+                        //label: '月平均配速',
                         data: chartData,
                         borderColor: 'rgba(220, 53, 69, 0.8)',
                         tension: 0.1,
