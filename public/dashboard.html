@@ -22,6 +22,7 @@
         .carousel-container {
             position: relative;
         }
+        .chart-container { height: 250px; }
         @media (min-width: 768px) {
             #statsCarousel .carousel-inner, #chartsCarousel .carousel-inner {
                 display: flex;
@@ -81,14 +82,14 @@
             <div class="carousel-inner" id="charts-container">
                 <div class="carousel-item active">
                     <div class="card stat-card">
-                        <div class="card-body" style="display:block;">
+                        <div class="card-body chart-container" style="display:block;">
                             <canvas id="monthlyChart"></canvas>
                         </div>
                     </div>
                 </div>
                 <div class="carousel-item">
                      <div class="card stat-card">
-                        <div class="card-body" style="display:block;">
+                        <div class="card-body chart-container" style="display:block;">
                             <canvas id="paceTrendChart"></canvas>
                         </div>
                     </div>
@@ -107,12 +108,12 @@
                             <i class="bi bi-trophy me-1"></i> 比赛
                         </button>
                         <button type="button" class="btn btn-outline-primary" data-filter="hm">
-                            <i class="bi bi-signpost-split me-1"></i> 半马
+                            <i class="bi bi-signpost-split me-1"></i> > 半马
                         </button>
                         <button type="button" class="btn btn-outline-primary" data-filter="pb">
                             <i class="bi bi-award me-1"></i> 个人最佳
                         </button>
-                         <button type="button" class="btn btn-outline-primary" data-filter="this-month">
+                        <button type="button" class="btn btn-outline-primary" data-filter="this-month">
                             <i class="bi bi-calendar-month me-1"></i> 本月
                         </button>
                         <button type="button" class="btn btn-outline-primary" data-filter="on-this-day">
@@ -251,13 +252,13 @@
                     value: `${paceFormatter(1000/avgPaceSeconds)} /km`,
                     icon: 'bi-speedometer2',
                     color: '#dc3545'
-                },
+                },/*
                 {
                     label: '总爬升',
                     value: `${Math.round(totalElevation)} 米`,
                     icon: 'bi-mountain',
                     color: '#6f42c1'
-                }
+                }*/
             ];
             let cardsHtml = '';
             stats.forEach((stat, index) => {
@@ -419,7 +420,7 @@
                     field: 'average_heartrate',
                     title: '<i class="bi bi-heart-pulse-fill text-danger"></i>',
                     sortable: true,
-                    class: 'd-none d-md-table-cell'
+                    //class: 'd-none d-md-table-cell'
                 }, {
                     field: 'total_elevation_gain',
                     title: '爬升',
@@ -475,8 +476,8 @@
                     filteredData = allRunsData.filter(run => run.type === 'Race');
                     break;
                 case 'hm':
-                    // 筛选距离在21km到22km之间的记录，以包含GPS误差
-                    filteredData = allRunsData.filter(run => run.distance >= 21000 && run.distance < 22000);
+                    // 筛选距离在21km到42km之间的记录，以包含GPS误差
+                    filteredData = allRunsData.filter(run => run.distance >= 21000 && run.distance < 42000);
                     break;
                 case 'pb':
                     // 筛选任何一项PB为true的记录
