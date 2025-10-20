@@ -26,13 +26,14 @@
         }
         @media (max-width: 767.98px) { .summary-nav { display: flex; } }
 
-        .chart-container { position: relative; height: 50vh; width: 100%; margin-bottom: 20px; }
+        .chart-container { position: relative; height: 25vh; width: 100%; margin-bottom: 20px; }
         @media (min-width: 992px) {
             .chart-container { height: auto; min-height: 400px; margin-bottom: 0; }
         }
 
-        #stats-summary-text { text-align: center; font-size: 1.1rem; margin-bottom: 1.5rem; color: #495057; }
+        #stats-summary-text, #trend-summary-text { text-align: center; font-size: 1rem; margin-bottom: 1.5rem; color: #495057; }
         .card-header-tabs { margin-bottom: -0.7rem; border-bottom: 0;} /* Adjust for seamless tab look */
+        #todays-run-card { border-left: 4px solid #0d6efd; }
     </style>
 </head>
 <body>
@@ -52,21 +53,55 @@
         </div>
         <div class="summary-nav"><button id="prev-card"><i class="fas fa-chevron-left"></i></button><button id="next-card"><i class="fas fa-chevron-right"></i></button></div>
     </div>
+    
+    <div id="dynamic-content-area">
+        <div class="card shadow-sm mb-4" id="todays-run-card" style="display: none;">
+            <div class="card-header"><h5 class="mb-0"><i class="fas fa-calendar-day text-primary"></i> 今日运动</h5></div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6 col-md-3 mb-2 mb-md-0">
+                        <h6 class="card-subtitle text-muted">跑量 (km)</h6>
+                        <h4 class="card-title" id="today-distance">--</h4>
+                    </div>
+                    <div class="col-6 col-md-3 mb-2 mb-md-0">
+                        <h6 class="card-subtitle text-muted">用时</h6>
+                        <h4 class="card-title" id="today-time">--</h4>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <h6 class="card-subtitle text-muted">配速</h6>
+                        <h4 class="card-title" id="today-pace">--</h4>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <h6 class="card-subtitle text-muted">心率</h6>
+                        <h4 class="card-title" id="today-heartrate">--</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+             <div class="card-header"><h5 class="mb-0"><i class="fas fa-chart-line text-success"></i> 本月趋势</h5></div>
+            <div class="card-body">
+                <div id="trend-summary-text"></div>
+                <div class="chart-container" style="height: 350px;"><canvas id="trendChart"></canvas></div>
+            </div>
+        </div>
+    </div>
+
 
     <div class="card shadow-sm">
         <div class="card-header">
             <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
-                <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#stats-content" type="button" role="tab"><i class="fas fa-chart-bar"></i> 数据统计</button></li>
-                <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#records-content" type="button" role="tab"><i class="fas fa-list-ul"></i> 详细记录</button></li>
+                <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#records-content" type="button" role="tab"><i class="fas fa-list-ul"></i> 详细记录</button></li>
+                <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#stats-content" type="button" role="tab"><i class="fas fa-chart-bar"></i> 数据统计</button></li>                
             </ul>
         </div>
         <div class="card-body">
             <div class="tab-content" id="myTabContent">
-                <div class="tab-pane fade show active" id="stats-content" role="tabpanel">
+                <div class="tab-pane fade" id="stats-content" role="tabpanel">
                     <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
                         <div class="btn-group" role="group" id="stats-period-filter">
-                            <button type="button" class="btn btn-sm btn-outline-primary active" data-period="trend">本月趋势</button>
-                            <button type="button" class="btn btn-sm btn-outline-primary" data-period="month">按月</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary active" data-period="month">按月</button>
                             <button type="button" class="btn btn-sm btn-outline-primary" data-period="16w">16周</button>
                             <button type="button" class="btn btn-sm btn-outline-primary" data-period="year">按年</button>
                             <button type="button" class="btn btn-sm btn-outline-primary" data-period="all">全部</button>
@@ -87,11 +122,10 @@
                         </div>
                     </div>
                 </div>
-                <div class="tab-pane fade" id="records-content" role="tabpanel">
+                <div class="tab-pane fade show active" id="records-content" role="tabpanel">
                     <div class="btn-group mb-3 flex-wrap" role="group" id="detailed-filter">
                         <button type="button" class="btn btn-sm btn-outline-primary active" data-filter="all">全部记录</button>
                         <button type="button" class="btn btn-sm btn-outline-primary" data-filter="today_in_history">史上今日</button>
-                        <!--<button type="button" class="btn btn-sm btn-outline-primary" data-filter="training">训练</button>-->
                         <button type="button" class="btn btn-sm btn-outline-primary" data-filter="race">比赛</button>
                         <button type="button" class="btn btn-sm btn-outline-primary" data-filter="half_marathon">&GreaterEqual;半马</button>
                         <button type="button" class="btn btn-sm btn-outline-primary" data-filter="marathon">&GreaterEqual;全马</button>
@@ -115,8 +149,8 @@
 $(function() {
     // --- Globals ---
     let allData = [];
-    let statsChart;
-    let currentStatsPeriod = 'trend';
+    let statsChart, trendChart;
+    let currentStatsPeriod = 'month'; // Default period changed
     let currentDateRef = moment();
 
     // --- Utility Functions (Robust versions) ---
@@ -151,11 +185,13 @@ $(function() {
         .then(data => {
             allData = data.map(d => ({...d, start_date_local_moment: moment(d.start_date_local), moving_time_seconds: parseMovingTime(d.moving_time)})).sort((a, b) => b.start_date_local_moment - a.start_date_local_moment);
             initSummaryCards();
+            displayTodaysRun(); // New function call
+            initTrendSection(); // New function call
             setupMobileSlider();
             initDetailedTable();
             setupDetailedFilters();
             setupStatsControls();
-            updateStatsView();
+            updateStatsView(); // Will now default to 'month' view
         });
 
     // --- UI Setup Functions ---
@@ -172,6 +208,44 @@ $(function() {
         $('#avg-pace').html(`<i class="fas fa-bolt-lightning text-warning"></i> ${totalMovingTime > 0 ? formatPace(1 / avgSpeed) : "N/A"}`);
         $('#avg-heartrate').html(`<i class="fas fa-heart-pulse text-danger"></i> ${totalMovingTime > 0 ? (totalWeightedHr / totalMovingTime).toFixed(0) : "N/A"}`);
     }
+
+    function displayTodaysRun() {
+        const todayStart = moment().startOf('day');
+        const todayEnd = moment().endOf('day');
+        const todaysRuns = allData.filter(d => d.start_date_local_moment.isBetween(todayStart, todayEnd));
+
+        if (todaysRuns.length > 0) {
+            const totalDistance = todaysRuns.reduce((s, d) => s + d.distance, 0);
+            const totalTime = todaysRuns.reduce((s, d) => s + d.moving_time_seconds, 0);
+            const totalWeightedHr = todaysRuns.reduce((s, d) => s + (d.average_heartrate || 0) * d.moving_time_seconds, 0);
+            
+            $('#today-distance').text((totalDistance / 1000).toFixed(2));
+            $('#today-time').text(formatSeconds(totalTime));
+            $('#today-pace').text(totalTime > 0 ? formatPace(totalTime / totalDistance) : "N/A");
+            $('#today-heartrate').text(totalTime > 0 ? (totalWeightedHr / totalTime).toFixed(0) : "N/A");
+
+            $('#todays-run-card').show();
+        }
+    }
+
+    function initTrendSection() {
+        if (!allData.length) return;
+        
+        const { labels, currentMonthCumulative, prevMonthCumulative } = aggregateCumulativeData();
+        renderTrendChart(labels, currentMonthCumulative, prevMonthCumulative);
+        
+        const todayIndex = moment().date() - 1;
+        // Ensure index is within bounds
+        const currentTotal = todayIndex < currentMonthCumulative.length ? currentMonthCumulative[todayIndex] : 0;
+        const prevTotal = todayIndex < prevMonthCumulative.length ? prevMonthCumulative[todayIndex] : 0;
+        
+        const diffTotal = ((currentTotal - prevTotal) / 1000).toFixed(2);
+        const diffSign = diffTotal > 0 ? '+' : '';
+        const diffColorClass = diffTotal > 0 ? 'text-success' : 'text-danger'; 
+        
+        $('#trend-summary-text').html(`本月已跑 <strong class="text-primary">${(currentTotal / 1000).toFixed(2)} km</strong>，较上月同期 <strong class="${diffColorClass}">${diffSign}${diffTotal} km</strong>。`);
+    }
+
 
     function setupMobileSlider() {
         let currentIndex = 0;
@@ -200,7 +274,7 @@ $(function() {
                 { field: 'city', title: '城市', visible: false, sortable: true },
             ],
             data: allData, pagination: true, search: true, sortName: 'start_date_local', sortOrder: 'desc', mobileResponsive: true,
-            toolbar: '#toolbar', showRefresh: true, showToggle: true, showColumns: true,
+            toolbar: '#toolbar', showRefresh: false, showToggle: true, showColumns: true,
             iconsPrefix: 'fa',
             icons: { refresh: 'fa-sync-alt', toggleOff: 'fa-toggle-off', toggleOn: 'fa-toggle-on', columns: 'fa-th-list', fullscreen: 'fa-arrows-alt' }
         });
@@ -240,25 +314,8 @@ $(function() {
 
     function updateStatsView() {
         if (!allData.length) return;
-        if (currentStatsPeriod === 'trend') {
-            handleTrendView();
-        } else {
-            handleStandardViews();
-        }
-    }
-
-    function handleTrendView() {
-        $('#time-nav, #stats-table-container').hide();
-        $('#stats-summary-text').show();
-        const { labels, currentMonthCumulative, prevMonthCumulative } = aggregateCumulativeData();
-        renderTrendChart(labels, currentMonthCumulative, prevMonthCumulative);
-        const todayIndex = moment().date() - 1;
-        const currentTotal = currentMonthCumulative[todayIndex] || 0;
-        const prevTotal = prevMonthCumulative[todayIndex] || 0;
-        const diffTotal = ((currentTotal - prevTotal) / 1000).toFixed(2);
-        const diffSign = diffTotal > 0 ? '+' : '';
-        const diffColorClass = diffTotal > 0 ? 'text-success' : 'text-danger'; 
-        $('#stats-summary-text').html(`本月已跑 <strong class="text-primary">${(currentTotal / 1000).toFixed(2)} km</strong>，较上月同期 <strong class="${diffColorClass}">${diffSign}${diffTotal} km</strong>。`);
+        // The 'trend' view logic is now removed from here
+        handleStandardViews();
     }
 
     function handleStandardViews() {
@@ -269,13 +326,11 @@ $(function() {
         renderStatsTable(aggregatedData);
         updateNavButtons();
         const totalDistance = Array.from(dataMap.values()).reduce((s, item) => s + item.distance, 0);
-        const totalPeriodNames = { 'month': '月', '16w': '16周', 'year': '年', 'all': '' };
-        const totalPeriodName = totalPeriodNames[currentStatsPeriod];
-        let summaryHtml = `${totalPeriodName}总跑量: <strong class="text-primary">${(totalDistance / 1000).toFixed(2)} km</strong>`;
+        let summaryHtml = `总跑量: <strong class="text-primary">${(totalDistance / 1000).toFixed(2)} km</strong>`;
         const numPeriodsWithRuns = Array.from(dataMap.values()).filter(v => v.count > 0).length;
         if (numPeriodsWithRuns > 0) {
             const avgDistance = totalDistance / numPeriodsWithRuns;
-            const periodNames = { '16w': '周', 'year': '月', 'all': '年' };
+            const periodNames = { 'month': '天', '16w': '周', 'year': '月', 'all': '年' };
             const periodName = periodNames[currentStatsPeriod];
             if(periodName) summaryHtml += `, 平均每${periodName}: <strong class="text-success">${(avgDistance / 1000).toFixed(2)} km</strong>`;
         }
@@ -303,7 +358,7 @@ $(function() {
         return { labels, currentMonthCumulative: calculateCumulative(currentMonthDaily), prevMonthCumulative: calculateCumulative(prevMonthDaily) };
     }
 
-    function aggregateData(period) { /* Logic unchanged */
+    function aggregateData(period) { 
         let aggregatedData = [], labels = [], dataMap = new Map();
         const addToMap = (key, run) => {
             if (!dataMap.has(key)) dataMap.set(key, { distance: 0, time: 0, weightedHr: 0, count: 0 });
@@ -336,8 +391,8 @@ $(function() {
                 break;
         }
         labels.forEach(label => {
-            const data = dataMap.get(label) || { distance: 0, time: 0, weightedHr: 0 };
-            aggregatedData.push({ period: label, distance: data.distance, time: data.time, avgHr: data.time > 0 ? Math.round(data.weightedHr / data.time) : 0, avgPace: formatPace(data.distance > 0 ? data.time / data.distance : 0) });
+            const data = dataMap.get(label) || { distance: 0, time: 0, weightedHr: 0, count: 0 };
+            aggregatedData.push({ period: label, distance: data.distance, time: data.time, avgHr: data.time > 0 ? Math.round(data.weightedHr / data.time) : 0, avgPace: formatPace(data.distance > 0 ? data.time / data.distance : 0), count: data.count });
         });
         return { aggregatedData, labels, dataMap };
     }
@@ -346,7 +401,8 @@ $(function() {
     const todayLinePlugin = {
         id: 'todayLine',
         afterDatasetsDraw(chart) {
-            if (currentStatsPeriod !== 'trend') return;
+            // Only apply to the trendChart
+            if (chart.canvas.id !== 'trendChart') return;
             const ctx = chart.ctx, todayIndex = moment().date() - 1;
             if (chart.getDatasetMeta(0).data.length <= todayIndex) return;
             const x = chart.getDatasetMeta(0).data[todayIndex]?.x;
@@ -361,41 +417,56 @@ $(function() {
     Chart.register(todayLinePlugin);
 
     function renderTrendChart(labels, currentData, prevData) {
-        if (statsChart) statsChart.destroy();
-        const ctx = document.getElementById('statsChart').getContext('2d');
+        if (trendChart) trendChart.destroy();
+        const ctx = document.getElementById('trendChart').getContext('2d');
         const todayDate = moment().date();
         const processedCurrentData = currentData.map((d, i) => i < todayDate ? (d / 1000).toFixed(2) : null);
-        statsChart = new Chart(ctx, {
+        trendChart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: labels,
                 datasets: [
-                    { label: '本月累计跑量 (km)', data: processedCurrentData, borderColor: 'rgba(0, 123, 255, 1)', backgroundColor: 'rgba(0, 123, 255, 0.1)', fill: true, tension: 0.1 },
-                    { label: '上月累计跑量 (km)', data: prevData.map(d => (d/1000).toFixed(2)), borderColor: 'rgba(108, 117, 125, 1)', backgroundColor: 'rgba(108, 117, 125, 0.1)', fill: true, tension: 0.1, borderDash: [5, 5] }
+                    { label: '本月', data: processedCurrentData, borderColor: 'rgba(0, 123, 255, 1)', backgroundColor: 'rgba(0, 123, 255, 0.1)', fill: true, tension: 0.1 },
+                    { label: '上月', data: prevData.map(d => (d/1000).toFixed(2)), borderColor: 'rgba(108, 117, 125, 1)', backgroundColor: 'rgba(108, 117, 125, 0.1)', fill: true, tension: 0.1, borderDash: [5, 5] }
                 ]
             },
-            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, title: { display: true, text: '累计公里 (km)' } } }, plugins: { tooltip: { mode: 'index', intersect: false } } }
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, title: { display: true, text: '跑量' } } }, plugins: { tooltip: { mode: 'index', intersect: false } } }
         });
     }
 
     function renderStatsChart(labels, data) {
         if (statsChart) statsChart.destroy();
         const ctx = document.getElementById('statsChart').getContext('2d');
+        const dataValues = data.map(d => (d.distance / 1000).toFixed(2));
+        
         statsChart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: labels,
-                datasets: [{ label: '跑量', data: data.map(d => (d.distance / 1000).toFixed(2)), backgroundColor: 'rgba(0, 123, 255, 0.5)', borderColor: 'rgba(0, 123, 255, 1)', borderWidth: 1 }]
+                datasets: [{ 
+                    label: '跑量', 
+                    data: dataValues, 
+                    backgroundColor: 'rgba(0, 123, 255, 0.5)', 
+                    borderColor: 'rgba(0, 123, 255, 1)', 
+                    borderWidth: 1 
+                }]
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
                 scales: { y: { beginAtZero: true, title: { display: true, text: '距离 (km)' } } },
                 plugins: { 
-                	tooltip: { callbacks: { footer: (items) => { const item = data[items[0].dataIndex]; return [`用时: ${formatSeconds(item.time)}`, `配速: ${item.avgPace}`, `心率: ${item.avgHr || 'N/A'}`]; } } },
-                	legend: {
-                		display: false
-                	}
-                 }
+                    tooltip: { callbacks: { 
+                        footer: (items) => { 
+                            const item = data[items[0].dataIndex]; 
+                            let footerText = [`用时: ${formatSeconds(item.time)}`, `配速: ${item.avgPace}`, `心率: ${item.avgHr || 'N/A'}`];
+                            if(item.count > 1) {
+                                footerText.unshift(`次数: ${item.count}`);
+                            }
+                            return footerText;
+                        } 
+                    } },
+                    legend: { display: false }
+                }
             }
         });
     }
@@ -407,7 +478,8 @@ $(function() {
         $('#stats-table').bootstrapTable('destroy').bootstrapTable({
             columns: [
                 { field: 'period', title: periodTitle },
-                { field: 'distance', title: '跑量', formatter: v => (v / 1000).toFixed(2) },
+                { field: 'distance', title: '跑量 (km)', formatter: v => (v / 1000).toFixed(2) },
+                { field: 'count', title: '次数', visible: currentStatsPeriod !== 'month'},
                 { field: 'time', title: '用时', formatter: v => formatSeconds(v) },
                 { field: 'avgHr', title: '心率' },
                 { field: 'avgPace', title: '配速' },
@@ -416,19 +488,19 @@ $(function() {
         });
     }
 
-    function updateNavButtons() { /* Logic unchanged */
+    function updateNavButtons() { 
         if (!allData || allData.length === 0) { $('#prev-time, #next-time').hide(); return; }
         const firstRunDate = allData[allData.length - 1].start_date_local_moment;
         if (currentStatsPeriod === 'month') {
             const prevMonth = currentDateRef.clone().subtract(1, 'month');
             const nextMonth = currentDateRef.clone().add(1, 'month');
-            $('#prev-time').toggle(prevMonth.endOf('month').isSameOrAfter(firstRunDate, 'day'));
-            $('#next-time').toggle(nextMonth.startOf('month').isSameOrBefore(moment(), 'day'));
+            $('#prev-time').prop('disabled', !prevMonth.endOf('month').isSameOrAfter(firstRunDate, 'day'));
+            $('#next-time').prop('disabled', !nextMonth.startOf('month').isSameOrBefore(moment(), 'day'));
         } else if (currentStatsPeriod === 'year') {
             const prevYear = currentDateRef.clone().subtract(1, 'year');
             const nextYear = currentDateRef.clone().add(1, 'year');
-            $('#prev-time').toggle(prevYear.endOf('year').isSameOrAfter(firstRunDate, 'day'));
-            $('#next-time').toggle(nextYear.startOf('year').isSameOrBefore(moment(), 'day'));
+            $('#prev-time').prop('disabled', !prevYear.endOf('year').isSameOrAfter(firstRunDate, 'day'));
+            $('#next-time').prop('disabled', !nextYear.startOf('year').isSameOrBefore(moment(), 'day'));
         }
     }
 });
