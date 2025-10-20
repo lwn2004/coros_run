@@ -11,7 +11,7 @@
 
     <style>
         body { background-color: #f8f9fa; }
-        .container-fluid { padding: 20px; }
+        .container-fluid { padding: 15px; }
         .summary-container { overflow: hidden; position: relative; }
         .summary-cards-wrapper { display: flex; transition: transform 0.3s ease-in-out; }
         .summary-card { flex: 0 0 100%; padding: 0 10px; }
@@ -26,10 +26,13 @@
         }
         @media (max-width: 767.98px) { .summary-nav { display: flex; } }
 
-        .chart-container { position: relative; height: 40vh; width: 100%; margin-bottom: 20px; }
-        #time-nav { margin-bottom: 1rem; }
-        .nav-tabs .nav-link.active { font-weight: bold; }
+        .chart-container { position: relative; height: 50vh; width: 100%; margin-bottom: 20px; }
+        @media (min-width: 992px) {
+            .chart-container { height: auto; min-height: 400px; margin-bottom: 0; }
+        }
+
         #stats-summary-text { text-align: center; font-size: 1.1rem; margin-bottom: 1.5rem; color: #495057; }
+        .card-header-tabs { margin-bottom: -0.7rem; border-bottom: 0;} /* Adjust for seamless tab look */
     </style>
 </head>
 <body>
@@ -50,44 +53,51 @@
         <div class="summary-nav"><button id="prev-card"><i class="fas fa-chevron-left"></i></button><button id="next-card"><i class="fas fa-chevron-right"></i></button></div>
     </div>
 
-    <ul class="nav nav-tabs" id="myTab" role="tablist">
-        <li class="nav-item" role="presentation"><button class="nav-link active" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats-content" type="button" role="tab"><i class="fas fa-chart-bar"></i> 数据统计</button></li>
-        <li class="nav-item" role="presentation"><button class="nav-link" id="records-tab" data-bs-toggle="tab" data-bs-target="#records-content" type="button" role="tab"><i class="fas fa-list-ul"></i> 详细记录</button></li>
-    </ul>
-
-    <div class="tab-content" id="myTabContent">
-        <div class="tab-pane fade show active" id="stats-content" role="tabpanel">
-            <div class="card card-body">
-                <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
-                    <div class="btn-group" role="group" id="stats-period-filter">
-                        <button type="button" class="btn btn-outline-primary" data-period="trend">本月趋势</button>
-                        <button type="button" class="btn btn-outline-primary" data-period="month">月</button>
-                        <button type="button" class="btn btn-outline-primary active" data-period="16w">16周</button>
-                        <button type="button" class="btn btn-outline-primary" data-period="year">年</button>
-                        <button type="button" class="btn btn-outline-primary" data-period="all">全部</button>
-                    </div>
-                    <div id="time-nav" class="btn-group mt-2 mt-md-0" style="display: none;">
-                        <button id="prev-time" class="btn btn-secondary"><i class="fas fa-angle-left"></i> 上一个</button>
-                        <span id="current-time-display" class="btn btn-light disabled"></span>
-                        <button id="next-time" class="btn btn-secondary">下一个 <i class="fas fa-angle-right"></i></button>
-                    </div>
-                </div>
-                <div class="chart-container"><canvas id="statsChart"></canvas></div>
-                <div id="stats-summary-text"></div>
-                <div id="stats-table-container"><table id="stats-table"></table></div>
-            </div>
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#stats-content" type="button" role="tab"><i class="fas fa-chart-bar"></i> 数据统计</button></li>
+                <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#records-content" type="button" role="tab"><i class="fas fa-list-ul"></i> 详细记录</button></li>
+            </ul>
         </div>
-        <div class="tab-pane fade" id="records-content" role="tabpanel">
-             <div class="card card-body">
-                <div class="btn-group mb-3 flex-wrap" role="group" id="detailed-filter">
-                    <button type="button" class="btn btn-outline-primary active" data-filter="all">全部记录</button>
-                    <button type="button" class="btn btn-outline-primary" data-filter="today_in_history">历史上的今天</button>
-                    <button type="button" class="btn btn-outline-primary" data-filter="training">训练</button>
-                    <button type="button" class="btn btn-outline-primary" data-filter="race">比赛</button>
-                    <button type="button" class="btn btn-outline-primary" data-filter="half_marathon">>=半马</button>
-                    <button type="button" class="btn btn-outline-primary" data-filter="marathon">>=全马</button>
+        <div class="card-body">
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="stats-content" role="tabpanel">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                        <div class="btn-group" role="group" id="stats-period-filter">
+                            <button type="button" class="btn btn-sm btn-outline-primary active" data-period="trend">本月趋势</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-period="month">按月</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-period="16w">16周</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-period="year">按年</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-period="all">全部</button>
+                        </div>
+                        <div id="time-nav" class="btn-group mt-2 mt-md-0" style="display: none;">
+                            <button id="prev-time" class="btn btn-secondary"><i class="fas fa-angle-left"></i></button>
+                            <span id="current-time-display" class="btn btn-light disabled"></span>
+                            <button id="next-time" class="btn btn-secondary"><i class="fas fa-angle-right"></i></button>
+                        </div>
+                    </div>
+                    <div class="row align-items-center">
+                        <div class="col-lg-7">
+                            <div class="chart-container"><canvas id="statsChart"></canvas></div>
+                        </div>
+                        <div class="col-lg-5">
+                            <div id="stats-summary-text"></div>
+                            <div id="stats-table-container"><table id="stats-table"></table></div>
+                        </div>
+                    </div>
                 </div>
-                <table id="detailed-table"></table>
+                <div class="tab-pane fade" id="records-content" role="tabpanel">
+                    <div class="btn-group mb-3 flex-wrap" role="group" id="detailed-filter">
+                        <button type="button" class="btn btn-sm btn-outline-primary active" data-filter="all">全部记录</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-filter="today_in_history">史上今日</button>
+                        <!--<button type="button" class="btn btn-sm btn-outline-primary" data-filter="training">训练</button>-->
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-filter="race">比赛</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-filter="half_marathon">&GreaterEqual;半马</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-filter="marathon">&GreaterEqual;全马</button>
+                    </div>
+                    <table id="detailed-table"></table>
+                </div>
             </div>
         </div>
     </div>
@@ -106,7 +116,7 @@ $(function() {
     // --- Globals ---
     let allData = [];
     let statsChart;
-    let currentStatsPeriod = '16w';
+    let currentStatsPeriod = 'trend';
     let currentDateRef = moment();
 
     // --- Utility Functions (Robust versions) ---
@@ -157,26 +167,42 @@ $(function() {
         const totalWeightedHr = allData.reduce((s, d) => s + (d.average_heartrate || 0) * d.moving_time_seconds, 0);
         const avgSpeed = totalDistance / totalMovingTime;
         $('#total-distance').html(`<i class="fas fa-road text-primary"></i> ${(totalDistance / 1000).toFixed(2)}`);
-        $('#total-runs').html(`<i class="fas fa-person-running text-success"></i> ${totalRuns}`);
+        $('#total-runs').html(`<i class="fas fa-calendar-check text-success"></i> ${totalRuns}`);
         $('#total-time').html(`<i class="far fa-clock text-info"></i> ${formatSeconds(totalMovingTime, true)}`);
-        $('#avg-pace').html(`<i class="fas fa-stopwatch text-warning"></i> ${totalMovingTime > 0 ? formatPace(1 / avgSpeed) : "N/A"}`);
+        $('#avg-pace').html(`<i class="fas fa-bolt-lightning text-warning"></i> ${totalMovingTime > 0 ? formatPace(1 / avgSpeed) : "N/A"}`);
         $('#avg-heartrate').html(`<i class="fas fa-heart-pulse text-danger"></i> ${totalMovingTime > 0 ? (totalWeightedHr / totalMovingTime).toFixed(0) : "N/A"}`);
     }
 
-    function setupMobileSlider() { /* Omitted for brevity, logic unchanged */ }
+    function setupMobileSlider() {
+        let currentIndex = 0;
+        const items = $('.summary-card');
+        const totalItems = items.length;
+        if (totalItems === 0) return;
+        const wrapper = $('.summary-cards-wrapper');
+        const updateSlider = () => wrapper.css('transform', `translateX(${-currentIndex * 100}%)`);
+        $('#next-card').on('click', () => { currentIndex = (currentIndex + 1) % totalItems; updateSlider(); });
+        $('#prev-card').on('click', () => { currentIndex = (currentIndex - 1 + totalItems) % totalItems; updateSlider(); });
+        $(window).on('resize', () => {
+             if ($(window).width() >= 768) wrapper.css('transform', 'translateX(0)');
+             else updateSlider();
+        }).trigger('resize');
+    }
 
     function initDetailedTable() {
         $('#detailed-table').bootstrapTable({
             columns: [
                 { field: 'start_date_local', title: '开始时间', sortable: true },
-                { field: 'type', title: '类型', sortable: true },
-                { field: 'distance', title: '距离 (km)', sortable: true, formatter: v => typeof v !== 'number' ? 'N/A' : (v / 1000).toFixed(2) },
-                { field: 'moving_time', title: '用时', sortable: true, sorter: (a,b) => parseMovingTime(a) - parseMovingTime(b) },
-                { field: 'average_speed', title: '平均配速', sortable: true, formatter: v => (typeof v !== 'number' || v <= 0) ? 'N/A' : formatPace(1/v) },
-                { field: 'average_heartrate', title: '平均心率', sortable: true, formatter: v => typeof v !== 'number' ? 'N/A' : Math.round(v) },
-                { field: 'city', title: '城市', sortable: true },
+                { field: 'type', title: '类型', visible: false, sortable: true },
+                { field: 'distance', title: '距离', sortable: true, formatter: v => typeof v !== 'number' ? 'N/A' : (v / 1000).toFixed(2) },
+                { field: 'moving_time', title: '用时', visible: false, sortable: true, sorter: (a,b) => parseMovingTime(a) - parseMovingTime(b), formatter: v => v.split('.')[0] },
+                { field: 'average_speed', title: '配速', sortable: true, formatter: v => (typeof v !== 'number' || v <= 0) ? 'N/A' : formatPace(1/v) },
+                { field: 'average_heartrate', title: '心率', sortable: true, formatter: v => typeof v !== 'number' ? 'N/A' : Math.round(v) },
+                { field: 'city', title: '城市', visible: false, sortable: true },
             ],
-            data: allData, pagination: true, search: true, sortName: 'start_date_local', sortOrder: 'desc', showRefresh: true, showToggle: true, showColumns: true, mobileResponsive: true
+            data: allData, pagination: true, search: true, sortName: 'start_date_local', sortOrder: 'desc', mobileResponsive: true,
+            toolbar: '#toolbar', showRefresh: true, showToggle: true, showColumns: true,
+            iconsPrefix: 'fa',
+            icons: { refresh: 'fa-sync-alt', toggleOff: 'fa-toggle-off', toggleOn: 'fa-toggle-on', columns: 'fa-th-list', fullscreen: 'fa-arrows-alt' }
         });
     }
 
@@ -229,26 +255,29 @@ $(function() {
         const todayIndex = moment().date() - 1;
         const currentTotal = currentMonthCumulative[todayIndex] || 0;
         const prevTotal = prevMonthCumulative[todayIndex] || 0;
-        $('#stats-summary-text').html(`截至今日，本月已跑 <strong class="text-primary">${(currentTotal / 1000).toFixed(2)} km</strong>，上月同期为 <strong class="text-secondary">${(prevTotal / 1000).toFixed(2)} km</strong>。`);
+        const diffTotal = ((currentTotal - prevTotal) / 1000).toFixed(2);
+        const diffSign = diffTotal > 0 ? '+' : '';
+        const diffColorClass = diffTotal > 0 ? 'text-success' : 'text-danger'; 
+        $('#stats-summary-text').html(`本月已跑 <strong class="text-primary">${(currentTotal / 1000).toFixed(2)} km</strong>，较上月同期 <strong class="${diffColorClass}">${diffSign}${diffTotal} km</strong>。`);
     }
 
     function handleStandardViews() {
         $('#stats-table-container, #stats-summary-text').show();
         $('#time-nav').toggle(currentStatsPeriod === 'month' || currentStatsPeriod === 'year');
-
         const { aggregatedData, labels, dataMap } = aggregateData(currentStatsPeriod);
         renderStatsChart(labels, aggregatedData);
         renderStatsTable(aggregatedData);
         updateNavButtons();
-        
         const totalDistance = Array.from(dataMap.values()).reduce((s, item) => s + item.distance, 0);
-        let summaryHtml = `本周期总跑量: <strong class="text-primary">${(totalDistance / 1000).toFixed(2)} km</strong>`;
-        const numPeriods = labels.length;
-        if (numPeriods > 0) {
-            const avgDistance = totalDistance / numPeriods;
+        const totalPeriodNames = { 'month': '月', '16w': '16周', 'year': '年', 'all': '' };
+        const totalPeriodName = totalPeriodNames[currentStatsPeriod];
+        let summaryHtml = `${totalPeriodName}总跑量: <strong class="text-primary">${(totalDistance / 1000).toFixed(2)} km</strong>`;
+        const numPeriodsWithRuns = Array.from(dataMap.values()).filter(v => v.count > 0).length;
+        if (numPeriodsWithRuns > 0) {
+            const avgDistance = totalDistance / numPeriodsWithRuns;
             const periodNames = { '16w': '周', 'year': '月', 'all': '年' };
             const periodName = periodNames[currentStatsPeriod];
-            if(periodName) summaryHtml += `, 平均每${periodName}跑量: <strong class="text-success">${(avgDistance / 1000).toFixed(2)} km</strong>`;
+            if(periodName) summaryHtml += `, 平均每${periodName}: <strong class="text-success">${(avgDistance / 1000).toFixed(2)} km</strong>`;
         }
         $('#stats-summary-text').html(summaryHtml);
     }
@@ -262,21 +291,19 @@ $(function() {
         const daysInMonth = today.daysInMonth();
         const labels = Array.from({ length: daysInMonth }, (_, i) => i + 1);
         let currentMonthDaily = new Array(daysInMonth).fill(0), prevMonthDaily = new Array(daysInMonth).fill(0);
-
         allData.forEach(run => {
-            if (run.start_date_local_moment.isBetween(startOfThisMonth, today, null, '[]')) {
+            if (run.start_date_local_moment.isBetween(startOfThisMonth, today, 'day', '[]')) {
                 currentMonthDaily[run.start_date_local_moment.date() - 1] += run.distance;
             }
-            if (run.start_date_local_moment.isBetween(startOfLastMonth, endOfLastMonth, null, '[]') && run.start_date_local_moment.date() <= daysInMonth) {
+            if (run.start_date_local_moment.isBetween(startOfLastMonth, endOfLastMonth, 'day', '[]') && run.start_date_local_moment.date() <= daysInMonth) {
                 prevMonthDaily[run.start_date_local_moment.date() - 1] += run.distance;
             }
         });
-        
         const calculateCumulative = data => data.reduce((acc, val) => { acc.push((acc.length > 0 ? acc[acc.length - 1] : 0) + val); return acc; }, []);
         return { labels, currentMonthCumulative: calculateCumulative(currentMonthDaily), prevMonthCumulative: calculateCumulative(prevMonthDaily) };
     }
 
-    function aggregateData(period) { /* Omitted for brevity, logic unchanged from last correct version */
+    function aggregateData(period) { /* Logic unchanged */
         let aggregatedData = [], labels = [], dataMap = new Map();
         const addToMap = (key, run) => {
             if (!dataMap.has(key)) dataMap.set(key, { distance: 0, time: 0, weightedHr: 0, count: 0 });
@@ -320,21 +347,15 @@ $(function() {
         id: 'todayLine',
         afterDatasetsDraw(chart) {
             if (currentStatsPeriod !== 'trend') return;
-            const ctx = chart.ctx;
-            const todayIndex = moment().date() - 1;
+            const ctx = chart.ctx, todayIndex = moment().date() - 1;
             if (chart.getDatasetMeta(0).data.length <= todayIndex) return;
-            const x = chart.getDatasetMeta(0).data[todayIndex].x;
-            const topY = chart.scales.y.top;
-            const bottomY = chart.scales.y.bottom;
+            const x = chart.getDatasetMeta(0).data[todayIndex]?.x;
+            if (x === undefined) return;
+            const topY = chart.scales.y.top, bottomY = chart.scales.y.bottom;
             ctx.save();
-            ctx.beginPath();
-            ctx.moveTo(x, topY);
-            ctx.lineTo(x, bottomY);
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = 'rgba(220, 53, 69, 0.8)';
-            ctx.setLineDash([5, 5]);
-            ctx.stroke();
-            ctx.restore();
+            ctx.beginPath(); ctx.moveTo(x, topY); ctx.lineTo(x, bottomY);
+            ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(220, 53, 69, 0.8)'; ctx.setLineDash([5, 5]);
+            ctx.stroke(); ctx.restore();
         }
     };
     Chart.register(todayLinePlugin);
@@ -342,8 +363,8 @@ $(function() {
     function renderTrendChart(labels, currentData, prevData) {
         if (statsChart) statsChart.destroy();
         const ctx = document.getElementById('statsChart').getContext('2d');
-        const todayIndex = moment().date();
-        const processedCurrentData = currentData.map((d, i) => i < todayIndex ? (d / 1000).toFixed(2) : null);
+        const todayDate = moment().date();
+        const processedCurrentData = currentData.map((d, i) => i < todayDate ? (d / 1000).toFixed(2) : null);
         statsChart = new Chart(ctx, {
             type: 'line',
             data: {
@@ -364,12 +385,17 @@ $(function() {
             type: 'bar',
             data: {
                 labels: labels,
-                datasets: [{ label: '跑量 (km)', data: data.map(d => (d.distance / 1000).toFixed(2)), backgroundColor: 'rgba(0, 123, 255, 0.5)', borderColor: 'rgba(0, 123, 255, 1)', borderWidth: 1 }]
+                datasets: [{ label: '跑量', data: data.map(d => (d.distance / 1000).toFixed(2)), backgroundColor: 'rgba(0, 123, 255, 0.5)', borderColor: 'rgba(0, 123, 255, 1)', borderWidth: 1 }]
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
-                scales: { y: { beginAtZero: true, title: { display: true, text: '公里 (km)' } } },
-                plugins: { tooltip: { callbacks: { footer: (items) => { const item = data[items[0].dataIndex]; return [`用时: ${formatSeconds(item.time)}`, `配速: ${item.avgPace}`, `心率: ${item.avgHr || 'N/A'}`]; } } } }
+                scales: { y: { beginAtZero: true, title: { display: true, text: '距离 (km)' } } },
+                plugins: { 
+                	tooltip: { callbacks: { footer: (items) => { const item = data[items[0].dataIndex]; return [`用时: ${formatSeconds(item.time)}`, `配速: ${item.avgPace}`, `心率: ${item.avgHr || 'N/A'}`]; } } },
+                	legend: {
+                		display: false
+                	}
+                 }
             }
         });
     }
@@ -377,20 +403,20 @@ $(function() {
     function renderStatsTable(data) {
         const tableData = data.filter(d => d.distance > 0);
         tableData.reverse();
-        const periodTitle = {'month':'日期', '16w':'周 (开始于)', 'year':'月份', 'all':'年份'}[currentStatsPeriod] || '周期';
+        const periodTitle = {'month':'日期', '16w':'周', 'year':'月份', 'all':'年份'}[currentStatsPeriod] || '周期';
         $('#stats-table').bootstrapTable('destroy').bootstrapTable({
             columns: [
                 { field: 'period', title: periodTitle },
-                { field: 'distance', title: '跑量 (km)', formatter: v => (v / 1000).toFixed(2) },
+                { field: 'distance', title: '跑量', formatter: v => (v / 1000).toFixed(2) },
                 { field: 'time', title: '用时', formatter: v => formatSeconds(v) },
-                { field: 'avgHr', title: '平均心率' },
-                { field: 'avgPace', title: '平均配速' },
+                { field: 'avgHr', title: '心率' },
+                { field: 'avgPace', title: '配速' },
             ],
             data: tableData
         });
     }
 
-    function updateNavButtons() { /* Omitted for brevity, logic unchanged */
+    function updateNavButtons() { /* Logic unchanged */
         if (!allData || allData.length === 0) { $('#prev-time, #next-time').hide(); return; }
         const firstRunDate = allData[allData.length - 1].start_date_local_moment;
         if (currentStatsPeriod === 'month') {
