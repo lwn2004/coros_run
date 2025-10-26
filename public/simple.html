@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>跑步数据统计</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+    <style>
+        /* --- 全局和字体 (无变化) --- */
+        :root {
+            --color-primary: #0d6efd;
+            --color-primary-light: #e7f5ff;
+            --color-primary-border: #bde0fe;
+            --color-bg: #f8f9fa;
+            --color-bg-card: #ffffff;
+            --color-border: #e9ecef;
+            --color-text: #212529;
+            --color-text-muted: #6c757d;
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.07);
+            --border-radius-sm: 0.25rem; /* 4px */
+            --border-radius-md: 0.5rem;  /* 8px */
+            --border-radius-lg: 0.75rem; /* 12px */
+        }
+        
+        body {
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            margin: 0;
+            padding: 30px 15px;
+            box-sizing: border-box;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* --- 容器卡片 (无变化) --- */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--color-bg-card);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+        }
+
+        /* --- 摘要表格 --- */
+        .summary-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 24px;
+        }
+
+        .summary-table {
+            display: grid;
+            /* [!! 已修改 !!] 移除“目标”和“进度”列，变为 2 列 */
+            grid-template-columns: 2fr 1fr;
+            min-width: 400px; /* 最小宽度缩小 */
+            gap: 1px;
+            background-color: var(--color-border);
+            border: 1px solid var(--color-border);
+            border-radius: var(--border-radius-md);
+            overflow: hidden;
+        }
+
+        .summary-table > div {
+            padding: 14px 12px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--color-bg-card);
+            transition: background-color 0.2s ease-in-out;
+        }
+        
+        .col-header {
+            font-weight: 600;
+            background-color: var(--color-bg) !important;
+            color: var(--color-text-muted);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+
+        .summary-row-label {
+            font-weight: 600;
+            background-color: var(--color-bg) !important;
+            justify-content: space-between !important;
+            cursor: pointer;
+            /* [!! 新增 !!] 为指示条腾出空间并使其居中 */
+            position: relative;
+            padding-left: 24px; /* 增加左内边距 */
+        }
+
+        /* [!! 新增 !!] 点击提示：悬停和激活状态的垂直指示条 */
+        .summary-row-label::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 0px; /* 默认隐藏 */
+            background-color: #ced4da; /* 悬停颜色 */
+            border-radius: 0 4px 4px 0;
+            transition: all 0.2s ease;
+        }
+        
+        /* 悬停时显示灰色指示条 */
+        .summary-row-label:hover::before {
+            height: 20px;
+        }
+
+        /* 激活时显示蓝色指示条 */
+        .summary-row-label.active::before {
+            height: 28px;
+            background-color: var(--color-primary);
+        }
+        /* 激活状态悬停时，保持蓝色和高度 */
+         .summary-row-label.active:hover::before {
+            height: 28px;
+            background-color: var(--color-primary);
+         }
+
+
+        .summary-row-label span {
+            flex-grow: 1;
+            text-align: center;
+        }
+        
+        .summary-row-label span.clickable {
+            cursor: pointer;
+            color: var(--color-primary);
+            transition: color 0.2s;
+        }
+         .summary-row-label span.clickable:hover {
+            color: #0b5ed7;
+            text-decoration: underline;
+         }
+        
+        .summary-col {
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+        
+        /* --- 导航按钮 (< >) (无变化) --- */
+        .nav-btn {
+            background: #f1f3f5;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            width: 26px;
+            height: 26px;
+            line-height: 24px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--color-text-muted);
+            flex-shrink: 0;
+            transition: background-color 0.15s ease;
+        }
+        .nav-btn:hover { background-color: #e9ecef; }
+        .nav-btn:active { background-color: #dee2e6; }
+        .nav-btn.hidden { visibility: hidden; }
+
+        /* --- 高亮样式 (行) --- */
+        .summary-table .active {
+            background-color: var(--color-primary-light) !important;
+        }
+        .summary-table .active span.clickable {
+            color: #0056b3;
+            font-weight: 700;
+        }
+
+        /* [!! 新增 !!] 悬停时高亮整行（非激活状态） */
+        .summary-table > div:hover:not(.active) {
+            background-color: var(--color-bg) !important;
+        }
+
+
+        /* --- 图表 (无变化) --- */
+        .chart-container {
+            padding: 24px;
+            margin-top: 0;
+            border-top: 1px solid var(--color-border);
+            min-height: 350px;
+        }
+
+        /* --- 详细数据表格 (无变化) --- */
+        .details-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0 24px 24px;
+        }
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            min-width: 500px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--border-radius-md);
+            overflow: hidden;
+        }
+        .details-table th,
+        .details-table td {
+            border: none;
+            border-bottom: 1px solid var(--color-border);
+            padding: 12px 15px;
+            text-align: left;
+            white-space: nowrap;
+        }
+        .details-table th {
+            background-color: var(--color-bg);
+            font-weight: 600;
+            color: var(--color-text-muted);
+            font-size: 0.85rem;
+            border-bottom-width: 2px;
+        }
+        .details-table tbody tr {
+            transition: background-color 0.15s ease;
+        }
+        .details-table tbody tr:hover {
+            background-color: #f1f3f5;
+        }
+        .details-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .no-data-cell {
+            text-align: center !important;
+            color: var(--color-text-muted);
+            padding: 30px !important;
+        }
+
+        /* --- 模态框 (无变化) --- */
+        .modal {
+            display: flex; position: fixed; z-index: 1000; left: 0; top: 0;
+            width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.4);
+            justify-content: center; align-items: center;
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+        .modal.show { opacity: 1; pointer-events: auto; }
+        .modal-content {
+            background-color: var(--color-bg-card); padding: 20px;
+            border: none; border-radius: var(--border-radius-md); 
+            width: 90%; max-width: 400px; max-height: 80vh; 
+            overflow-y: auto; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-20px);
+            transition: transform 0.25s ease;
+        }
+        .modal.show .modal-content { transform: translateY(0); }
+        .modal-close {
+            color: #aaa; float: right; font-size: 28px;
+            font-weight: bold; cursor: pointer; line-height: 1;
+        }
+        .modal-title { 
+            font-size: 1.2rem; font-weight: 600; 
+            margin-bottom: 20px; margin-top: 5px;
+        }
+        .picker-options { display: flex; flex-wrap: wrap; gap: 10px; }
+        .picker-options button {
+            padding: 8px 14px; font-size: 0.95rem; cursor: pointer;
+            border: 1px solid #ced4da; background-color: var(--color-bg-card);
+            border-radius: var(--border-radius-sm);
+            transition: all 0.15s ease;
+        }
+        .picker-options button:hover {
+            background-color: #f8f9fa; border-color: #adb5bd;
+        }
+        .picker-options button:focus {
+            outline: none;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        }
+
+        /* --- 响应式 (无变化) --- */
+        @media (max-width: 600px) {
+            body { padding: 15px 0; }
+            .container {
+                border-radius: 0; box-shadow: none;
+                border-top: 1px solid var(--color-border);
+                border-bottom: 1px solid var(--color-border);
+            }
+            .summary-wrapper { padding: 15px; }
+            .summary-table > div { padding: 10px 8px; }
+            /* 响应式调整指示条的 padding */
+            .summary-row-label { padding-left: 16px; } 
+            
+            .nav-btn {
+                width: 24px; height: 24px; line-height: 22px; font-size: 14px;
+            }
+            .chart-container { padding: 15px; }
+            .details-wrapper { padding: 0 15px 15px; }
+            .details-table th, .details-table td { padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="summary-wrapper">
+            <div class="summary-table">
+                <div class="summary-label col-header">周期</div>
+                <div class="col-header">完成</div>
+
+                <div class="summary-row-label" data-view="total">
+                     <button class="nav-btn hidden">&lt;</button>
+                     <span>总跑量</span>
+                     <button class="nav-btn hidden">&gt;</button>
+                </div>
+                <div class="summary-col" data-view="total" id="completed-total">...</div>
+                <div class="summary-row-label" data-view="year">
+                    <button class="nav-btn" id="prev-year">&lt;</button>
+                    <span id="label-year" class="clickable">...年</span>
+                    <button class="nav-btn" id="next-year">&gt;</button>
+                </div>
+                <div class="summary-col" data-view="year" id="completed-year">...</div>
+                <div class="summary-row-label" data-view="month">
+                    <button class="nav-btn" id="prev-month">&lt;</button>
+                    <span id="label-month" class="clickable">...月</span>
+                    <button class="nav-btn" id="next-month">&gt;</button>
+                </div>
+                <div class="summary-col" data-view="month" id="completed-month">...</div>
+                <div class="summary-row-label" data-view="day">
+                    <button class="nav-btn" id="prev-day">&lt;</button>
+                    <span id="label-day" class="clickable">...日</span>
+                    <button class="nav-btn" id="next-day">&gt;</button>
+                </div>
+                <div class="summary-col" data-view="day" id="completed-day">...</div>
+                </div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="runChart"></canvas>
+        </div>
+
+        <div class="details-wrapper">
+            <table class="details-table">
+                <thead id="details-table-head">
+                    </thead>
+                <tbody id="details-table-body">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="date-picker-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" id="modal-close-btn">&times;</span>
+            <h3 id="modal-title" class="modal-title">选择日期</h3>
+            <div id="modal-options" class="picker-options">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 全局状态 ---
+        let allRuns = [];
+        let selectedDate = new Date();
+        let activeView = 'day';
+        let myRunChart = null;
+
+        // [!! 已移除 !!] TARGETS 常量
+
+        const MONTH_NAMES = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+
+        // --- DOM 元素引用 ---
+        const dom = {
+            labelYear: document.getElementById('label-year'),
+            labelMonth: document.getElementById('label-month'),
+            labelDay: document.getElementById('label-day'),
+            completed: {
+                total: document.getElementById('completed-total'),
+                year: document.getElementById('completed-year'),
+                month: document.getElementById('completed-month'),
+                day: document.getElementById('completed-day')
+            },
+            // [!! 已移除 !!] dom.progress
+            chartCanvas: document.getElementById('runChart').getContext('2d'),
+            detailsTableHead: document.getElementById('details-table-head'),
+            detailsTableBody: document.getElementById('details-table-body'),
+            summaryTableElements: document.querySelectorAll('.summary-table > div'),
+            prevYearBtn: document.getElementById('prev-year'),
+            nextYearBtn: document.getElementById('next-year'),
+            prevMonthBtn: document.getElementById('prev-month'),
+            nextMonthBtn: document.getElementById('next-month'),
+            prevDayBtn: document.getElementById('prev-day'),
+            nextDayBtn: document.getElementById('next-day'),
+            modal: document.getElementById('date-picker-modal'),
+            modalTitle: document.getElementById('modal-title'),
+            modalOptions: document.getElementById('modal-options'),
+            modalCloseBtn: document.getElementById('modal-close-btn')
+        };
+
+        // --- 实用工具函数 ---
+        function formatKm(meters) { return (meters / 1000).toFixed(2) + ' km'; }
+        // [!! 已移除 !!] formatPercent
+        function formatMovingTime(timeStr) { return timeStr.split('.')[0]; }
+        function formatPace(speedMps) {
+            if (speedMps === 0) return '-';
+            const paceMinPerKm = 1000 / (speedMps * 60);
+            const minutes = Math.floor(paceMinPerKm);
+            const seconds = Math.floor((paceMinPerKm - minutes) * 60);
+            return `${minutes}'${seconds.toString().padStart(2, '0')}"`;
+        }
+        function getDaysInMonth(year, month) { return new Date(year, month + 1, 0).getDate(); }
+
+        // --- 数据处理函数 (无变化) ---
+        function parseData(data) {
+            return data
+                .filter(d => d.type === 'Run')
+                .map(run => ({
+                    ...run,
+                    dateObj: new Date(run.start_date_local),
+                    distanceKm: run.distance / 1000
+                }))
+                .sort((a, b) => b.dateObj - a.dateObj);
+        }
+        function filterRuns(view, date) {
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            const day = date.getDate();
+            switch (view) {
+                case 'total': return allRuns;
+                case 'year': return allRuns.filter(r => r.dateObj.getFullYear() === year);
+                case 'month': return allRuns.filter(r => r.dateObj.getFullYear() === year && r.dateObj.getMonth() === month);
+                case 'day': return allRuns.filter(r => r.dateObj.getFullYear() === year && r.dateObj.getMonth() === month && r.dateObj.getDate() === day);
+                case 'day-historical': return allRuns.filter(r => r.dateObj.getMonth() === month && r.dateObj.getDate() === day);
+                default: return [];
+            }
+        }
+        function setDefaultActiveView() {
+            const dayRuns = filterRuns('day', selectedDate).length;
+            const monthRuns = filterRuns('month', selectedDate).length;
+            const yearRuns = filterRuns('year', selectedDate).length;
+            if (dayRuns > 0) activeView = 'day';
+            else if (monthRuns > 0) activeView = 'month';
+            else if (yearRuns > 0) activeView = 'year';
+            else activeView = 'total';
+        }
+
+        // --- UI 更新函数 ---
+        function updateUI() {
+            updateSummaryTable();
+            updateChart();
+            updateDetailedTable();
+            updateHighlights();
+        }
+
+        // [!! 已修改 !!] 移除“进度”更新
+        function updateSummaryTable() {
+            const year = selectedDate.getFullYear();
+            const month = selectedDate.getMonth();
+            const day = selectedDate.getDate();
+            
+            dom.labelYear.textContent = `${year}年`;
+            dom.labelMonth.textContent = `${month + 1}月`;
+            dom.labelDay.textContent = `${day}日`;
+
+            const completedKm = {
+                total: filterRuns('total', selectedDate).reduce((sum, r) => sum + r.distanceKm, 0),
+                year: filterRuns('year', selectedDate).reduce((sum, r) => sum + r.distanceKm, 0),
+                month: filterRuns('month', selectedDate).reduce((sum, r) => sum + r.distanceKm, 0),
+                day: filterRuns('day', selectedDate).reduce((sum, r) => sum + r.distanceKm, 0)
+            };
+
+            dom.completed.total.textContent = completedKm.total.toFixed(2) + ' km';
+            dom.completed.year.textContent = completedKm.year.toFixed(2) + ' km';
+            dom.completed.month.textContent = completedKm.month.toFixed(2) + ' km';
+            dom.completed.day.textContent = completedKm.day.toFixed(2) + ' km';
+        }
+
+        // --- 更新图表 (无变化) ---
+        function updateChart() {
+            if (myRunChart) {
+                myRunChart.destroy();
+            }
+            let chartConfig;
+            switch (activeView) {
+                case 'total': chartConfig = getChartConfig_Total(); break;
+                case 'year': chartConfig = getChartConfig_Year(); break;
+                case 'month': chartConfig = getChartConfig_Month(); break;
+                case 'day': chartConfig = getChartConfig_DayHistorical(); break;
+            }
+            myRunChart = new Chart(dom.chartCanvas, chartConfig);
+        }
+        
+        // --- 图表配置生成器 (无变化) ---
+        const chartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            aspectRatio: 1.8,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#fff', titleColor: '#333', bodyColor: '#555',
+                    borderColor: '#ddd', borderWidth: 1, padding: 10,
+                    cornerRadius: 6, boxPadding: 3
+                }
+            },
+            scales: {
+                x: { grid: { display: false }, ticks: { color: '#555' } }, 
+                y: { grid: { color: '#e9ecef' }, ticks: { color: '#555' } } 
+            }
+        };
+        function getChartConfig_Total() {
+            const dataByYear = allRuns.reduce((acc, run) => {
+                const year = run.dateObj.getFullYear();
+                acc[year] = (acc[year] || 0) + run.distanceKm;
+                return acc;
+            }, {});
+            const labels = Object.keys(dataByYear).sort((a,b) => a - b);
+            const data = labels.map(year => dataByYear[year]);
+            return {
+                type: 'bar',
+                data: { labels: labels, datasets: [{ 
+                    label: '每年总跑量 (km)', data: data, 
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderRadius: 4
+                }] },
+                options: { ...chartOptions, plugins: { ...chartOptions.plugins, title: { display: true, text: '每年总跑量 (km)' } } }
+            };
+        }
+        function getChartConfig_Year() {
+            const yearRuns = filterRuns('year', selectedDate);
+            const dataByMonth = Array(12).fill(0);
+            yearRuns.forEach(run => { dataByMonth[run.dateObj.getMonth()] += run.distanceKm; });
+            return {
+                type: 'bar',
+                data: { labels: MONTH_NAMES, datasets: [{ 
+                    label: '每月跑量 (km)', data: dataByMonth, 
+                    backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderRadius: 4
+                }] },
+                options: { ...chartOptions, plugins: { ...chartOptions.plugins, title: { display: true, text: `${selectedDate.getFullYear()}年每月跑量 (km)` } } }
+            };
+        }
+        function getChartConfig_Month() {
+            const monthRuns = filterRuns('month', selectedDate);
+            const daysInMonth = getDaysInMonth(selectedDate.getFullYear(), selectedDate.getMonth());
+            const labels = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+            const dataByDay = Array(daysInMonth).fill(0);
+            monthRuns.forEach(run => { dataByDay[run.dateObj.getDate() - 1] += run.distanceKm; });
+            return {
+                type: 'bar',
+                data: { labels: labels, datasets: [{ 
+                    label: '每日跑量 (km)', data: dataByDay, 
+                    backgroundColor: 'rgba(255, 159, 64, 0.7)',
+                    borderColor: 'rgba(255, 159, 64, 1)',
+                    borderRadius: 4
+                }] },
+                options: { ...chartOptions, plugins: { ...chartOptions.plugins, title: { display: true, text: `${selectedDate.getFullYear()}年${selectedDate.getMonth() + 1}月每日跑量 (km)` } } }
+            };
+        }
+        function getChartConfig_DayHistorical() {
+            const historicalRuns = filterRuns('day-historical', selectedDate);
+            const dataByYear = historicalRuns.reduce((acc, run) => {
+                const year = run.dateObj.getFullYear();
+                acc[year] = (acc[year] || 0) + run.distanceKm;
+                return acc;
+            }, {});
+            const labels = Object.keys(dataByYear).sort((a,b) => a - b);
+            const data = labels.map(year => dataByYear[year]);
+            const dayStr = `${selectedDate.getMonth() + 1}月${selectedDate.getDate()}日`;
+            return {
+                type: 'bar',
+                data: { labels: labels, datasets: [{ 
+                    label: '跑量 (km)', data: data, 
+                    backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderRadius: 4
+                }] },
+                options: { ...chartOptions, plugins: { ...chartOptions.plugins, title: { display: true, text: `历年 ${dayStr} 跑量 (km)` } } }
+            };
+        }
+
+        // --- 更新详细表格 (无变化) ---
+        function updateDetailedTable() {
+            dom.detailsTableHead.innerHTML = '';
+            dom.detailsTableBody.innerHTML = '';
+            let noDataMessage = '该周期内无跑步数据';
+            switch (activeView) {
+                case 'total':
+                    dom.detailsTableHead.innerHTML = '<tr><th>年份</th><th>总距离 (km)</th><th>总次数</th><th>平均距离 (km)</th></tr>';
+                    const dataByYear = allRuns.reduce((acc, run) => {
+                        const year = run.dateObj.getFullYear();
+                        if (!acc[year]) acc[year] = { distance: 0, count: 0 };
+                        acc[year].distance += run.distanceKm;
+                        acc[year].count++;
+                        return acc;
+                    }, {});
+                    const years = Object.keys(dataByYear).sort((a,b) => b - a);
+                    if (years.length > 0) {
+                        years.forEach(year => {
+                            const data = dataByYear[year];
+                            const avg = data.count > 0 ? (data.distance / data.count).toFixed(2) : 0;
+                            dom.detailsTableBody.innerHTML += `<tr><td>${year}</td><td>${data.distance.toFixed(2)}</td><td>${data.count}</td><td>${avg}</td></tr>`;
+                        });
+                    }
+                    break;
+                case 'year':
+                    dom.detailsTableHead.innerHTML = '<tr><th>月份</th><th>总距离 (km)</th><th>总次数</th><th>平均距离 (km)</th></tr>';
+                    const yearRuns = filterRuns('year', selectedDate);
+                    const dataByMonth = Array(12).fill(null).map(() => ({ distance: 0, count: 0 }));
+                    yearRuns.forEach(run => {
+                        const month = run.dateObj.getMonth();
+                        dataByMonth[month].distance += run.distanceKm;
+                        dataByMonth[month].count++;
+                    });
+                    if (yearRuns.length > 0) {
+                        dataByMonth.forEach((data, index) => {
+                            if (data.count > 0) {
+                                const avg = (data.distance / data.count).toFixed(2);
+                                dom.detailsTableBody.innerHTML += `<tr><td>${MONTH_NAMES[index]}</td><td>${data.distance.toFixed(2)}</td><td>${data.count}</td><td>${avg}</td></tr>`;
+                            }
+                        });
+                    }
+                    break;
+                case 'month':
+                case 'day':
+                    dom.detailsTableHead.innerHTML = '<tr><th>日期</th><th>距离 (km)</th><th>运动时间</th><th>平均配速 (min/km)</th><th>平均心率</th></tr>';
+                    const runsToShow = (activeView === 'month') ? 
+                        filterRuns('month', selectedDate) : 
+                        filterRuns('day-historical', selectedDate);
+                    if (runsToShow.length > 0) {
+                        runsToShow.forEach(run => {
+                            dom.detailsTableBody.innerHTML += `
+                                <tr>
+                                    <td>${run.start_date_local}</td>
+                                    <td>${run.distanceKm.toFixed(2)}</td>
+                                    <td>${formatMovingTime(run.moving_time)}</td>
+                                    <td>${formatPace(run.average_speed)}</td>
+                                    <td>${run.average_heartrate || '-'}</td>
+                                </tr>`;
+                        });
+                    }
+                    break;
+            }
+            if (dom.detailsTableBody.innerHTML === '') {
+                 const cols = dom.detailsTableHead.querySelectorAll('th').length || 1;
+                 dom.detailsTableBody.innerHTML = `<tr><td colspan="${cols}" class="no-data-cell">${noDataMessage}</td></tr>`;
+            }
+        }
+        
+        // --- 更新高亮 (无变化) ---
+        function updateHighlights() {
+            dom.summaryTableElements.forEach(el => el.classList.remove('active'));
+            const activeElements = document.querySelectorAll(`[data-view="${activeView}"]`);
+            activeElements.forEach(el => el.classList.add('active'));
+        }
+        
+        // --- 日期选择器 (无变化) ---
+        function showDatePicker(type) {
+            dom.modalOptions.innerHTML = '';
+            let title = '';
+            if (type === 'day') {
+                title = `选择日期 (${selectedDate.getFullYear()}年${selectedDate.getMonth() + 1}月)`;
+                const monthRuns = filterRuns('month', selectedDate);
+                const runDays = [...new Set(monthRuns.map(r => r.dateObj.getDate()))].sort((a,b) => a - b);
+                if (runDays.length === 0) {
+                     dom.modalOptions.innerHTML = '<p>本月无跑步记录</p>';
+                } else {
+                    runDays.forEach(day => {
+                        const btn = document.createElement('button');
+                        btn.textContent = `${day}日`;
+                        btn.onclick = () => {
+                            selectedDate.setDate(day);
+                            closeModal();
+                            updateUI();
+                        };
+                        dom.modalOptions.appendChild(btn);
+                    });
+                }
+            } else if (type === 'month') {
+                title = `选择月份 (${selectedDate.getFullYear()}年)`;
+                MONTH_NAMES.forEach((name, index) => {
+                    const btn = document.createElement('button');
+                    btn.textContent = name;
+                    btn.onclick = () => {
+                        selectedDate.setMonth(index);
+                        selectedDate.setDate(Math.min(selectedDate.getDate(), getDaysInMonth(selectedDate.getFullYear(), index)));
+                        closeModal();
+                        updateUI();
+                    };
+                    dom.modalOptions.appendChild(btn);
+                });
+            } else if (type === 'year') {
+                title = '选择年份';
+                const runYears = [...new Set(allRuns.map(r => r.dateObj.getFullYear()))].sort((a,b) => b - a);
+                 if (runYears.length === 0) {
+                     dom.modalOptions.innerHTML = '<p>无跑步记录</p>';
+                } else {
+                    runYears.forEach(year => {
+                        const btn = document.createElement('button');
+                        btn.textContent = `${year}年`;
+                        btn.onclick = () => {
+                            selectedDate.setFullYear(year);
+                            closeModal();
+                            updateUI();
+                        };
+                        dom.modalOptions.appendChild(btn);
+                    });
+                }
+            }
+            dom.modalTitle.textContent = title;
+            dom.modal.classList.add('show');
+        }
+        function closeModal() {
+            dom.modal.classList.remove('show');
+        }
+
+        // --- 事件监听器 ---
+        function setupEventListeners() {
+            // 1. 行点击事件 (无变化)
+            document.querySelectorAll('.summary-row-label, .summary-col').forEach(el => {
+                el.addEventListener('click', (e) => {
+                    const view = e.currentTarget.dataset.view;
+                    if (view) {
+                        activeView = view;
+                        updateChart();
+                        updateDetailedTable();
+                        updateHighlights();
+                    }
+                });
+            });
+
+            // [!! 新增 !!] 行悬停事件，用于同步高亮
+            document.querySelectorAll('.summary-row-label, .summary-col').forEach(el => {
+                el.addEventListener('mouseenter', (e) => {
+                    const view = e.currentTarget.dataset.view;
+                    if (view && view !== activeView) {
+                        document.querySelectorAll(`[data-view="${view}"]`).forEach(cell => {
+                            cell.classList.add('hover');
+                        });
+                    }
+                });
+                el.addEventListener('mouseleave', (e) => {
+                    const view = e.currentTarget.dataset.view;
+                    if (view) {
+                         document.querySelectorAll(`[data-view="${view}"]`).forEach(cell => {
+                            cell.classList.remove('hover');
+                        });
+                    }
+                });
+            });
+
+            // 2. 日期标签点击事件 (无变化)
+            dom.labelYear.addEventListener('click', (e) => { e.stopPropagation(); showDatePicker('year'); });
+            dom.labelMonth.addEventListener('click', (e) => { e.stopPropagation(); showDatePicker('month'); });
+            dom.labelDay.addEventListener('click', (e) => { e.stopPropagation(); showDatePicker('day'); });
+            
+            // 3. 模态框关闭事件 (无变化)
+            dom.modalCloseBtn.addEventListener('click', closeModal);
+            dom.modal.addEventListener('click', (event) => {
+                if (event.target == dom.modal) {
+                    closeModal();
+                }
+            });
+            
+            // 4. 导航 (< >) 按钮事件 (无变化)
+            dom.prevYearBtn.addEventListener('click', (e) => { e.stopPropagation(); selectedDate.setFullYear(selectedDate.getFullYear() - 1); updateUI(); });
+            dom.nextYearBtn.addEventListener('click', (e) => { e.stopPropagation(); selectedDate.setFullYear(selectedDate.getFullYear() + 1); updateUI(); });
+            dom.prevMonthBtn.addEventListener('click', (e) => { e.stopPropagation(); selectedDate.setMonth(selectedDate.getMonth() - 1); updateUI(); });
+            dom.nextMonthBtn.addEventListener('click', (e) => { e.stopPropagation(); selectedDate.setMonth(selectedDate.getMonth() + 1); updateUI(); });
+            dom.prevDayBtn.addEventListener('click', (e) => { e.stopPropagation(); selectedDate.setDate(selectedDate.getDate() - 1); updateUI(); });
+            dom.nextDayBtn.addEventListener('click', (e) => { e.stopPropagation(); selectedDate.setDate(selectedDate.getDate() + 1); updateUI(); });
+        }
+
+        // --- 初始化 (无变化) ---
+        function fetchData() {
+            fetch('data/all.json')
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    allRuns = parseData(data);
+                    if (allRuns.length > 0) {
+                        selectedDate = new Date(allRuns[0].dateObj); 
+                    } else {
+                        selectedDate = new Date();
+                    }
+                    // [!! 注意 !!] 您的测试数据在 2025 年 10 月。
+                    // 为了让您的测试数据默认显示，我将覆盖 selectedDate 为 2025-10-17
+                    // 如果您使用自己的数据，请注释掉下面这一行
+                    //selectedDate = new Date("2025-10-17T06:13:52"); 
+                    
+                    setDefaultActiveView();
+                    setupEventListeners();
+                    updateUI();
+                })
+                .catch(error => {
+                    console.error('Error fetching or processing data:', error);
+                    alert('加载数据失败，请检查 data/all.json 文件是否存在或格式是否正确。');
+                    dom.completed.total.textContent = '加载失败';
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchData);
+    </script>
+</body>
+</html>
