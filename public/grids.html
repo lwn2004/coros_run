@@ -93,6 +93,17 @@ body{
   background:var(--l0);
   position:relative;
 }
+.cell span.label{
+	font-size: 14px;
+	color: var(--sub);
+	text-transform: uppercase;
+	padding: 6px;
+}
+.cell span.distance{
+	font-size: 24px;
+	color: #fff;
+	padding: 6px;
+}
 .cell span.pb{
   position:absolute;
   top:2px;right:2px;
@@ -243,11 +254,13 @@ function renderMonth(){
       const km=runs[key]||0;
       const c=document.createElement('div');
       c.className='cell level-'+level(km, 'm');
+	  c.innerHTML='<span class="label">'+d+'日</span>';
       if(pbDays.includes(key)){
-        c.innerHTML='<span class="pb">🏆</span>';
+        //c.innerHTML+='<span class="pb">🏆</span>';
       }
       if(km){
         bindTip(c,`${key} · ${km.toFixed(1)} km${pbDays.includes(key)?' · PB':''}`);
+		c.innerHTML+='<span class="distance">'+km.toFixed(1)+'</span>';
       }
       g.appendChild(c);
     }
@@ -265,6 +278,7 @@ function renderYear(){
     Object.entries(years[y]).sort().forEach(([m,km])=>{
       const c=document.createElement('div');
       c.className='cell level-'+level(km, 'y');
+	  c.innerHTML='<span class="label">'+m.slice(-2)+'月</span><span class="distance">'+km.toFixed(0)+'</span>';
       bindTip(c,`${m} · ${km.toFixed(1)} km`);
       g.appendChild(c);
     });
