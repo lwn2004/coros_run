@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>Running Journey</title>
 
 <style>
@@ -12,130 +12,133 @@
   --l0:#ebedf0;--l1:#d6f5df;--l2:#b7ebc6;--l3:#8fdfa8;
   --l4:#6cd18a;--l5:#4fc26b;--l6:#36ab56;
   --l7:#2e8f47;--l8:#246b37;--l9:#164b26;
+  --tip-bg: rgba(0,0,0,0.85);
 }
 @media(prefers-color-scheme:dark){
-:root{--bg:#0d1117;--card:#161b22;--text:#e6edf3;--sub:#8b949e;--l0:#21262d;}
+  :root{--bg:#0d1117;--card:#161b22;--text:#e6edf3;--sub:#8b949e;--l0:#21262d;--tip-bg: rgba(255,255,255,0.95);}
 }
+
 body{
-  margin:0;padding:32px 14px;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+  margin:0;padding:20px 12px;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
   background:var(--bg);color:var(--text);
   display:flex;flex-direction:column;align-items:center;
+  min-height: 100vh;
 }
+
 .top-bar{
   max-width:500px;width:100%;
   display:flex;justify-content:space-between;align-items:center;
+  margin-bottom: 10px;
 }
 .toggle button{
   padding:6px 12px;border-radius:999px;
   border:1px solid var(--l0);
   background:none;color:var(--sub);cursor:pointer;
+  font-size: 14px;
+  transition: all 0.2s;
 }
-.toggle .active{background:var(--primary);color:#fff;border:none}
+.toggle .active{background:var(--primary);color:#fff;border-color:var(--primary)}
 
 .card{
   max-width:500px;width:100%;
   background:var(--card);
   border-radius:16px;
   padding:24px;
-  margin-top:16px;
+  margin-top:10px;
   box-sizing: border-box;
   text-align: center;
-}
-.summary-title {
-	font-size: 14px;
-	font-weight: 500;
-	color: var(--sub);
-	letter-spacing: 0.5px;
-	margin-bottom: 12px;
-	text-transform: uppercase;
-}
-.summary-distance {
-	font-size: 48px;
-	font-weight: 800;
-	color: var(--text);
-	line-height: 1;
-	margin-bottom: 4px;
-	font-variant-numeric: tabular-nums;
-}
-.unit {
-	font-size: 18px;
-	font-weight: 600;
-	color: var(--sub);
-	margin-left: 4px;
-}
-.progress{height:8px;background:var(--l0);border-radius:4px;margin-top:8px}
-.progress span{display:block;height:100%;background:var(--primary);border-radius:4px}
-.progress-info{font-size:12px;color:var(--sub);display:flex;justify-content:space-between;margin-top:6px}
-.badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.badge{
-  font-size:12px;padding:4px 8px;
-  background:rgba(46,164,79,.15);
-  color:var(--primary);
-  border-radius:6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
-.calendar{max-width:500px;width:100%;margin-top:24px}
+.summary-title { font-size: 14px; color: var(--sub); text-transform: uppercase; letter-spacing: 1px;}
+.summary-distance { font-size: 42px; font-weight: 800; line-height: 1.1; margin: 8px 0; font-variant-numeric: tabular-nums;}
+.unit { font-size: 16px; font-weight: 600; color: var(--sub); margin-left: 4px; }
+
+.progress{height:8px;background:var(--l0);border-radius:4px;margin-top:12px;overflow: hidden;}
+.progress span{
+    display:block; height:100%; background:var(--primary); border-radius:4px;
+    width: 0; transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.progress-info{font-size:12px;color:var(--sub);display:flex;justify-content:space-between;margin-top:6px;}
+
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;justify-content: center;}
+.badge{
+  font-size:12px;padding:4px 10px;
+  background:var(--l1); color:var(--l9);
+  border-radius:99px; font-weight: 500;
+}
+
+.calendar{max-width:500px;width:100%;margin-top:20px;}
 .month{
   background:var(--card);
   border-radius:14px;
-  padding:16px;margin-bottom:18px;
+  padding:16px;margin-bottom:16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  animation: fadeIn 0.5s ease-out;
 }
-.title{font-weight:700;margin-bottom:8px}
-.grid{
-  display:grid;
-  grid-template-columns:repeat(7,1fr);
-  gap:8px;
-}
-.cell{
-  aspect-ratio:1;
-  border-radius:4px;
-  background:var(--l0);
-  position:relative;
-}
-.cell span.label{
-	font-size: 14px;
-	color: var(--sub);
-	text-transform: uppercase;
-	padding: 6px;
-}
-.cell span.distance{
-	font-size: 24px;
-	color: #fff;
-	padding: 6px;
-}
-.cell span.pb{
-  position:absolute;
-  top:2px;right:2px;
-  font-size:10px;
-}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-.level-0{background:var(--l0)}.level-1{background:var(--l1)}
-.level-2{background:var(--l2)}.level-3{background:var(--l3)}
-.level-4{background:var(--l4)}.level-5{background:var(--l5)}
-.level-6{background:var(--l6)}.level-7{background:var(--l7)}
-.level-8{background:var(--l8)}.level-9{background:var(--l9)}
+.title{font-weight:700;margin-bottom:12px; font-size: 15px; display: flex; justify-content: space-between;}
+.grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
+
+.cell{
+  aspect-ratio:1; border-radius:4px;
+  background:var(--l0); position:relative;
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  transition: transform 0.1s;
+}
+.cell:hover { transform: scale(1.05); z-index: 2; border: 1px solid rgba(0,0,0,0.1); }
+.cell .label{ font-size: 12px; color: var(--sub); position: absolute; top: 2px; left: 4px; transform: scale(0.85); transform-origin: top left;}
+.cell .distance{ font-size: 13px; font-weight: 700; color: #fff; z-index: 2;}
+
+.level-0{background:var(--l0); color: var(--sub) !important;}
+.level-1{background:var(--l1); .distance{color:var(--l8)}}
+.level-2{background:var(--l2); .distance{color:var(--l9)}}
+.level-3{background:var(--l3)} .level-4{background:var(--l4)}
+.level-5{background:var(--l5)} .level-6{background:var(--l6)}
+.level-7{background:var(--l7)} .level-8{background:var(--l8)}
+.level-9{background:var(--l9)}
 
 #tooltip{
   position:fixed;
-  background:#000;color:#fff;
-  padding:6px 10px;
-  border-radius:6px;
+  background:var(--tip-bg); color:#fff;
+  padding:10px 14px;
+  border-radius:8px;
   font-size:12px;
   pointer-events:none;
   opacity:0;
   z-index:9999;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  line-height: 1.6;
+  backdrop-filter: blur(4px);
 }
+@media (prefers-color-scheme:dark){ #tooltip { color: #000; } }
+
+.tip-row { display: flex; gap: 12px; justify-content: space-between; align-items: center; }
+.tip-header { border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:4px; margin-bottom: 4px; font-weight: 600; display: flex; justify-content: space-between;}
+@media (prefers-color-scheme:dark){ .tip-header { border-color: rgba(0,0,0,0.1); } }
+
 #toTop{
-  position:fixed;
-  right:16px;bottom:16px;
-  background:var(--primary);
-  color:#fff;border:none;
-  padding:10px 12px;
-  border-radius:50%;
-  cursor:pointer;
-  display:none;
+  position:fixed; right:20px; bottom:30px;
+  background:var(--primary); color:#fff; border:none;
+  width: 44px; height: 44px; border-radius:50%;
+  cursor:pointer; display:none;
+  font-size: 20px; box-shadow: 0 4px 12px rgba(46,164,79,0.4);
+  z-index: 100;
 }
+
+#loading-sentinel { height: 20px; margin-top: 10px; }
+
+@media (max-width: 480px) {
+  .summary-distance { font-size: 36px; }
+  .grid { gap: 4px; }
+  .cell .distance { font-size: 11px; }
+  #tooltip { display: none !important; opacity: 0 !important; }
+}
+@media (hover: none) { #tooltip { display: none !important; } }
 </style>
 </head>
 
@@ -152,7 +155,7 @@ body{
 <div class="card">
   <div class="summary-title">累计跑量</div>
   <div class="summary-distance">
-            <span id="total">0</span><span class="unit">km</span>
+    <span id="total">0.0</span><span class="unit">km</span>
   </div>
   <div class="progress"><span id="globe"></span></div>
   <div class="progress-info">
@@ -162,6 +165,7 @@ body{
 </div>
 
 <div class="calendar" id="calendar"></div>
+<div id="loading-sentinel"></div>
 <div id="tooltip"></div>
 <button id="toTop">↑</button>
 
@@ -173,43 +177,142 @@ const ppctEl=document.getElementById('ppct');
 const badgesEl=document.getElementById('badges');
 const cal=document.getElementById('calendar');
 const tip=document.getElementById('tooltip');
+const sentinel = document.getElementById('loading-sentinel');
 
-let runs={},months={},years={};
-let pb=0,pbDays=[];
+let runsRaw = {};
+let monthKeys = [];
+let years = {};
+let months={};
+let pb = 0, pbDays = [];
+let renderCursor = 0;
+const BATCH_SIZE = 12;
+let currentView = 'month';
+let observer = null;
+
+// 动画：数字增长
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        const ease = 1 - Math.pow(1 - progress, 4);
+        obj.innerHTML = (start + (end - start) * ease).toFixed(1);
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    };
+    window.requestAnimationFrame(step);
+}
+
+// 新增：解析 "0:56:34.570000" 这种格式为秒数
+function parseDuration(t) {
+    if (typeof t === 'number') return t; // 如果已经是数字，直接返回
+    if (!t || typeof t !== 'string') return 0;
+    
+    // 按冒号分割
+    const parts = t.split(':');
+    
+    // 处理 HH:MM:SS 或 HH:MM:SS.sss
+    if (parts.length === 3) {
+        return Number(parts[0]) * 3600 + Number(parts[1]) * 60 + parseFloat(parts[2]);
+    }
+    // 处理 MM:SS
+    if (parts.length === 2) {
+        return Number(parts[0]) * 60 + parseFloat(parts[1]);
+    }
+    return 0;
+}
+
+// 格式化秒数为 HH:MM:SS 显示
+function formatTime(seconds) {
+    seconds = Math.round(Number(seconds)); 
+    if(!seconds || isNaN(seconds)) return '--:--';
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    
+    if (h > 0) {
+        return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    } else {
+        return `${m}:${String(s).padStart(2,'0')}`;
+    }
+}
+
+// 计算配速 (秒/公里 -> M'SS")
+function formatPace(seconds, distKm) {
+    seconds = Number(seconds);
+    distKm = Number(distKm);
+    if (!seconds || !distKm || distKm === 0) return '--';
+    const paceSec = seconds / distKm;
+    const m = Math.floor(paceSec / 60);
+    const s = Math.floor(paceSec % 60);
+    return `${m}'${String(s).padStart(2,'0')}"`;
+}
 
 fetch(DATA_URL).then(r=>r.json()).then(data=>{
-  data.forEach(r=>{
-    const d=r.start_date_local.split(' ')[0];
-    const km=r.distance/1000;
-    runs[d]=(runs[d]||0)+km;
-
-    const m=d.slice(0,7);
-    months[m]=(months[m]||0)+km;
-
-    const y=d.slice(0,4);
-    years[y]=years[y]||{};
-    years[y][m]=(years[y][m]||0)+km;
-
-    if(km>pb){pb=km;pbDays=[d]}
-    else if(km===pb){pbDays.push(d)}
-  });
+  processData(data);
+  initObserver();
   renderSummary();
-  renderMonth();
+  renderNextBatch(); 
+}).catch(e => {
+    console.error(e);
+    cal.innerHTML = '<div style="padding:20px;color:#999">数据加载失败</div>';
 });
 
-function renderSummary(){
-  const total=Object.values(runs).reduce((a,b)=>a+b,0);
-  totalEl.textContent=total.toFixed(1);
-  globeEl.style.width=Math.min(total/40075*100,100)+'%';
-  ppctEl.textContent=Math.min(total/40075*100,100).toFixed(1)+'%';
-  let bestMonth=Object.entries(months).sort((a,b)=>b[1]-a[1])[0];
+function processData(data) {
+  runsRaw = {}; years = {}; pb = 0;
+  
+  data.forEach(r => {
+    const dateStr = r.start_date_local || r.start_date;
+    if(!dateStr) return;
+    
+    const d = dateStr.split(' ')[0];
+    const km = Number(r.distance || 0) / 1000;
+    if (!runsRaw[d]) runsRaw[d] = { totalKm: 0, runs: [] };
+    
+    runsRaw[d].totalKm += km;
+    runsRaw[d].runs.push(r);
 
-  let streak=0,tmp=0,last=null;
-  Object.keys(runs).sort().forEach(d=>{
-    if(last && new Date(d)-new Date(last)===86400000) tmp++;
-    else tmp=1;
-    streak=Math.max(streak,tmp);
-    last=d;
+    const m = d.slice(0, 7);
+    const y = d.slice(0, 4);
+	months[m]=(months[m]||0)+km;
+    years[y] = years[y] || {};
+    years[y][m] = (years[y][m] || 0) + km;
+
+    if (km > pb) { pb = km; pbDays = [d]; }
+    else if (km === pb) { pbDays.push(d); }
+  });
+
+  const tempMonths = new Set();
+  Object.keys(runsRaw).forEach(d => tempMonths.add(d.slice(0,7)));
+  monthKeys = Array.from(tempMonths).sort().reverse();
+}
+
+function renderSummary(){
+  const total = Object.values(runsRaw).reduce((a,b)=>a + b.totalKm, 0);
+  animateValue(totalEl, 0, total, 1500);
+
+  const earth = 40075;
+  const pct = Math.min(total/earth*100, 100);
+  
+  globeEl.style.width = '0%';
+  setTimeout(() => {
+      globeEl.style.width = pct + '%';
+  }, 100);
+  let bestMonth=Object.entries(months).sort((a,b)=>b[1]-a[1])[0];
+  ppctEl.textContent = (total/earth*100).toFixed(1) + '%';
+  
+  let streak = 0, currentStreak = 0, lastDate = null;
+  Object.keys(runsRaw).sort().forEach(d => {
+    if (lastDate) {
+        const diff = (new Date(d) - new Date(lastDate)) / (1000 * 60 * 60 * 24);
+        if (diff === 1) currentStreak++;
+        else currentStreak = 1;
+    } else {
+        currentStreak = 1;
+    }
+    streak = Math.max(streak, currentStreak);
+    lastDate = d;
   });
 
   badgesEl.innerHTML=`
@@ -218,91 +321,184 @@ function renderSummary(){
     <div class="badge">📅 连续 ${streak} 天</div>`;
 }
 
-function level(k, v){//v==='y' means year view,else month view
-  if(v==='y'){
-    return k>300?9:k>250?8:k>230?7:k>210?6:k>190?5:k>150?4:k>100?3:k>50?2:k>10?1:0;
-  }
-  else {
-    return k>40?9:k>25?8:k>20?7:k>16?6:k>12?5:k>8?4:k>5?3:k>3?2:k>0?1:0;;
-  }
-}
-function bindTip(el,text){
-  el.onmouseenter=()=>{tip.textContent=text;tip.style.opacity=1};
-  el.onmousemove=e=>{tip.style.left=e.clientX+'px';tip.style.top=e.clientY+'px'};
-  el.onmouseleave=()=>tip.style.opacity=0;
+function level(k, v){
+  if(v==='y') return k>300?9:k>250?8:k>230?7:k>210?6:k>190?5:k>150?4:k>100?3:k>50?2:k>10?1:0;
+  return k>40?9:k>25?8:k>20?7:k>16?6:k>12?5:k>8?4:k>5?3:k>3?2:k>0?1:0;
 }
 
-function renderMonth(){
-  cal.innerHTML='';
-  Object.entries(months).sort().reverse().forEach(([m,monthKm])=>{
-    const [y,mo]=m.split('-');
-    const days=new Date(y,mo,0).getDate();
-    const firstDay=new Date(y,mo-1,1).getDay(); // Sunday=0
+function buildTooltipContent(date, dayData) {
+    if (!dayData) return '';
+    let html = ``;
+    
+    dayData.runs.forEach((r, idx) => {
+        const dist = (Number(r.distance) / 1000).toFixed(2);
+        
+        // --- 核心修改：使用 parseDuration 解析字符串时间 ---
+        const movingTimeSec = parseDuration(r.moving_time); 
+        // ---------------------------------------------
+        
+        const timeStr = formatTime(movingTimeSec);
+        const paceStr = formatPace(movingTimeSec, Number(r.distance)/1000);
+        const hr = r.average_heartrate ? Math.round(r.average_heartrate) : '-';
+        
+        // 提取 HH:MM
+        let specificTime = '';
+        if(r.start_date_local) {
+            const match = r.start_date_local.match(/(\d{2}:\d{2})/);
+            if(match) specificTime = match[1];
+        }
 
-    const box=document.createElement('div');
-    box.className='month';
-    box.innerHTML=
-      `<div class="title">${y}年${mo}月 · ${monthKm.toFixed(1)} km</div>
-       <div class="grid"></div>`;
-    const g=box.querySelector('.grid');
-
-    for(let i=0;i<firstDay;i++){
-      g.appendChild(document.createElement('div'));
-    }
-    for(let d=1;d<=days;d++){
-      const key=`${y}-${mo}-${String(d).padStart(2,'0')}`;
-      const km=runs[key]||0;
-      const c=document.createElement('div');
-      c.className='cell level-'+level(km, 'm');
-	  c.innerHTML='<span class="label">'+d+'日</span>';
-      if(pbDays.includes(key)){
-        //c.innerHTML+='<span class="pb">🏆</span>';
-      }
-      if(km){
-        bindTip(c,`${key} · ${km.toFixed(1)} km${pbDays.includes(key)?' · PB':''}`);
-		c.innerHTML+='<span class="distance">'+km.toFixed(1)+'</span>';
-      }
-      g.appendChild(c);
-    }
-    cal.appendChild(box);
-  });
-}
-
-function renderYear(){
-  cal.innerHTML='';
-  Object.keys(years).sort().reverse().forEach(y=>{
-    const box=document.createElement('div');
-    box.className='month';
-    box.innerHTML=`<div class="title">${y}</div><div class="grid"></div>`;
-    const g=box.querySelector('.grid');
-    Object.entries(years[y]).sort().forEach(([m,km])=>{
-      const c=document.createElement('div');
-      c.className='cell level-'+level(km, 'y');
-	  c.innerHTML='<span class="label">'+m.slice(-2)+'月</span><span class="distance">'+km.toFixed(0)+'</span>';
-      bindTip(c,`${m} · ${km.toFixed(1)} km`);
-      g.appendChild(c);
+        if(idx === 0) {
+             html += `<div class="tip-header"><span>${date}</span> <span>${specificTime}</span></div>`;
+        } else {
+             html += `<div style="border-top:1px dashed rgba(255,255,255,0.2);margin:4px 0;padding-top:4px;font-size:11px;color:#bbb">Run ${idx+1} · ${specificTime}</div>`;
+        }
+        
+        html += `
+        <div>
+            <div class="tip-row">
+                <span style="font-weight:bold;font-size:13px">🏃 ${dist} km</span> 
+                <span style="color:#8fdfa8;font-weight:bold">${paceStr}</span>
+            </div>
+            <div class="tip-row" style="font-size:11px;color:#ccc;margin-top:2px">
+                <span>⏱ ${timeStr}</span>
+                <span>💓 ${hr} bpm</span>
+            </div>
+        </div>
+        `;
     });
-    cal.appendChild(box);
-  });
+    return html;
 }
 
-btnMonth.onclick=()=>{
-  btnMonth.classList.add('active');
-  btnYear.classList.remove('active');
-  renderMonth();
-};
-btnYear.onclick=()=>{
-  btnYear.classList.add('active');
-  btnMonth.classList.remove('active');
-  renderYear();
+function bindTip(el, date, dayData){
+  el.onmouseenter = () => {
+    tip.innerHTML = buildTooltipContent(date, dayData);
+    tip.style.opacity = 1;
+  };
+  el.onmousemove = e => {
+    const x = e.clientX + 15;
+    const y = e.clientY + 15;
+    tip.style.left = Math.min(x, window.innerWidth - 200) + 'px';
+    tip.style.top = y + 'px';
+  };
+  el.onmouseleave = () => tip.style.opacity = 0;
+}
+
+function initObserver() {
+    if (observer) observer.disconnect();
+    observer = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+            renderNextBatch();
+        }
+    }, { rootMargin: '200px' });
+    observer.observe(sentinel);
+}
+
+function renderNextBatch() {
+    if (currentView === 'month') {
+        const nextBatch = monthKeys.slice(renderCursor, renderCursor + BATCH_SIZE);
+        if (nextBatch.length === 0) return;
+        nextBatch.forEach(m => renderOneMonth(m));
+        renderCursor += BATCH_SIZE;
+    }
+}
+
+function renderOneMonth(m) {
+    const [y, mo] = m.split('-');
+    let monthTotal = 0;
+    if(years[y] && years[y][m]) monthTotal = years[y][m];
+
+    const days = new Date(y, mo, 0).getDate();
+    const firstDay = new Date(y, mo - 1, 1).getDay();
+
+    const box = document.createElement('div');
+    box.className = 'month';
+    box.innerHTML = `<div class="title"><span>${y}年${mo}月</span><span>${monthTotal.toFixed(1)} km</span></div><div class="grid"></div>`;
+    const g = box.querySelector('.grid');
+
+    for (let i = 0; i < firstDay; i++) {
+        g.appendChild(document.createElement('div'));
+    }
+    
+    for (let d = 1; d <= days; d++) {
+        const key = `${y}-${mo}-${String(d).padStart(2, '0')}`;
+        const dayData = runsRaw[key];
+        const km = dayData ? dayData.totalKm : 0;
+        
+        const c = document.createElement('div');
+        c.className = 'cell level-' + level(km, 'm');
+        c.innerHTML = `<span class="label">${d}</span>`;
+        
+        if (km > 0) {
+            c.innerHTML += `<span class="distance">${km.toFixed(1)}</span>`;
+            bindTip(c, key, dayData);
+        }
+        g.appendChild(c);
+    }
+    cal.appendChild(box);
+}
+
+function renderYearView() {
+    cal.innerHTML = '';
+    observer.disconnect();
+    
+    Object.keys(years).sort().reverse().forEach(y => {
+        const box = document.createElement('div');
+        box.className = 'month';
+        let yearTotal = Object.values(years[y]).reduce((a,b)=>a+b,0);
+        box.innerHTML = `<div class="title"><span>${y}</span><span>${yearTotal.toFixed(0)} km</span></div><div class="grid"></div>`;
+        const g = box.querySelector('.grid');
+        
+        Object.entries(years[y]).sort().forEach(([m, km]) => {
+            const c = document.createElement('div');
+            c.className = 'cell level-' + level(km, 'y');
+            c.innerHTML = `<span class="label">${Number(m.slice(-2))}月</span><span class="distance">${km.toFixed(0)}</span>`;
+            
+            c.onmouseenter = () => {
+                tip.innerHTML = `<div style="font-weight:bold">${m}</div><div>Total: ${km.toFixed(1)} km</div>`;
+                tip.style.opacity = 1;
+            };
+            c.onmousemove = e => {
+                 tip.style.left = (e.clientX+10)+'px'; 
+                 tip.style.top = (e.clientY+10)+'px';
+            };
+            c.onmouseleave = ()=>tip.style.opacity=0;
+            g.appendChild(c);
+        });
+        cal.appendChild(box);
+    });
+}
+
+const btnMonth = document.getElementById('btnMonth');
+const btnYear = document.getElementById('btnYear');
+
+btnMonth.onclick = () => {
+    if(currentView === 'month') return;
+    currentView = 'month';
+    btnMonth.classList.add('active');
+    btnYear.classList.remove('active');
+    
+    cal.innerHTML = '';
+    renderCursor = 0;
+    sentinel.style.display = 'block';
+    renderNextBatch();
+    initObserver();
 };
 
-window.onscroll=()=>{
-  document.getElementById('toTop').style.display=
-    window.scrollY>300?'block':'none';
+btnYear.onclick = () => {
+    if(currentView === 'year') return;
+    currentView = 'year';
+    btnYear.classList.add('active');
+    btnMonth.classList.remove('active');
+    sentinel.style.display = 'none';
+    renderYearView();
 };
-toTop.onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
+
+window.onscroll = () => {
+  document.getElementById('toTop').style.display = window.scrollY > 500 ? 'block' : 'none';
+};
+document.getElementById('toTop').onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+
 </script>
-
 </body>
 </html>
