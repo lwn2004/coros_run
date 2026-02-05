@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>跑步记录 - 大字版</title>
+    <style>
+        :root {
+            /* 颜色方案：保持清新，但增加文字对比度 */
+            --primary-color: #2ea44f;
+            --bg-color: #f0f2f5; /* 背景稍微深一点点，衬托白色卡片 */
+            --card-bg: #ffffff;
+            --text-main: #000000; /* 纯黑，最大对比度 */
+            --text-sub: #444444;  /* 深灰，比之前的浅灰更深，易读 */
+            --border-color: #d0d7de;
+            
+            /* 热力图颜色 */
+            --level-0: #ebedf0;
+            --level-1: #9be9a8;
+            --level-2: #40c463;
+            --level-3: #30a14e;
+            --level-4: #216e39;
+        }
+
+        body {
+            /* 基础字号调大到 18px */
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif; /* 优先使用清晰的无衬线字体 */
+            font-size: 18px; 
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        /* ----- 顶部卡片 ----- */
+        .summary-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); /* 阴影加重一点，层次更分明 */
+            padding: 30px; /* 内边距加大 */
+            width: 100%;
+            max-width: 600px; /* 宽度加宽 */
+            box-sizing: border-box;
+            margin-bottom: 40px;
+            text-align: center;
+            border: 1px solid #e1e1e1;
+        }
+
+        .summary-title {
+            font-size: 22px; /* 标题加大 */
+            font-weight: bold;
+            color: var(--text-sub);
+            margin-bottom: 15px;
+        }
+
+        .summary-distance {
+            font-size: 80px; /* 核心数字非常大 */
+            font-weight: 900;
+            color: var(--primary-color); /* 用绿色突出 */
+            line-height: 1;
+            margin-bottom: 10px;
+            letter-spacing: -2px;
+        }
+
+        .unit {
+            font-size: 30px; /* 单位也加大 */
+            font-weight: 700;
+            color: var(--text-main);
+            margin-left: 10px;
+        }
+
+        /* 进度条区域 */
+        .progress-container {
+            margin-top: 30px;
+        }
+
+        .progress-bar-bg {
+            background-color: #e0e0e0; /* 背景条加深，对比度更好 */
+            border-radius: 15px;
+            height: 20px; /* 进度条变粗 */
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            background-color: var(--primary-color);
+            height: 100%;
+            width: 0%;
+            border-radius: 15px;
+            transition: width 1s ease-out;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 18px; /* 进度文字加大 */
+            font-weight: 600;
+            color: var(--text-sub);
+        }
+
+        /* ----- 日历容器 ----- */
+        .calendar-container {
+            width: 100%;
+            max-width: 600px; /* 与上方卡片对齐 */
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .month-block {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 16px;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .month-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee; /* 分割线加粗 */
+        }
+
+        .month-title {
+            font-size: 24px; /* 月份标题加大 */
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .month-stat {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--text-sub);
+        }
+
+        .month-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px; /* 格子间距加大 */
+        }
+
+        .day-header {
+            font-size: 16px; /* 星期头加大 */
+            color: var(--text-sub);
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .day-cell {
+            aspect-ratio: 1;
+            border-radius: 6px;
+            background-color: var(--level-0);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        /* 增加点击/触摸的可操作区域感 */
+        .day-cell.active {
+            cursor: pointer;
+        }
+        
+        /* 颜色类保持不变 */
+        .level-0 { background-color: var(--level-0); }
+        .level-1 { background-color: var(--level-1); }
+        .level-2 { background-color: var(--level-2); }
+        .level-3 { background-color: var(--level-3); }
+        .level-4 { background-color: var(--level-4); }
+
+        /* ----- 图例 ----- */
+        .legend {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            font-size: 16px; /* 图例文字加大 */
+            font-weight: bold;
+            color: var(--text-sub);
+            margin: 10px 0;
+            width: 100%;
+            max-width: 600px;
+        }
+        .legend-item {
+            width: 20px; /* 图例色块加大 */
+            height: 20px;
+            border-radius: 4px;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        /* ----- 大号悬浮提示窗 (Tooltip) ----- */
+        #tooltip {
+            position: fixed;
+            background: #222; /* 深色背景 */
+            color: #fff;       /* 白色文字 */
+            padding: 15px 20px; /* 内边距加大 */
+            border-radius: 10px;
+            font-size: 20px;    /* 提示文字加大 */
+            font-weight: bold;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 9999;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            white-space: nowrap;
+            transform: translate(-50%, -130%); /* 显示在鼠标上方更远一点，防止挡住 */
+        }
+
+        /* ----- 加载状态 ----- */
+        #sentinel {
+            margin-top: 30px;
+            padding: 20px;
+            text-align: center;
+            color: var(--text-sub);
+            font-size: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="tooltip"></div>
+
+    <div class="summary-card">
+        <div class="summary-title">累计总跑量</div>
+        <div class="summary-distance">
+            <span id="total-dist">0.00</span><span class="unit">公里</span>
+        </div>
+        
+        <div class="progress-container">
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progress-fill"></div>
+            </div>
+            <div class="progress-info">
+                <span>环绕地球</span>
+                <span id="progress-text">0%</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="legend">
+        <span>少</span>
+        <span class="legend-item level-0"></span>
+        <span class="legend-item level-1"></span>
+        <span class="legend-item level-2"></span>
+        <span class="legend-item level-3"></span>
+        <span class="legend-item level-4"></span>
+        <span>多</span>
+    </div>
+
+    <div id="calendar-wrapper" class="calendar-container"></div>
+
+    <div id="sentinel">正在加载更多记录...</div>
+
+    <script>
+        const DATA_URL = 'https://run.linwn.net/data/all.json';
+        const EARTH_CIRCUMFERENCE = 40075;
+        const BATCH_SIZE = 4;
+
+        let runsData = {}; 
+        let allMonths = []; 
+        let currentRenderIndex = 0;
+        let observer;
+
+        // Tooltip 功能
+        const tooltip = document.getElementById('tooltip');
+        
+        function showTooltip(e, text) {
+            tooltip.textContent = text;
+            tooltip.style.opacity = '1';
+            updateTooltipPos(e);
+        }
+
+        function hideTooltip() {
+            tooltip.style.opacity = '0';
+        }
+
+        function updateTooltipPos(e) {
+            tooltip.style.left = e.clientX + 'px';
+            tooltip.style.top = e.clientY + 'px';
+        }
+
+        async function init() {
+            try {
+                const response = await fetch(DATA_URL);
+                if (!response.ok) throw new Error('网络错误');
+                const rawData = await response.json();
+                
+                processData(rawData);
+                renderSummaryCard(rawData);
+                prepareCalendarData(rawData);
+                
+                setupIntersectionObserver();
+            } catch (error) {
+                console.error(error);
+                document.getElementById('sentinel').textContent = '数据加载失败，请检查网络。';
+                document.getElementById('sentinel').style.color = 'red';
+            }
+        }
+
+        function processData(data) {
+            data.forEach(run => {
+                const dateStr = run.start_date_local.split(' ')[0];
+                const distanceKm = run.distance / 1000;
+                if (runsData[dateStr]) {
+                    runsData[dateStr] += distanceKm;
+                } else {
+                    runsData[dateStr] = distanceKm;
+                }
+            });
+        }
+
+        function renderSummaryCard(rawData) {
+            const totalDistanceMeters = rawData.reduce((acc, run) => acc + run.distance, 0);
+            const totalDistanceKm = (totalDistanceMeters / 1000).toFixed(2);
+            const percentage = (totalDistanceKm / EARTH_CIRCUMFERENCE * 100).toFixed(2); // 保留2位小数即可
+
+            document.getElementById('total-dist').textContent = totalDistanceKm;
+            document.getElementById('progress-text').textContent = `${percentage}%`;
+            
+            setTimeout(() => {
+                document.getElementById('progress-fill').style.width = `${Math.min(percentage, 100)}%`;
+            }, 300);
+        }
+
+        function prepareCalendarData(rawData) {
+            const dates = rawData.map(r => new Date(r.start_date_local.split(' ')[0]));
+            if(dates.length === 0) return;
+            const maxDate = new Date(Math.max.apply(null, dates));
+            const minDate = new Date(Math.min.apply(null, dates));
+
+            let current = new Date(maxDate.getFullYear(), maxDate.getMonth(), 1);
+            const end = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
+
+            while (current >= end) {
+                allMonths.push({
+                    year: current.getFullYear(),
+                    month: current.getMonth()
+                });
+                current.setMonth(current.getMonth() - 1);
+            }
+        }
+
+        function renderNextBatch() {
+            const wrapper = document.getElementById('calendar-wrapper');
+            const fragment = document.createDocumentFragment();
+            const nextBatch = allMonths.slice(currentRenderIndex, currentRenderIndex + BATCH_SIZE);
+            
+            if (nextBatch.length === 0) {
+                document.getElementById('sentinel').textContent = '—— 全部记录已显示 ——';
+                observer.disconnect();
+                return;
+            }
+
+            nextBatch.forEach(({year, month}) => {
+                const monthBlock = createMonthBlock(year, month);
+                fragment.appendChild(monthBlock);
+            });
+
+            wrapper.appendChild(fragment);
+            currentRenderIndex += BATCH_SIZE;
+        }
+
+        function createMonthBlock(year, month) {
+            const block = document.createElement('div');
+            block.className = 'month-block';
+
+            let monthTotal = 0;
+            const daysInMonthTemp = new Date(year, month + 1, 0).getDate();
+            for(let d=1; d<=daysInMonthTemp; d++) {
+                 const k = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                 if(runsData[k]) monthTotal += runsData[k];
+            }
+
+            // 头部
+            const header = document.createElement('div');
+            header.className = 'month-header';
+            
+            const title = document.createElement('div');
+            title.className = 'month-title';
+            title.textContent = `${year}年 ${month + 1}月`;
+            
+            const stat = document.createElement('div');
+            stat.className = 'month-stat';
+            stat.textContent = monthTotal > 0 ? `共 ${monthTotal.toFixed(1)} 公里` : '无记录';
+
+            header.appendChild(title);
+            header.appendChild(stat);
+            block.appendChild(header);
+
+            // 网格
+            const grid = document.createElement('div');
+            grid.className = 'month-grid';
+
+            const weeks = ['日', '一', '二', '三', '四', '五', '六'];
+            weeks.forEach(w => {
+                const h = document.createElement('div');
+                h.className = 'day-header';
+                h.textContent = w;
+                grid.appendChild(h);
+            });
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            for (let i = 0; i < firstDay; i++) {
+                grid.appendChild(document.createElement('div'));
+            }
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dayCell = document.createElement('div');
+                const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const dist = runsData[dateKey] || 0;
+                
+                dayCell.className = 'day-cell level-0';
+                
+                if (dist > 0) {
+                    dayCell.classList.add('active'); 
+                    if (dist < 3) dayCell.classList.add('level-1');
+                    else if (dist < 6) dayCell.classList.add('level-2');
+                    else if (dist < 10) dayCell.classList.add('level-3');
+                    else dayCell.classList.add('level-4');
+                    
+                    // Tooltip 内容，日期格式化为中文习惯
+                    const tooltipText = `${month + 1}月${d}日: 跑了 ${dist.toFixed(2)} 公里`;
+                    
+                    dayCell.addEventListener('mouseenter', (e) => showTooltip(e, tooltipText));
+                    dayCell.addEventListener('mousemove', (e) => updateTooltipPos(e));
+                    dayCell.addEventListener('mouseleave', hideTooltip);
+                }
+
+                grid.appendChild(dayCell);
+            }
+
+            block.appendChild(grid);
+            return block;
+        }
+
+        function setupIntersectionObserver() {
+            const options = { root: null, rootMargin: '200px', threshold: 0.1 };
+            observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) renderNextBatch();
+                });
+            }, options);
+            observer.observe(document.getElementById('sentinel'));
+        }
+
+        init();
+    </script>
+</body>
+</html>
