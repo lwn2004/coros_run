@@ -57,7 +57,7 @@ body{
 
 .progress{height:8px;background:var(--l0);border-radius:4px;margin-top:12px;overflow: hidden;}
 .progress span{
-    display:block; height:100%; background:var(--primary); border-radius:4px;
+    display:block; height:100%; background:linear-gradient(90deg, #40c463, #2ea44f); border-radius:4px;
     width: 0; transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .progress-info{font-size:12px;color:var(--sub);display:flex;justify-content:space-between;margin-top:6px;}
@@ -90,7 +90,7 @@ body{
 }
 .cell:hover { transform: scale(1.05); z-index: 2; border: 1px solid rgba(0,0,0,0.1); }
 .cell .label{ font-size: 12px; color: var(--sub); position: absolute; top: 2px; left: 4px; transform: scale(0.85); transform-origin: top left;}
-.cell .distance{ font-size: 13px; font-weight: 700; color: #fff; z-index: 2;}
+.cell .distance{ font-size: 18px; font-weight: 700; color: #fff; z-index: 2;}
 
 .level-0{background:var(--l0); color: var(--sub) !important;}
 .level-1{background:var(--l1); .distance{color:var(--l8)}}
@@ -136,9 +136,7 @@ body{
   .summary-distance { font-size: 36px; }
   .grid { gap: 4px; }
   .cell .distance { font-size: 11px; }
-  /*#tooltip { display: none !important; opacity: 0 !important; }*/
 }
-/*@media (hover: none) { #tooltip { display: none !important; } }*/
 </style>
 </head>
 
@@ -184,19 +182,21 @@ let monthKeys = [];
 let years = {};
 let months={};
 let pb = 0, pbDays = [];
+let fastest = 6*60;
+let fastest_pace_str = null;
 let renderCursor = 0;
 const BATCH_SIZE = 12;
 let currentView = 'month';
 let observer = null;
 
 // 动画：数字增长
-function animateValue(obj, start, end, duration) {
+function animateValue(obj, start, end, duration, suffix) {
     let startTimestamp = null;
     const step = (timestamp) => {
         if (!startTimestamp) startTimestamp = timestamp;
         const progress = Math.min((timestamp - startTimestamp) / duration, 1);
         const ease = 1 - Math.pow(1 - progress, 4);
-        obj.innerHTML = (start + (end - start) * ease).toFixed(1);
+        obj.innerHTML = (start + (end - start) * ease).toFixed(1) + suffix;
         if (progress < 1) {
             window.requestAnimationFrame(step);
         }
@@ -260,7 +260,7 @@ fetch(DATA_URL).then(r=>r.json()).then(data=>{
 });
 
 function processData(data) {
-  runsRaw = {}; years = {}; pb = 0;
+  runsRaw = {}; years = {}; pb = 0; fastest = 6*60; fastest_pace_str = '--';
   
   data.forEach(r => {
     const dateStr = r.start_date_local || r.start_date;
@@ -268,6 +268,10 @@ function processData(data) {
     
     const d = dateStr.split(' ')[0];
     const km = Number(r.distance || 0) / 1000;
+	const movingTimeSec = parseDuration(r.moving_time);
+    if(movingTimeSec/km < fastest) {fastest=movingTimeSec/km; fastest_pace_str=formatPace(movingTimeSec, km)}	
+    const timeStr = formatTime(movingTimeSec);
+    const paceStr = formatPace(movingTimeSec, Number(r.distance)/1000);
     if (!runsRaw[d]) runsRaw[d] = { totalKm: 0, runs: [] };
     
     runsRaw[d].totalKm += km;
@@ -290,10 +294,12 @@ function processData(data) {
 
 function renderSummary(){
   const total = Object.values(runsRaw).reduce((a,b)=>a + b.totalKm, 0);
-  animateValue(totalEl, 0, total, 1500);
+  animateValue(totalEl, 0, total, 1500, '');
 
   const earth = 40075;
   const pct = Math.min(total/earth*100, 100);
+  
+  animateValue(ppctEl, 0, pct, 1500, '%')
   
   globeEl.style.width = '0%';
   setTimeout(() => {
@@ -317,6 +323,7 @@ function renderSummary(){
 
   badgesEl.innerHTML=`
     <div class="badge">🏆 最长 ${pb.toFixed(1)} km</div>
+    <div class="badge">⚡ 最快 ${fastest_pace_str}</div>	
     <div class="badge">🔥 最猛 ${bestMonth[0]}</div>
     <div class="badge">📅 连续 ${streak} 天</div>`;
 }
