@@ -431,7 +431,7 @@ async function togglePBView() {
                     b.className = 'badge';
                     const dateStr = String(item.happenDay).replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
                     b.textContent = `⭐ ${typeMap[item.type]} ${formatTime(item.record)}`;
-                    b.style.animation = `cellAppear 0.5s ease-out forwards ${idx * 0.1}s`;
+                    b.style.animation = `cellAppear 0.5s ease-out both ${idx * 0.1}s`;
                     bindTip(b, `<div style="padding:4px">日期：${dateStr}<br>地点：${item.site || '-'}</div>`);
                     pbContainer.appendChild(b);
                 });
