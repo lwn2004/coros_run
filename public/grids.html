@@ -79,6 +79,14 @@ body{
 .badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;justify-content: center;}
 .badge{ font-size:12px;padding:4px 10px; background:var(--l1); color:var(--l9); border-radius:99px; font-weight: 500; cursor: help;}
 
+/* 新增：PB 容器与按钮样式 */
+#pb-badges { margin-top: 8px; display: none; border-top: 1px dashed var(--l0); padding-top: 12px; }
+.toggle-pb-btn {
+    background: none; border: none; color: var(--primary); font-size: 12px; margin-top: 12px;
+    cursor: pointer; padding: 4px 12px; border-radius: 4px; transition: 0.2s;
+}
+.toggle-pb-btn:hover { background: var(--l1); }
+
 /* 日历与柱状图视图 */
 .calendar{max-width:500px;width:100%;margin-top:20px;}
 .month{ background:var(--card); border-radius:14px; padding:16px;margin-bottom:16px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); }
@@ -162,6 +170,8 @@ body{
   <div class="progress"><span id="globe"></span></div>
   <div class="progress-info"><span>环球进度</span><span id="ppct">0%</span></div>
   <div class="badges" id="badges"></div>
+  <div class="badges" id="pb-badges"></div>
+  <button id="togglePb" class="toggle-pb-btn">展开 PB 记录 ↓</button>
 </div>
 
 <div class="calendar" id="calendar"></div>
@@ -171,11 +181,13 @@ body{
 
 <script>
 const DATA_URL = 'https://run.linwn.net/data/all.json';
+const PB_URL = 'https://run.linwn.net/data/pb.json';
 const BATCH_SIZE = 8;
 
 let runsRaw = {}, monthKeys = [], years = {}, months = {};
 let stats = { totalKm: 0, pb: { val: 0, date: '-' }, fastest: { paceVal: 9999, paceStr: '--', date: '-' }, bestMonth: { name: '-', val: 0 }, streak: { count: 0, start: '-', end: '-' } };
 let renderCursor = 0, currentView = 'month', currentMode = 'grid';
+let pbDataLoaded = false;
 
 /**
  * 工具函数
@@ -253,7 +265,6 @@ function processData(data) {
         }
     });
 
-    // 统计连跑
     const sortedDates = Object.keys(runsRaw).sort();
     let maxStreak = [], currentStreak = [];
     sortedDates.forEach((d, i) => {
@@ -391,6 +402,50 @@ function renderSummary() {
 }
 
 /**
+ * PB 数据加载与展示
+ */
+async function togglePBView() {
+    const pbContainer = document.getElementById('pb-badges');
+    const btn = document.getElementById('togglePb');
+    
+    if (pbContainer.style.display === 'flex') {
+        pbContainer.style.display = 'none';
+        btn.textContent = '展开 PB 记录 ↓';
+        return;
+    }
+
+    if (!pbDataLoaded) {
+        try {
+            const res = await fetch(PB_URL);
+            const data = await res.json();
+            
+            // PB 类型映射
+            const typeMap = { 7: "1km", 6: "3km", 5: "5km", 4: "10km", 2: "半马", 1: "全马" };
+            const targetTypes = [7, 6, 5, 4, 2, 1];
+            
+            pbContainer.innerHTML = '';
+            data.filter(item => targetTypes.includes(item.type))
+                .sort((a, b) => targetTypes.indexOf(a.type) - targetTypes.indexOf(b.type))
+                .forEach((item, idx) => {
+                    const b = document.createElement('div');
+                    b.className = 'badge';
+                    const dateStr = String(item.happenDay).replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
+                    b.textContent = `⭐ ${typeMap[item.type]} ${formatTime(item.record)}`;
+                    b.style.animation = `cellAppear 0.5s ease-out forwards ${idx * 0.1}s`;
+                    bindTip(b, `<div style="padding:4px">日期：${dateStr}<br>地点：${item.site || '-'}</div>`);
+                    pbContainer.appendChild(b);
+                });
+            pbDataLoaded = true;
+        } catch (e) {
+            console.error("加载 PB 失败", e);
+        }
+    }
+    
+    pbContainer.style.display = 'flex';
+    btn.textContent = '收起 PB 记录 ↑';
+}
+
+/**
  * 交互控制
  */
 const menu = document.getElementById('menu');
@@ -403,6 +458,7 @@ const toggleMenu = (show) => {
 };
 openBtn.onclick = () => toggleMenu(true);
 overlay.onclick = () => toggleMenu(false);
+document.getElementById('togglePb').onclick = togglePBView;
 
 const refresh = () => {
     document.getElementById('calendar').innerHTML = '';
@@ -428,7 +484,6 @@ function renderNextBatch() {
     renderCursor += BATCH_SIZE;
 }
 
-// 懒加载与返回顶部
 const observer = new IntersectionObserver(e => { if(e[0].isIntersecting) renderNextBatch(); }, { rootMargin: '200px' });
 observer.observe(document.getElementById('loading-sentinel'));
 
