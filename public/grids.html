@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>Running Journey - Pro</title>
+<title>Running Journey Pro</title>
 
 <style>
 :root{
@@ -20,38 +20,52 @@
 
 body{
   margin:0;padding:20px 12px;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;
   background:var(--bg);color:var(--text);
   display:flex;flex-direction:column;align-items:center;
   min-height: 100vh;
 }
 
+/* 顶部与菜单设计 */
 .top-bar{
   max-width:500px;width:100%;
   display:flex;justify-content:space-between;align-items:center;
   margin-bottom: 10px;
 }
-.toggle button{
-  padding:6px 12px;border-radius:999px;
-  border:1px solid var(--l0);
-  background:none;color:var(--sub);cursor:pointer;
-  font-size: 14px;
-  transition: all 0.2s;
+.menu-btn {
+  background: var(--card); border: 1px solid var(--l0);
+  width: 40px; height: 40px; border-radius: 8px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 20px; color: var(--sub); box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
-.toggle .active{background:var(--primary);color:#fff;border-color:var(--primary)}
 
+.menu-panel {
+  position: fixed; top: 0; right: -280px; width: 240px; height: 100%;
+  background: var(--card); z-index: 1000; padding: 30px 20px;
+  box-shadow: -4px 0 15px rgba(0,0,0,0.1);
+  transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.menu-panel.open { right: 0; }
+.menu-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.3); z-index: 999; display: none;
+}
+.menu-group { margin-bottom: 24px; }
+.menu-group label { display: block; font-size: 12px; color: var(--sub); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+
+.toggle-group { display: flex; background: var(--bg); padding: 4px; border-radius: 10px; gap: 4px; }
+.toggle-group button {
+  flex: 1; border: none; padding: 8px; border-radius: 8px;
+  background: none; color: var(--sub); cursor: pointer; font-size: 13px; transition: 0.2s;
+}
+.toggle-group button.active { background: var(--primary); color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+/* 卡片与进度条 */
 .card{
-  max-width:500px;width:100%;
-  background:var(--card);
-  border-radius:16px;
-  padding:24px;
-  margin-top:10px;
-  box-sizing: border-box;
-  text-align: center;
+  max-width:500px;width:100%; background:var(--card); border-radius:16px;
+  padding:24px; margin-top:10px; box-sizing: border-box; text-align: center;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
-
-.summary-title { font-size: 14px; color: var(--sub); text-transform: uppercase; letter-spacing: 1px;}
 .summary-distance { font-size: 42px; font-weight: 800; line-height: 1.1; margin: 8px 0; font-variant-numeric: tabular-nums;}
 .unit { font-size: 16px; font-weight: 600; color: var(--sub); margin-left: 4px; }
 
@@ -60,48 +74,41 @@ body{
     display:block; height:100%; background:linear-gradient(90deg, #40c463, #2ea44f); border-radius:4px;
     width: 0; transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.progress-info{font-size:12px;color:var(--sub);display:flex;justify-content:space-between;margin-top:6px;font-variant-numeric: tabular-nums;}
+.progress-info{font-size:12px;color:var(--sub);display:flex;justify-content:space-between;margin-top:6px;}
 
 .badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;justify-content: center;}
-.badge{
-  font-size:12px;padding:4px 10px;
-  background:var(--l1); color:var(--l9);
-  border-radius:99px; font-weight: 500; cursor: help;
-}
+.badge{ font-size:12px;padding:4px 10px; background:var(--l1); color:var(--l9); border-radius:99px; font-weight: 500; cursor: help;}
 
+/* 日历与柱状图视图 */
 .calendar{max-width:500px;width:100%;margin-top:20px;}
-.month{
-  background:var(--card);
-  border-radius:14px;
-  padding:16px;margin-bottom:16px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
-}
+.month{ background:var(--card); border-radius:14px; padding:16px;margin-bottom:16px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); }
 
-.title{font-weight:700;margin-bottom:12px; font-size: 14px; display: flex; flex-direction: column; gap: 4px;}
-.title .main-info { display: flex; justify-content: space-between; font-size: 16px;}
-.title .sub-info { display: flex; gap: 12px; color: var(--sub); font-weight: normal; font-size: 12px; align-self: flex-end; text-align: right;}
+.title{ margin-bottom:14px; display: flex; flex-direction: column; gap: 4px;}
+.title .main-info { display: flex; justify-content: space-between; font-size: 16px; font-weight: 700;}
+.title .sub-info { display: flex; gap: 12px; color: var(--sub); font-size: 12px; align-self: flex-end; }
 
 .grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
+.bar-view { display: flex; align-items: flex-end; gap: 4px; height: 120px; padding-top: 20px; border-bottom: 1px solid var(--l0); }
 
-/* 2. 改进：格子逐渐明显的动画 */
 @keyframes cellAppear {
-  from { opacity: 0; transform: translateY(8px) scale(0.9); }
+  from { opacity: 0; transform: translateY(10px) scale(0.9); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.cell{
-  aspect-ratio:1; border-radius:4px;
-  background:var(--l0); position:relative;
-  display: flex; flex-direction: column; justify-content: center; align-items: center;
-  transition: transform 0.1s;
-  opacity: 0; /* 初始透明 */
-  animation: cellAppear 0.5s ease-out forwards;
+.cell, .bar-item {
+  border-radius:4px; position:relative; opacity: 0;
+  animation: cellAppear 0.5s ease-out forwards; transition: transform 0.1s;
 }
-.cell:hover { transform: scale(1.05); z-index: 2; border: 1px solid rgba(0,0,0,0.1); }
-.cell .label{ font-size: 11px; color: var(--sub); position: absolute; top: 2px; left: 4px; transform: scale(0.8); transform-origin: top left;}
-.cell .distance{ font-size: 14px; font-weight: 700; color: #fff; z-index: 2;}
+.cell { aspect-ratio:1; display: flex; justify-content: center; align-items: center; background:var(--l0);}
+.bar-item { flex: 1; min-width: 4px; background: var(--l0); }
 
-/* 颜色等级样式保持不变，但增加低透明度下的文字清晰度 */
+.cell:hover, .bar-item:hover { transform: scale(1.05); z-index: 2; filter: brightness(1.05); }
+.cell .label, .bar-item .label { font-size: 10px; color: var(--sub); position: absolute; transform: scale(0.8); }
+.cell .label { top: 2px; left: 4px; }
+.bar-item .label { bottom: -18px; left: 50%; transform: translateX(-50%) scale(0.85); }
+.cell .distance { font-size: 14px; font-weight: 700; color: #fff; }
+
+/* 颜色等级 */
 .level-0{background:var(--l0); color: var(--sub) !important;}
 .level-1{background:var(--l1); .distance{color:var(--l8)}}
 .level-2{background:var(--l2); .distance{color:var(--l9)}}
@@ -111,32 +118,16 @@ body{
 .level-8{background:var(--l8)} .level-9{background:var(--l9)}
 
 #tooltip{
-  position:fixed; background:var(--tip-bg); color:#fff;
-  padding:10px 14px; border-radius:8px; font-size:12px;
-  pointer-events:none; opacity:0; z-index:9999;
-  transition: opacity 0.15s; white-space: nowrap;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2); line-height: 1.6; backdrop-filter: blur(4px);
+  position:fixed; background:var(--tip-bg); color:#fff; padding:10px 14px; border-radius:8px; font-size:12px;
+  pointer-events:none; opacity:0; z-index:9999; transition: opacity 0.15s; white-space: nowrap; line-height: 1.6; backdrop-filter: blur(4px);
 }
 @media (prefers-color-scheme:dark){ #tooltip { color: #000; } }
-
-.tip-row { display: flex; gap: 12px; justify-content: space-between; align-items: center; }
 .tip-header { border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:4px; margin-bottom: 4px; font-weight: 600; display: flex; justify-content: space-between;}
+.tip-row { display: flex; gap: 12px; justify-content: space-between; align-items: center; }
 
-#toTop{
-  position:fixed; right:20px; bottom:30px;
-  background:var(--primary); color:#fff; border:none;
-  width: 44px; height: 44px; border-radius:50%;
-  cursor:pointer; display:none;
-  font-size: 20px; box-shadow: 0 4px 12px rgba(46,164,79,0.4); z-index: 100;
-}
+#toTop{ position:fixed; right:20px; bottom:30px; background:var(--primary); color:#fff; border:none; width: 44px; height: 44px; border-radius:50%; display:none; cursor:pointer; z-index: 100; box-shadow: 0 4px 12px rgba(46,164,79,0.3);}
 
-#loading-sentinel { height: 20px; margin-top: 10px; }
-
-@media (max-width: 480px) {
-  .summary-distance { font-size: 36px; }
-  .grid { gap: 4px; }
-  .cell .distance { font-size: 11px; }
-}
+#loading-sentinel { height: 20px; }
 </style>
 </head>
 
@@ -144,21 +135,32 @@ body{
 
 <div class="top-bar">
   <strong>Running Journey</strong>
-  <div class="toggle">
-    <button id="btnMonth" class="active">Month</button>
-    <button id="btnYear">Year</button>
+  <button class="menu-btn" id="openMenu">☰</button>
+</div>
+
+<div class="menu-overlay" id="overlay"></div>
+<div class="menu-panel" id="menu">
+  <div class="menu-group">
+    <label>视图周期</label>
+    <div class="toggle-group">
+      <button id="btnMonth" class="active">月</button>
+      <button id="btnYear">年</button>
+    </div>
   </div>
+  <div class="menu-group">
+    <label>显示模式</label>
+    <div class="toggle-group">
+      <button id="btnGrid" class="active">日历</button>
+      <button id="btnBar">趋势</button>
+    </div>
+  </div>
+  <p style="font-size: 11px; color: var(--sub); margin-top: 40px;">跑步是和自己的对话。</p>
 </div>
 
 <div class="card">
-  <div class="summary-title">累计跑量</div>
-  <div class="summary-distance">
-    <span id="total">0.0</span><span class="unit">km</span>
-  </div>
+  <div class="summary-distance"><span id="total">0.0</span><span class="unit">km</span></div>
   <div class="progress"><span id="globe"></span></div>
-  <div class="progress-info">
-    <span>环球进度</span><span id="ppct">0%</span>
-  </div>
+  <div class="progress-info"><span>环球进度</span><span id="ppct">0%</span></div>
   <div class="badges" id="badges"></div>
 </div>
 
@@ -168,54 +170,30 @@ body{
 <button id="toTop">↑</button>
 
 <script>
-/**
- * 配置与常量
- */
-const DATA_URL = '/data/all.json';
+const DATA_URL = 'https://run.linwn.net/data/all.json';
 const BATCH_SIZE = 8;
 
-// DOM 引用
-const totalEl = document.getElementById('total');
-const globeEl = document.getElementById('globe');
-const ppctEl = document.getElementById('ppct');
-const badgesEl = document.getElementById('badges');
-const cal = document.getElementById('calendar');
-const tip = document.getElementById('tooltip');
-const sentinel = document.getElementById('loading-sentinel');
-
 let runsRaw = {}, monthKeys = [], years = {}, months = {};
-let stats = {
-    totalKm: 0,
-    pb: { val: 0, date: '-' },
-    fastest: { paceVal: 9999, paceStr: '--', date: '-' },
-    bestMonth: { name: '-', val: 0 },
-    streak: { count: 0, start: '-', end: '-' }
-};
-let renderCursor = 0;
-let currentView = 'month';
-let observer = null;
+let stats = { totalKm: 0, pb: { val: 0, date: '-' }, fastest: { paceVal: 9999, paceStr: '--', date: '-' }, bestMonth: { name: '-', val: 0 }, streak: { count: 0, start: '-', end: '-' } };
+let renderCursor = 0, currentView = 'month', currentMode = 'grid';
 
 /**
- * 辅助工具函数
+ * 工具函数
  */
 const parseDuration = t => {
     if (typeof t === 'number') return t;
-    if (!t || typeof t !== 'string') return 0;
-    const parts = t.split(':').map(Number);
-    if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
-    if (parts.length === 2) return parts[0] * 60 + parts[1];
-    return 0;
+    const parts = (t || "0:0:0").split(':').map(Number);
+    return parts.length === 3 ? parts[0]*3600 + parts[1]*60 + parts[2] : parts[0]*60 + parts[1];
 };
 
 const formatTime = s => {
-    s = Math.round(Number(s));
-    if (!s || isNaN(s)) return '--:--';
+    s = Math.round(s);
     const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
     return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}` : `${m}:${String(sec).padStart(2, '0')}`;
 };
 
 const formatPace = (s, km) => {
-    if (!s || !km || km === 0) return '--';
+    if (!s || !km) return '--';
     const p = s / km, m = Math.floor(p / 60), sec = Math.floor(p % 60);
     return `${m}'${String(sec).padStart(2, '0')}"`;
 };
@@ -232,21 +210,18 @@ function animateValue(obj, start, end, duration, suffix) {
     window.requestAnimationFrame(step);
 }
 
-function bindTip(el, contentProvider) {
-    el.onmouseenter = () => {
-        tip.innerHTML = typeof contentProvider === 'function' ? contentProvider() : contentProvider;
-        tip.style.opacity = 1;
-    };
-    el.onmousemove = e => {
-        const x = e.clientX + 15, y = e.clientY + 15;
-        tip.style.left = Math.min(x, window.innerWidth - 220) + 'px';
-        tip.style.top = y + 'px';
-    };
-    el.onmouseleave = () => tip.style.opacity = 0;
+/**
+ * 颜色分级 (4 6 8 10 12 15 20 30 42)
+ */
+function getLevel(k, mode) {
+    if (k <= 0) return 0;
+    const levels = mode === 'y' ? [100, 150, 180, 210, 240, 270, 300, 350, 400] : [4, 6, 8, 10, 12, 15, 20, 30, 42];
+    for (let i = levels.length - 1; i >= 0; i--) if (k >= levels[i]) return i + 1;
+    return 1;
 }
 
 /**
- * 1. 改进：数据处理加入月均配速和心率统计
+ * 数据聚合
  */
 function processData(data) {
     data.forEach(r => {
@@ -260,213 +235,211 @@ function processData(data) {
         runsRaw[fullDate].runs.push(r);
 
         const mKey = fullDate.slice(0, 7), yKey = fullDate.slice(0, 4);
-        
-        // 扩展月份统计数据结构
-        if (!months[mKey]) months[mKey] = { km: 0, time: 0, hrSum: 0, hrCount: 0 };
+        if (!months[mKey]) months[mKey] = { km: 0, time: 0, hrSum: 0, hrCount: 0, dailyMax: 0 };
         months[mKey].km += km;
         months[mKey].time += movingTime;
-        if (r.average_heartrate) {
-            months[mKey].hrSum += r.average_heartrate;
-            months[mKey].hrCount++;
-        }
+        months[mKey].dailyMax = Math.max(months[mKey].dailyMax, runsRaw[fullDate].totalKm);
+        if (r.average_heartrate) { months[mKey].hrSum += r.average_heartrate; months[mKey].hrCount++; }
 
-        years[yKey] = years[yKey] || {};
-        years[yKey][mKey] = (years[yKey][mKey] || 0) + km;
+        if (!years[yKey]) years[yKey] = { total: 0, months: {}, maxMonth: 0 };
+        years[yKey].months[mKey] = (years[yKey].months[mKey] || 0) + km;
+        years[yKey].total += km;
+        years[yKey].maxMonth = Math.max(years[yKey].maxMonth, years[yKey].months[mKey]);
+        
         stats.totalKm += km;
-
         if (km > stats.pb.val) stats.pb = { val: km, date: fullDate };
         if (paceVal < stats.fastest.paceVal && km > 1) {
             stats.fastest = { paceVal, paceStr: formatPace(movingTime, km), date: fullDate };
         }
     });
 
-    const topMonth = Object.entries(months).sort((a, b) => b[1].km - a[1].km)[0];
-    if (topMonth) stats.bestMonth = { name: topMonth[0], val: topMonth[1].km };
-
+    // 统计连跑
     const sortedDates = Object.keys(runsRaw).sort();
     let maxStreak = [], currentStreak = [];
     sortedDates.forEach((d, i) => {
         if (i > 0) {
             const diff = (new Date(d) - new Date(sortedDates[i - 1])) / 86400000;
-            if (diff === 1) { currentStreak.push(d); } 
-            else {
-                if (currentStreak.length > maxStreak.length) maxStreak = [...currentStreak];
-                currentStreak = [d];
-            }
-        } else { currentStreak = [d]; }
+            if (diff === 1) currentStreak.push(d);
+            else { if (currentStreak.length > maxStreak.length) maxStreak = [...currentStreak]; currentStreak = [d]; }
+        } else currentStreak = [d];
     });
     if (currentStreak.length > maxStreak.length) maxStreak = currentStreak;
     if (maxStreak.length > 0) stats.streak = { count: maxStreak.length, start: maxStreak[0], end: maxStreak[maxStreak.length - 1] };
+
+    const topMonth = Object.entries(months).sort((a,b)=>b[1].km - a[1].km)[0];
+    if (topMonth) stats.bestMonth = { name: topMonth[0], val: topMonth[1].km };
 
     monthKeys = Array.from(new Set(Object.keys(runsRaw).map(d => d.slice(0, 7)))).sort().reverse();
 }
 
 /**
- * 3. 改进：自定义格子颜色等级 (4 6 8 10 12 15 20 30 42)
+ * 视图渲染
  */
-function getLevel(k, mode) {
-    if(mode === 'y') return k>300?9:k>250?8:k>230?7:k>210?6:k>190?5:k>150?4:k>100?3:k>50?2:k>10?1:0;
-    
-    if (k <= 0) return 0;
-    const levels = [4, 6, 8, 10, 12, 15, 20, 30, 42];
-    for (let i = levels.length - 1; i >= 0; i--) {
-        if (k >= levels[i]) return i + 1;
-    }
-    return 1;
-}
-
-function renderSummary() {
-    animateValue(totalEl, 0, stats.totalKm, 1500, '');
-    const earth = 40075, pct = Math.min(stats.totalKm / earth * 100, 100);
-    animateValue(ppctEl, 0, pct, 1500, '%');
-    setTimeout(() => globeEl.style.width = Math.min(pct, 100) + '%', 100);
-
-    const badgeData = [
-        { label: `🏆 最长 ${stats.pb.val.toFixed(1)} km`, tip: `达成日期：${stats.pb.date}` },
-        { label: `⚡ 最快 ${stats.fastest.paceStr}`, tip: `达成日期：${stats.fastest.date}` },
-        { label: `🔥 最猛 ${stats.bestMonth.name}`, tip: `当月跑量：${stats.bestMonth.val.toFixed(1)} km` },
-        { label: `📅 连续 ${stats.streak.count} 天`, tip: `连跑区间：${stats.streak.start} ~ ${stats.streak.end}` }
-    ];
-
-    badgesEl.innerHTML = '';
-    badgeData.forEach(item => {
-        const b = document.createElement('div');
-        b.className = 'badge';
-        b.textContent = item.label;
-        bindTip(b, `<div style="padding:4px">${item.tip}</div>`);
-        badgesEl.appendChild(b);
-    });
-}
-
 function renderOneMonth(mKey) {
     const [y, mo] = mKey.split('-');
     const mData = months[mKey];
-    const monthTotal = mData.km || 0;
-    const avgPace = formatPace(mData.time, mData.km);
-    const avgHR = mData.hrCount > 0 ? Math.round(mData.hrSum / mData.hrCount) : '--';
-    
     const daysInMonth = new Date(y, mo, 0).getDate();
-    const firstDay = new Date(y, mo - 1, 1).getDay();
-
+    
     const box = document.createElement('div');
     box.className = 'month';
-    // 1. 改进：月视图标题加入均配速和平均心率
     box.innerHTML = `
         <div class="title">
-            <div class="main-info"><span>${y}年${mo}月</span><span>${monthTotal.toFixed(1)} km</span></div>
-            <div class="sub-info"><span>Avg.配速 ${avgPace}</span><span>Avg.心率 ${avgHR} bpm</span></div>
+            <div class="main-info"><span>${y}年${mo}月</span><span>${mData.km.toFixed(1)} km</span></div>
+            <div class="sub-info"><span>Avg. ${formatPace(mData.time, mData.km)}</span><span>Avg. ${mData.hrCount ? Math.round(mData.hrSum/mData.hrCount) : '--'} bpm</span></div>
         </div>
-        <div class="grid"></div>`;
-    const g = box.querySelector('.grid');
-
-    for (let i = 0; i < firstDay; i++) g.appendChild(document.createElement('div'));
+        <div class="${currentMode === 'grid' ? 'grid' : 'bar-view'}"></div>`;
     
+    const container = box.querySelector(currentMode === 'grid' ? '.grid' : '.bar-view');
+    if (currentMode === 'grid') {
+        const firstDay = new Date(y, mo - 1, 1).getDay();
+        for (let i = 0; i < firstDay; i++) container.appendChild(document.createElement('div'));
+    }
+
     for (let d = 1; d <= daysInMonth; d++) {
         const dateKey = `${y}-${mo}-${String(d).padStart(2, '0')}`;
-        const dayData = runsRaw[dateKey];
-        const km = dayData ? dayData.totalKm : 0;
+        const km = runsRaw[dateKey] ? runsRaw[dateKey].totalKm : 0;
+        const el = document.createElement('div');
+        el.className = `${currentMode === 'grid' ? 'cell' : 'bar-item'} level-${getLevel(km, 'm')}`;
         
-        const c = document.createElement('div');
-        c.className = `cell level-${getLevel(km, 'm')}`;
-        c.innerHTML = `<span class="label">${d}</span>`;
-        // 2. 改进：设置递增的动画延迟，实现顺滑的渐现效果
-        c.style.animationDelay = `${d * 0.02}s`;
-
-        if (km > 0) {
-            c.innerHTML += `<span class="distance">${km.toFixed(1)}</span>`;
-            bindTip(c, () => buildDayTooltip(dateKey, dayData));
+        if (currentMode === 'grid') {
+            el.innerHTML = `<span class="label">${d}</span>${km > 0 ? `<span class="distance">${km.toFixed(1)}</span>` : ''}`;
+        } else {
+            const h = km > 0 ? Math.max((km / mData.dailyMax) * 100, 5) : 0;
+            el.style.height = h + '%';
+            if (d === 1 || d === daysInMonth || d % 5 === 0) el.innerHTML = `<span class="label">${d}</span>`;
         }
-        g.appendChild(c);
+        
+        el.style.animationDelay = `${d * 0.015}s`;
+        if (km > 0) bindTip(el, () => buildDayTooltip(dateKey, runsRaw[dateKey]));
+        container.appendChild(el);
     }
-    cal.appendChild(box);
-}
-
-function buildDayTooltip(date, dayData) {
-    if (!dayData) return '';
-    return dayData.runs.map((r, idx) => {
-        const dist = (Number(r.distance) / 1000).toFixed(2);
-        const sec = parseDuration(r.moving_time);
-        const timeStr = formatTime(sec);
-        const paceStr = formatPace(sec, Number(r.distance)/1000);
-        const hr = r.average_heartrate ? Math.round(r.average_heartrate) : '-';
-        const stTime = r.start_date_local ? (r.start_date_local.match(/(\d{2}:\d{2})/) || [])[1] : '';
-
-        return `
-            ${idx === 0 ? `<div class="tip-header"><span>${date}</span> <span>${stTime}</span></div>` : 
-            `<div style="border-top:1px dashed rgba(255,255,255,0.2);margin:4px 0;padding-top:4px;font-size:11px;color:#bbb">Run ${idx+1} · ${stTime}</div>`}
-            <div>
-                <div class="tip-row"><span style="font-weight:bold;font-size:13px">🏃 ${dist} km</span> <span style="color:#8fdfa8;font-weight:bold">${paceStr}</span></div>
-                <div class="tip-row" style="font-size:11px;color:#ccc;margin-top:2px"><span>⏱ ${timeStr}</span><span>💓 ${hr} bpm</span></div>
-            </div>`;
-    }).join('');
+    document.getElementById('calendar').appendChild(box);
 }
 
 function renderYearView() {
+    const cal = document.getElementById('calendar');
     cal.innerHTML = '';
     Object.keys(years).sort().reverse().forEach(y => {
+        const yData = years[y];
         const box = document.createElement('div');
         box.className = 'month';
-        const yTotal = Object.values(years[y]).reduce((a,b)=>a+b,0);
-        box.innerHTML = `<div class="title"><div class="main-info"><span>${y}年</span><span>${yTotal.toFixed(0)} km</span></div></div><div class="grid"></div>`;
-        const g = box.querySelector('.grid');
-        
-        Object.entries(years[y]).sort().forEach(([mKey, km], idx) => {
-            const c = document.createElement('div');
-            c.className = `cell level-${getLevel(km, 'y')}`;
-            c.style.animationDelay = `${idx * 0.05}s`;
-            c.innerHTML = `<span class="label">${Number(mKey.slice(-2))}月</span><span class="distance">${km.toFixed(0)}</span>`;
-            bindTip(c, `<div style="font-weight:bold">${mKey}</div><div>跑量: ${km.toFixed(1)} km</div>`);
-            g.appendChild(c);
+        box.innerHTML = `<div class="title"><div class="main-info"><span>${y}年</span><span>${yData.total.toFixed(0)} km</span></div></div>
+                         <div class="${currentMode === 'grid' ? 'grid' : 'bar-view'}"></div>`;
+        const container = box.querySelector(currentMode === 'grid' ? '.grid' : '.bar-view');
+
+        Object.entries(yData.months).sort().forEach(([mKey, km], idx) => {
+            const el = document.createElement('div');
+            const mNum = parseInt(mKey.split('-')[1]);
+            el.className = `${currentMode === 'grid' ? 'cell' : 'bar-item'} level-${getLevel(km, 'y')}`;
+            
+            if (currentMode === 'grid') {
+                el.innerHTML = `<span class="label">${mNum}月</span><span class="distance">${km.toFixed(0)}</span>`;
+            } else {
+                el.style.height = (km / yData.maxMonth * 100) + '%';
+                el.innerHTML = `<span class="label">${mNum}月</span>`;
+            }
+            el.style.animationDelay = `${idx * 0.05}s`;
+            bindTip(el, `<strong>${mKey}</strong><br>跑量: ${km.toFixed(1)} km`);
+            container.appendChild(el);
         });
         cal.appendChild(box);
     });
 }
 
+function buildDayTooltip(date, dayData) {
+    return dayData.runs.map((r, idx) => {
+        const dist = (r.distance / 1000).toFixed(2);
+        const sec = parseDuration(r.moving_time);
+        const hr = r.average_heartrate ? Math.round(r.average_heartrate) : '-';
+        return `
+            ${idx === 0 ? `<div class="tip-header"><span>${date}</span></div>` : `<div style="border-top:1px dashed rgba(255,255,255,0.2);margin-top:4px;padding-top:4px"></div>`}
+            <div class="tip-row"><span style="font-weight:bold">🏃 ${dist} km</span> <span style="color:#8fdfa8">${formatPace(sec, dist)}</span></div>
+            <div class="tip-row" style="font-size:11px;color:#ccc"><span>⏱ ${formatTime(sec)}</span><span>💓 ${hr} bpm</span></div>`;
+    }).join('');
+}
+
+function bindTip(el, content) {
+    const tip = document.getElementById('tooltip');
+    el.onmouseenter = () => { tip.innerHTML = typeof content === 'function' ? content() : content; tip.style.opacity = 1; };
+    el.onmousemove = e => { 
+        tip.style.left = Math.min(e.clientX + 15, window.innerWidth - 200) + 'px'; 
+        tip.style.top = (e.clientY + 15) + 'px'; 
+    };
+    el.onmouseleave = () => tip.style.opacity = 0;
+}
+
+function renderSummary() {
+    animateValue(document.getElementById('total'), 0, stats.totalKm, 1500, '');
+    const earth = 40075, pct = Math.min(stats.totalKm / earth * 100, 100);
+    animateValue(document.getElementById('ppct'), 0, pct, 1500, '%');
+    setTimeout(() => document.getElementById('globe').style.width = pct + '%', 100);
+
+    const badgeData = [
+        { label: `🏆 最长 ${stats.pb.val.toFixed(1)} km`, tip: `日期：${stats.pb.date}` },
+        { label: `⚡ 最快 ${stats.fastest.paceStr}`, tip: `日期：${stats.fastest.date}` },
+        { label: `🔥 最猛 ${stats.bestMonth.name}`, tip: `单月：${stats.bestMonth.val.toFixed(1)} km` },
+        { label: `📅 连续 ${stats.streak.count} 天`, tip: `${stats.streak.start} ~ ${stats.streak.end}` }
+    ];
+    const bEl = document.getElementById('badges');
+    bEl.innerHTML = '';
+    badgeData.forEach(item => {
+        const b = document.createElement('div');
+        b.className = 'badge'; b.textContent = item.label;
+        bindTip(b, `<div style="padding:4px">${item.tip}</div>`);
+        bEl.appendChild(b);
+    });
+}
+
+/**
+ * 交互控制
+ */
+const menu = document.getElementById('menu');
+const overlay = document.getElementById('overlay');
+const openBtn = document.getElementById('openMenu');
+
+const toggleMenu = (show) => {
+    menu.classList.toggle('open', show);
+    overlay.style.display = show ? 'block' : 'none';
+};
+openBtn.onclick = () => toggleMenu(true);
+overlay.onclick = () => toggleMenu(false);
+
+const refresh = () => {
+    document.getElementById('calendar').innerHTML = '';
+    renderCursor = 0;
+    currentView === 'month' ? renderNextBatch() : renderYearView();
+    toggleMenu(false);
+};
+
+document.getElementById('btnMonth').onclick = function() { currentView = 'month'; updateBtn(this); refresh(); };
+document.getElementById('btnYear').onclick = function() { currentView = 'year'; updateBtn(this); refresh(); };
+document.getElementById('btnGrid').onclick = function() { currentMode = 'grid'; updateBtn(this); refresh(); };
+document.getElementById('btnBar').onclick = function() { currentMode = 'bar'; updateBtn(this); refresh(); };
+
+function updateBtn(el) {
+    Array.from(el.parentElement.children).forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+}
+
 function renderNextBatch() {
-    if (currentView !== 'month') return;
+    if (currentView !== 'month' || renderCursor >= monthKeys.length) return;
     const batch = monthKeys.slice(renderCursor, renderCursor + BATCH_SIZE);
-    if (batch.length === 0) return;
     batch.forEach(m => renderOneMonth(m));
     renderCursor += BATCH_SIZE;
 }
 
-function initObserver() {
-    if (observer) observer.disconnect();
-    observer = new IntersectionObserver(entries => {
-        if (entries[0].isIntersecting) renderNextBatch();
-    }, { rootMargin: '200px' });
-    observer.observe(sentinel);
-}
-
-document.getElementById('btnMonth').onclick = function() {
-    if(currentView === 'month') return;
-    currentView = 'month';
-    this.classList.add('active');
-    document.getElementById('btnYear').classList.remove('active');
-    cal.innerHTML = ''; renderCursor = 0; sentinel.style.display = 'block';
-    renderNextBatch(); initObserver();
-};
-
-document.getElementById('btnYear').onclick = function() {
-    if(currentView === 'year') return;
-    currentView = 'year';
-    this.classList.add('active');
-    document.getElementById('btnMonth').classList.remove('active');
-    sentinel.style.display = 'none';
-    renderYearView();
-};
+// 懒加载与返回顶部
+const observer = new IntersectionObserver(e => { if(e[0].isIntersecting) renderNextBatch(); }, { rootMargin: '200px' });
+observer.observe(document.getElementById('loading-sentinel'));
 
 window.onscroll = () => document.getElementById('toTop').style.display = window.scrollY > 500 ? 'block' : 'none';
 document.getElementById('toTop').onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
+// 启动
 fetch(DATA_URL).then(r => r.json()).then(data => {
     processData(data);
     renderSummary();
-    renderNextBatch();
-    initObserver();
-}).catch(e => {
-    console.error(e);
-    cal.innerHTML = '<div style="padding:20px;color:#999">数据加载失败</div>';
+    refresh();
 });
 </script>
 </body>
