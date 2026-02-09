@@ -663,6 +663,7 @@ def main():
     runs_file = os.path.join(parent, "src", "static", "all.json")
     shutil.copyfile(runs_file, os.path.join(parent, "public", "data", "all.json"))
     pb_file = os.path.join(parent, "src", "static", "pb.json")
+    shutil.copyfile(pb_file, os.path.join(parent, "public", "data", "pb.json"))
     events_file = os.path.join(parent, "src", "static", "events.json")
     template_file = "template.html"
     output_file = os.path.join(parent, "public", "fun.html")
@@ -709,5 +710,6 @@ def main():
 if __name__ == "__main__":
     parent = os.path.dirname(current) 
     main()
+
 
 
