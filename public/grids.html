@@ -78,9 +78,10 @@ body{
 
 .badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;justify-content: center;}
 .badge{ font-size:12px;padding:4px 10px; background:var(--l1); color:var(--l9); border-radius:99px; font-weight: 500; cursor: help;}
+.badge{ font-size:12px;padding:4px 10px; background:var(--l1); color:var(--l9); border-radius:99px; font-weight: 500; cursor: help;}
 
-/* 新增：PB 容器与按钮样式 */
-#pb-badges { margin-top: 8px; display: none; border-top: 1px dashed var(--l0); padding-top: 12px; }
+/* PB 样式 */
+#pb-container { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--l0); }
 .toggle-pb-btn {
     background: none; border: none; color: var(--primary); font-size: 12px; margin-top: 12px;
     cursor: pointer; padding: 4px 12px; border-radius: 4px; transition: 0.2s;
@@ -89,7 +90,13 @@ body{
 
 /* 日历与柱状图视图 */
 .calendar{max-width:500px;width:100%;margin-top:20px;}
-.month{ background:var(--card); border-radius:14px; padding:16px;margin-bottom:16px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); }
+.month{ 
+  background:var(--card); border-radius:14px; padding:16px;margin-bottom:16px; 
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03); 
+  opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease;
+}
+/* 当月份卡片进入视口时激活的状态 */
+.month.is-visible { opacity: 1; transform: translateY(0); }
 
 .title{ margin-bottom:14px; display: flex; flex-direction: column; gap: 4px;}
 .title .main-info { display: flex; justify-content: space-between; font-size: 16px; font-weight: 700;}
@@ -99,14 +106,18 @@ body{
 .bar-view { display: flex; align-items: flex-end; gap: 4px; height: 120px; padding-top: 20px; border-bottom: 1px solid var(--l0); }
 
 @keyframes cellAppear {
-  from { opacity: 0; transform: translateY(10px) scale(0.9); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from { opacity: 0; transform: scale(0.6); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 .cell, .bar-item {
-  border-radius:4px; position:relative; opacity: 0;
-  animation: cellAppear 0.5s ease-out forwards; transition: transform 0.1s;
+  border-radius:4px; position:relative; opacity: 0; transition: transform 0.1s;
 }
+/* 只有当父级 .month 具有 .is-visible 类时才播放格子动画 */
+.month.is-visible .cell, .month.is-visible .bar-item {
+  animation: cellAppear 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
 .cell { aspect-ratio:1; display: flex; justify-content: center; align-items: center; background:var(--l0);}
 .bar-item { flex: 1; min-width: 4px; background: var(--l0); }
 
@@ -170,8 +181,8 @@ body{
   <div class="progress"><span id="globe"></span></div>
   <div class="progress-info"><span>环球进度</span><span id="ppct">0%</span></div>
   <div class="badges" id="badges"></div>
-  <div class="badges" id="pb-badges"></div>
-  <button id="togglePb" class="toggle-pb-btn">展开 PB 记录 ↓</button>
+  <div class="badges" id="pb-container"></div>
+  <button class="toggle-pb-btn" id="togglePb">展开 PB 纪录 ↓</button>
 </div>
 
 <div class="calendar" id="calendar"></div>
@@ -182,12 +193,21 @@ body{
 <script>
 const DATA_URL = 'https://run.linwn.net/data/all.json';
 const PB_URL = 'https://run.linwn.net/data/pb.json';
-const BATCH_SIZE = 8;
+const BATCH_SIZE = 6;
 
 let runsRaw = {}, monthKeys = [], years = {}, months = {};
 let stats = { totalKm: 0, pb: { val: 0, date: '-' }, fastest: { paceVal: 9999, paceStr: '--', date: '-' }, bestMonth: { name: '-', val: 0 }, streak: { count: 0, start: '-', end: '-' } };
 let renderCursor = 0, currentView = 'month', currentMode = 'grid';
-let pbDataLoaded = false;
+
+// 用于控制入场动画的 Observer
+const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            revealObserver.unobserve(entry.target); // 只执行一次动画
+        }
+    });
+}, { threshold: 0.1 });
 
 /**
  * 工具函数
@@ -222,9 +242,6 @@ function animateValue(obj, start, end, duration, suffix) {
     window.requestAnimationFrame(step);
 }
 
-/**
- * 颜色分级 (4 6 8 10 12 15 20 30 42)
- */
 function getLevel(k, mode) {
     if (k <= 0) return 0;
     const levels = mode === 'y' ? [100, 150, 180, 210, 240, 270, 300, 350, 400] : [4, 6, 8, 10, 12, 15, 20, 30, 42];
@@ -232,9 +249,6 @@ function getLevel(k, mode) {
     return 1;
 }
 
-/**
- * 数据聚合
- */
 function processData(data) {
     data.forEach(r => {
         const fullDate = (r.start_date_local || r.start_date).split(' ')[0];
@@ -283,6 +297,25 @@ function processData(data) {
     monthKeys = Array.from(new Set(Object.keys(runsRaw).map(d => d.slice(0, 7)))).sort().reverse();
 }
 
+function renderPBs(pbData) {
+    const pbContainer = document.getElementById('pb-container');
+    const pbMap = { 7: "1km", 6: "3km", 5: "5km", 4: "10km", 2: "半马", 1: "全马" };
+    const targetTypes = [7, 6, 5, 4, 2, 1];
+    const filtered = pbData.filter(item => targetTypes.includes(item.type)).sort((a, b) => targetTypes.indexOf(a.type) - targetTypes.indexOf(b.type));
+
+    filtered.forEach((item, idx) => {
+        const b = document.createElement('div');
+        b.className = 'badge';
+        const pace = formatPace(item.record, item.distance / 1000);
+        b.textContent = `${pbMap[item.type]} ${formatTime(item.record)}`;
+        b.style.animation = `cellAppear 0.5s ease-out both ${idx * 0.1}s`;
+        const dateStr = item.happenDay.toString();
+        const formattedDate = `${dateStr.slice(0, 4)}-${dateStr.slice(4, 6)}-${dateStr.slice(6, 8)}`;
+        bindTip(b, `<div style="padding:4px"><strong>${pbMap[item.type]} PB</strong><br>时间：${formatTime(item.record)}<br>配速：${pace}<br>日期：${formattedDate}</div>`);
+        pbContainer.appendChild(b);
+    });
+}
+
 /**
  * 视图渲染
  */
@@ -320,11 +353,14 @@ function renderOneMonth(mKey) {
             if (d === 1 || d === daysInMonth || d % 5 === 0) el.innerHTML = `<span class="label">${d}</span>`;
         }
         
+        // 关键：基于日期给予延迟，产生“逐个跳出”的效果
         el.style.animationDelay = `${d * 0.015}s`;
         if (km > 0) bindTip(el, () => buildDayTooltip(dateKey, runsRaw[dateKey]));
         container.appendChild(el);
     }
     document.getElementById('calendar').appendChild(box);
+    // 开始监听新生成的月份卡片
+    revealObserver.observe(box);
 }
 
 function renderYearView() {
@@ -342,7 +378,6 @@ function renderYearView() {
             const el = document.createElement('div');
             const mNum = parseInt(mKey.split('-')[1]);
             el.className = `${currentMode === 'grid' ? 'cell' : 'bar-item'} level-${getLevel(km, 'y')}`;
-            
             if (currentMode === 'grid') {
                 el.innerHTML = `<span class="label">${mNum}月</span><span class="distance">${km.toFixed(0)}</span>`;
             } else {
@@ -354,6 +389,7 @@ function renderYearView() {
             container.appendChild(el);
         });
         cal.appendChild(box);
+        revealObserver.observe(box);
     });
 }
 
@@ -372,10 +408,7 @@ function buildDayTooltip(date, dayData) {
 function bindTip(el, content) {
     const tip = document.getElementById('tooltip');
     el.onmouseenter = () => { tip.innerHTML = typeof content === 'function' ? content() : content; tip.style.opacity = 1; };
-    el.onmousemove = e => { 
-        tip.style.left = Math.min(e.clientX + 15, window.innerWidth - 200) + 'px'; 
-        tip.style.top = (e.clientY + 15) + 'px'; 
-    };
+    el.onmousemove = e => { tip.style.left = Math.min(e.clientX + 15, window.innerWidth - 200) + 'px'; tip.style.top = (e.clientY + 15) + 'px'; };
     el.onmouseleave = () => tip.style.opacity = 0;
 }
 
@@ -402,63 +435,14 @@ function renderSummary() {
 }
 
 /**
- * PB 数据加载与展示
- */
-async function togglePBView() {
-    const pbContainer = document.getElementById('pb-badges');
-    const btn = document.getElementById('togglePb');
-    
-    if (pbContainer.style.display === 'flex') {
-        pbContainer.style.display = 'none';
-        btn.textContent = '展开 PB 记录 ↓';
-        return;
-    }
-
-    if (!pbDataLoaded) {
-        try {
-            const res = await fetch(PB_URL);
-            const data = await res.json();
-            
-            // PB 类型映射
-            const typeMap = { 7: "1km", 6: "3km", 5: "5km", 4: "10km", 2: "半马", 1: "全马" };
-            const targetTypes = [7, 6, 5, 4, 2, 1];
-            
-            pbContainer.innerHTML = '';
-            data.filter(item => targetTypes.includes(item.type))
-                .sort((a, b) => targetTypes.indexOf(a.type) - targetTypes.indexOf(b.type))
-                .forEach((item, idx) => {
-                    const b = document.createElement('div');
-                    b.className = 'badge';
-                    const dateStr = String(item.happenDay).replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
-                    b.textContent = `⭐ ${typeMap[item.type]} ${formatTime(item.record)}`;
-                    b.style.animation = `cellAppear 0.5s ease-out both ${idx * 0.1}s`;
-                    bindTip(b, `<div style="padding:4px">日期：${dateStr}<br>地点：${item.site || '-'}</div>`);
-                    pbContainer.appendChild(b);
-                });
-            pbDataLoaded = true;
-        } catch (e) {
-            console.error("加载 PB 失败", e);
-        }
-    }
-    
-    pbContainer.style.display = 'flex';
-    btn.textContent = '收起 PB 记录 ↑';
-}
-
-/**
  * 交互控制
  */
 const menu = document.getElementById('menu');
 const overlay = document.getElementById('overlay');
 const openBtn = document.getElementById('openMenu');
-
-const toggleMenu = (show) => {
-    menu.classList.toggle('open', show);
-    overlay.style.display = show ? 'block' : 'none';
-};
+const toggleMenu = (show) => { menu.classList.toggle('open', show); overlay.style.display = show ? 'block' : 'none'; };
 openBtn.onclick = () => toggleMenu(true);
 overlay.onclick = () => toggleMenu(false);
-document.getElementById('togglePb').onclick = togglePBView;
 
 const refresh = () => {
     document.getElementById('calendar').innerHTML = '';
@@ -477,6 +461,13 @@ function updateBtn(el) {
     el.classList.add('active');
 }
 
+document.getElementById('togglePb').onclick = function() {
+  const container = document.getElementById('pb-container');
+  const isHidden = container.style.display === 'none' || container.style.display === '';
+  container.style.display = isHidden ? 'flex' : 'none';
+  this.textContent = isHidden ? '收起 PB 纪录 ↑' : '展开 PB 纪录 ↓';
+};
+
 function renderNextBatch() {
     if (currentView !== 'month' || renderCursor >= monthKeys.length) return;
     const batch = monthKeys.slice(renderCursor, renderCursor + BATCH_SIZE);
@@ -484,6 +475,7 @@ function renderNextBatch() {
     renderCursor += BATCH_SIZE;
 }
 
+// 底部懒加载
 const observer = new IntersectionObserver(e => { if(e[0].isIntersecting) renderNextBatch(); }, { rootMargin: '200px' });
 observer.observe(document.getElementById('loading-sentinel'));
 
@@ -491,9 +483,13 @@ window.onscroll = () => document.getElementById('toTop').style.display = window.
 document.getElementById('toTop').onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
 // 启动
-fetch(DATA_URL).then(r => r.json()).then(data => {
-    processData(data);
+Promise.all([
+    fetch(DATA_URL).then(r => r.json()),
+    fetch(PB_URL).then(r => r.json())
+]).then(([allData, pbData]) => {
+    processData(allData);
     renderSummary();
+    renderPBs(pbData);
     refresh();
 });
 </script>
