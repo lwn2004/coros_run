@@ -53,7 +53,73 @@ body {
   cursor: pointer; display: flex; align-items: center; justify-content: center;
   font-size: 20px; color: var(--sub); 
 }
+/* --- 花朵装饰样式 --- */
+.flower-cluster {
+  position: absolute;
+  top: 0; right: 0;
+  width: 100%; max-width: 500px; /* 限制在内容区域内 */
+  height: 120px;
+  pointer-events: none; /* 让鼠标可以穿透花朵点击下面的按钮 */
+  z-index: 1; /* 在背景之上，但在文字之下(如果重叠的话) */
+  overflow: hidden;
+}
 
+/* 桌面端调整花朵容器位置 */
+@media (min-width: 900px) {
+  .flower-cluster { max-width: 1000px; }
+}
+
+.flower {
+  position: absolute;
+  fill: var(--l2); /* 花瓣颜色：跟随主题的浅色调 */
+  opacity: 0.8;
+  animation: sway 3s ease-in-out infinite alternate;
+}
+
+.flower circle {
+  fill: var(--primary); /* 花蕊颜色：跟随主题的主色调 */
+}
+
+/* 第一朵：大，右上角 */
+.f1 {
+  width: 60px; height: 60px;
+  right: -10px; top: -10px;
+  transform: rotate(15deg);
+  animation-duration: 4s;
+}
+
+/* 第二朵：中，稍微靠左 */
+.f2 {
+  width: 40px; height: 40px;
+  right: 45px; top: 10px;
+  fill: var(--l1); /* 更浅一点 */
+  transform: rotate(-10deg);
+  animation-duration: 3.5s;
+}
+
+/* 第三朵：小，仿佛飘落 */
+.f3 {
+  width: 25px; height: 25px;
+  right: 80px; top: 40px;
+  fill: var(--primary);
+  opacity: 0.6;
+  animation: sway 2.5s ease-in-out infinite alternate;
+}
+
+/* 摇曳动画 */
+@keyframes sway {
+  from { transform: rotate(0deg) scale(1); }
+  to { transform: rotate(10deg) scale(1.05); }
+}
+
+/* 暗黑模式微调：让花朵发光一点，不然太暗 */
+body[data-theme="dark"] .flower {
+  fill: var(--l4); /* 暗黑模式下用深绿色系 */
+  filter: drop-shadow(0 0 5px var(--primary));
+}
+body[data-theme="dark"] .flower circle {
+  fill: #fff;
+}
 /* 菜单样式 (保持不变) */
 .menu-panel {
   position: fixed; top: 0; right: -320px; width: 280px; height: 100%;
@@ -218,25 +284,37 @@ body {
 
 <body>
 
+<div class="flower-cluster">
+  <svg class="flower f1" viewBox="0 0 100 100">
+    <path d="M50 50 C20 0 0 20 50 50 C80 0 100 20 50 50 C20 100 0 80 50 50 C80 100 100 80 50 50 Z" />
+    <circle cx="50" cy="50" r="10" />
+  </svg>
+  <svg class="flower f2" viewBox="0 0 100 100">
+    <path d="M50 50 C20 0 0 20 50 50 C80 0 100 20 50 50 C20 100 0 80 50 50 C80 100 100 80 50 50 Z" />
+    <circle cx="50" cy="50" r="10" />
+  </svg>
+  <svg class="flower f3" viewBox="0 0 100 100">
+    <path d="M50 50 C20 0 0 20 50 50 C80 0 100 20 50 50 C20 100 0 80 50 50 C80 100 100 80 50 50 Z" />
+  </svg>
+</div>
+
 <div class="top-bar">
-  <div style="display:flex; flex-direction:column;">
-    <strong style="font-size: 22px; letter-spacing: -0.5px;">奔跑的<span style="color: var(--primary)">风铃木</></strong>
-    <span style="font-size: 12px; color: var(--sub); font-weight: 500;">每一次奔跑都是与自己的对话</span>
+  <div style="display:flex; flex-direction:column; z-index: 2;">
+    <strong style="font-size: 22px; letter-spacing: -0.5px;">奔跑的风铃木</strong>
+    <span style="font-size: 12px; color: var(--sub); font-weight: 500;">听见风的声音，遇见更好的自己</span>
   </div>
   <button class="menu-btn" id="openMenu">☰</button>
 </div>
 
-<div class="menu-overlay" id="overlay"></div>
 <div class="menu-panel" id="menu">
-  <h3 style="margin-top:0; margin-bottom:20px; font-size:18px;">设置</h3>
-  <div class="menu-group">
-    <label>主题风格</label>
+  <h3 style="margin-top:0; margin-bottom:20px; font-size:18px;">风铃木花色</h3> <div class="menu-group">
+    <label>选择主题</label>
     <div class="theme-grid">
-      <button class="theme-btn active" data-val="green"><span class="color-dot" style="background:#2ea44f"></span>绿花风铃木</button>
-      <button class="theme-btn" data-val="orange"><span class="color-dot" style="background:#f97316"></span>橙花风铃木</button>
-      <button class="theme-btn" data-val="blue"><span class="color-dot" style="background:#3b82f6"></span>蓝花风铃木</button>
-      <button class="theme-btn" data-val="purple"><span class="color-dot" style="background:#8b5cf6"></span>紫花风铃木</button>
-      <button class="theme-btn" data-val="dark"><span class="color-dot" style="background:#21262d"></span>黑花风铃木</button>
+      <button class="theme-btn active" data-val="green"><span class="color-dot" style="background:#2ea44f"></span>翡翠风铃</button>
+      <button class="theme-btn" data-val="orange"><span class="color-dot" style="background:#f97316"></span>暖阳风铃</button>
+      <button class="theme-btn" data-val="blue"><span class="color-dot" style="background:#3b82f6"></span>深海风铃</button>
+      <button class="theme-btn" data-val="purple"><span class="color-dot" style="background:#8b5cf6"></span>紫雾风铃</button>
+      <button class="theme-btn" data-val="dark"><span class="color-dot" style="background:#21262d"></span>暗夜风铃</button>
     </div>
   </div>
   <div class="menu-group"><label>时间维度</label><div class="toggle-group"><button id="btnMonth" class="active">月视图</button><button id="btnYear">年视图</button></div></div>
