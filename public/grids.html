@@ -6,183 +6,250 @@
 <title>Running Journey Pro</title>
 
 <style>
-:root{
-  --bg:#f7f9fb;--card:#fff;--text:#111;--sub:#666;
-  --primary:#2ea44f;
-  --l0:#ebedf0;--l1:#d6f5df;--l2:#b7ebc6;--l3:#8fdfa8;
-  --l4:#6cd18a;--l5:#4fc26b;--l6:#36ab56;
-  --l7:#2e8f47;--l8:#246b37;--l9:#164b26;
-  --tip-bg: rgba(0,0,0,0.85);
-}
-@media(prefers-color-scheme:dark){
-  :root{--bg:#0d1117;--card:#161b22;--text:#e6edf3;--sub:#8b949e;--l0:#21262d;--tip-bg: rgba(255,255,255,0.95);}
+/* --- 核心变量定义 --- */
+:root {
+  --bg: #f7f9fb; --card: #ffffff; --text: #1f2328; --sub: #656d76;
+  --border: #d0d7de;
+  --primary: #2ea44f;
+  
+  /* 色阶 */
+  --l0: #ebedf0; 
+  --l1: #9be9a8; --l2: #40c463; --l3: #30a14e; --l4: #216e39;
+  
+  --shadow: rgba(140, 149, 159, 0.2);
+  --font-main: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
 }
 
-body{
-  margin:0;padding:20px 12px;
-  font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;
-  background:var(--bg);color:var(--text);
-  display:flex;flex-direction:column;align-items:center;
+/* 主题配色方案 (保持不变) */
+body[data-theme="orange"] { --primary: #f97316; --l0: #fff7ed; --l1: #ffddb0; --l2: #fdba74; --l3: #f97316; --l4: #c2410c; }
+body[data-theme="blue"] { --primary: #3b82f6; --l0: #eff6ff; --l1: #dbeafe; --l2: #60a5fa; --l3: #2563eb; --l4: #1e40af; }
+body[data-theme="purple"] { --primary: #8b5cf6; --l0: #f5f3ff; --l1: #ddd6fe; --l2: #a78bfa; --l3: #7c3aed; --l4: #5b21b6; }
+body[data-theme="dark"] {
+  --bg: #0d1117; --card: #161b22; --text: #e6edf3; --sub: #8b949e;
+  --border: #30363d; --primary: #238636;
+  --l0: #21262d; --l1: #0e4429; --l2: #006d32; --l3: #26a641; --l4: #39d353;
+  --shadow: rgba(0,0,0,0.5);
+}
+
+body {
+  margin: 0; padding: 20px 12px;
+  font-family: var(--font-main);
+  background: var(--bg); color: var(--text);
+  display: flex; flex-direction: column; align-items: center;
   min-height: 100vh;
+  transition: background 0.3s, color 0.3s;
 }
 
-/* 顶部与菜单设计 */
-.top-bar{
-  max-width:500px;width:100%;
-  display:flex;justify-content:space-between;align-items:center;
-  margin-bottom: 10px;
+/* --- 布局组件 --- */
+.top-bar {
+  max-width: 500px; width: 100%;
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px; transition: max-width 0.4s ease;
 }
+
 .menu-btn {
-  background: var(--card); border: 1px solid var(--l0);
+  background: var(--card); border: 1px solid var(--border);
   width: 40px; height: 40px; border-radius: 8px;
   cursor: pointer; display: flex; align-items: center; justify-content: center;
-  font-size: 20px; color: var(--sub); box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  font-size: 20px; color: var(--sub); 
 }
 
+/* 菜单样式 (保持不变) */
 .menu-panel {
-  position: fixed; top: 0; right: -280px; width: 240px; height: 100%;
-  background: var(--card); z-index: 1000; padding: 30px 20px;
-  box-shadow: -4px 0 15px rgba(0,0,0,0.1);
-  transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: fixed; top: 0; right: -320px; width: 280px; height: 100%;
+  background: var(--card); z-index: 1000; padding: 30px 24px;
+  box-shadow: -4px 0 25px rgba(0,0,0,0.15);
+  transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
 }
 .menu-panel.open { right: 0; }
 .menu-overlay {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.3); z-index: 999; display: none;
+  background: rgba(0,0,0,0.4); z-index: 999; display: none; backdrop-filter: blur(2px);
 }
-.menu-group { margin-bottom: 24px; }
-.menu-group label { display: block; font-size: 12px; color: var(--sub); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+.menu-group { margin-bottom: 30px; }
+.menu-group label { display: block; font-size: 13px; font-weight: 600; color: var(--sub); margin-bottom: 12px; }
+.toggle-group { display: flex; background: var(--l0); padding: 4px; border-radius: 10px; gap: 4px; }
+.toggle-group button { flex: 1; border: none; padding: 10px; border-radius: 8px; background: none; color: var(--sub); cursor: pointer; transition: 0.2s; }
+.toggle-group button.active { background: var(--card); color: var(--primary); box-shadow: 0 2px 6px rgba(0,0,0,0.08); font-weight: 700; }
+.theme-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.theme-btn { border: 2px solid transparent; background: var(--l0); padding: 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; color: var(--text); }
+.theme-btn.active { border-color: var(--primary); background: var(--card); }
+.color-dot { width: 12px; height: 12px; border-radius: 50%; }
 
-.toggle-group { display: flex; background: var(--bg); padding: 4px; border-radius: 10px; gap: 4px; }
-.toggle-group button {
-  flex: 1; border: none; padding: 8px; border-radius: 8px;
-  background: none; color: var(--sub); cursor: pointer; font-size: 13px; transition: 0.2s;
+/* --- 概览卡片 --- */
+.card {
+  max-width: 500px; width: 100%; background: var(--card); 
+  border-radius: 20px; padding: 28px; margin-top: 10px; 
+  text-align: center; box-shadow: 0 4px 12px var(--shadow);
+  border: 1px solid var(--border);
+  box-sizing: border-box; /* 确保宽度计算包含内边距 */
+  transition: max-width 0.4s ease;
 }
-.toggle-group button.active { background: var(--primary); color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 
-/* 卡片与进度条 */
-.card{
-  max-width:500px;width:100%; background:var(--card); border-radius:16px;
-  padding:24px; margin-top:10px; box-sizing: border-box; text-align: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+.summary-distance { font-size: 48px; font-weight: 800; line-height: 1; margin: 10px 0; letter-spacing: -1px; font-variant-numeric: tabular-nums;}
+.unit { font-size: 18px; font-weight: 600; color: var(--sub); margin-left: 6px; }
+
+.progress { height: 10px; background: var(--l0); border-radius: 6px; overflow: hidden; margin-top: 20px; }
+.progress span { display: block; height: 100%; background: linear-gradient(90deg, var(--l2), var(--primary)); width: 0; transition: width 1.5s ease-out; }
+.progress-info { font-size: 13px; color: var(--sub); display: flex; justify-content: space-between; margin-top: 8px; font-weight: 500; }
+
+.badges { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 24px; justify-content: center; }
+.badge { 
+  font-size: 12px; padding: 6px 14px; background: var(--l0); color: var(--sub); 
+  border-radius: 99px; font-weight: 600; cursor: help; transition: 0.2s; 
 }
-.summary-distance { font-size: 42px; font-weight: 800; line-height: 1.1; margin: 8px 0; font-variant-numeric: tabular-nums;}
-.unit { font-size: 16px; font-weight: 600; color: var(--sub); margin-left: 4px; }
+.badge:hover { background: var(--l1); color: var(--l4); transform: scale(1.05); }
 
-.progress{height:8px;background:var(--l0);border-radius:4px;margin-top:12px;overflow: hidden;}
-.progress span{
-    display:block; height:100%; background:linear-gradient(90deg, #40c463, #2ea44f); border-radius:4px;
-    width: 0; transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+#pb-container { display: none; margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--border); }
+.toggle-pb-btn { background: none; border: none; color: var(--sub); font-size: 13px; margin-top: 16px; cursor: pointer; padding: 6px 12px; border-radius: 6px; transition: 0.2s; }
+.toggle-pb-btn:hover { color: var(--primary); background: var(--l0); }
+
+/* --- 日历部分 --- */
+.calendar { 
+  max-width: 500px; width: 100%; margin-top: 30px; 
+  box-sizing: border-box; 
+  transition: max-width 0.4s ease; 
 }
-.progress-info{font-size:12px;color:var(--sub);display:flex;justify-content:space-between;margin-top:6px;}
-
-.badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;justify-content: center;}
-.badge{ font-size:12px;padding:4px 10px; background:var(--l1); color:var(--l9); border-radius:99px; font-weight: 500; cursor: help;}
-.badge{ font-size:12px;padding:4px 10px; background:var(--l1); color:var(--l9); border-radius:99px; font-weight: 500; cursor: help;}
-
-/* PB 样式 */
-#pb-container { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--l0); }
-.toggle-pb-btn {
-    background: none; border: none; color: var(--primary); font-size: 12px; margin-top: 12px;
-    cursor: pointer; padding: 4px 12px; border-radius: 4px; transition: 0.2s;
+.month { 
+  background: var(--card); border-radius: 16px; padding: 20px; margin-bottom: 24px; 
+  box-shadow: 0 2px 8px var(--shadow); border: 1px solid var(--border);
+  opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease, transform 0.6s ease;
 }
-.toggle-pb-btn:hover { background: var(--l1); }
-
-/* 日历与柱状图视图 */
-.calendar{max-width:500px;width:100%;margin-top:20px;}
-.month{ 
-  background:var(--card); border-radius:14px; padding:16px;margin-bottom:16px; 
-  box-shadow: 0 1px 3px rgba(0,0,0,0.03); 
-  opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease;
-}
-/* 当月份卡片进入视口时激活的状态 */
 .month.is-visible { opacity: 1; transform: translateY(0); }
 
-.title{ margin-bottom:14px; display: flex; flex-direction: column; gap: 4px;}
-.title .main-info { display: flex; justify-content: space-between; font-size: 16px; font-weight: 700;}
-.title .sub-info { display: flex; gap: 12px; color: var(--sub); font-size: 12px; align-self: flex-end; }
+.title { margin-bottom: 18px; }
+.title .main-info { display: flex; justify-content: space-between; font-size: 18px; font-weight: 800; }
+.title .sub-info { display: flex; gap: 16px; color: var(--sub); font-size: 13px; margin-top: 4px; font-weight: 500; flex-wrap: wrap; }
 
-.grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
-.bar-view { display: flex; align-items: flex-end; gap: 4px; height: 120px; padding-top: 20px; border-bottom: 1px solid var(--l0); }
+.grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
 
-@keyframes cellAppear {
-  from { opacity: 0; transform: scale(0.6); }
-  to { opacity: 1; transform: scale(1); }
+/* 格子核心样式 */
+.cell { 
+  aspect-ratio: 1; border-radius: 6px; position: relative; 
+  background: var(--l0); cursor: default;
+  transform-style: preserve-3d; perspective: 1000px;
 }
-
-.cell, .bar-item {
-  border-radius:4px; position:relative; opacity: 0; transition: transform 0.1s;
+.cell .content-layer {
+  position: absolute; width: 100%; height: 100%;
+  display: flex; flex-direction: column; justify-content: space-between;
+  padding: 4px; box-sizing: border-box;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  backface-visibility: hidden; border-radius: 6px;
 }
-/* 只有当父级 .month 具有 .is-visible 类时才播放格子动画 */
-.month.is-visible .cell, .month.is-visible .bar-item {
-  animation: cellAppear 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-}
-
-.cell { aspect-ratio:1; display: flex; justify-content: center; align-items: center; background:var(--l0);}
-.bar-item { flex: 1; min-width: 4px; background: var(--l0); }
-
-.cell:hover, .bar-item:hover { transform: scale(1.05); z-index: 2; filter: brightness(1.05); }
-.cell .label, .bar-item .label { font-size: 10px; color: var(--sub); position: absolute; transform: scale(0.8); }
-.cell .label { top: 2px; left: 4px; }
-.bar-item .label { bottom: -18px; left: 50%; transform: translateX(-50%) scale(0.85); }
-.cell .distance { font-size: 14px; font-weight: 700; color: #fff; }
 
 /* 颜色等级 */
-.level-0{background:var(--l0); color: var(--sub) !important;}
-.level-1{background:var(--l1); .distance{color:var(--l8)}}
-.level-2{background:var(--l2); .distance{color:var(--l9)}}
-.level-3{background:var(--l3); .distance{color:var(--l9)}}
-.level-4{background:var(--l4)} .level-5{background:var(--l5)}
-.level-6{background:var(--l6)} .level-7{background:var(--l7)}
-.level-8{background:var(--l8)} .level-9{background:var(--l9)}
+.level-0 { background: var(--l0); }
+.level-1 { background: var(--l1); }
+.level-2 { background: var(--l2); }
+.level-3 { background: var(--l3); }
+.level-4 { background: var(--l4); }
 
-#tooltip{
-  position:fixed; background:var(--tip-bg); color:#fff; padding:10px 14px; border-radius:8px; font-size:12px;
-  pointer-events:none; opacity:0; z-index:9999; transition: opacity 0.15s; white-space: nowrap; line-height: 1.6; backdrop-filter: blur(4px);
+/* 正面样式 */
+.cell .front { opacity: 1; transform: rotateX(0deg); z-index: 2; }
+.cell .label { font-size: 10px; color: var(--sub); font-weight: 600; }
+/* 距离数字样式优化 */
+.cell .distance { 
+  align-self: center; margin-top: auto; margin-bottom: auto;
+  font-size: 15px; font-weight: 800; color: rgba(255,255,255,0.95); 
+  display: flex; align-items: baseline; justify-content: center;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
-@media (prefers-color-scheme:dark){ #tooltip { color: #000; } }
-.tip-header { border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:4px; margin-bottom: 4px; font-weight: 600; display: flex; justify-content: space-between;}
-.tip-row { display: flex; gap: 12px; justify-content: space-between; align-items: center; }
+/* 小号单位 */
+.cell .unit-sm { font-size: 10px; font-weight: 500; margin-left: 2px; opacity: 0.9; }
 
-#toTop{ position:fixed; right:20px; bottom:30px; background:var(--primary); color:#fff; border:none; width: 44px; height: 44px; border-radius:50%; display:none; cursor:pointer; z-index: 100; box-shadow: 0 4px 12px rgba(46,164,79,0.3);}
+/* 背面详细信息 (默认隐藏) */
+.cell .back { 
+  opacity: 0; background: var(--card); border: 2px solid var(--primary);
+  align-items: center; justify-content: center; z-index: 1; pointer-events: none;
+}
+.level-0 .distance { display: none; }
 
-#loading-sentinel { height: 20px; }
+/* 柱状图 */
+.bar-view { display: flex; align-items: flex-end; gap: 4px; height: 140px; padding-top: 20px; border-bottom: 1px solid var(--l0); }
+.bar-item { flex: 1; /*background: var(--l2);*/ border-radius: 4px 4px 0 0; position: relative; min-height: 4px; }
+.bar-item .label { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%) scale(0.8); font-size: 10px; color: var(--sub); }
+
+/* Tooltip */
+#tooltip {
+  position: fixed; background: rgba(0,0,0,0.85); color: #fff; 
+  padding: 8px 12px; border-radius: 8px; font-size: 12px;
+  pointer-events: none; opacity: 0; z-index: 9999; 
+  transition: opacity 0.15s; white-space: nowrap; backdrop-filter: blur(4px);
+}
+.tip-row { display: flex; gap: 12px; align-items: center; }
+
+/* --- 桌面端响应式优化 --- */
+@media (min-width: 900px) {
+  /* 宽度放宽且保持一致 */
+  .top-bar, .card, .calendar { max-width: 1000px; }
+  
+  /* 格子交互 */
+  .grid { gap: 10px; }
+  .cell { aspect-ratio: 1.25; transition: transform 0.2s; }
+  .cell:hover { z-index: 10; transform: scale(1.05); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+  
+  /* 翻转动画 */
+  .cell.has-run:hover .front { opacity: 0; transform: scale(0.9); }
+  .cell.has-run:hover .back { opacity: 1; pointer-events: auto; }
+
+  /* 字体放大 */
+  .cell .distance { font-size: 26px; letter-spacing: -1px; }
+  .cell .unit-sm { font-size: 12px; }
+
+  /* 背面详细信息排版 */
+  .cell .back { display: flex; flex-direction: column; justify-content: center; padding: 4px; }
+  .detail-group { text-align: center; line-height: 1.3; width: 100%; }
+  .detail-dist { font-size: 22px; font-weight: 900; color: var(--primary); display: block; }
+  .detail-meta { font-size: 11px; color: var(--sub); font-weight: 600; display: block; margin-top: 2px;}
+  .detail-row { display: flex; gap: 8px; justify-content: center; margin-top: 6px; font-size: 12px; font-weight: 700; color: var(--text); }
+  
+  /* 注意：不再隐藏 tooltip，而是通过 JS 控制不绑定给格子 */
+}
+
+/* 动画 */
+@keyframes cellAppear { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
+.month.is-visible .cell, .month.is-visible .bar-item { animation: cellAppear 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+#toTop { position: fixed; right: 30px; bottom: 30px; background: var(--primary); color: #fff; border: none; width: 50px; height: 50px; border-radius: 50%; display: none; cursor: pointer; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.2); font-size: 20px; }
+#loading-sentinel { height: 40px; margin-bottom: 40px;}
 </style>
 </head>
 
 <body>
 
 <div class="top-bar">
-  <strong>Running Journey</strong>
+  <div style="display:flex; flex-direction:column;">
+    <strong style="font-size: 22px; letter-spacing: -0.5px;">Running Journey</strong>
+    <span style="font-size: 12px; color: var(--sub); font-weight: 500;">每一次奔跑都是与自己的对话</span>
+  </div>
   <button class="menu-btn" id="openMenu">☰</button>
 </div>
 
 <div class="menu-overlay" id="overlay"></div>
 <div class="menu-panel" id="menu">
+  <h3 style="margin-top:0; margin-bottom:20px; font-size:18px;">设置</h3>
   <div class="menu-group">
-    <label>视图周期</label>
-    <div class="toggle-group">
-      <button id="btnMonth" class="active">月</button>
-      <button id="btnYear">年</button>
+    <label>主题风格</label>
+    <div class="theme-grid">
+      <button class="theme-btn active" data-val="green"><span class="color-dot" style="background:#2ea44f"></span>绿花风铃木</button>
+      <button class="theme-btn" data-val="orange"><span class="color-dot" style="background:#f97316"></span>橙花风铃木</button>
+      <button class="theme-btn" data-val="blue"><span class="color-dot" style="background:#3b82f6"></span>蓝花风铃木</button>
+      <button class="theme-btn" data-val="purple"><span class="color-dot" style="background:#8b5cf6"></span>紫花风铃木</button>
+      <button class="theme-btn" data-val="dark"><span class="color-dot" style="background:#21262d"></span>黑花风铃木</button>
     </div>
   </div>
-  <div class="menu-group">
-    <label>显示模式</label>
-    <div class="toggle-group">
-      <button id="btnGrid" class="active">日历</button>
-      <button id="btnBar">趋势</button>
-    </div>
-  </div>
-  <p style="font-size: 11px; color: var(--sub); margin-top: 40px;">跑步是和自己的对话。</p>
+  <div class="menu-group"><label>时间维度</label><div class="toggle-group"><button id="btnMonth" class="active">月视图</button><button id="btnYear">年视图</button></div></div>
+  <div class="menu-group"><label>展示模式</label><div class="toggle-group"><button id="btnGrid" class="active">日历格</button><button id="btnBar">趋势柱</button></div></div>
 </div>
 
 <div class="card">
   <div class="summary-distance"><span id="total">0.0</span><span class="unit">km</span></div>
   <div class="progress"><span id="globe"></span></div>
-  <div class="progress-info"><span>环球进度</span><span id="ppct">0%</span></div>
+  <div class="progress-info"><span>环球赤道进度</span><span id="ppct">0%</span></div>
   <div class="badges" id="badges"></div>
   <div class="badges" id="pb-container"></div>
-  <button class="toggle-pb-btn" id="togglePb">展开 PB 纪录 ↓</button>
+  <button class="toggle-pb-btn" id="togglePb">展开个人纪录 (PB) ↓</button>
 </div>
 
 <div class="calendar" id="calendar"></div>
@@ -191,44 +258,238 @@ body{
 <button id="toTop">↑</button>
 
 <script>
-const DATA_URL = 'https://run.linwn.net/data/all.json';
-const PB_URL = 'https://run.linwn.net/data/pb.json';
+// --- 配置区 ---
+const DATA_URL = 'https://run.linwn.net/data/all.json'; 
+const PB_URL = 'https://run.linwn.net/data/pb.json';   
 const BATCH_SIZE = 6;
 
-let runsRaw = {}, monthKeys = [], years = {}, months = {};
-let stats = { totalKm: 0, pb: { val: 0, date: '-' }, fastest: { paceVal: 9999, paceStr: '--', date: '-' }, bestMonth: { name: '-', val: 0 }, streak: { count: 0, start: '-', end: '-' } };
-let renderCursor = 0, currentView = 'month', currentMode = 'grid';
+// --- 状态管理 ---
+let appState = {
+  runsRaw: {}, monthKeys: [], years: {}, months: {},
+  stats: { totalKm: 0, pb: { val: 0, date: '-' }, fastest: { paceVal: 9999, paceStr: '--', date: '-' }, bestMonth: { name: '-', val: 0 }, streak: { count: 0, start: '-', end: '-' } },
+  view: { cursor: 0, type: 'month', mode: 'grid' },
+  theme: 'green'
+};
 
-// 用于控制入场动画的 Observer
-const revealObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.classList.add('is-visible');
-            revealObserver.unobserve(entry.target); // 只执行一次动画
-        }
-    });
-}, { threshold: 0.1 });
+function loadSettings() {
+  const saved = localStorage.getItem('run_journey_settings');
+  if (saved) {
+    const p = JSON.parse(saved);
+    if(p.theme) switchTheme(p.theme);
+    if(p.type) { appState.view.type = p.type; updateToggleState('btnMonth', p.type === 'month'); updateToggleState('btnYear', p.type === 'year'); }
+    if(p.mode) { appState.view.mode = p.mode; updateToggleState('btnGrid', p.mode === 'grid'); updateToggleState('btnBar', p.mode === 'bar'); }
+  }
+}
+function saveSettings() {
+  localStorage.setItem('run_journey_settings', JSON.stringify({ theme: appState.theme, type: appState.view.type, mode: appState.view.mode }));
+}
 
-/**
- * 工具函数
- */
+// --- 核心工具 ---
 const parseDuration = t => {
     if (typeof t === 'number') return t;
     const parts = (t || "0:0:0").split(':').map(Number);
     return parts.length === 3 ? parts[0]*3600 + parts[1]*60 + parts[2] : parts[0]*60 + parts[1];
 };
-
 const formatTime = s => {
     s = Math.round(s);
     const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
     return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}` : `${m}:${String(sec).padStart(2, '0')}`;
 };
-
 const formatPace = (s, km) => {
     if (!s || !km) return '--';
     const p = s / km, m = Math.floor(p / 60), sec = Math.floor(p % 60);
     return `${m}'${String(sec).padStart(2, '0')}"`;
 };
+const getLevel = (k, mode) => {
+    if (k <= 0) return 0;
+    const levels = mode === 'y' ? [100, 150, 200, 300] : [3, 7, 12, 21];
+    for (let i = levels.length - 1; i >= 0; i--) if (k >= levels[i]) return i + 1;
+    return 1;
+};
+
+// --- 数据处理 ---
+function processData(data) {
+   data.forEach(r => {
+       const fullDate = (r.start_date_local || r.start_date).split(' ')[0];
+       const startTime = (r.start_date_local || r.start_date).split(' ')[1]?.slice(0,5) || "--:--";
+       const km = Number(r.distance || 0) / 1000;
+       const movingTime = parseDuration(r.moving_time);
+       const paceVal = movingTime / km;
+
+       if (!appState.runsRaw[fullDate]) appState.runsRaw[fullDate] = { totalKm: 0, runs: [], mainRun: null };
+       appState.runsRaw[fullDate].totalKm += km;
+       appState.runsRaw[fullDate].runs.push(r);
+       
+       if (!appState.runsRaw[fullDate].mainRun || km > appState.runsRaw[fullDate].mainRun.dist) {
+          appState.runsRaw[fullDate].mainRun = { dist: km, time: movingTime, pace: paceVal, start: startTime, hr: r.average_heartrate };
+       }
+
+       const mKey = fullDate.slice(0, 7), yKey = fullDate.slice(0, 4);
+       if (!appState.months[mKey]) appState.months[mKey] = { km: 0, time: 0, hrSum: 0, hrCount: 0, dailyMax: 0 };
+       appState.months[mKey].km += km;
+       appState.months[mKey].time += movingTime;
+       appState.months[mKey].dailyMax = Math.max(appState.months[mKey].dailyMax, appState.runsRaw[fullDate].totalKm);
+       if (r.average_heartrate) { appState.months[mKey].hrSum += r.average_heartrate; appState.months[mKey].hrCount++; }
+
+       if (!appState.years[yKey]) appState.years[yKey] = { total: 0, months: {}, maxMonth: 0 };
+       appState.years[yKey].months[mKey] = (appState.years[yKey].months[mKey] || 0) + km;
+       appState.years[yKey].total += km;
+       appState.years[yKey].maxMonth = Math.max(appState.years[yKey].maxMonth, appState.years[yKey].months[mKey]);
+       
+       appState.stats.totalKm += km;
+       if (km > appState.stats.pb.val) appState.stats.pb = { val: km, date: fullDate };
+       if (paceVal < appState.stats.fastest.paceVal && km > 1) {
+           appState.stats.fastest = { paceVal, paceStr: formatPace(movingTime, km), date: fullDate };
+       }
+   });
+
+   appState.monthKeys = Array.from(new Set(Object.keys(appState.runsRaw).map(d => d.slice(0, 7)))).sort().reverse();
+   
+   // 计算 Streak (略微简化逻辑)
+   const dates = Object.keys(appState.runsRaw).sort();
+   let max = 0, cur = 0, start = '', end = '', tempStart = '';
+   for(let i=0; i<dates.length; i++) {
+     if(i>0 && (new Date(dates[i]) - new Date(dates[i-1]))/86400000 === 1) {
+       cur++; 
+     } else {
+       if(cur > max) { max = cur; start = tempStart; end = dates[i-1]; }
+       cur = 1; tempStart = dates[i];
+     }
+   }
+   if(cur > max) { max = cur; start = tempStart; end = dates[dates.length-1]; }
+   if(max > 0) appState.stats.streak = { count: max, start, end };
+   
+   const topMonth = Object.entries(appState.months).sort((a,b)=>b[1].km - a[1].km)[0];
+   if (topMonth) appState.stats.bestMonth = { name: topMonth[0], val: topMonth[1].km };
+}
+
+// --- 渲染函数 ---
+function renderOneMonth(mKey) {
+   const [y, mo] = mKey.split('-');
+   const mData = appState.months[mKey];
+   const daysInMonth = new Date(y, mo, 0).getDate();
+   const avgPace = formatPace(mData.time, mData.km);
+   const avgHr = mData.hrCount ? Math.round(mData.hrSum / mData.hrCount) + ' bpm' : '--';
+   
+   const box = document.createElement('div');
+   box.className = 'month';
+   box.innerHTML = `
+       <div class="title">
+           <div class="main-info"><span>${y}年${mo}月</span><span>${mData.km.toFixed(1)} km</span></div>
+           <div class="sub-info">
+             <span>🏃 Avg. ${avgPace}</span>
+             <span>💓 Avg. ${avgHr}</span>
+             <span>📅 ${Object.keys(appState.runsRaw).filter(k=>k.startsWith(mKey)).length} Days</span>
+           </div>
+       </div>
+       <div class="${appState.view.mode === 'grid' ? 'grid' : 'bar-view'}"></div>`;
+   
+   const container = box.querySelector(appState.view.mode === 'grid' ? '.grid' : '.bar-view');
+   if (appState.view.mode === 'grid') {
+       const firstDay = new Date(y, mo - 1, 1).getDay();
+       for (let i = 0; i < firstDay; i++) container.appendChild(document.createElement('div'));
+   }
+
+   for (let d = 1; d <= daysInMonth; d++) {
+       const dateKey = `${y}-${mo}-${String(d).padStart(2, '0')}`;
+       const dayInfo = appState.runsRaw[dateKey];
+       const km = dayInfo ? dayInfo.totalKm : 0;
+       const el = document.createElement('div');
+       const levelClass = `level-${getLevel(km, 'm')}`;
+       
+       if (appState.view.mode === 'grid') {
+           el.className = `cell ${levelClass} ${km > 0 ? 'has-run' : ''}`;
+           // Front Layer: 增加 unit-sm
+           let frontHtml = `<div class="content-layer front"><span class="label">${d}</span>`;
+           if (km > 0) frontHtml += `<span class="distance">${km.toFixed(1)}<span class="unit-sm">km</span></span>`;
+           frontHtml += `</div>`;
+
+           // Back Layer: 保持详细信息
+           let backHtml = '';
+           if (km > 0 && dayInfo.mainRun) {
+             const mr = dayInfo.mainRun;
+             backHtml = `
+              <div class="content-layer back">
+                <div class="detail-group">
+                  <span class="detail-meta">${parseInt(mo)}月${d}日 ${mr.start}</span>
+                  <span class="detail-dist">${mr.dist.toFixed(2)}<span class="unit-sm">km</span></span>
+                  <div class="detail-row">
+                    <span>⚡ ${formatPace(mr.time, mr.dist)}</span>
+                    <span>💓 ${mr.hr ? Math.round(mr.hr) : '-'}</span>
+                  </div>
+                  <div class="detail-row" style="color:var(--sub); font-size:10px;">⏱ ${formatTime(mr.time)}</div>
+                </div>
+              </div>`;
+           } else {
+             backHtml = `<div class="content-layer back"></div>`;
+           }
+           el.innerHTML = frontHtml + backHtml;
+       } else {
+           el.className = `bar-item ${levelClass}`;
+           const h = km > 0 ? Math.max((km / mData.dailyMax) * 100, 5) : 0;
+           el.style.height = h + '%';
+           if (d === 1 || d === daysInMonth || d % 5 === 0) el.innerHTML = `<span class="label">${d}</span>`;
+       }
+       
+       el.style.animationDelay = `${d * 0.01}s`;
+       
+       // 关键修改：只有移动端 或者 非Grid模式 才绑定Tooltip到Cell
+       // 桌面端 Grid 模式下，使用 CSS Flip 效果，不使用Tooltip
+       const isDesktop = window.innerWidth >= 900;
+       if (km > 0) {
+           if (!isDesktop || appState.view.mode !== 'grid') {
+               bindTip(el, () => buildDayTooltip(dateKey, dayInfo));
+           }
+       }
+       container.appendChild(el);
+   }
+   document.getElementById('calendar').appendChild(box);
+   revealObserver.observe(box);
+}
+
+function renderYearView() {
+   const cal = document.getElementById('calendar');
+   cal.innerHTML = '';
+   Object.keys(appState.years).sort().reverse().forEach(y => {
+       const yData = appState.years[y];
+       const box = document.createElement('div');
+       box.className = 'month';
+       box.innerHTML = `<div class="title"><div class="main-info"><span>${y}年</span><span>${yData.total.toFixed(0)} km</span></div></div>
+                        <div class="${appState.view.mode === 'grid' ? 'grid' : 'bar-view'}"></div>`;
+       const container = box.querySelector(appState.view.mode === 'grid' ? '.grid' : '.bar-view');
+       container.style.gridTemplateColumns = 'repeat(6, 1fr)'; 
+
+       Object.entries(yData.months).sort().forEach(([mKey, km], idx) => {
+           const el = document.createElement('div');
+           const mNum = parseInt(mKey.split('-')[1]);
+           const levelClass = `level-${getLevel(km, 'y')}`;
+           if (appState.view.mode === 'grid') {
+               el.className = `cell ${levelClass}`;
+               el.style.aspectRatio = '1.5';
+               el.innerHTML = `<div class="content-layer front"><span class="label">${mNum}月</span><span class="distance" style="font-size:18px">${km.toFixed(0)}</span></div>`;
+           } else {
+               el.className = `bar-item ${levelClass}`;
+               el.style.height = (km / yData.maxMonth * 100) + '%';
+               el.innerHTML = `<span class="label">${mNum}月</span>`;
+           }
+           el.style.animationDelay = `${idx * 0.05}s`;
+           bindTip(el, `<strong>${mKey}</strong><br>跑量: ${km.toFixed(1)} km`);
+           container.appendChild(el);
+       });
+       cal.appendChild(box);
+       revealObserver.observe(box);
+   });
+}
+
+// --- 交互与逻辑 ---
+const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            revealObserver.unobserve(entry.target);
+        }
+    });
+}, { threshold: 0.05 });
 
 function animateValue(obj, start, end, duration, suffix) {
     let startTimestamp = null;
@@ -242,255 +503,132 @@ function animateValue(obj, start, end, duration, suffix) {
     window.requestAnimationFrame(step);
 }
 
-function getLevel(k, mode) {
-    if (k <= 0) return 0;
-    const levels = mode === 'y' ? [100, 150, 180, 210, 240, 270, 300, 350, 400] : [4, 6, 8, 10, 12, 15, 20, 30, 42];
-    for (let i = levels.length - 1; i >= 0; i--) if (k >= levels[i]) return i + 1;
-    return 1;
-}
-
-function processData(data) {
-    data.forEach(r => {
-        const fullDate = (r.start_date_local || r.start_date).split(' ')[0];
-        const km = Number(r.distance || 0) / 1000;
-        const movingTime = parseDuration(r.moving_time);
-        const paceVal = movingTime / km;
-
-        if (!runsRaw[fullDate]) runsRaw[fullDate] = { totalKm: 0, runs: [] };
-        runsRaw[fullDate].totalKm += km;
-        runsRaw[fullDate].runs.push(r);
-
-        const mKey = fullDate.slice(0, 7), yKey = fullDate.slice(0, 4);
-        if (!months[mKey]) months[mKey] = { km: 0, time: 0, hrSum: 0, hrCount: 0, dailyMax: 0 };
-        months[mKey].km += km;
-        months[mKey].time += movingTime;
-        months[mKey].dailyMax = Math.max(months[mKey].dailyMax, runsRaw[fullDate].totalKm);
-        if (r.average_heartrate) { months[mKey].hrSum += r.average_heartrate; months[mKey].hrCount++; }
-
-        if (!years[yKey]) years[yKey] = { total: 0, months: {}, maxMonth: 0 };
-        years[yKey].months[mKey] = (years[yKey].months[mKey] || 0) + km;
-        years[yKey].total += km;
-        years[yKey].maxMonth = Math.max(years[yKey].maxMonth, years[yKey].months[mKey]);
-        
-        stats.totalKm += km;
-        if (km > stats.pb.val) stats.pb = { val: km, date: fullDate };
-        if (paceVal < stats.fastest.paceVal && km > 1) {
-            stats.fastest = { paceVal, paceStr: formatPace(movingTime, km), date: fullDate };
-        }
-    });
-
-    const sortedDates = Object.keys(runsRaw).sort();
-    let maxStreak = [], currentStreak = [];
-    sortedDates.forEach((d, i) => {
-        if (i > 0) {
-            const diff = (new Date(d) - new Date(sortedDates[i - 1])) / 86400000;
-            if (diff === 1) currentStreak.push(d);
-            else { if (currentStreak.length > maxStreak.length) maxStreak = [...currentStreak]; currentStreak = [d]; }
-        } else currentStreak = [d];
-    });
-    if (currentStreak.length > maxStreak.length) maxStreak = currentStreak;
-    if (maxStreak.length > 0) stats.streak = { count: maxStreak.length, start: maxStreak[0], end: maxStreak[maxStreak.length - 1] };
-
-    const topMonth = Object.entries(months).sort((a,b)=>b[1].km - a[1].km)[0];
-    if (topMonth) stats.bestMonth = { name: topMonth[0], val: topMonth[1].km };
-
-    monthKeys = Array.from(new Set(Object.keys(runsRaw).map(d => d.slice(0, 7)))).sort().reverse();
-}
-
-function renderPBs(pbData) {
-    const pbContainer = document.getElementById('pb-container');
-    const pbMap = { 7: "1km", 6: "3km", 5: "5km", 4: "10km", 2: "半马", 1: "全马" };
-    const targetTypes = [7, 6, 5, 4, 2, 1];
-    const filtered = pbData.filter(item => targetTypes.includes(item.type)).sort((a, b) => targetTypes.indexOf(a.type) - targetTypes.indexOf(b.type));
-
-    filtered.forEach((item, idx) => {
-        const b = document.createElement('div');
-        b.className = 'badge';
-        const pace = formatPace(item.record, item.distance / 1000);
-        b.textContent = `${pbMap[item.type]} ${formatTime(item.record)}`;
-        b.style.animation = `cellAppear 0.5s ease-out both ${idx * 0.1}s`;
-        const dateStr = item.happenDay.toString();
-        const formattedDate = `${dateStr.slice(0, 4)}-${dateStr.slice(4, 6)}-${dateStr.slice(6, 8)}`;
-        bindTip(b, `<div style="padding:4px"><strong>${pbMap[item.type]} PB</strong><br>时间：${formatTime(item.record)}<br>配速：${pace}<br>日期：${formattedDate}</div>`);
-        pbContainer.appendChild(b);
-    });
-}
-
-/**
- * 视图渲染
- */
-function renderOneMonth(mKey) {
-    const [y, mo] = mKey.split('-');
-    const mData = months[mKey];
-    const daysInMonth = new Date(y, mo, 0).getDate();
-    
-    const box = document.createElement('div');
-    box.className = 'month';
-    box.innerHTML = `
-        <div class="title">
-            <div class="main-info"><span>${y}年${mo}月</span><span>${mData.km.toFixed(1)} km</span></div>
-            <div class="sub-info"><span>Avg. ${formatPace(mData.time, mData.km)}</span><span>Avg. ${mData.hrCount ? Math.round(mData.hrSum/mData.hrCount) : '--'} bpm</span></div>
-        </div>
-        <div class="${currentMode === 'grid' ? 'grid' : 'bar-view'}"></div>`;
-    
-    const container = box.querySelector(currentMode === 'grid' ? '.grid' : '.bar-view');
-    if (currentMode === 'grid') {
-        const firstDay = new Date(y, mo - 1, 1).getDay();
-        for (let i = 0; i < firstDay; i++) container.appendChild(document.createElement('div'));
-    }
-
-    for (let d = 1; d <= daysInMonth; d++) {
-        const dateKey = `${y}-${mo}-${String(d).padStart(2, '0')}`;
-        const km = runsRaw[dateKey] ? runsRaw[dateKey].totalKm : 0;
-        const el = document.createElement('div');
-        el.className = `${currentMode === 'grid' ? 'cell' : 'bar-item'} level-${getLevel(km, 'm')}`;
-        
-        if (currentMode === 'grid') {
-            el.innerHTML = `<span class="label">${d}</span>${km > 0 ? `<span class="distance">${km.toFixed(1)}</span>` : ''}`;
-        } else {
-            const h = km > 0 ? Math.max((km / mData.dailyMax) * 100, 5) : 0;
-            el.style.height = h + '%';
-            if (d === 1 || d === daysInMonth || d % 5 === 0) el.innerHTML = `<span class="label">${d}</span>`;
-        }
-        
-        // 关键：基于日期给予延迟，产生“逐个跳出”的效果
-        el.style.animationDelay = `${d * 0.015}s`;
-        if (km > 0) bindTip(el, () => buildDayTooltip(dateKey, runsRaw[dateKey]));
-        container.appendChild(el);
-    }
-    document.getElementById('calendar').appendChild(box);
-    // 开始监听新生成的月份卡片
-    revealObserver.observe(box);
-}
-
-function renderYearView() {
-    const cal = document.getElementById('calendar');
-    cal.innerHTML = '';
-    Object.keys(years).sort().reverse().forEach(y => {
-        const yData = years[y];
-        const box = document.createElement('div');
-        box.className = 'month';
-        box.innerHTML = `<div class="title"><div class="main-info"><span>${y}年</span><span>${yData.total.toFixed(0)} km</span></div></div>
-                         <div class="${currentMode === 'grid' ? 'grid' : 'bar-view'}"></div>`;
-        const container = box.querySelector(currentMode === 'grid' ? '.grid' : '.bar-view');
-
-        Object.entries(yData.months).sort().forEach(([mKey, km], idx) => {
-            const el = document.createElement('div');
-            const mNum = parseInt(mKey.split('-')[1]);
-            el.className = `${currentMode === 'grid' ? 'cell' : 'bar-item'} level-${getLevel(km, 'y')}`;
-            if (currentMode === 'grid') {
-                el.innerHTML = `<span class="label">${mNum}月</span><span class="distance">${km.toFixed(0)}</span>`;
-            } else {
-                el.style.height = (km / yData.maxMonth * 100) + '%';
-                el.innerHTML = `<span class="label">${mNum}月</span>`;
-            }
-            el.style.animationDelay = `${idx * 0.05}s`;
-            bindTip(el, `<strong>${mKey}</strong><br>跑量: ${km.toFixed(1)} km`);
-            container.appendChild(el);
-        });
-        cal.appendChild(box);
-        revealObserver.observe(box);
-    });
+function bindTip(el, content) {
+    const tip = document.getElementById('tooltip');
+    el.onmouseenter = () => { 
+        // 移除了之前的 window宽度判断，现在所有绑定的元素都会显示tooltip
+        const html = typeof content === 'function' ? content() : content;
+        if(!html) return;
+        tip.innerHTML = html; tip.style.opacity = 1; 
+    };
+    el.onmousemove = e => { 
+        tip.style.left = Math.min(e.clientX + 15, window.innerWidth - 200) + 'px'; 
+        tip.style.top = (e.clientY + 15) + 'px'; 
+    };
+    el.onmouseleave = () => tip.style.opacity = 0;
 }
 
 function buildDayTooltip(date, dayData) {
     return dayData.runs.map((r, idx) => {
         const dist = (r.distance / 1000).toFixed(2);
         const sec = parseDuration(r.moving_time);
-        const hr = r.average_heartrate ? Math.round(r.average_heartrate) : '-';
-        return `
-            ${idx === 0 ? `<div class="tip-header"><span>${date}</span></div>` : `<div style="border-top:1px dashed rgba(255,255,255,0.2);margin-top:4px;padding-top:4px"></div>`}
-            <div class="tip-row"><span style="font-weight:bold">🏃 ${dist} km</span> <span style="color:#8fdfa8">${formatPace(sec, dist)}</span></div>
-            <div class="tip-row" style="font-size:11px;color:#ccc"><span>⏱ ${formatTime(sec)}</span><span>💓 ${hr} bpm</span></div>`;
+        return `${idx === 0 ? `<div style="font-weight:700;margin-bottom:4px;border-bottom:1px solid rgba(255,255,255,0.2)">${date}</div>` : `<div style="margin:4px 0;border-top:1px dashed rgba(255,255,255,0.2)"></div>`}
+            <div class="tip-row"><span>🏃 ${dist} km</span> <span style="color:#dcdcdc">${formatPace(sec, dist)}</span></div>`;
     }).join('');
 }
 
-function bindTip(el, content) {
-    const tip = document.getElementById('tooltip');
-    el.onmouseenter = () => { tip.innerHTML = typeof content === 'function' ? content() : content; tip.style.opacity = 1; };
-    el.onmousemove = e => { tip.style.left = Math.min(e.clientX + 15, window.innerWidth - 200) + 'px'; tip.style.top = (e.clientY + 15) + 'px'; };
-    el.onmouseleave = () => tip.style.opacity = 0;
+function renderPBs(pbData) {
+   const pbContainer = document.getElementById('pb-container');
+   const pbMap = { 7: "1km", 6: "3km", 5: "5km", 4: "10km", 2: "半马", 1: "全马" };
+   const targetTypes = [7, 6, 5, 4, 2, 1];
+   const filtered = pbData.filter(item => targetTypes.includes(item.type)).sort((a, b) => targetTypes.indexOf(a.type) - targetTypes.indexOf(b.type));
+   filtered.forEach((item, idx) => {
+       const b = document.createElement('div');
+       b.className = 'badge';
+       b.textContent = `${pbMap[item.type]} ${formatTime(item.record)}`;
+       b.style.animation = `cellAppear 0.5s ease-out both ${idx * 0.1}s`;
+       const dateStr = item.happenDay.toString();
+       const formattedDate = `${dateStr.slice(0, 4)}-${dateStr.slice(4, 6)}-${dateStr.slice(6, 8)}`;
+       bindTip(b, `<strong>${pbMap[item.type]} PB</strong><br>时间：${formatTime(item.record)}<br>配速：${formatPace(item.record, item.distance / 1000)}<br>日期：${formattedDate}`);
+       pbContainer.appendChild(b);
+   });
 }
 
 function renderSummary() {
-    animateValue(document.getElementById('total'), 0, stats.totalKm, 1500, '');
-    const earth = 40075, pct = Math.min(stats.totalKm / earth * 100, 100);
-    animateValue(document.getElementById('ppct'), 0, pct, 1500, '%');
-    setTimeout(() => document.getElementById('globe').style.width = pct + '%', 100);
+   animateValue(document.getElementById('total'), 0, appState.stats.totalKm, 1500, '');
+   const earth = 40075, pct = Math.min(appState.stats.totalKm / earth * 100, 100);
+   animateValue(document.getElementById('ppct'), 0, pct, 1500, '%');
+   setTimeout(() => document.getElementById('globe').style.width = pct + '%', 100);
 
-    const badgeData = [
-        { label: `🏆 最长 ${stats.pb.val.toFixed(1)} km`, tip: `日期：${stats.pb.date}` },
-        { label: `⚡ 最快 ${stats.fastest.paceStr}`, tip: `日期：${stats.fastest.date}` },
-        { label: `🔥 最猛 ${stats.bestMonth.name}`, tip: `单月：${stats.bestMonth.val.toFixed(1)} km` },
-        { label: `📅 连续 ${stats.streak.count} 天`, tip: `${stats.streak.start} ~ ${stats.streak.end}` }
-    ];
-    const bEl = document.getElementById('badges');
-    bEl.innerHTML = '';
-    badgeData.forEach(item => {
-        const b = document.createElement('div');
-        b.className = 'badge'; b.textContent = item.label;
-        bindTip(b, `<div style="padding:4px">${item.tip}</div>`);
-        bEl.appendChild(b);
-    });
+   const bEl = document.getElementById('badges');
+   bEl.innerHTML = '';
+   const items = [
+       { label: `🏆 最远 ${appState.stats.pb.val.toFixed(1)} km`, tip: `${appState.stats.pb.date}` },
+       { label: `⚡ 最快 ${appState.stats.fastest.paceStr}`, tip: `${appState.stats.fastest.date}` },
+       { label: `🔥 最佳 ${appState.stats.bestMonth.name}`, tip: `${appState.stats.bestMonth.val.toFixed(1)} km` },
+       { label: `📅 连续 ${appState.stats.streak.count} 天`, tip: `${appState.stats.streak.start} ~ ${appState.stats.streak.end}` }
+   ];
+   items.forEach(item => {
+       const b = document.createElement('div');
+       b.className = 'badge'; b.textContent = item.label;
+       bindTip(b, `<div style="padding:4px">${item.tip}</div>`);
+       bEl.appendChild(b);
+   });
 }
 
-/**
- * 交互控制
- */
+// --- 初始化与事件 ---
 const menu = document.getElementById('menu');
 const overlay = document.getElementById('overlay');
-const openBtn = document.getElementById('openMenu');
 const toggleMenu = (show) => { menu.classList.toggle('open', show); overlay.style.display = show ? 'block' : 'none'; };
-openBtn.onclick = () => toggleMenu(true);
+document.getElementById('openMenu').onclick = () => toggleMenu(true);
 overlay.onclick = () => toggleMenu(false);
 
-const refresh = () => {
+function refresh() {
     document.getElementById('calendar').innerHTML = '';
-    renderCursor = 0;
-    currentView === 'month' ? renderNextBatch() : renderYearView();
-    toggleMenu(false);
-};
-
-document.getElementById('btnMonth').onclick = function() { currentView = 'month'; updateBtn(this); refresh(); };
-document.getElementById('btnYear').onclick = function() { currentView = 'year'; updateBtn(this); refresh(); };
-document.getElementById('btnGrid').onclick = function() { currentMode = 'grid'; updateBtn(this); refresh(); };
-document.getElementById('btnBar').onclick = function() { currentMode = 'bar'; updateBtn(this); refresh(); };
-
-function updateBtn(el) {
-    Array.from(el.parentElement.children).forEach(b => b.classList.remove('active'));
-    el.classList.add('active');
+    appState.view.cursor = 0;
+    appState.view.type === 'month' ? renderNextBatch() : renderYearView();
+    saveSettings(); 
 }
+
+function updateToggleState(id, isActive) {
+  const btn = document.getElementById(id);
+  if(isActive) {
+     Array.from(btn.parentElement.children).forEach(b => b.classList.remove('active'));
+     btn.classList.add('active');
+  }
+}
+function switchTheme(themeVal) {
+    appState.theme = themeVal;
+    document.body.setAttribute('data-theme', themeVal);
+    document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.val === themeVal));
+    saveSettings();
+}
+
+document.getElementById('btnMonth').onclick = function() { appState.view.type = 'month'; updateToggleState(this.id, true); refresh(); };
+document.getElementById('btnYear').onclick = function() { appState.view.type = 'year'; updateToggleState(this.id, true); refresh(); };
+document.getElementById('btnGrid').onclick = function() { appState.view.mode = 'grid'; updateToggleState(this.id, true); refresh(); };
+document.getElementById('btnBar').onclick = function() { appState.view.mode = 'bar'; updateToggleState(this.id, true); refresh(); };
+document.querySelectorAll('.theme-btn').forEach(btn => btn.onclick = () => switchTheme(btn.dataset.val));
 
 document.getElementById('togglePb').onclick = function() {
   const container = document.getElementById('pb-container');
-  const isHidden = container.style.display === 'none' || container.style.display === '';
+  const isHidden = getComputedStyle(container).display === 'none';
   container.style.display = isHidden ? 'flex' : 'none';
-  this.textContent = isHidden ? '收起 PB 纪录 ↑' : '展开 PB 纪录 ↓';
+  this.textContent = isHidden ? '收起个人纪录 (PB) ↑' : '展开个人纪录 (PB) ↓';
 };
 
 function renderNextBatch() {
-    if (currentView !== 'month' || renderCursor >= monthKeys.length) return;
-    const batch = monthKeys.slice(renderCursor, renderCursor + BATCH_SIZE);
-    batch.forEach(m => renderOneMonth(m));
-    renderCursor += BATCH_SIZE;
+   if (appState.view.type !== 'month' || appState.view.cursor >= appState.monthKeys.length) return;
+   const batch = appState.monthKeys.slice(appState.view.cursor, appState.view.cursor + BATCH_SIZE);
+   batch.forEach(m => renderOneMonth(m));
+   appState.view.cursor += BATCH_SIZE;
 }
 
-// 底部懒加载
 const observer = new IntersectionObserver(e => { if(e[0].isIntersecting) renderNextBatch(); }, { rootMargin: '200px' });
 observer.observe(document.getElementById('loading-sentinel'));
 
 window.onscroll = () => document.getElementById('toTop').style.display = window.scrollY > 500 ? 'block' : 'none';
 document.getElementById('toTop').onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
-// 启动
+loadSettings(); 
 Promise.all([
-    fetch(DATA_URL).then(r => r.json()),
-    fetch(PB_URL).then(r => r.json())
+   fetch(DATA_URL).then(r => r.json()),
+   fetch(PB_URL).then(r => r.json())
 ]).then(([allData, pbData]) => {
-    processData(allData);
-    renderSummary();
-    renderPBs(pbData);
-    refresh();
+   processData(allData);
+   renderSummary();
+   renderPBs(pbData);
+   refresh(); 
 });
 </script>
 </body>
