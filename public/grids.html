@@ -631,9 +631,9 @@ function renderSummary() {
    const bEl = document.getElementById('badges');
    bEl.innerHTML = '';
    const items = [
-       { label: `🏆 最远 ${appState.stats.pb.val.toFixed(1)} km`, tip: `${appState.stats.pb.date}` },
+       { label: `🏆 最长 ${appState.stats.pb.val.toFixed(1)} km`, tip: `${appState.stats.pb.date}` },
        { label: `⚡ 最快 ${appState.stats.fastest.paceStr}`, tip: `${appState.stats.fastest.date}` },
-       { label: `🔥 最佳 ${appState.stats.bestMonth.name}`, tip: `${appState.stats.bestMonth.val.toFixed(1)} km` },
+       { label: `🔥 最猛 ${appState.stats.bestMonth.name}`, tip: `${appState.stats.bestMonth.val.toFixed(1)} km` },
        { label: `📅 连续 ${appState.stats.streak.count} 天`, tip: `${appState.stats.streak.start} ~ ${appState.stats.streak.end}` }
    ];
    items.forEach(item => {
