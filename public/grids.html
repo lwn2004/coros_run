@@ -222,7 +222,7 @@ body[data-theme="dark"] .flower circle {
   text-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 /* 小号单位 */
-.cell .unit-sm { font-size: 10px; font-weight: 500; margin-left: 2px; opacity: 0.9; }
+.cell .unit-sm { display: none }
 
 /* 背面详细信息 (默认隐藏) */
 .cell .back { 
@@ -249,7 +249,7 @@ body[data-theme="dark"] .flower circle {
 @media (min-width: 900px) {
   /* 宽度放宽且保持一致 */
   .top-bar, .card, .calendar { max-width: 1000px; }
-  
+  .cell .unit-sm { display: block; font-size: 10px; font-weight: 500; margin-left: 2px; opacity: 0.9; }  
   /* 格子交互 */
   .grid { gap: 10px; }
   .cell { aspect-ratio: 1.25; transition: transform 0.2s; }
