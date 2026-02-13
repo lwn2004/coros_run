@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>奔跑的风铃木</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" async></script>
 
 <style>
 /* --- 核心变量定义 --- */
@@ -20,7 +21,7 @@
   --font-main: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
 }
 
-/* 主题配色方案 (保持不变) */
+/* 主题配色方案 */
 body[data-theme="orange"] { --primary: #f97316; --l0: #fff7ed; --l1: #ffddb0; --l2: #fdba74; --l3: #f97316; --l4: #c2410c; }
 body[data-theme="blue"] { --primary: #3b82f6; --l0: #eff6ff; --l1: #dbeafe; --l2: #60a5fa; --l3: #2563eb; --l4: #1e40af; }
 body[data-theme="purple"] { --primary: #8b5cf6; --l0: #f5f3ff; --l1: #ddd6fe; --l2: #a78bfa; --l3: #7c3aed; --l4: #5b21b6; }
@@ -53,74 +54,23 @@ body {
   cursor: pointer; display: flex; align-items: center; justify-content: center;
   font-size: 20px; color: var(--sub); 
 }
-/* --- 花朵装饰样式 --- */
+
+/* --- 花朵装饰 --- */
 .flower-cluster {
-  position: absolute;
-  top: 0; right: 0;
-  width: 100%; max-width: 500px; /* 限制在内容区域内 */
-  height: 120px;
-  pointer-events: none; /* 让鼠标可以穿透花朵点击下面的按钮 */
-  z-index: 1; /* 在背景之上，但在文字之下(如果重叠的话) */
-  overflow: hidden;
+  position: absolute; top: 0; right: 0; width: 100%; max-width: 500px; height: 120px;
+  pointer-events: none; z-index: 1; overflow: hidden;
 }
+@media (min-width: 900px) { .flower-cluster { max-width: 1000px; } }
+.flower { position: absolute; fill: var(--l2); opacity: 0.8; animation: sway 3s ease-in-out infinite alternate; }
+.flower circle { fill: var(--primary); }
+.f1 { width: 60px; height: 60px; right: -10px; top: -10px; transform: rotate(15deg); animation-duration: 4s; }
+.f2 { width: 40px; height: 40px; right: 45px; top: 10px; fill: var(--l1); transform: rotate(-10deg); animation-duration: 3.5s; }
+.f3 { width: 25px; height: 25px; right: 80px; top: 40px; fill: var(--primary); opacity: 0.6; animation: sway 2.5s ease-in-out infinite alternate; }
+@keyframes sway { from { transform: rotate(0deg) scale(1); } to { transform: rotate(10deg) scale(1.05); } }
+body[data-theme="dark"] .flower { fill: var(--l4); filter: drop-shadow(0 0 5px var(--primary)); }
+body[data-theme="dark"] .flower circle { fill: #fff; }
 
-/* 桌面端调整花朵容器位置 */
-@media (min-width: 900px) {
-  .flower-cluster { max-width: 1000px; }
-}
-
-.flower {
-  position: absolute;
-  fill: var(--l2); /* 花瓣颜色：跟随主题的浅色调 */
-  opacity: 0.8;
-  animation: sway 3s ease-in-out infinite alternate;
-}
-
-.flower circle {
-  fill: var(--primary); /* 花蕊颜色：跟随主题的主色调 */
-}
-
-/* 第一朵：大，右上角 */
-.f1 {
-  width: 60px; height: 60px;
-  right: -10px; top: -10px;
-  transform: rotate(15deg);
-  animation-duration: 4s;
-}
-
-/* 第二朵：中，稍微靠左 */
-.f2 {
-  width: 40px; height: 40px;
-  right: 45px; top: 10px;
-  fill: var(--l1); /* 更浅一点 */
-  transform: rotate(-10deg);
-  animation-duration: 3.5s;
-}
-
-/* 第三朵：小，仿佛飘落 */
-.f3 {
-  width: 25px; height: 25px;
-  right: 80px; top: 40px;
-  fill: var(--primary);
-  opacity: 0.6;
-  animation: sway 2.5s ease-in-out infinite alternate;
-}
-
-/* 摇曳动画 */
-@keyframes sway {
-  from { transform: rotate(0deg) scale(1); }
-  to { transform: rotate(10deg) scale(1.05); }
-}
-
-/* 暗黑模式微调：让花朵发光一点，不然太暗 */
-body[data-theme="dark"] .flower {
-  fill: var(--l4); /* 暗黑模式下用深绿色系 */
-  filter: drop-shadow(0 0 5px var(--primary));
-}
-body[data-theme="dark"] .flower circle {
-  fill: #fff;
-}
-/* 菜单样式 (保持不变) */
+/* 菜单 */
 .menu-panel {
   position: fixed; top: 0; right: -320px; width: 280px; height: 100%;
   background: var(--card); z-index: 1000; padding: 30px 24px;
@@ -129,10 +79,7 @@ body[data-theme="dark"] .flower circle {
   overflow-y: auto;
 }
 .menu-panel.open { right: 0; }
-.menu-overlay {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.4); z-index: 999; display: none; backdrop-filter: blur(2px);
-}
+.menu-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 999; display: none; backdrop-filter: blur(2px); }
 .menu-group { margin-bottom: 30px; }
 .menu-group label { display: block; font-size: 13px; font-weight: 600; color: var(--sub); margin-bottom: 12px; }
 .toggle-group { display: flex; background: var(--l0); padding: 4px; border-radius: 10px; gap: 4px; }
@@ -143,54 +90,40 @@ body[data-theme="dark"] .flower circle {
 .theme-btn.active { border-color: var(--primary); background: var(--card); }
 .color-dot { width: 12px; height: 12px; border-radius: 50%; }
 
-/* --- 概览卡片 --- */
+/* --- 卡片组件 --- */
 .card {
   max-width: 500px; width: 100%; background: var(--card); 
   border-radius: 20px; padding: 28px; margin-top: 10px; 
   text-align: center; box-shadow: 0 4px 12px var(--shadow);
-  border: 1px solid var(--border);
-  box-sizing: border-box; /* 确保宽度计算包含内边距 */
+  border: 1px solid var(--border); box-sizing: border-box;
   transition: max-width 0.4s ease;
 }
-
 .summary-distance { font-size: 48px; font-weight: 800; line-height: 1; margin: 10px 0; letter-spacing: -1px; font-variant-numeric: tabular-nums;}
 .unit { font-size: 18px; font-weight: 600; color: var(--sub); margin-left: 6px; }
-
 .progress { height: 10px; background: var(--l0); border-radius: 6px; overflow: hidden; margin-top: 20px; }
 .progress span { display: block; height: 100%; background: linear-gradient(90deg, var(--l2), var(--primary)); width: 0; transition: width 1.5s ease-out; }
 .progress-info { font-size: 13px; color: var(--sub); display: flex; justify-content: space-between; margin-top: 8px; font-weight: 500; }
-
 .badges { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 24px; justify-content: center; }
-.badge { 
-  font-size: 12px; padding: 6px 14px; background: var(--l0); color: var(--sub); 
-  border-radius: 99px; font-weight: 600; cursor: help; transition: 0.2s; 
-}
+.badge { font-size: 12px; padding: 6px 14px; background: var(--l0); color: var(--sub); border-radius: 99px; font-weight: 600; cursor: help; transition: 0.2s; }
 .badge:hover { background: var(--l1); color: var(--l4); transform: scale(1.05); }
-
 #pb-container { display: none; margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--border); }
 .toggle-pb-btn { background: none; border: none; color: var(--sub); font-size: 13px; margin-top: 16px; cursor: pointer; padding: 6px 12px; border-radius: 6px; transition: 0.2s; }
 .toggle-pb-btn:hover { color: var(--primary); background: var(--l0); }
 
-/* --- 日历部分 --- */
-.calendar { 
-  max-width: 500px; width: 100%; margin-top: 30px; 
-  box-sizing: border-box; 
-  transition: max-width 0.4s ease; 
-}
+/* --- 日历 --- */
+.calendar { max-width: 500px; width: 100%; margin-top: 30px; box-sizing: border-box; transition: max-width 0.4s ease; }
 .month { 
   background: var(--card); border-radius: 16px; padding: 20px; margin-bottom: 24px; 
   box-shadow: 0 2px 8px var(--shadow); border: 1px solid var(--border);
   opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease, transform 0.6s ease;
 }
 .month.is-visible { opacity: 1; transform: translateY(0); }
-
 .title { margin-bottom: 18px; }
 .title .main-info { display: flex; justify-content: space-between; font-size: 18px; font-weight: 800; }
 .title .sub-info { display: flex; gap: 16px; color: var(--sub); font-size: 13px; margin-top: 4px; font-weight: 500; flex-wrap: wrap; }
-
 .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
 
-/* 格子核心样式 */
+/* 格子样式 */
 .cell { 
   aspect-ratio: 1; border-radius: 6px; position: relative; 
   background: var(--l0); cursor: default;
@@ -204,39 +137,48 @@ body[data-theme="dark"] .flower circle {
   backface-visibility: hidden; border-radius: 6px;
 }
 
-/* 颜色等级 */
 .level-0 { background: var(--l0); }
 .level-1 { background: var(--l1); }
 .level-2 { background: var(--l2); }
 .level-3 { background: var(--l3); }
 .level-4 { background: var(--l4); }
 
-/* 正面样式 */
 .cell .front { opacity: 1; transform: rotateX(0deg); z-index: 2; }
 .cell .label { font-size: 10px; color: var(--sub); font-weight: 600; }
-/* 距离数字样式优化 */
 .cell .distance { 
   align-self: center; margin-top: auto; margin-bottom: auto;
   font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.95); 
   display: flex; align-items: baseline; justify-content: center;
   text-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
-/* 小号单位 */
 .cell .unit-sm { font-size: 0px; }
 
-/* 背面详细信息 (默认隐藏) */
+/* 背面 */
 .cell .back { 
   opacity: 0; background: var(--card); border: 2px solid var(--primary);
   align-items: center; justify-content: center; z-index: 1; pointer-events: none;
 }
 .level-0 .distance { display: none; }
 
-/* 柱状图 */
+/* 趋势柱 */
 .bar-view { display: flex; align-items: flex-end; gap: 4px; height: 140px; padding-top: 20px; border-bottom: 1px solid var(--l0); }
-.bar-item { flex: 1; /*background: var(--l2);*/ border-radius: 4px 4px 0 0; position: relative; min-height: 4px; }
+.bar-item { flex: 1; border-radius: 4px 4px 0 0; position: relative; min-height: 4px; }
 .bar-item .label { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%) scale(0.8); font-size: 10px; color: var(--sub); }
 
-/* Tooltip */
+/* --- 分享按钮 --- */
+.share-btn {
+  position: absolute; top: 2px; right: 2px;
+  width: 18px; height: 18px; border-radius: 4px;
+  background: rgba(255,255,255,0.9); border: 1px solid rgba(0,0,0,0.1);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; opacity: 0; transition: opacity 0.2s; 
+  z-index: 20; font-size: 12px; color: #333; line-height: 1;
+}
+.share-btn:hover { background: #fff; transform: scale(1.1); }
+.cell:hover .share-btn { opacity: 1; }
+body[data-theme="dark"] .share-btn { background: rgba(0,0,0,0.6); color: #fff; border-color: rgba(255,255,255,0.2); }
+body[data-theme="dark"] .share-btn:hover { background: rgba(0,0,0,0.9); }
+
 #tooltip {
   position: fixed; background: rgba(0,0,0,0.85); color: #fff; 
   padding: 8px 12px; border-radius: 8px; font-size: 12px;
@@ -245,36 +187,23 @@ body[data-theme="dark"] .flower circle {
 }
 .tip-row { display: flex; gap: 12px; align-items: center; }
 
-/* --- 桌面端响应式优化 --- */
 @media (min-width: 900px) {
-  /* 宽度放宽且保持一致 */
   .top-bar, .card, .calendar { max-width: 1000px; }
   .cell .unit-sm { font-size: 10px; font-weight: 500; margin-left: 2px; opacity: 0.9; }
-  
-  /* 格子交互 */
   .grid { gap: 10px; }
   .cell { aspect-ratio: 1.25; transition: transform 0.2s; }
   .cell:hover { z-index: 10; transform: scale(1.05); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-  
-  /* 翻转动画 */
   .cell.has-run:hover .front { opacity: 0; transform: scale(0.9); }
   .cell.has-run:hover .back { opacity: 1; pointer-events: auto; }
-
-  /* 字体放大 */
   .cell .distance { font-size: 26px; letter-spacing: -1px; }
   .cell .unit-sm { font-size: 12px; }
-
-  /* 背面详细信息排版 */
   .cell .back { display: flex; flex-direction: column; justify-content: center; padding: 4px; }
   .detail-group { text-align: center; line-height: 1.3; width: 100%; }
   .detail-dist { font-size: 22px; font-weight: 900; color: var(--primary); display: block; }
   .detail-meta { font-size: 11px; color: var(--sub); font-weight: 600; display: block; margin-top: 2px;}
   .detail-row { display: flex; gap: 8px; justify-content: center; margin-top: 6px; font-size: 12px; font-weight: 700; color: var(--text); }
-  
-  /* 注意：不再隐藏 tooltip，而是通过 JS 控制不绑定给格子 */
 }
 
-/* 动画 */
 @keyframes cellAppear { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
 .month.is-visible .cell, .month.is-visible .bar-item { animation: cellAppear 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 
@@ -286,17 +215,9 @@ body[data-theme="dark"] .flower circle {
 <body>
 
 <div class="flower-cluster">
-  <svg class="flower f1" viewBox="0 0 100 100">
-    <path d="M50 50 C20 0 0 20 50 50 C80 0 100 20 50 50 C20 100 0 80 50 50 C80 100 100 80 50 50 Z" />
-    <circle cx="50" cy="50" r="10" />
-  </svg>
-  <svg class="flower f2" viewBox="0 0 100 100">
-    <path d="M50 50 C20 0 0 20 50 50 C80 0 100 20 50 50 C20 100 0 80 50 50 C80 100 100 80 50 50 Z" />
-    <circle cx="50" cy="50" r="10" />
-  </svg>
-  <svg class="flower f3" viewBox="0 0 100 100">
-    <path d="M50 50 C20 0 0 20 50 50 C80 0 100 20 50 50 C20 100 0 80 50 50 C80 100 100 80 50 50 Z" />
-  </svg>
+  <svg class="flower f1" viewBox="0 0 100 100"><path d="M50 50 C20 0 0 20 50 50 C80 0 100 20 50 50 C20 100 0 80 50 50 C80 100 100 80 50 50 Z" /><circle cx="50" cy="50" r="10" /></svg>
+  <svg class="flower f2" viewBox="0 0 100 100"><path d="M50 50 C20 0 0 20 50 50 C80 0 100 20 50 50 C20 100 0 80 50 50 C80 100 100 80 50 50 Z" /><circle cx="50" cy="50" r="10" /></svg>
+  <svg class="flower f3" viewBox="0 0 100 100"><path d="M50 50 C20 0 0 20 50 50 C80 0 100 20 50 50 C20 100 0 80 50 50 C80 100 100 80 50 50 Z" /></svg>
 </div>
 
 <div class="top-bar">
@@ -339,7 +260,7 @@ body[data-theme="dark"] .flower circle {
 <script>
 // --- 配置区 ---
 const DATA_URL = 'https://run.linwn.net/data/all.json'; 
-const PB_URL = 'https://run.linwn.net/data/pb.json';   
+const PB_URL = 'https://run.linwn.net/data/pb.json';    
 const BATCH_SIZE = 6;
 
 // --- 状态管理 ---
@@ -385,7 +306,150 @@ const getLevel = (k, mode) => {
     for (let i = levels.length - 1; i >= 0; i--) if (k >= levels[i]) return i + 1;
     return 1;
 };
+/*
+// --- 截图功能 (Fixed 1024px Export) ---
+function takeScreenshot(cellElement) {
+    if (typeof html2canvas === 'undefined') { console.warn('html2canvas 未加载'); return; }
 
+    // 1. 获取 backHtml 的内容 (排除 front 和 按钮)
+    const backContent = cellElement.querySelector('.back');
+    if (!backContent) return;
+
+    // 2. 创建一个临时的、固定大小的容器 (离屏)
+    const exportBox = document.createElement('div');
+    exportBox.style.width = '800px';
+    exportBox.style.height = '600px';
+    exportBox.style.position = 'fixed';
+    exportBox.style.top = '0';
+    exportBox.style.left = '-9999px'; // 移出视野
+    exportBox.style.zIndex = '-1';
+    exportBox.style.display = 'flex';
+    exportBox.style.flexDirection = 'column';
+    exportBox.style.justifyContent = 'center';
+    exportBox.style.alignItems = 'center';
+    exportBox.style.boxSizing = 'border-box';
+    
+    // 3. 应用样式
+    // 背景与边框
+    const computedStyle = getComputedStyle(document.body);
+    const borderColor = computedStyle.getPropertyValue('--primary').trim();
+    const bgColor = computedStyle.getPropertyValue('--card').trim();
+    const textColor = computedStyle.getPropertyValue('--text').trim();
+    
+    exportBox.style.backgroundColor = bgColor;
+    exportBox.style.border = `4px solid ${borderColor}`; // 边框加粗适配大图
+    exportBox.style.color = textColor;
+    exportBox.style.borderRadius = '40px'; // 圆角适配大图
+
+    // 4. 注入内容
+    exportBox.innerHTML = backContent.innerHTML;
+
+    // 5. 注入高清适配 CSS (覆盖原有的 px 单位)
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .detail-group { width: 100%; text-align: center; font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif; }
+        .detail-dist { font-size: 180px !important; line-height: 1.1; font-weight: 900; color: ${borderColor}; display: block; margin-bottom: 20px; }
+        .detail-dist .unit-sm { font-size: 60px !important; margin-left: 10px; font-weight: 600; color: ${computedStyle.getPropertyValue('--sub')}; }
+        .detail-meta { font-size: 60px !important; color: ${computedStyle.getPropertyValue('--sub')}; font-weight: 600; display: block; margin-bottom: 30px; letter-spacing: 2px;}
+        .detail-row { display: flex; justify-content: center; gap: 40px !important; font-size: 50px !important; font-weight: 700; margin-top: 20px; color: ${textColor}; }
+        .detail-row span { display: flex; align-items: center; }
+    `;
+    exportBox.appendChild(style);
+    document.body.appendChild(exportBox);
+
+    // 6. 生成图片
+    html2canvas(exportBox, {
+        width: 800,
+        height: 600,
+        scale: 1, // 1:1 因为我们已经设定了 1024px 的容器
+        backgroundColor: null,
+        logging: false
+    }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `run-card-${new Date().getTime()}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        document.body.removeChild(exportBox);
+    }).catch(err => {
+        console.error('Export failed:', err);
+        document.body.removeChild(exportBox);
+    });
+}*/
+// --- 截图功能 (无感导出 + 透明背景方案) ---
+function takeScreenshot(cellElement) {
+    if (typeof html2canvas === 'undefined') { console.warn('html2canvas 未加载'); return; }
+
+    const backContent = cellElement.querySelector('.back');
+    if (!backContent) return;
+
+    // 获取当前主题样式 (用于边框和文字颜色)
+    const computedStyle = getComputedStyle(document.body);
+    const borderColor = computedStyle.getPropertyValue('--primary').trim();
+    // const bgColor = computedStyle.getPropertyValue('--card').trim(); // 不再需要背景色
+    const textColor = computedStyle.getPropertyValue('--text').trim();
+    const subColor = computedStyle.getPropertyValue('--sub').trim();
+
+    html2canvas(document.body, {
+        width: 830,
+        height: 640,
+        scale: 1,
+        backgroundColor: null, // 关键点1：告诉 html2canvas 使用元素自身的背景，不要填充默认白色
+        logging: false,
+        onclone: (clonedDoc) => {
+            // 1. 清空克隆文档的内容
+            const body = clonedDoc.body;
+            body.innerHTML = ''; 
+            // 关键点2：确保 body 也是透明的
+            body.style.backgroundColor = 'transparent';
+            body.style.width = '800px';
+            body.style.height = '600px';
+            body.style.overflow = 'hidden';
+
+            // 2. 创建导出容器
+            const exportBox = clonedDoc.createElement('div');
+            exportBox.style.width = '800px';
+            exportBox.style.height = '600px';
+            exportBox.style.display = 'flex';
+            exportBox.style.flexDirection = 'column';
+            exportBox.style.justifyContent = 'center';
+            exportBox.style.alignItems = 'center';
+            exportBox.style.boxSizing = 'border-box';
+            
+            // 【核心修改在这里】
+            // 原来的代码：exportBox.style.backgroundColor = bgColor;
+            // 修改为透明：
+            exportBox.style.backgroundColor = 'transparent'; 
+            
+            exportBox.style.border = `4px solid ${borderColor}`;
+            exportBox.style.color = textColor;
+            exportBox.style.borderRadius = '60px'; // 保持圆角边框
+            
+            // 3. 注入内容
+            exportBox.innerHTML = backContent.innerHTML;
+
+            // 4. 注入高清 CSS
+            const style = clonedDoc.createElement('style');
+            style.innerHTML = `
+                .detail-group { width: 100%; text-align: center; font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif; }
+                .detail-dist { font-size: 180px !important; line-height: 1.1; font-weight: 900; color: ${borderColor}; display: block; margin-bottom: 20px; }
+                .detail-dist .unit-sm { font-size: 60px !important; margin-left: 10px; font-weight: 600; color: ${subColor}; }
+                .detail-meta { font-size: 60px !important; color: ${subColor}; font-weight: 600; display: block; margin-bottom: 30px; letter-spacing: 2px;}
+                .detail-row { display: flex; justify-content: center; gap: 40px !important; font-size: 50px !important; font-weight: 700; margin-top: 20px; color: ${textColor}; }
+                .detail-row span { display: flex; align-items: center; }
+            `;
+            exportBox.appendChild(style);
+            body.appendChild(exportBox);
+        }
+    }).then(canvas => {
+        // 使用 image/png 格式以支持透明度
+        const link = document.createElement('a');
+        link.download = `run-card-${new Date().getTime()}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    }).catch(err => {
+        console.error('Export failed:', err);
+    });
+}
 // --- 数据处理 ---
 function processData(data) {
    data.forEach(r => {
@@ -424,7 +488,6 @@ function processData(data) {
 
    appState.monthKeys = Array.from(new Set(Object.keys(appState.runsRaw).map(d => d.slice(0, 7)))).sort().reverse();
    
-   // 计算 Streak (略微简化逻辑)
    const dates = Object.keys(appState.runsRaw).sort();
    let max = 0, cur = 0, start = '', end = '', tempStart = '';
    for(let i=0; i<dates.length; i++) {
@@ -478,12 +541,12 @@ function renderOneMonth(mKey) {
        
        if (appState.view.mode === 'grid') {
            el.className = `cell ${levelClass} ${km > 0 ? 'has-run' : ''}`;
-           // Front Layer: 增加 unit-sm
+           // Front Layer
            let frontHtml = `<div class="content-layer front"><span class="label">${d}</span>`;
            if (km > 0) frontHtml += `<span class="distance">${km.toFixed(1)}<span class="unit-sm">km</span></span>`;
            frontHtml += `</div>`;
 
-           // Back Layer: 保持详细信息
+           // Back Layer
            let backHtml = '';
            if (km > 0 && dayInfo.mainRun) {
              const mr = dayInfo.mainRun;
@@ -503,6 +566,20 @@ function renderOneMonth(mKey) {
              backHtml = `<div class="content-layer back"></div>`;
            }
            el.innerHTML = frontHtml + backHtml;
+
+           // 分享按钮 (仅在有数据的格子显示)
+           if (km > 0) {
+               const shareBtn = document.createElement('div');
+               shareBtn.className = 'share-btn';
+               shareBtn.innerHTML = '↗';
+               shareBtn.title = '导出为图片';
+               shareBtn.onclick = (e) => {
+                   e.stopPropagation();
+                   takeScreenshot(el);
+               };
+               el.appendChild(shareBtn);
+           }
+
        } else {
            el.className = `bar-item ${levelClass}`;
            const h = km > 0 ? Math.max((km / mData.dailyMax) * 100, 5) : 0;
@@ -512,8 +589,6 @@ function renderOneMonth(mKey) {
        
        el.style.animationDelay = `${d * 0.01}s`;
        
-       // 关键修改：只有移动端 或者 非Grid模式 才绑定Tooltip到Cell
-       // 桌面端 Grid 模式下，使用 CSS Flip 效果，不使用Tooltip
        const isDesktop = window.innerWidth >= 900;
        if (km > 0) {
            if (!isDesktop || appState.view.mode !== 'grid') {
@@ -545,7 +620,8 @@ function renderYearView() {
            if (appState.view.mode === 'grid') {
                el.className = `cell ${levelClass}`;
                el.style.aspectRatio = '1.5';
-               el.innerHTML = `<div class="content-layer front"><span class="label">${mNum}月</span><span class="distance" style="font-size:18px">${km.toFixed(0)}</span></div>`;
+               el.innerHTML = `<div class="content-layer front"><span class="label">${mNum}月</span><span class="distance" style="font-size:18px">${km.toFixed(0)}</span></div>
+                               <div class="content-layer back" style="display:none"></div>`; // 年视图暂无Back详情
            } else {
                el.className = `bar-item ${levelClass}`;
                el.style.height = (km / yData.maxMonth * 100) + '%';
@@ -585,7 +661,6 @@ function animateValue(obj, start, end, duration, suffix) {
 function bindTip(el, content) {
     const tip = document.getElementById('tooltip');
     el.onmouseenter = () => { 
-        // 移除了之前的 window宽度判断，现在所有绑定的元素都会显示tooltip
         const html = typeof content === 'function' ? content() : content;
         if(!html) return;
         tip.innerHTML = html; tip.style.opacity = 1; 
