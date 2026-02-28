@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>跑步记录</title>
+    <style>
+        /* 定义颜色变量，方便你随时修改 */
+        :root {
+            --bg-color: #ffffff;           /* 网页背景色：纯白 */
+            --text-primary: #222222;       /* 主标题和正文颜色：柔和的深黑 */
+            --text-secondary: #737373;     /* 次要信息颜色（如统计数据）：中灰色 */
+            --link-color: #111111;         /* 可点击文字的颜色：几乎纯黑 */
+            --link-hover: #2563eb;         /* 鼠标悬停时的颜色：明亮的蓝色，增加一点交互感 */
+            --line-color: #e5e5e5;         /* 下划线颜色：浅灰 */
+        }
+
+        /* 自动适应系统的深色模式（如果不需要，可以删掉这一段） */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #121212;       /* 深色背景：深灰 */
+                --text-primary: #e0e0e0;   /* 深色模式下的文字：柔和的浅灰白 */
+                --text-secondary: #888888; /* 深色模式下次要信息：稍暗的灰色 */
+                --link-color: #ffffff;     /* 深色模式下的链接：纯白 */
+                --link-hover: #8ab4f8;     /* 深色模式下的悬停色：浅蓝色 */
+                --line-color: #333333;     /* 深色模式下的下划线：深灰 */
+            }
+        }
+
+        /* 以下是排版样式，应用了上面的颜色变量 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 0 20px;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s; /* 切换深浅色时增加柔和过渡 */
+        }
+        h1, h2 {
+            font-weight: 500;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+        p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-top: 0;
+            margin-bottom: 30px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        li {
+            margin-bottom: 15px;
+        }
+        a {
+            color: var(--link-color);
+            text-decoration: none;
+            cursor: pointer;
+            border-bottom: 1px solid var(--line-color);
+            padding-bottom: 1px;
+            font-size: 1.1rem;
+            transition: color 0.2s, border-bottom-color 0.2s;
+        }
+        a:hover {
+            color: var(--link-hover);
+            border-bottom-color: var(--link-hover);
+        }
+        .stats {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+        .nav-back {
+            display: inline-block;
+            margin-bottom: 30px;
+            color: var(--text-secondary);
+            border: none;
+            font-size: 0.9rem;
+        }
+        .nav-back::before {
+            content: "← ";
+        }
+        .nav-back:hover {
+            color: var(--link-hover);
+            border: none;
+        }
+        .loading {
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <div class="loading">正在加载数据...</div>
+    </div>
+
+    <script>
+        const API_URL = 'https://run.linwn.net/data/all.json';
+        let rawData = [];
+        let parsedData = { total: { dist: 0, count: 0 }, years: {} };
+
+        // 格式化时间 (例如 2:03:27 -> 2小时3分)
+        function formatTime(timeStr) {
+            if (!timeStr) return '-';
+            const parts = timeStr.split(':');
+            return `${parseInt(parts[0]) > 0 ? parseInt(parts[0]) + '小时' : ''}${parseInt(parts[1])}分${parseInt(parts[2])}秒`;
+        }
+
+        // 格式化配速 (根据 m/s 计算)
+        function formatPace(speedMS) {
+            if (!speedMS) return '-';
+            const secPerKm = 1000 / speedMS;
+            const m = Math.floor(secPerKm / 60);
+            const s = Math.floor(secPerKm % 60);
+            return `${m}'${s.toString().padStart(2, '0')}"`;
+        }
+
+        // 格式化日期
+        function formatDate(dateStr) {
+            const d = new Date(dateStr.replace(' ', 'T'));
+            return `${d.getMonth() + 1}月${d.getDate()}日 ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+        }
+
+        // 处理从接口拉取的数据
+        async function init() {
+            try {
+                const res = await fetch(API_URL);
+                rawData = await res.json();
+                
+                // 按时间降序排序
+                rawData.sort((a, b) => new Date(b.start_date_local.replace(' ', 'T')) - new Date(a.start_date_local.replace(' ', 'T')));
+
+                rawData.forEach(run => {
+                    const date = new Date(run.start_date_local.replace(' ', 'T'));
+                    const year = date.getFullYear();
+                    const month = date.getMonth() + 1;
+                    const distKm = run.distance / 1000;
+
+                    // 汇总总计
+                    parsedData.total.dist += distKm;
+                    parsedData.total.count++;
+
+                    // 汇总年份
+                    if (!parsedData.years[year]) {
+                        parsedData.years[year] = { dist: 0, count: 0, months: {} };
+                    }
+                    parsedData.years[year].dist += distKm;
+                    parsedData.years[year].count++;
+
+                    // 汇总月份
+                    if (!parsedData.years[year].months[month]) {
+                        parsedData.years[year].months[month] = { dist: 0, count: 0, runs: [] };
+                    }
+                    parsedData.years[year].months[month].dist += distKm;
+                    parsedData.years[year].months[month].count++;
+                    parsedData.years[year].months[month].runs.push(run);
+                });
+
+                renderHome();
+            } catch (err) {
+                document.getElementById('app').innerHTML = '<div class="loading">加载失败，请检查网络或跨域设置。</div>';
+                console.error(err);
+            }
+        }
+
+        // 渲染主页 (所有年份)
+        function renderHome() {
+            const app = document.getElementById('app');
+            let html = `
+                <h1>生涯总计</h1>
+                <p>共奔跑 ${parsedData.total.count} 次，累计 ${(parsedData.total.dist).toFixed(2)} 公里</p>
+                <ul>
+            `;
+            
+            // 年份降序展示
+            const years = Object.keys(parsedData.years).sort((a, b) => b - a);
+            years.forEach(year => {
+                const yData = parsedData.years[year];
+                html += `
+                    <li>
+                        <a onclick="renderYear(${year})">${year} 年</a>
+                        <span class="stats">${yData.count} 次，${(yData.dist).toFixed(2)} 公里</span>
+                    </li>
+                `;
+            });
+            html += `</ul>`;
+            app.innerHTML = html;
+        }
+
+        // 渲染某年 (所有月份)
+        function renderYear(year) {
+            const app = document.getElementById('app');
+            const yData = parsedData.years[year];
+            let html = `
+                <a class="nav-back" onclick="renderHome()">返回总计</a>
+                <h1>${year} 年</h1>
+                <p>共奔跑 ${yData.count} 次，累计 ${(yData.dist).toFixed(2)} 公里</p>
+                <ul>
+            `;
+            
+            // 月份降序展示
+            const months = Object.keys(yData.months).sort((a, b) => b - a);
+            months.forEach(month => {
+                const mData = yData.months[month];
+                html += `
+                    <li>
+                        <a onclick="renderMonth(${year}, ${month})">${month} 月</a>
+                        <span class="stats">${mData.count} 次，${(mData.dist).toFixed(2)} 公里</span>
+                    </li>
+                `;
+            });
+            html += `</ul>`;
+            app.innerHTML = html;
+        }
+
+        // 渲染某月 (具体记录)
+        function renderMonth(year, month) {
+            const app = document.getElementById('app');
+            const mData = parsedData.years[year].months[month];
+            let html = `
+                <a class="nav-back" onclick="renderYear(${year})">返回 ${year} 年</a>
+                <h1>${year} 年 ${month} 月</h1>
+                <p>共奔跑 ${mData.count} 次，累计 ${(mData.dist).toFixed(2)} 公里</p>
+                <ul>
+            `;
+            
+            mData.runs.forEach(run => {
+                const dist = (run.distance / 1000).toFixed(2);
+                html += `
+                    <li>
+                        <div><strong>${formatDate(run.start_date_local)} - ${run.city || '未知城市'}</strong></div>
+                        <span class="stats">
+                            距离: ${dist} km | 
+                            用时: ${formatTime(run.moving_time)} | 
+                            配速: ${formatPace(run.average_speed)} | 
+                            心率: ${run.average_heartrate ? Math.round(run.average_heartrate) + ' bpm' : '-'}
+                        </span>
+                    </li>
+                `;
+            });
+            html += `</ul>`;
+            app.innerHTML = html;
+        }
+
+        // 启动应用
+        init();
+    </script>
+</body>
+</html>
