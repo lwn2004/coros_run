@@ -83,6 +83,7 @@ body {
   border: 1px solid var(--border); box-sizing: border-box;
   transition: max-width 0.4s ease;
 }
+.distance-prefix { font-size: 18px; font-weight: 600; color: var(--sub); margin-right: 6px; }
 .summary-distance { font-size: 48px; font-weight: 800; line-height: 1; margin: 10px 0; letter-spacing: -1px; font-variant-numeric: tabular-nums;}
 .unit { font-size: 18px; font-weight: 600; color: var(--sub); margin-left: 6px; }
 .progress { height: 10px; background: var(--l0); border-radius: 6px; overflow: hidden; margin-top: 20px; }
@@ -252,7 +253,7 @@ body[data-theme="dark"] .share-btn:hover { background: rgba(0,0,0,0.9); }
 </div>
 
 <div class="card">
-  <div class="summary-distance"><span id="total">0.0</span><span class="unit">km</span></div>
+  <div class="summary-distance"><span class="distance-prefix">总跑量</span><span id="total">0.0</span><span class="unit">km</span></div>
   <div class="progress"><span id="globe"></span></div>
   <div class="progress-info"><span>环球赤道进度</span><span id="ppct">0%</span></div>
   <div class="badges" id="badges"></div>
