@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>跑步记录 · 热力年历</title>
+    <style>
+        /* ----- 核心变量 & 基础样式 (保持原风格) ----- */
+        :root {
+            --bg-color: #ffffff;
+            --text-primary: #111111;
+            --text-secondary: #737373;
+            --link-color: #111111;
+            --line-color: #e5e5e5;
+            
+            --time-color: #FBBF24;
+            --dist-color: #3B82F6;
+            --pace-color: #22D3EE;
+            --hr-color: #EF4444;
+            --bg-bar: #e5e7eb;
+            --bg-hover: #f3f4f6;
+            --cal-empty: #e9e9e9;
+
+            /* 热力图色阶 (灰色→绿→深绿→橙红) */
+            --heat-0: #ebedf0;           /* 0 km */
+            --heat-1: #9be9a8;           /* (0,10] */
+            --heat-2: #40c463;           /* (10,20] */
+            --heat-3: #30a14e;           /* (20,30] */
+            --heat-4: #216e39;           /* (30,40] */
+            --heat-5: #bd5a2b;           /* >40 另一色系 (橙褐) */
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #121212;
+                --text-primary: #e0e0e0;
+                --text-secondary: #888888;
+                --link-color: #ffffff;
+                --line-color: #333333;
+                --time-color: #FCD34D;
+                --dist-color: #60A5FA;
+                --pace-color: #67E8F9;
+                --hr-color: #F87171;
+                --bg-bar: #374151;
+                --bg-hover: #1f2937;
+                --cal-empty: #2a2a2a;
+                --heat-0: #2d2d2d;
+                --heat-1: #0e4429;
+                --heat-2: #006d32;
+                --heat-3: #26a641;
+                --heat-4: #39d353;
+                --heat-5: #b15a2b;
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            max-width: 1000px;   /* 稍微加宽适应热力图+双栏月份 */
+            margin: 40px auto;
+            padding: 0 20px;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        h1, h2 { font-weight: 500; font-size: 1.2rem; margin-bottom: 5px; }
+        p { color: var(--text-secondary); font-size: 0.95rem; margin-top: 0; margin-bottom: 30px; }
+        ul { list-style-type: none; padding: 0; margin: 0; }
+        li { margin-bottom: 18px; transition: background-color 0.2s; }
+
+        a { color: var(--link-color); text-decoration: none; cursor: pointer; font-size: 1.1rem; }
+        .li-item { padding: 5px 8px; border-radius: 4px; margin-left: -8px; }
+        .li-item:hover { background-color: var(--bg-hover); }
+        .li-title { display: flex; justify-content: space-between; align-items: baseline; }
+
+        .progress-container { width: 100%; height: 4px; background-color: var(--bg-bar); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+        .progress-bar { height: 100%; border-radius: 2px; width: 0%; transition: width 0.3s ease; }
+        .year-bar { background-color: var(--dist-color); }
+        .month-bar { background-color: var(--pace-color); }
+
+        .stats { display: block; color: var(--text-secondary); font-size: 0.9rem; margin-top: 4px; }
+        .stats-compact { font-size: 0.85rem; color: var(--text-secondary); }
+        .nav-back { display: inline-block; margin-bottom: 30px; color: var(--text-secondary); font-size: 0.9rem; cursor: pointer; }
+        .nav-back::before { content: "← "; }
+        .nav-back:hover { color: var(--link-color); }
+        .loading { color: var(--text-secondary); }
+
+        .month-summary { display: flex; justify-content: space-between; margin-bottom: 30px; }
+        .summary-item { display: flex; flex-direction: column; align-items: center; width: 32%; }
+        .summary-val { font-size: 1.5rem; font-weight: 500; }
+        .summary-unit { font-size: 0.8rem; color: var(--text-secondary); }
+
+        .stat-time { color: var(--time-color); }
+        .stat-dist { color: var(--dist-color); }
+        .stat-pace { color: var(--pace-color); }
+        .stat-hr { color: var(--hr-color); }
+        .stat-secondary { color: var(--text-secondary); }
+
+        .run-record { margin-bottom: 15px; border-bottom: 1px solid var(--line-color); padding-bottom: 10px; }
+        .run-header { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .run-date { font-weight: 500; font-size: 1.1rem; }
+        .run-city { color: var(--text-secondary); font-size: 0.9rem; }
+        .run-data { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; font-size: 0.9rem; color: var(--text-secondary); }
+        .run-val { color: var(--text-primary); font-weight: 500; }
+
+        /* ----- 热力图专用样式 (横向, 左侧星期, 顶部月份) ----- */
+        .heatmap-section {
+            margin-bottom: 40px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+        .heatmap-wrapper {
+            display: inline-block;
+            min-width: 100%;
+        }
+        /* 月份标签行 (单独grid, 第一列留空对齐星期) */
+        .month-row {
+            display: grid;
+            grid-template-columns: 40px repeat(var(--weeks-count), 1fr);
+            gap: 3px;
+            margin-bottom: 3px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-align: center;
+            align-items: end;
+        }
+        .month-cell {
+            padding-bottom: 2px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        /* 主体网格: 星期列 + 所有周 */
+        .heatmap-grid {
+            display: grid;
+            grid-template-columns: 40px repeat(var(--weeks-count), 1fr);
+            gap: 3px;
+        }
+        .weekday-label {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            padding-right: 6px;
+            height: 100%;
+        }
+        .heat-cell {
+            aspect-ratio: 1 / 1;
+            width: 100%;
+            border-radius: 3px;
+            background-color: var(--heat-0);  /* 默认灰 */
+            transition: 0.1s;
+            cursor: default;
+        }
+        .heat-cell:hover {
+            transform: scale(1.15);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            z-index: 2;
+        }
+        /* 强度色阶 */
+        .heat-0 { background-color: var(--heat-0); }
+        .heat-1 { background-color: var(--heat-1); }
+        .heat-2 { background-color: var(--heat-2); }
+        .heat-3 { background-color: var(--heat-3); }
+        .heat-4 { background-color: var(--heat-4); }
+        .heat-5 { background-color: var(--heat-5); }
+
+        /* 月份双栏布局 (左1-6, 右7-12) */
+        .months-split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        .months-split ul {
+            margin: 0;
+        }
+        /* 空月份占位 (无数据) 样式 */
+        .month-item-empty {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        .month-item-empty .progress-container {
+            background-color: transparent;
+        }
+
+        @media (max-width: 700px) {
+            .months-split { grid-template-columns: 1fr; gap: 10px; }
+            .run-data { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="loading">正在加载数据...</div>
+    </div>
+
+    <script>
+        const API_URL = 'https://run.linwn.net/data/all.json';
+        let rawData = [];
+        let parsedData = { 
+            total: { dist: 0, count: 0, seconds: 0 }, 
+            years: {},
+            maxYearDist: 0,
+            maxMonthDist: 0,
+            // runDates 不再作为主判断, 改用 dayDistMap
+            dayDistMap: {}   // key: 'YYYY-MM-DD' -> 累计公里数
+        };
+
+        function timeStringToSeconds(timeStr) {
+            if (!timeStr) return 0;
+            const parts = timeStr.split(':');
+            if (parts.length === 3) return parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseFloat(parts[2]);
+            if (parts.length === 2) return parseInt(parts[0]) * 60 + parseFloat(parts[1]);
+            return 0;
+        }
+
+        function formatSecondsToSummaryTime(seconds) {
+            if (!seconds || seconds <= 0) return '-';
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            return `${h > 0 ? h + '<span class="summary-unit">h </span>' : ''}${m}<span class="summary-unit">m</span>`;
+        }
+
+        function formatSecondsToCompactTime(seconds) {
+            if (!seconds || seconds <= 0) return '-';
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            return `${h > 0 ? h + 'h ' : ''}${m}m`;
+        }
+
+        function formatSecondsToHMS(seconds) {
+            if (!seconds || seconds <= 0) return '-';
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = Math.floor(seconds % 60);
+            return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function formatPaceFromSeconds(distKm, seconds) {
+            if (!distKm || distKm <= 0 || !seconds || seconds <= 0) return '-';
+            const secPerKm = seconds / distKm;
+            const m = Math.floor(secPerKm / 60);
+            const s = Math.floor(secPerKm % 60);
+            return `${m}'${s.toString().padStart(2, '0')}"`;
+        }
+
+        function formatDate(dateStr) {
+            const d = new Date(dateStr.replace(' ', 'T'));
+            return `${d.getMonth() + 1}月${d.getDate()}日`;
+        }
+
+        // 根据公里数返回热力等级 (0-5)
+        function getHeatLevel(km) {
+            if (km === 0) return 0;
+            if (km < 10) return 1;
+            if (km < 20) return 2;
+            if (km < 30) return 3;
+            if (km < 40) return 4;
+            return 5;   // >=40 另一色系
+        }
+
+        async function init() {
+            try {
+                const res = await fetch(API_URL);
+                rawData = await res.json();
+                
+                rawData.sort((a, b) => new Date(b.start_date_local.replace(' ', 'T')) - new Date(a.start_date_local.replace(' ', 'T')));
+
+                rawData.forEach(run => {
+                    const dateStrClean = run.start_date_local.split(' ')[0]; // YYYY-MM-DD
+                    const distKm = run.distance / 1000;
+                    // 累加到日跑量
+                    parsedData.dayDistMap[dateStrClean] = (parsedData.dayDistMap[dateStrClean] || 0) + distKm;
+
+                    const date = new Date(run.start_date_local.replace(' ', 'T'));
+                    const year = date.getFullYear();
+                    const month = date.getMonth() + 1;
+                    const durationSeconds = timeStringToSeconds(run.moving_time);
+
+                    parsedData.total.dist += distKm;
+                    parsedData.total.count++;
+                    parsedData.total.seconds += durationSeconds;
+
+                    if (!parsedData.years[year]) parsedData.years[year] = { dist: 0, count: 0, seconds: 0, months: {} };
+                    parsedData.years[year].dist += distKm;
+                    parsedData.years[year].count++;
+                    parsedData.years[year].seconds += durationSeconds;
+
+                    if (!parsedData.years[year].months[month]) parsedData.years[year].months[month] = { dist: 0, count: 0, seconds: 0, runs: [] };
+                    parsedData.years[year].months[month].dist += distKm;
+                    parsedData.years[year].months[month].count++;
+                    parsedData.years[year].months[month].seconds += durationSeconds;
+                    parsedData.years[year].months[month].runs.push(run);
+                });
+
+                Object.values(parsedData.years).forEach(yData => {
+                    parsedData.maxYearDist = Math.max(parsedData.maxYearDist, yData.dist);
+                    Object.values(yData.months).forEach(mData => {
+                        parsedData.maxMonthDist = Math.max(parsedData.maxMonthDist, mData.dist);
+                    });
+                });
+
+                renderHome();
+            } catch (err) {
+                document.getElementById('app').innerHTML = '<div class="loading">加载失败，请检查网络或跨域设置。</div>';
+            }
+        }
+
+        function renderHome() {
+            const app = document.getElementById('app');
+            let html = `
+                <h1>生涯总计</h1>
+                <p>共奔跑 <span class="stat-secondary">${parsedData.total.count}</span> 次，累计 <span class="stat-dist">${(parsedData.total.dist).toFixed(2)}</span> 公里</p>
+                <ul>
+            `;
+            
+            const years = Object.keys(parsedData.years).sort((a, b) => b - a);
+            years.forEach(year => {
+                const yData = parsedData.years[year];
+                const percentage = (yData.dist / parsedData.maxYearDist * 100).toFixed(1);
+                html += `
+                    <li class="li-item" onclick="renderYear(${year})">
+                        <div class="li-title">
+                            <a href="#">${year} 年</a>
+                            <span class="stats">${yData.count} 次</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar year-bar" style="width: ${percentage}%"></div>
+                        </div>
+                        <span class="stats"><span class="stat-dist">${(yData.dist).toFixed(2)}</span> 公里</span>
+                    </li>
+                `;
+            });
+            html += `</ul>`;
+            app.innerHTML = html;
+        }
+
+        // ========== 新版 renderYear：热力图在上，月份双栏 ==========
+        function renderYear(year) {
+            const app = document.getElementById('app');
+            const yData = parsedData.years[year];
+            if (!yData) return;
+
+            // --- 1. 构建热力图数据：计算该年所有日期所在的周矩阵 (周日开始) ---
+            const startDate = new Date(year, 0, 1);          // 1月1日
+            // 找到上一个周日 (若1月1日就是周日，则不变)
+            const firstSunday = new Date(startDate);
+            const dayOfWeek = startDate.getDay();            // 0 = 周日
+            if (dayOfWeek !== 0) {
+                firstSunday.setDate(startDate.getDate() - dayOfWeek); // 回退到周日
+            }
+            
+            const endDate = new Date(year, 11, 31);          // 12月31日
+            // 我们迭代从 firstSunday 到 endDate 之后一周的周六? 为了矩阵完整，迭代到 endDate 所在周的周六
+            const lastDate = new Date(endDate);
+            const lastDay = endDate.getDay();                // 0周日 .. 6周六
+            if (lastDay !== 6) {
+                lastDate.setDate(endDate.getDate() + (6 - lastDay)); // 调到周六
+            }
+
+            // 生成所有日期 (从firstSunday到lastDate)，按周分组，每周7天，用null补位
+            let weeks = [];
+            let currentWeek = [];
+            let currentDate = new Date(firstSunday);
+
+            while (currentDate <= lastDate) {
+                // 复制当前日期对象存入
+                currentWeek.push(new Date(currentDate));
+                
+                if (currentWeek.length === 7) {
+                    weeks.push(currentWeek);
+                    currentWeek = [];
+                }
+                // 增加一天
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            // 如果最后一周不足7天，用null补满
+            if (currentWeek.length > 0) {
+                while (currentWeek.length < 7) {
+                    currentWeek.push(null);
+                }
+                weeks.push(currentWeek);
+            }
+
+            const weekCount = weeks.length;
+
+            // --- 2. 构建顶部月份标签 (monthLabels 长度 = weekCount) ---
+            const monthLabels = new Array(weekCount).fill('');
+            // 遍历每一周，检查每一天是否是该月第一天
+            weeks.forEach((week, colIdx) => {
+                for (let dayIdx = 0; dayIdx < 7; dayIdx++) {
+                    const d = week[dayIdx];
+                    if (d && d.getFullYear() === year && d.getDate() === 1) {
+                        // 找到当月第一天
+                        monthLabels[colIdx] = (d.getMonth() + 1) + '月';
+                        break; // 同一周只显示一个月份 (不可能有两个1号)
+                    }
+                }
+            });
+
+            // --- 3. 构建热力图格子HTML (7行, weekCount列) 并确定颜色类---
+            const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+            
+            // 准备每一格的颜色等级 (二维数组: [row][col] -> heatLevel)
+            const gridLevels = [];
+            for (let row = 0; row < 7; row++) {
+                const rowArr = [];
+                for (let col = 0; col < weekCount; col++) {
+                    const dateObj = weeks[col]?.[row];
+                    let level = 0;  // 默认灰色
+                    if (dateObj && dateObj.getFullYear() === year) {
+                        // 只有在目标年份内才获取跑量
+                        const y = dateObj.getFullYear();
+                        const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+                        const d = String(dateObj.getDate()).padStart(2, '0');
+                        const dateKey = `${y}-${m}-${d}`;
+                        const km = parsedData.dayDistMap[dateKey] || 0;
+                        level = getHeatLevel(km);
+                    } else {
+                        // 非当年日期(前后占位)也当作0公里灰色 (heat-0)
+                        level = 0;
+                    }
+                    rowArr.push(level);
+                }
+                gridLevels.push(rowArr);
+            }
+
+            // 开始构建页面输出
+            let html = `
+                <a class="nav-back" onclick="renderHome()">返回总计</a>
+                <h1>${year} 年</h1>
+                <p>共奔跑 <span class="stat-secondary">${yData.count}</span> 次，累计 <span class="stat-dist">${(yData.dist).toFixed(2)}</span> 公里</p>
+
+                <!-- 热力图区域 (横向, 顶部月份) -->
+                <div class="heatmap-section">
+                    <div class="heatmap-wrapper">
+                        <!-- 月份行: 需要留出第一格(对应星期列) -->
+                        <div class="month-row" style="--weeks-count: ${weekCount};">
+                            <div></div> <!-- 空位对齐星期列 -->
+                            ${monthLabels.map(label => `<div class="month-cell">${label}</div>`).join('')}
+                        </div>
+
+                        <!-- 热力图主体: 星期列 + 格子 -->
+                        <div class="heatmap-grid" style="--weeks-count: ${weekCount};">
+                            ${weekdays.map((day, row) => `
+                                <div class="weekday-label">${day}</div>
+                                ${gridLevels[row].map(level => 
+                                    `<div class="heat-cell heat-${level}" title=""></div>`  // title稍后统一填充
+                                ).join('')}
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 月份列表 左右分列 1-6 和 7-12 -->
+                <div class="months-split">
+                    <div class="left-months"><ul>
+            `;
+
+            // 左列 1-6月
+            for (let m = 1; m <= 6; m++) {
+                const mData = yData.months[m];
+                html += renderMonthListItem(year, m, mData);
+            }
+            html += `</ul></div><div class="right-months"><ul>`;
+            // 右列 7-12月
+            for (let m = 7; m <= 12; m++) {
+                const mData = yData.months[m];
+                html += renderMonthListItem(year, m, mData);
+            }
+            html += `</ul></div></div>`;  // 结束双栏
+
+            app.innerHTML = html;
+
+            // 在格子中批量填充title (日期+公里数) 因为上面动态构建不易拼接复杂文本
+            const cells = document.querySelectorAll('.heat-cell');
+            let idx = 0;
+            for (let col = 0; col < weekCount; col++) {
+                for (let row = 0; row < 7; row++) {
+                    const cell = cells[idx++];
+                    if (!cell) continue;
+                    const dateObj = weeks[col]?.[row];
+                    if (dateObj && dateObj.getFullYear() === year) {
+                        const y = dateObj.getFullYear();
+                        const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+                        const d = String(dateObj.getDate()).padStart(2, '0');
+                        const dateKey = `${y}-${m}-${d}`;
+                        const km = parsedData.dayDistMap[dateKey] || 0;
+                        cell.setAttribute('title', `${dateKey}  ${km.toFixed(2)} km`);
+                    } else if (dateObj) {
+                        // 非当年日期 显示日期但无跑量
+                        const y = dateObj.getFullYear();
+                        const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+                        const d = String(dateObj.getDate()).padStart(2, '0');
+                        cell.setAttribute('title', `${y}-${m}-${d} (不在${year}年)`);
+                    } else {
+                        cell.setAttribute('title', '');
+                    }
+                }
+            }
+        }
+
+        // 辅助: 生成月份列表的单个条目 (支持空月份)
+        function renderMonthListItem(year, month, mData) {
+            const hasData = !!mData;
+            const dist = hasData ? mData.dist : 0;
+            const count = hasData ? mData.count : 0;
+            const seconds = hasData ? mData.seconds : 0;
+            const avgPace = hasData ? formatPaceFromSeconds(dist, seconds) : '-';
+            const compactTime = hasData ? formatSecondsToCompactTime(seconds) : '-';
+            const percentage = hasData ? (dist / parsedData.maxMonthDist * 100).toFixed(1) : 0;
+            
+            const liClass = hasData ? 'li-item' : 'li-item month-item-empty';
+            const clickHandler = hasData ? `onclick="renderMonth(${year}, ${month})"` : '';
+            
+            return `
+                <li class="${liClass}" ${clickHandler}>
+                    <div class="li-title">
+                        <a href="#">${month} 月</a>
+                        <span class="stats-compact">
+                            <span class="stat-dist">${dist.toFixed(1)} km</span> · 
+                            <span class="stat-time">${compactTime}</span> · 
+                            <span class="stat-pace">${avgPace}</span> · 
+                            <span class="stat-secondary">${count}次</span>
+                        </span>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar month-bar" style="width: ${percentage}%"></div>
+                    </div>
+                </li>
+            `;
+        }
+
+        // 月详情页面 (保持不变)
+        function renderMonth(year, month) {
+            const app = document.getElementById('app');
+            const mData = parsedData.years[year].months[month];
+            if (!mData) {
+                alert('该月没有跑步记录');
+                return;
+            }
+            const avgPace = formatPaceFromSeconds(mData.dist, mData.seconds);
+            const totalTime = formatSecondsToSummaryTime(mData.seconds);
+
+            let html = `
+                <a class="nav-back" onclick="renderYear(${year})">返回 ${year} 年</a>
+                <h1>${month} 月统计</h1>
+                <div class="month-summary">
+                    <div class="summary-item">
+                        <span class="summary-val stat-time">${totalTime}</span>
+                        <span class="summary-unit">总用时</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-val stat-dist">${(mData.dist).toFixed(1)}<span class="summary-unit">km</span></span>
+                        <span class="summary-unit">总距离</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-val stat-pace">${avgPace}</span>
+                        <span class="summary-unit">平均配速</span>
+                    </div>
+                </div>
+                <p class="stat-secondary">${mData.count} 次跑步</p>
+                <ul>
+            `;
+            
+            mData.runs.forEach(run => {
+                const dist = (run.distance / 1000).toFixed(2);
+                const durationSeconds = timeStringToSeconds(run.moving_time);
+                const hmsTime = formatSecondsToHMS(durationSeconds);
+                const pace = formatPaceFromSeconds(dist, durationSeconds);
+                const hr = run.average_heartrate ? Math.round(run.average_heartrate) : '-';
+
+                html += `
+                    <li class="run-record">
+                        <div class="run-header">
+                            <span class="run-date">${formatDate(run.start_date_local)}</span>
+                            <span class="run-city">${run.city || '未知城市'}</span>
+                        </div>
+                        <div class="run-data">
+                            <div>距离: <span class="run-val stat-dist">${dist} km</span></div>
+                            <div>用时: <span class="run-val stat-time">${hmsTime}</span></div>
+                            <div>配速: <span class="run-val stat-pace">${pace}</span></div>
+                            <div>心率: <span class="run-val stat-hr">${hr} bpm</span></div>
+                        </div>
+                    </li>
+                `;
+            });
+            html += `</ul>`;
+            app.innerHTML = html;
+        }
+
+        init();
+    </script>
+</body>
+</html>
