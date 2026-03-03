@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>跑步记录</title>
+    <style>
+        /* 核心配色与排版变量 */
+        :root {
+            --bg-color: #ffffff;
+            --text-primary: #111111;
+            --text-secondary: #737373;
+            --link-color: #111111;
+            --line-color: #e5e5e5;
+            
+            --time-color: #FBBF24;
+            --dist-color: #3B82F6;
+            --pace-color: #22D3EE;
+            --hr-color: #EF4444;
+            --bg-bar: #e5e7eb;
+            --bg-hover: #f3f4f6;
+            /* 热力图颜色梯度 (浅色模式: 蓝系为主，>40橙色) */
+            --cal-level-0: transparent;
+            --cal-level-1: #dbeafe; /* < 10km */
+            --cal-level-2: #93c5fd; /* < 20km */
+            --cal-level-3: #3b82f6; /* < 30km */
+            --cal-level-4: #1d4ed8; /* < 40km */
+            --cal-level-5: #f59e0b; /* >= 40km (高亮橙色) */
+        }
+
+        /* 自动适配深色模式 */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #121212;
+                --text-primary: #e0e0e0;
+                --text-secondary: #888888;
+                --link-color: #ffffff;
+                --line-color: #333333;
+                --time-color: #FCD34D;
+                --dist-color: #60A5FA;
+                --pace-color: #67E8F9;
+                --hr-color: #F87171;
+                --bg-bar: #374151;
+                --bg-hover: #1f2937;
+                /* 热力图颜色梯度 (深色模式) */
+                --cal-level-0: transparent;
+                --cal-level-1: #1e3a8a;
+                --cal-level-2: #1d4ed8;
+                --cal-level-3: #3b82f6;
+                --cal-level-4: #60a5fa;
+                --cal-level-5: #fbbf24;                 
+            }
+        }
+
+        /* 全局样式 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            max-width: 850px; /* 加宽以容纳双栏结构 */
+            margin: 40px auto;
+            padding: 0 20px;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        h1, h2 { font-weight: 500; font-size: 1.2rem; margin-bottom: 5px; }
+        p { color: var(--text-secondary); font-size: 0.95rem; margin-top: 0; margin-bottom: 30px; }
+        ul { list-style-type: none; padding: 0; margin: 0; }
+        li { margin-bottom: 18px; transition: background-color 0.2s; }
+
+        /* 链接和可点击项目 */
+        a { color: var(--link-color); text-decoration: none; cursor: pointer; font-size: 1.1rem; }
+        .li-item { padding: 8px 8px; border-radius: 4px; margin-left: -8px;}
+        .li-item:hover { background-color: var(--bg-hover); }
+        .li-title { display: flex; justify-content: space-between; align-items: baseline; }
+
+        /* 进度条 */
+        .progress-container { width: 100%; height: 4px; background-color: var(--bg-bar); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+        .progress-bar { height: 100%; border-radius: 2px; width: 0%; transition: width 0.3s ease; }
+        .year-bar { background-color: var(--dist-color); }
+        .month-bar { background-color: var(--pace-color); }
+
+        /* 文本统计样式 */
+        .stats { display: block; color: var(--text-secondary); font-size: 0.9rem; margin-top: 4px; }
+        .stats-compact { font-size: 0.85rem; color: var(--text-secondary); }
+        .nav-back { display: inline-block; margin-bottom: 30px; color: var(--text-secondary); font-size: 0.9rem; cursor: pointer; }
+        .nav-back::before { content: "← "; }
+        .nav-back:hover { color: var(--link-color); }
+        .loading { color: var(--text-secondary); }
+
+        /* 月详情的汇总样式 */
+        .month-summary { display: flex; justify-content: space-between; margin-bottom: 30px; }
+        .summary-item { display: flex; flex-direction: column; align-items: center; width: 32%; }
+        .summary-val { font-size: 1.5rem; font-weight: 500; }
+        .summary-unit { font-size: 0.8rem; color: var(--text-secondary); }
+
+        /* 颜色应用类 */
+        .stat-time { color: var(--time-color); }
+        .stat-dist { color: var(--dist-color); }
+        .stat-pace { color: var(--pace-color); }
+        .stat-hr { color: var(--hr-color); }
+        .stat-secondary { color: var(--text-secondary); }
+
+        /* 单次记录详细排版 */
+        .run-record { margin-bottom: 15px; border-bottom: 1px solid var(--line-color); padding-bottom: 10px; }
+        .run-header { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .run-date { font-weight: 500; font-size: 1.1rem; }
+        .run-city { color: var(--text-secondary); font-size: 0.9rem; }
+        .run-data { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; font-size: 0.9rem; color: var(--text-secondary); }
+        .run-val { color: var(--text-primary); font-weight: 500; }
+
+        /* 年度视图分栏与日历网格 */
+        .layout-year { display: flex; gap: 50px; align-items: flex-start; }
+        .col-months { flex: 1; }
+        .col-calendar { width: 140px; flex-shrink: 0; }
+        .calendar-grid { 
+            display: grid; 
+            grid-template-columns: repeat(7, 1fr); 
+            gap: 4px; 
+        }
+        .cal-header { font-size: 0.7rem; color: var(--text-secondary); text-align: center; margin-bottom: 4px; }
+        .cal-cell { 
+        	width: 12px; 
+            height: 12px; 
+            border-radius: 2px; 
+            background-color: var(--cal-level-0); 
+            outline: 1px solid var(--bg-bar);
+            outline-offset: -1px; }
+        .cal-cell:hover { transform: scale(1.2); transition: 0.1s; z-index: 10; outline-color: var(--text-secondary); }
+        .cal-cell.empty { background-color: var(--cal-empty); }
+        .cal-cell.hidden { outline: 0px; }
+        .cal-cell.month-start { outline-style: dashed; outline-width: 1px; outline-color: var(--text-secondary); outline-offset: 0px;}
+        /* 热力图颜色梯度类 */
+        .cal-level-1 { background-color: var(--cal-level-1); outline: none; }
+        .cal-level-2 { background-color: var(--cal-level-2); outline: none; }
+        .cal-level-3 { background-color: var(--cal-level-3); outline: none; }
+        .cal-level-4 { background-color: var(--cal-level-4); outline: none; }
+        .cal-level-5 { background-color: var(--cal-level-5); outline: none; }        
+
+        /* 移动端响应式折叠 */
+        @media (max-width: 650px) {
+            .layout-year { flex-direction: column; gap: 30px; }
+            .col-calendar { width: 100%; max-width: 250px; margin: 0 auto; }
+            .run-data { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <div class="loading">正在加载数据...</div>
+    </div>
+
+    <script>
+        const API_URL = 'https://run.linwn.net/data/all.json';
+        let rawData = [];
+        let parsedData = { 
+            total: { dist: 0, count: 0, seconds: 0 }, 
+            years: {},
+            maxYearDist: 0,
+            maxMonthDist: 0,
+            dailyDistances: new Map() // 映射 日期 -> 当日跑量总计
+        };
+
+        function timeStringToSeconds(timeStr) {
+            if (!timeStr) return 0;
+            const parts = timeStr.split(':');
+            if (parts.length === 3) return parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseFloat(parts[2]);
+            if (parts.length === 2) return parseInt(parts[0]) * 60 + parseFloat(parts[1]);
+            return 0;
+        }
+
+        function formatSecondsToSummaryTime(seconds) {
+            if (!seconds || seconds <= 0) return '-';
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            return `${h > 0 ? h + '<span class="summary-unit">h </span>' : ''}${m}<span class="summary-unit">m</span>`;
+        }
+
+        // 为紧凑列表用的精简时间格式 (如: 1h 25m)
+        function formatSecondsToCompactTime(seconds) {
+            if (!seconds || seconds <= 0) return '-';
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            return `${h > 0 ? h + 'h ' : ''}${m}m`;
+        }
+
+        function formatSecondsToHMS(seconds) {
+            if (!seconds || seconds <= 0) return '-';
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = Math.floor(seconds % 60);
+            return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function formatPaceFromSeconds(distKm, seconds) {
+            if (!distKm || distKm <= 0 || !seconds || seconds <= 0) return '-';
+            const secPerKm = seconds / distKm;
+            const m = Math.floor(secPerKm / 60);
+            const s = Math.floor(secPerKm % 60);
+            return `${m}'${s.toString().padStart(2, '0')}"`;
+        }
+
+        function formatDate(dateStr) {
+            const d = new Date(dateStr.replace(' ', 'T'));
+            return `${d.getMonth() + 1}月${d.getDate()}日`;
+        }
+
+        async function init() {
+            try {
+                const res = await fetch(API_URL);
+                rawData = await res.json();
+                
+                rawData.sort((a, b) => new Date(b.start_date_local.replace(' ', 'T')) - new Date(a.start_date_local.replace(' ', 'T')));
+
+                rawData.forEach(run => {
+                    const dateStrClean = run.start_date_local.split(' ')[0]; // 取出 YYYY-MM-DD
+
+                    const date = new Date(run.start_date_local.replace(' ', 'T'));
+                    const year = date.getFullYear();
+                    const month = date.getMonth() + 1;
+                    const distKm = run.distance / 1000;
+                    // 记录当日跑量以供热力图着色
+                    const currentDist = parsedData.dailyDistances.get(dateStrClean) || 0;
+                    parsedData.dailyDistances.set(dateStrClean, currentDist + distKm);
+                    const durationSeconds = timeStringToSeconds(run.moving_time);
+
+                    parsedData.total.dist += distKm;
+                    parsedData.total.count++;
+                    parsedData.total.seconds += durationSeconds;
+
+                    if (!parsedData.years[year]) parsedData.years[year] = { dist: 0, count: 0, seconds: 0, months: {} };
+                    parsedData.years[year].dist += distKm;
+                    parsedData.years[year].count++;
+                    parsedData.years[year].seconds += durationSeconds;
+
+                    if (!parsedData.years[year].months[month]) parsedData.years[year].months[month] = { dist: 0, count: 0, seconds: 0, runs: [] };
+                    parsedData.years[year].months[month].dist += distKm;
+                    parsedData.years[year].months[month].count++;
+                    parsedData.years[year].months[month].seconds += durationSeconds;
+                    parsedData.years[year].months[month].runs.push(run);
+                });
+
+                Object.values(parsedData.years).forEach(yData => {
+                    parsedData.maxYearDist = Math.max(parsedData.maxYearDist, yData.dist);
+                    Object.values(yData.months).forEach(mData => {
+                        parsedData.maxMonthDist = Math.max(parsedData.maxMonthDist, mData.dist);
+                    });
+                });
+
+                renderHome();
+            } catch (err) {
+                document.getElementById('app').innerHTML = '<div class="loading">加载失败，请检查网络或跨域设置。</div>';
+            }
+        }
+
+        function renderHome() {
+            const app = document.getElementById('app');
+            let html = `
+                <h1>生涯总计</h1>
+                <p>共奔跑 <span class="stat-secondary">${parsedData.total.count}</span> 次，累计 <span class="stat-dist">${(parsedData.total.dist).toFixed(2)}</span> 公里</p>
+                <ul>
+            `;
+            
+            const years = Object.keys(parsedData.years).sort((a, b) => a - b);
+            years.forEach(year => {
+                const yData = parsedData.years[year];
+                const percentage = (yData.dist / parsedData.maxYearDist * 100).toFixed(1);
+                html += `
+                    <li class="li-item" onclick="renderYear(${year})">
+                        <div class="li-title">
+                            <a href="#">${year} 年</a>
+                            <span class="stats">${yData.count} 次</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar year-bar" style="width: ${percentage}%"></div>
+                        </div>
+                        <span class="stats"><span class="stat-dist">${(yData.dist).toFixed(2)}</span> 公里</span>
+                    </li>
+                `;
+            });
+            html += `</ul>`;
+            app.innerHTML = html;
+        }
+
+        function renderYear(year) {
+            const app = document.getElementById('app');
+            const yData = parsedData.years[year];
+            
+            // 构建头部信息
+            let html = `
+                <a class="nav-back" onclick="renderHome()">返回总计</a>
+                <h1>${year} 年</h1>
+                <p>共奔跑 <span class="stat-secondary">${yData.count}</span> 次，累计 <span class="stat-dist">${(yData.dist).toFixed(2)}</span> 公里</p>
+                <div class="layout-year">
+                    <div class="col-months">
+                        <ul>
+            `;
+            
+            // 左栏：紧凑版月份列表
+            const months = Object.keys(yData.months).sort((a, b) => a - b);
+            months.forEach(month => {
+                const mData = yData.months[month];
+                const percentage = (mData.dist / parsedData.maxMonthDist * 100).toFixed(1);
+                const avgPace = formatPaceFromSeconds(mData.dist, mData.seconds);
+                const compactTime = formatSecondsToCompactTime(mData.seconds);
+                
+                html += `
+                    <li class="li-item" onclick="renderMonth(${year}, ${month})">
+                        <div class="li-title">
+                            <a href="#">${month} 月</a>
+                            <span class="stats-compact">
+                                <span class="stat-dist">${(mData.dist).toFixed(1)} km</span> · 
+                                <span class="stat-time">${compactTime}</span> · 
+                                <span class="stat-pace">${avgPace}</span> · 
+                                <span class="stat-secondary">${mData.count}次</span>
+                            </span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar month-bar" style="width: ${percentage}%"></div>
+                        </div>
+                    </li>
+                `;
+            });
+            html += `</ul></div>`;
+
+            // 右栏：全年日历图网格
+            html += `<div class="col-calendar"><div class="calendar-grid">`;
+            
+            // 填入星期表头
+            const daysHead = ['日', '一', '二', '三', '四', '五', '六'];
+            daysHead.forEach(d => html += `<div class="cal-header">${d}</div>`);
+            
+            // 计算当年的日历占位符和总天数
+            const startDate = new Date(year, 0, 1);
+            const startDay = startDate.getDay(); // 0 是周日
+            const isLeap = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+            const daysInYear = isLeap ? 366 : 365;
+            
+            // 补齐第一周的空白天数
+            for(let i = 0; i < startDay; i++) {
+                html += `<div class="cal-cell hidden"></div>`;
+            }
+            
+            // 填入365/366天的格子
+            for(let i = 0; i < daysInYear; i++) {
+                const d = new Date(year, 0, i + 1);
+                const mStr = String(d.getMonth() + 1).padStart(2, '0');
+                const dStr = String(d.getDate()).padStart(2, '0');
+                const dateStr = `${year}-${mStr}-${dStr}`; // 组装为 YYYY-MM-DD
+                const dist = parsedData.dailyDistances.get(dateStr) || 0;
+                let levelClass = '';
+                let monthStartClass = '';
+
+                if (dist > 0 && dist < 10) levelClass = 'cal-level-1';
+                else if (dist >= 10 && dist < 20) levelClass = 'cal-level-2';
+                else if (dist >= 20 && dist < 30) levelClass = 'cal-level-3';
+                else if (dist >= 30 && dist < 40) levelClass = 'cal-level-4';
+                else if (dist >= 40) levelClass = 'cal-level-5';
+                
+                const titleText = dist > 0 ? `${dateStr}：${dist.toFixed(2)} km` : dateStr;
+                if (d <= Date.now() && d.getDate() ==1) monthStartClass = 'month-start';
+                html += `<div class="cal-cell ${levelClass} ${monthStartClass}" title="${titleText}"></div>`;
+            }
+
+            html += `</div></div></div>`; // 结束 calendar-grid, col-calendar, layout-year
+            app.innerHTML = html;
+        }
+
+        function renderMonth(year, month) {
+            const app = document.getElementById('app');
+            const mData = parsedData.years[year].months[month];
+            const avgPace = formatPaceFromSeconds(mData.dist, mData.seconds);
+            const totalTime = formatSecondsToSummaryTime(mData.seconds);
+
+            let html = `
+                <a class="nav-back" onclick="renderYear(${year})">返回 ${year} 年</a>
+                <h1>${month} 月统计</h1>
+                <div class="month-summary">
+                    <div class="summary-item">
+                        <span class="summary-val stat-time">${totalTime}</span>
+                        <span class="summary-unit">总用时</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-val stat-dist">${(mData.dist).toFixed(1)}<span class="summary-unit">km</span></span>
+                        <span class="summary-unit">总距离</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-val stat-pace">${avgPace}</span>
+                        <span class="summary-unit">平均配速</span>
+                    </div>
+                </div>
+                <p class="stat-secondary">${mData.count} 次跑步</p>
+                <ul>
+            `;
+            
+            mData.runs.forEach(run => {
+                const dist = (run.distance / 1000).toFixed(2);
+                const durationSeconds = timeStringToSeconds(run.moving_time);
+                const hmsTime = formatSecondsToHMS(durationSeconds);
+                const pace = formatPaceFromSeconds(dist, durationSeconds);
+                const hr = run.average_heartrate ? Math.round(run.average_heartrate) : '-';
+
+                html += `
+                    <li class="run-record">
+                        <div class="run-header">
+                            <span class="run-date">${formatDate(run.start_date_local)}</span>
+                            <span class="run-city">${run.city || '未知城市'}</span>
+                        </div>
+                        <div class="run-data">
+                            <div>距离: <span class="run-val stat-dist">${dist} km</span></div>
+                            <div>用时: <span class="run-val stat-time">${hmsTime}</span></div>
+                            <div>配速: <span class="run-val stat-pace">${pace}</span></div>
+                            <div>心率: <span class="run-val stat-hr">${hr} bpm</span></div>
+                        </div>
+                    </li>
+                `;
+            });
+            html += `</ul>`;
+            app.innerHTML = html;
+        }
+
+        init();
+    </script>
+</body>
+</html>
