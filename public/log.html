@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>跑步记录 · 热力年历</title>
     <style>
-        /* ----- 核心变量 & 基础样式 (保持原风格) ----- */
+        /* ----- 核心变量 & 基础样式 ----- */
         :root {
             --bg-color: #ffffff;
             --text-primary: #111111;
@@ -27,7 +27,7 @@
             --heat-2: #40c463;           /* (10,20] */
             --heat-3: #30a14e;           /* (20,30] */
             --heat-4: #216e39;           /* (30,40] */
-            --heat-5: #bd5a2b;           /* >40 另一色系 (橙褐) */
+            --heat-5: #bd5a2b;           /* >40 另一色系 */
         }
 
         @media (prefers-color-scheme: dark) {
@@ -55,7 +55,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            max-width: 1000px;   /* 稍微加宽适应热力图+双栏月份 */
+            max-width: 1000px;
             margin: 40px auto;
             padding: 0 20px;
             background-color: var(--bg-color);
@@ -69,8 +69,17 @@
         li { margin-bottom: 18px; transition: background-color 0.2s; }
 
         a { color: var(--link-color); text-decoration: none; cursor: pointer; font-size: 1.1rem; }
-        .li-item { padding: 5px 8px; border-radius: 4px; margin-left: -8px; }
-        .li-item:hover { background-color: var(--bg-hover); }
+        
+        /* 月份列表项 - 左对齐，无负边距 */
+        .li-item { 
+            padding: 5px 0; 
+            margin: 0; 
+            border-radius: 0 4px 4px 0;
+        }
+        .li-item:hover { 
+            background-color: var(--bg-hover); 
+        }
+        
         .li-title { display: flex; justify-content: space-between; align-items: baseline; }
 
         .progress-container { width: 100%; height: 4px; background-color: var(--bg-bar); border-radius: 2px; margin-top: 6px; overflow: hidden; }
@@ -148,7 +157,7 @@
             aspect-ratio: 1 / 1;
             width: 100%;
             border-radius: 3px;
-            background-color: var(--heat-0);  /* 默认灰 */
+            background-color: var(--heat-0);
             transition: 0.1s;
             cursor: default;
         }
@@ -156,6 +165,17 @@
             transform: scale(1.15);
             box-shadow: 0 2px 6px rgba(0,0,0,0.2);
             z-index: 2;
+        }
+        /* 不属于该年的格子：完全隐藏（占位但不可见） */
+        .heat-cell.out-of-year {
+            opacity: 0;
+            pointer-events: none;
+        }
+        /* 每月第一天的格子：金色边框高亮 */
+        .heat-cell.first-day {
+            outline: 2px solid #ffaa00;
+            outline-offset: -1px;
+            z-index: 3;
         }
         /* 强度色阶 */
         .heat-0 { background-color: var(--heat-0); }
@@ -169,7 +189,7 @@
         .months-split {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 30px;
+            gap: 100px;
             margin-top: 20px;
         }
         .months-split ul {
@@ -203,7 +223,6 @@
             years: {},
             maxYearDist: 0,
             maxMonthDist: 0,
-            // runDates 不再作为主判断, 改用 dayDistMap
             dayDistMap: {}   // key: 'YYYY-MM-DD' -> 累计公里数
         };
 
@@ -260,6 +279,14 @@
             return 5;   // >=40 另一色系
         }
 
+        // 辅助：将Date对象格式化为 YYYY-MM-DD
+        function formatYMD(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
         async function init() {
             try {
                 const res = await fetch(API_URL);
@@ -270,7 +297,6 @@
                 rawData.forEach(run => {
                     const dateStrClean = run.start_date_local.split(' ')[0]; // YYYY-MM-DD
                     const distKm = run.distance / 1000;
-                    // 累加到日跑量
                     parsedData.dayDistMap[dateStrClean] = (parsedData.dayDistMap[dateStrClean] || 0) + distKm;
 
                     const date = new Date(run.start_date_local.replace(' ', 'T'));
@@ -336,46 +362,39 @@
             app.innerHTML = html;
         }
 
-        // ========== 新版 renderYear：热力图在上，月份双栏 ==========
         function renderYear(year) {
             const app = document.getElementById('app');
             const yData = parsedData.years[year];
             if (!yData) return;
 
-            // --- 1. 构建热力图数据：计算该年所有日期所在的周矩阵 (周日开始) ---
-            const startDate = new Date(year, 0, 1);          // 1月1日
-            // 找到上一个周日 (若1月1日就是周日，则不变)
+            // --- 构建热力图数据：计算该年所有日期所在的周矩阵 (周日开始) ---
+            const startDate = new Date(year, 0, 1);
             const firstSunday = new Date(startDate);
-            const dayOfWeek = startDate.getDay();            // 0 = 周日
+            const dayOfWeek = startDate.getDay(); // 0 = 周日
             if (dayOfWeek !== 0) {
-                firstSunday.setDate(startDate.getDate() - dayOfWeek); // 回退到周日
+                firstSunday.setDate(startDate.getDate() - dayOfWeek);
             }
             
-            const endDate = new Date(year, 11, 31);          // 12月31日
-            // 我们迭代从 firstSunday 到 endDate 之后一周的周六? 为了矩阵完整，迭代到 endDate 所在周的周六
+            const endDate = new Date(year, 11, 31);
             const lastDate = new Date(endDate);
-            const lastDay = endDate.getDay();                // 0周日 .. 6周六
+            const lastDay = endDate.getDay();
             if (lastDay !== 6) {
-                lastDate.setDate(endDate.getDate() + (6 - lastDay)); // 调到周六
+                lastDate.setDate(endDate.getDate() + (6 - lastDay));
             }
 
-            // 生成所有日期 (从firstSunday到lastDate)，按周分组，每周7天，用null补位
             let weeks = [];
             let currentWeek = [];
             let currentDate = new Date(firstSunday);
 
             while (currentDate <= lastDate) {
-                // 复制当前日期对象存入
                 currentWeek.push(new Date(currentDate));
                 
                 if (currentWeek.length === 7) {
                     weeks.push(currentWeek);
                     currentWeek = [];
                 }
-                // 增加一天
                 currentDate.setDate(currentDate.getDate() + 1);
             }
-            // 如果最后一周不足7天，用null补满
             if (currentWeek.length > 0) {
                 while (currentWeek.length < 7) {
                     currentWeek.push(null);
@@ -385,68 +404,53 @@
 
             const weekCount = weeks.length;
 
-            // --- 2. 构建顶部月份标签 (monthLabels 长度 = weekCount) ---
+            // --- 顶部月份标签 ---
             const monthLabels = new Array(weekCount).fill('');
-            // 遍历每一周，检查每一天是否是该月第一天
             weeks.forEach((week, colIdx) => {
                 for (let dayIdx = 0; dayIdx < 7; dayIdx++) {
                     const d = week[dayIdx];
                     if (d && d.getFullYear() === year && d.getDate() === 1) {
-                        // 找到当月第一天
                         monthLabels[colIdx] = (d.getMonth() + 1) + '月';
-                        break; // 同一周只显示一个月份 (不可能有两个1号)
+                        break;
                     }
                 }
             });
 
-            // --- 3. 构建热力图格子HTML (7行, weekCount列) 并确定颜色类---
+            // --- 热力图颜色等级 (仅用于颜色类) ---
             const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
-            
-            // 准备每一格的颜色等级 (二维数组: [row][col] -> heatLevel)
             const gridLevels = [];
             for (let row = 0; row < 7; row++) {
                 const rowArr = [];
                 for (let col = 0; col < weekCount; col++) {
                     const dateObj = weeks[col]?.[row];
-                    let level = 0;  // 默认灰色
+                    let level = 0;
                     if (dateObj && dateObj.getFullYear() === year) {
-                        // 只有在目标年份内才获取跑量
-                        const y = dateObj.getFullYear();
-                        const m = String(dateObj.getMonth() + 1).padStart(2, '0');
-                        const d = String(dateObj.getDate()).padStart(2, '0');
-                        const dateKey = `${y}-${m}-${d}`;
+                        const dateKey = formatYMD(dateObj);
                         const km = parsedData.dayDistMap[dateKey] || 0;
                         level = getHeatLevel(km);
-                    } else {
-                        // 非当年日期(前后占位)也当作0公里灰色 (heat-0)
-                        level = 0;
                     }
                     rowArr.push(level);
                 }
                 gridLevels.push(rowArr);
             }
 
-            // 开始构建页面输出
             let html = `
                 <a class="nav-back" onclick="renderHome()">返回总计</a>
                 <h1>${year} 年</h1>
                 <p>共奔跑 <span class="stat-secondary">${yData.count}</span> 次，累计 <span class="stat-dist">${(yData.dist).toFixed(2)}</span> 公里</p>
 
-                <!-- 热力图区域 (横向, 顶部月份) -->
+                <!-- 热力图区域 -->
                 <div class="heatmap-section">
                     <div class="heatmap-wrapper">
-                        <!-- 月份行: 需要留出第一格(对应星期列) -->
                         <div class="month-row" style="--weeks-count: ${weekCount};">
-                            <div></div> <!-- 空位对齐星期列 -->
+                            <div></div>
                             ${monthLabels.map(label => `<div class="month-cell">${label}</div>`).join('')}
                         </div>
-
-                        <!-- 热力图主体: 星期列 + 格子 -->
                         <div class="heatmap-grid" style="--weeks-count: ${weekCount};">
                             ${weekdays.map((day, row) => `
                                 <div class="weekday-label">${day}</div>
-                                ${gridLevels[row].map(level => 
-                                    `<div class="heat-cell heat-${level}" title=""></div>`  // title稍后统一填充
+                                ${gridLevels[row].map((level, col) => 
+                                    `<div class="heat-cell heat-${level}" data-row="${row}" data-col="${col}" title=""></div>`
                                 ).join('')}
                             `).join('')}
                         </div>
@@ -458,50 +462,57 @@
                     <div class="left-months"><ul>
             `;
 
-            // 左列 1-6月
             for (let m = 1; m <= 6; m++) {
                 const mData = yData.months[m];
                 html += renderMonthListItem(year, m, mData);
             }
             html += `</ul></div><div class="right-months"><ul>`;
-            // 右列 7-12月
             for (let m = 7; m <= 12; m++) {
                 const mData = yData.months[m];
                 html += renderMonthListItem(year, m, mData);
             }
-            html += `</ul></div></div>`;  // 结束双栏
+            html += `</ul></div></div>`;
 
             app.innerHTML = html;
 
-            // 在格子中批量填充title (日期+公里数) 因为上面动态构建不易拼接复杂文本
+            // 填充格子title、隐藏非本年格子、标记每月第一天
             const cells = document.querySelectorAll('.heat-cell');
             let idx = 0;
-            for (let col = 0; col < weekCount; col++) {
-                for (let row = 0; row < 7; row++) {
+            for (let row = 0; row < 7; row++) {
+                for (let col = 0; col < weekCount; col++) {
                     const cell = cells[idx++];
                     if (!cell) continue;
                     const dateObj = weeks[col]?.[row];
+                    
+                    // 清除可能存在的旧类（但保留 heat- 颜色类）
+                    cell.classList.remove('out-of-year', 'first-day');
+                    
                     if (dateObj && dateObj.getFullYear() === year) {
-                        const y = dateObj.getFullYear();
-                        const m = String(dateObj.getMonth() + 1).padStart(2, '0');
-                        const d = String(dateObj.getDate()).padStart(2, '0');
-                        const dateKey = `${y}-${m}-${d}`;
+                        // 属于该年
+                        const dateKey = formatYMD(dateObj);
                         const km = parsedData.dayDistMap[dateKey] || 0;
                         cell.setAttribute('title', `${dateKey}  ${km.toFixed(2)} km`);
+                        
+                        // 如果是每月第一天，添加特殊标记
+                        if (dateObj.getDate() === 1) {
+                            cell.classList.add('first-day');
+                        }
                     } else if (dateObj) {
-                        // 非当年日期 显示日期但无跑量
+                        // 不属于该年（前一年或后一年）
                         const y = dateObj.getFullYear();
                         const m = String(dateObj.getMonth() + 1).padStart(2, '0');
                         const d = String(dateObj.getDate()).padStart(2, '0');
                         cell.setAttribute('title', `${y}-${m}-${d} (不在${year}年)`);
+                        cell.classList.add('out-of-year'); // 添加隐藏类
                     } else {
+                        // 空占位格子 (null)
                         cell.setAttribute('title', '');
+                        cell.classList.add('out-of-year'); // 同样隐藏
                     }
                 }
             }
         }
 
-        // 辅助: 生成月份列表的单个条目 (支持空月份)
         function renderMonthListItem(year, month, mData) {
             const hasData = !!mData;
             const dist = hasData ? mData.dist : 0;
@@ -532,7 +543,6 @@
             `;
         }
 
-        // 月详情页面 (保持不变)
         function renderMonth(year, month) {
             const app = document.getElementById('app');
             const mData = parsedData.years[year].months[month];
