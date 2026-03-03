@@ -1,764 +1,605 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>奔跑的风铃木</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" async></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>跑步记录 · 热力年历</title>
+    <style>
+        /* ----- 核心变量 & 基础样式 ----- */
+        :root {
+            --bg-color: #ffffff;
+            --text-primary: #111111;
+            --text-secondary: #737373;
+            --link-color: #111111;
+            --line-color: #e5e5e5;
+            
+            --time-color: #FBBF24;
+            --dist-color: #3B82F6;
+            --pace-color: #22D3EE;
+            --hr-color: #EF4444;
+            --bg-bar: #e5e7eb;
+            --bg-hover: #f3f4f6;
+            --cal-empty: #e9e9e9;
 
-<style>
-/* --- 核心变量定义 --- */
-:root {
-  --bg: #f7f9fb; --card: #ffffff; --text: #1f2328; --sub: #656d76;
-  --border: #d0d7de;
-  --primary: #2ea44f;
-  
-  /* 色阶 */
-  --l0: #ebedf0; 
-  --l1: #9be9a8; --l2: #40c463; --l3: #30a14e; --l4: #216e39;
-  
-  --shadow: rgba(140, 149, 159, 0.2);
-  --font-main: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
-}
+            /* 热力图色阶 (灰色→绿→深绿→橙红) */
+            --heat-0: #ebedf0;           /* 0 km */
+            --heat-1: #9be9a8;           /* (0,10] */
+            --heat-2: #40c463;           /* (10,20] */
+            --heat-3: #30a14e;           /* (20,30] */
+            --heat-4: #216e39;           /* (30,40] */
+            --heat-5: #bd5a2b;           /* >40 另一色系 */
+        }
 
-/* 主题配色方案 */
-body[data-theme="orange"] { --primary: #f97316; --l0: #fff7ed; --l1: #ffddb0; --l2: #fdba74; --l3: #f97316; --l4: #c2410c; }
-body[data-theme="blue"] { --primary: #3b82f6; --l0: #eff6ff; --l1: #dbeafe; --l2: #60a5fa; --l3: #2563eb; --l4: #1e40af; }
-body[data-theme="purple"] { --primary: #8b5cf6; --l0: #f5f3ff; --l1: #ddd6fe; --l2: #a78bfa; --l3: #7c3aed; --l4: #5b21b6; }
-body[data-theme="dark"] {
-  --bg: #0d1117; --card: #161b22; --text: #e6edf3; --sub: #8b949e;
-  --border: #30363d; --primary: #238636;
-  --l0: #21262d; --l1: #0e4429; --l2: #006d32; --l3: #26a641; --l4: #39d353;
-  --shadow: rgba(0,0,0,0.5);
-}
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #121212;
+                --text-primary: #e0e0e0;
+                --text-secondary: #888888;
+                --link-color: #ffffff;
+                --line-color: #333333;
+                --time-color: #FCD34D;
+                --dist-color: #60A5FA;
+                --pace-color: #67E8F9;
+                --hr-color: #F87171;
+                --bg-bar: #374151;
+                --bg-hover: #1f2937;
+                --cal-empty: #2a2a2a;
+                --heat-0: #2d2d2d;
+                --heat-1: #0e4429;
+                --heat-2: #006d32;
+                --heat-3: #26a641;
+                --heat-4: #39d353;
+                --heat-5: #b15a2b;
+            }
+        }
 
-body {
-  margin: 0; padding: 20px 12px;
-  font-family: var(--font-main);
-  background: var(--bg); color: var(--text);
-  display: flex; flex-direction: column; align-items: center;
-  min-height: 100vh;
-  transition: background 0.3s, color 0.3s;
-}
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        h1, h2 { font-weight: 500; font-size: 1.2rem; margin-bottom: 5px; }
+        p { color: var(--text-secondary); font-size: 0.95rem; margin-top: 0; margin-bottom: 30px; }
+        ul { list-style-type: none; padding: 0; margin: 0; }
+        li { margin-bottom: 18px; transition: background-color 0.2s; }
 
-/* --- 布局组件 --- */
-.top-bar {
-  max-width: 500px; width: 100%;
-  display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 20px; transition: max-width 0.4s ease;
-}
+        a { color: var(--link-color); text-decoration: none; cursor: pointer; font-size: 1.1rem; }
+        
+        /* 月份列表项 - 左对齐，无负边距 */
+        .li-item { 
+            padding: 5px 0; 
+            margin: 0; 
+            border-radius: 0 4px 4px 0;
+        }
+        .li-item:hover { 
+            background-color: var(--bg-hover); 
+        }
+        
+        .li-title { display: flex; justify-content: space-between; align-items: baseline; }
 
-.menu-btn {
-  background: var(--card); border: 1px solid var(--border);
-  width: 40px; height: 40px; border-radius: 8px;
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  font-size: 20px; color: var(--sub); 
-}
+        .progress-container { width: 100%; height: 4px; background-color: var(--bg-bar); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+        .progress-bar { height: 100%; border-radius: 2px; width: 0%; transition: width 0.3s ease; }
+        .year-bar { background-color: var(--dist-color); }
+        .month-bar { background-color: var(--pace-color); }
 
-/* 菜单 */
-.menu-panel {
-  position: fixed; top: 0; right: -320px; width: 280px; height: 100%;
-  background: var(--card); z-index: 1000; padding: 30px 24px;
-  box-shadow: -4px 0 25px rgba(0,0,0,0.15);
-  transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow-y: auto;
-}
-.menu-panel.open { right: 0; }
-.menu-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 999; display: none; backdrop-filter: blur(2px); }
-.menu-group { margin-bottom: 30px; }
-.menu-group label { display: block; font-size: 13px; font-weight: 600; color: var(--sub); margin-bottom: 12px; }
-.toggle-group { display: flex; background: var(--l0); padding: 4px; border-radius: 10px; gap: 4px; }
-.toggle-group button { flex: 1; border: none; padding: 10px; border-radius: 8px; background: none; color: var(--sub); cursor: pointer; transition: 0.2s; }
-.toggle-group button.active { background: var(--card); color: var(--primary); box-shadow: 0 2px 6px rgba(0,0,0,0.08); font-weight: 700; }
-.theme-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-.theme-btn { border: 2px solid transparent; background: var(--l0); padding: 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; color: var(--text); }
-.theme-btn.active { border-color: var(--primary); background: var(--card); }
-.color-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .stats { display: block; color: var(--text-secondary); font-size: 0.9rem; margin-top: 4px; }
+        .stats-compact { font-size: 0.85rem; color: var(--text-secondary); }
+        .nav-back { display: inline-block; margin-bottom: 30px; color: var(--text-secondary); font-size: 0.9rem; cursor: pointer; }
+        .nav-back::before { content: "← "; }
+        .nav-back:hover { color: var(--link-color); }
+        .loading { color: var(--text-secondary); }
 
-/* --- 卡片组件 --- */
-.card {
-  max-width: 500px; width: 100%; background: var(--card); 
-  border-radius: 20px; padding: 28px; margin-top: 10px; 
-  text-align: center; box-shadow: 0 4px 12px var(--shadow);
-  border: 1px solid var(--border); box-sizing: border-box;
-  transition: max-width 0.4s ease;
-}
-.distance-prefix { font-size: 18px; font-weight: 600; color: var(--sub); margin-right: 6px; }
-.summary-distance { font-size: 48px; font-weight: 800; line-height: 1; margin: 10px 0; letter-spacing: -1px; font-variant-numeric: tabular-nums;}
-.unit { font-size: 18px; font-weight: 600; color: var(--sub); margin-left: 6px; }
-.progress { height: 10px; background: var(--l0); border-radius: 6px; overflow: hidden; margin-top: 20px; }
-.progress span { display: block; height: 100%; background: linear-gradient(90deg, var(--l2), var(--primary)); width: 0; transition: width 1.5s ease-out; }
-.progress-info { font-size: 13px; color: var(--sub); display: flex; justify-content: space-between; margin-top: 8px; font-weight: 500; }
-.badges { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 24px; justify-content: center; }
-.badge { font-size: 12px; padding: 6px 14px; background: var(--l0); color: var(--sub); border-radius: 99px; font-weight: 600; cursor: help; transition: 0.2s; }
-.badge:hover { background: var(--l1); color: var(--l4); transform: scale(1.05); }
-#pb-container { display: none; margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--border); }
-.toggle-pb-btn { background: none; border: none; color: var(--sub); font-size: 13px; margin-top: 16px; cursor: pointer; padding: 6px 12px; border-radius: 6px; transition: 0.2s; }
-.toggle-pb-btn:hover { color: var(--primary); background: var(--l0); }
+        .month-summary { display: flex; justify-content: space-between; margin-bottom: 30px; }
+        .summary-item { display: flex; flex-direction: column; align-items: center; width: 32%; }
+        .summary-val { font-size: 1.5rem; font-weight: 500; }
+        .summary-unit { font-size: 0.8rem; color: var(--text-secondary); }
 
-/* --- 日历 --- */
-.calendar { max-width: 500px; width: 100%; margin-top: 30px; box-sizing: border-box; transition: max-width 0.4s ease; }
-.month { 
-  background: var(--card); border-radius: 16px; padding: 20px; margin-bottom: 24px; 
-  box-shadow: 0 2px 8px var(--shadow); border: 1px solid var(--border);
-  opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease, transform 0.6s ease;
-}
-.month.is-visible { opacity: 1; transform: translateY(0); }
-.title { margin-bottom: 18px; }
-.title .main-info { display: flex; justify-content: space-between; font-size: 18px; font-weight: 800; }
-.title .sub-info { display: flex; gap: 16px; color: var(--sub); font-size: 13px; margin-top: 4px; font-weight: 500; flex-wrap: wrap; }
-.grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+        .stat-time { color: var(--time-color); }
+        .stat-dist { color: var(--dist-color); }
+        .stat-pace { color: var(--pace-color); }
+        .stat-hr { color: var(--hr-color); }
+        .stat-secondary { color: var(--text-secondary); }
 
-/* --- 年视图(网格模式)专属样式 --- */
-.months-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px 15px; margin-top: 15px; }
-.mini-month { display: flex; flex-direction: column; }
-.mini-month-name { font-size: 18px; font-weight: 700; margin-bottom: 12px; text-align: left; }
-.mini-week-row { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 11px; color: var(--sub); margin-bottom: 8px; font-weight: 600; }
-.mini-day-grid { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; gap: 4px 0; }
+        .run-record { margin-bottom: 15px; border-bottom: 1px solid var(--line-color); padding-bottom: 10px; }
+        .run-header { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .run-date { font-weight: 500; font-size: 1.1rem; }
+        .run-city { color: var(--text-secondary); font-size: 0.9rem; }
+        .run-data { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; font-size: 0.9rem; color: var(--text-secondary); }
+        .run-val { color: var(--text-primary); font-weight: 500; }
 
-.mini-day { font-size: 13px; width: 24px; height: 24px; line-height: 24px; margin: 0 auto; border-radius: 4px; cursor: default; transition: 0.2s; box-sizing: border-box; }
-/* 色阶覆盖与交互 */
-.mini-day.has-run { font-weight: 700; cursor: pointer; }
-.mini-day.has-run:hover { transform: scale(1.15); box-shadow: 0 2px 6px rgba(0,0,0,0.15); z-index: 2; position: relative; filter: brightness(1.05); }
+        /* ----- 热力图专用样式 (横向, 左侧星期, 顶部月份) ----- */
+        .heatmap-section {
+            margin-bottom: 40px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+        .heatmap-wrapper {
+            display: inline-block;
+            min-width: 100%;
+        }
+        /* 月份标签行 (单独grid, 第一列留空对齐星期) */
+        .month-row {
+            display: grid;
+            grid-template-columns: 40px repeat(var(--weeks-count), 1fr);
+            gap: 3px;
+            margin-bottom: 3px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-align: center;
+            align-items: end;
+        }
+        .month-cell {
+            padding-bottom: 2px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        /* 主体网格: 星期列 + 所有周 */
+        .heatmap-grid {
+            display: grid;
+            grid-template-columns: 40px repeat(var(--weeks-count), 1fr);
+            gap: 3px;
+        }
+        .weekday-label {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            padding-right: 6px;
+            height: 100%;
+        }
+        .heat-cell {
+            aspect-ratio: 1 / 1;
+            width: 100%;
+            border-radius: 3px;
+            background-color: var(--heat-0);
+            transition: 0.1s;
+            cursor: default;
+        }
+        .heat-cell:hover {
+            transform: scale(1.15);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            z-index: 2;
+        }
+        /* 不属于该年的格子：完全隐藏（占位但不可见） */
+        .heat-cell.out-of-year {
+            opacity: 0;
+            pointer-events: none;
+        }
+        /* 每月第一天的格子：底部金色阴影下划线 */
+        .heat-cell.first-day {
+            box-shadow: 0 3px 0 gold;
+            z-index: 3;
+        }
+        /* 强度色阶 */
+        .heat-0 { background-color: var(--heat-0); }
+        .heat-1 { background-color: var(--heat-1); }
+        .heat-2 { background-color: var(--heat-2); }
+        .heat-3 { background-color: var(--heat-3); }
+        .heat-4 { background-color: var(--heat-4); }
+        .heat-5 { background-color: var(--heat-5); }
 
-/* 年视图色阶背景 */
-.mini-day.level-1 { background: var(--l1); color: var(--text); }
-.mini-day.level-2 { background: var(--l2); color: #fff; text-shadow: 0 1px 1px rgba(0,0,0,0.1); }
-.mini-day.level-3 { background: var(--l3); color: #fff; text-shadow: 0 1px 1px rgba(0,0,0,0.1); }
-.mini-day.level-4 { background: var(--l4); color: #fff; text-shadow: 0 1px 1px rgba(0,0,0,0.1); }
-body[data-theme="dark"] .mini-day.level-1 { color: #fff; }
+        /* 月份双栏布局 (左1-6, 右7-12) */
+        .months-split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 100px;
+            margin-top: 20px;
+        }
+        .months-split ul {
+            margin: 0;
+        }
+        /* 空月份占位 (无数据) 样式 */
+        .month-item-empty {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        .month-item-empty .progress-container {
+            background-color: transparent;
+        }
 
-.mini-day.today { background: var(--primary) !important; color: #fff !important; font-weight: 700; border-radius: 6px; }
-
-/* 小屏幕下缩小间距和字体，确保 3 列可以完美排下 */
-@media (max-width: 600px) { 
-  .months-grid { grid-template-columns: repeat(3, 1fr); gap: 15px 5px; } 
-  .mini-day { width: 15px; height: 15px; line-height: 15px; font-size: 10px; border-radius: 3px; }
-  .mini-week-row { font-size: 9px; margin-bottom: 4px; }
-  .mini-month-name { font-size: 14px; margin-bottom: 6px; }
-}
-
-/* 格子样式 */
-.cell { 
-  aspect-ratio: 1; border-radius: 6px; position: relative; 
-  background: var(--l0); cursor: default;
-  transform-style: preserve-3d; perspective: 1000px;
-}
-.cell .content-layer {
-  position: absolute; width: 100%; height: 100%;
-  display: flex; flex-direction: column; justify-content: space-between;
-  padding: 4px; box-sizing: border-box;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  backface-visibility: hidden; border-radius: 6px;
-}
-
-.level-0 { background: var(--l0); }
-.level-1 { background: var(--l1); }
-.level-2 { background: var(--l2); }
-.level-3 { background: var(--l3); }
-.level-4 { background: var(--l4); }
-
-.cell .front { opacity: 1; transform: rotateX(0deg); z-index: 2; }
-.cell .label { font-size: 10px; color: var(--sub); font-weight: 600; }
-.cell .distance { 
-  align-self: center; margin-top: auto; margin-bottom: auto;
-  font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.95); 
-  display: flex; align-items: baseline; justify-content: center;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
-}
-.cell .unit-sm { font-size: 0px; }
-
-/* 背面 */
-.cell .back { 
-  opacity: 0; background: var(--card); border: 2px solid var(--primary);
-  align-items: center; justify-content: center; z-index: 1; pointer-events: none;
-}
-.level-0 .distance { display: none; }
-
-/* 趋势柱 */
-.bar-view { display: flex; align-items: flex-end; gap: 4px; height: 140px; padding-top: 20px; border-bottom: 1px solid var(--l0); }
-.bar-item { flex: 1; border-radius: 4px 4px 0 0; position: relative; min-height: 4px; }
-.bar-item .label { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%) scale(0.8); font-size: 10px; color: var(--sub); }
-
-/* --- 分享按钮 --- */
-.share-btn {
-  position: absolute; top: 2px; right: 2px;
-  width: 18px; height: 18px; border-radius: 4px;
-  background: rgba(255,255,255,0.9); border: 1px solid rgba(0,0,0,0.1);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; opacity: 0; transition: opacity 0.2s; 
-  z-index: 20; font-size: 12px; color: #333; line-height: 1;
-}
-.share-btn:hover { background: #fff; transform: scale(1.1); }
-.cell:hover .share-btn { opacity: 1; }
-body[data-theme="dark"] .share-btn { background: rgba(0,0,0,0.6); color: #fff; border-color: rgba(255,255,255,0.2); }
-body[data-theme="dark"] .share-btn:hover { background: rgba(0,0,0,0.9); }
-
-#tooltip {
-  position: fixed; background: rgba(0,0,0,0.85); color: #fff; 
-  padding: 8px 12px; border-radius: 8px; font-size: 12px;
-  pointer-events: none; opacity: 0; z-index: 9999; 
-  transition: opacity 0.15s; white-space: nowrap; backdrop-filter: blur(4px);
-}
-.tip-row { display: flex; gap: 12px; align-items: center; }
-
-@media (min-width: 900px) {
-  .top-bar, .card, .calendar { max-width: 1000px; }
-  .cell .unit-sm { font-size: 10px; font-weight: 500; margin-left: 2px; opacity: 0.9; }
-  .grid { gap: 10px; }
-  .cell { aspect-ratio: 1.25; transition: transform 0.2s; }
-  .cell:hover { z-index: 10; transform: scale(1.05); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-  .cell.has-run:hover .front { opacity: 0; transform: scale(0.9); }
-  .cell.has-run:hover .back { opacity: 1; pointer-events: auto; }
-  .cell .distance { font-size: 26px; letter-spacing: -1px; }
-  .cell .unit-sm { font-size: 12px; }
-  .cell .back { display: flex; flex-direction: column; justify-content: center; padding: 4px; }
-  .detail-group { text-align: center; line-height: 1.3; width: 100%; }
-  .detail-dist { font-size: 22px; font-weight: 900; color: var(--primary); display: block; }
-  .detail-meta { font-size: 11px; color: var(--sub); font-weight: 600; display: block; margin-top: 2px;}
-  .detail-row { display: flex; gap: 8px; justify-content: center; margin-top: 6px; font-size: 12px; font-weight: 700; color: var(--text); }
-}
-
-@keyframes cellAppear { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
-.month.is-visible .cell, .month.is-visible .bar-item { animation: cellAppear 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-
-#toTop { position: fixed; right: 30px; bottom: 30px; background: var(--primary); color: #fff; border: none; width: 50px; height: 50px; border-radius: 50%; display: none; cursor: pointer; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.2); font-size: 20px; }
-#loading-sentinel { height: 40px; margin-bottom: 40px;}
-</style>
+        @media (max-width: 700px) {
+            .months-split { grid-template-columns: 1fr; gap: 10px; }
+            .run-data { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
 </head>
-
 <body>
-
-<div class="top-bar">
-  <div style="display:flex; flex-direction:column; z-index: 2;">
-    <strong style="font-size: 22px; letter-spacing: -0.5px;">奔跑的<span style="color: var(--primary)">风铃木</span></strong>
-    <span style="font-size: 12px; color: var(--sub); font-weight: 500;">听见风的声音，遇见更好的自己</span>
-  </div>
-  <button class="menu-btn" id="openMenu">☰</button>
-</div>
-<div class="menu-overlay" id="overlay"></div>
-<div class="menu-panel" id="menu">
-  <h3 style="margin-top:0; margin-bottom:20px; font-size:18px;">设置</h3> <div class="menu-group">
-    <label>选择主题</label>
-    <div class="theme-grid">
-      <button class="theme-btn active" data-val="green"><span class="color-dot" style="background:#2ea44f"></span>翡翠风铃</button>
-      <button class="theme-btn" data-val="orange"><span class="color-dot" style="background:#f97316"></span>暖阳风铃</button>
-      <button class="theme-btn" data-val="blue"><span class="color-dot" style="background:#3b82f6"></span>深海风铃</button>
-      <button class="theme-btn" data-val="purple"><span class="color-dot" style="background:#8b5cf6"></span>紫雾风铃</button>
-      <button class="theme-btn" data-val="dark"><span class="color-dot" style="background:#21262d"></span>暗夜风铃</button>
+    <div id="app">
+        <div class="loading">正在加载数据...</div>
     </div>
-  </div>
-  <div class="menu-group"><label>时间维度</label><div class="toggle-group"><button id="btnMonth" class="active">月视图</button><button id="btnYear">年视图</button></div></div>
-  <div class="menu-group"><label>展示模式</label><div class="toggle-group"><button id="btnGrid" class="active">日历格</button><button id="btnBar">趋势柱</button></div></div>
-</div>
 
-<div class="card">
-  <div class="summary-distance"><span class="distance-prefix">总跑量</span><span id="total">0.0</span><span class="unit">km</span></div>
-  <div class="progress"><span id="globe"></span></div>
-  <div class="progress-info"><span>环球赤道进度</span><span id="ppct">0%</span></div>
-  <div class="badges" id="badges"></div>
-  <div class="badges" id="pb-container"></div>
-  <button class="toggle-pb-btn" id="togglePb">展开个人纪录 (PB) ↓</button>
-</div>
+    <script>
+        const API_URL = 'https://run.linwn.net/data/all.json';
+        let rawData = [];
+        let parsedData = { 
+            total: { dist: 0, count: 0, seconds: 0 }, 
+            years: {},
+            maxYearDist: 0,
+            maxMonthDist: 0,
+            dayDistMap: {}   // key: 'YYYY-MM-DD' -> 累计公里数
+        };
 
-<div class="calendar" id="calendar"></div>
-<div id="loading-sentinel"></div>
-<div id="tooltip"></div>
-<button id="toTop">↑</button>
+        function timeStringToSeconds(timeStr) {
+            if (!timeStr) return 0;
+            const parts = timeStr.split(':');
+            if (parts.length === 3) return parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseFloat(parts[2]);
+            if (parts.length === 2) return parseInt(parts[0]) * 60 + parseFloat(parts[1]);
+            return 0;
+        }
 
-<script>
-// --- 配置区 ---
-const DATA_URL = 'https://run.linwn.net/data/all.json'; 
-const PB_URL = 'https://run.linwn.net/data/pb.json';    
-const BATCH_SIZE = 6;
+        function formatSecondsToSummaryTime(seconds) {
+            if (!seconds || seconds <= 0) return '-';
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            return `${h > 0 ? h + '<span class="summary-unit">h </span>' : ''}${m}<span class="summary-unit">m</span>`;
+        }
 
-// --- 状态管理 ---
-let appState = {
-  runsRaw: {}, monthKeys: [], years: {}, months: {},
-  stats: { totalKm: 0, pb: { val: 0, date: '-' }, fastest: { paceVal: 9999, paceStr: '--', date: '-' }, bestMonth: { name: '-', val: 0 }, streak: { count: 0, start: '-', end: '-' } },
-  view: { cursor: 0, type: 'month', mode: 'grid' },
-  theme: 'green'
-};
+        function formatSecondsToCompactTime(seconds) {
+            if (!seconds || seconds <= 0) return '-';
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            return `${h > 0 ? h + 'h ' : ''}${m}m`;
+        }
 
-function loadSettings() {
-  const saved = localStorage.getItem('run_journey_settings');
-  if (saved) {
-    const p = JSON.parse(saved);
-    if(p.theme) switchTheme(p.theme);
-    if(p.type) { appState.view.type = p.type; updateToggleState('btnMonth', p.type === 'month'); updateToggleState('btnYear', p.type === 'year'); }
-    if(p.mode) { appState.view.mode = p.mode; updateToggleState('btnGrid', p.mode === 'grid'); updateToggleState('btnBar', p.mode === 'bar'); }
-  }
-}
-function saveSettings() {
-  localStorage.setItem('run_journey_settings', JSON.stringify({ theme: appState.theme, type: appState.view.type, mode: appState.view.mode }));
-}
+        function formatSecondsToHMS(seconds) {
+            if (!seconds || seconds <= 0) return '-';
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = Math.floor(seconds % 60);
+            return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
 
-// --- 核心工具 ---
-const parseDuration = t => {
-    if (typeof t === 'number') return t;
-    const parts = (t || "0:0:0").split(':').map(Number);
-    return parts.length === 3 ? parts[0]*3600 + parts[1]*60 + parts[2] : parts[0]*60 + parts[1];
-};
-const formatTime = s => {
-    s = Math.round(s);
-    const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
-    return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}` : `${m}:${String(sec).padStart(2, '0')}`;
-};
-const formatPace = (s, km) => {
-    if (!s || !km) return '--';
-    const p = s / km, m = Math.floor(p / 60), sec = Math.floor(p % 60);
-    return `${m}'${String(sec).padStart(2, '0')}"`;
-};
-const getLevel = (k, mode) => {
-    if (k <= 0) return 0;
-    const levels = mode === 'y' ? [100, 150, 200, 300] : [3, 7, 12, 21];
-    for (let i = levels.length - 1; i >= 0; i--) if (k >= levels[i]) return i + 1;
-    return 1;
-};
+        function formatPaceFromSeconds(distKm, seconds) {
+            if (!distKm || distKm <= 0 || !seconds || seconds <= 0) return '-';
+            const secPerKm = seconds / distKm;
+            const m = Math.floor(secPerKm / 60);
+            const s = Math.floor(secPerKm % 60);
+            return `${m}'${s.toString().padStart(2, '0')}"`;
+        }
 
-// --- 截图功能 ---
-function takeScreenshot(cellElement) {
-    if (typeof html2canvas === 'undefined') { console.warn('html2canvas 未加载'); return; }
+        function formatDate(dateStr) {
+            const d = new Date(dateStr.replace(' ', 'T'));
+            return `${d.getMonth() + 1}月${d.getDate()}日`;
+        }
 
-    const backContent = cellElement.querySelector('.back');
-    if (!backContent) return;
+        // 根据公里数返回热力等级 (0-5)
+        function getHeatLevel(km) {
+            if (km === 0) return 0;
+            if (km < 10) return 1;
+            if (km < 20) return 2;
+            if (km < 30) return 3;
+            if (km < 40) return 4;
+            return 5;   // >=40 另一色系
+        }
 
-    const computedStyle = getComputedStyle(document.body);
-    const borderColor = computedStyle.getPropertyValue('--primary').trim();
-    const textColor = computedStyle.getPropertyValue('--text').trim();
-    const subColor = computedStyle.getPropertyValue('--sub').trim();
+        // 辅助：将Date对象格式化为 YYYY-MM-DD
+        function formatYMD(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
 
-    html2canvas(document.body, {
-        width: 830,
-        height: 640,
-        scale: 1,
-        backgroundColor: null, 
-        logging: false,
-        onclone: (clonedDoc) => {
-            const body = clonedDoc.body;
-            body.innerHTML = ''; 
-            body.style.backgroundColor = 'transparent';
-            body.style.width = '800px';
-            body.style.height = '600px';
-            body.style.overflow = 'hidden';
+        async function init() {
+            try {
+                const res = await fetch(API_URL);
+                rawData = await res.json();
+                
+                rawData.sort((a, b) => new Date(b.start_date_local.replace(' ', 'T')) - new Date(a.start_date_local.replace(' ', 'T')));
 
-            const exportBox = clonedDoc.createElement('div');
-            exportBox.style.width = '800px';
-            exportBox.style.height = '600px';
-            exportBox.style.display = 'flex';
-            exportBox.style.flexDirection = 'column';
-            exportBox.style.justifyContent = 'center';
-            exportBox.style.alignItems = 'center';
-            exportBox.style.boxSizing = 'border-box';
-            
-            exportBox.style.backgroundColor = 'var(--card)'; 
-            exportBox.style.border = `4px solid ${borderColor}`;
-            exportBox.style.color = textColor;
-            exportBox.style.borderRadius = '60px';
-            
-            exportBox.innerHTML = backContent.innerHTML;
+                rawData.forEach(run => {
+                    const dateStrClean = run.start_date_local.split(' ')[0]; // YYYY-MM-DD
+                    const distKm = run.distance / 1000;
+                    parsedData.dayDistMap[dateStrClean] = (parsedData.dayDistMap[dateStrClean] || 0) + distKm;
 
-            const style = clonedDoc.createElement('style');
-            style.innerHTML = `
-                .detail-group { width: 100%; text-align: center; font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif; }
-                .detail-dist { font-size: 180px !important; line-height: 1.1; font-weight: 900; color: ${borderColor}; display: block; margin-bottom: 20px; }
-                .detail-dist .unit-sm { font-size: 60px !important; margin-left: 10px; font-weight: 600; color: ${subColor}; }
-                .detail-meta { font-size: 60px !important; color: ${subColor}; font-weight: 600; display: block; margin-bottom: 30px; letter-spacing: 2px;}
-                .detail-row { display: flex; justify-content: center; gap: 40px !important; font-size: 50px !important; font-weight: 700; margin-top: 20px; color: ${textColor}; }
-                .detail-row span { display: flex; align-items: center; }
+                    const date = new Date(run.start_date_local.replace(' ', 'T'));
+                    const year = date.getFullYear();
+                    const month = date.getMonth() + 1;
+                    const durationSeconds = timeStringToSeconds(run.moving_time);
+
+                    parsedData.total.dist += distKm;
+                    parsedData.total.count++;
+                    parsedData.total.seconds += durationSeconds;
+
+                    if (!parsedData.years[year]) parsedData.years[year] = { dist: 0, count: 0, seconds: 0, months: {} };
+                    parsedData.years[year].dist += distKm;
+                    parsedData.years[year].count++;
+                    parsedData.years[year].seconds += durationSeconds;
+
+                    if (!parsedData.years[year].months[month]) parsedData.years[year].months[month] = { dist: 0, count: 0, seconds: 0, runs: [] };
+                    parsedData.years[year].months[month].dist += distKm;
+                    parsedData.years[year].months[month].count++;
+                    parsedData.years[year].months[month].seconds += durationSeconds;
+                    parsedData.years[year].months[month].runs.push(run);
+                });
+
+                Object.values(parsedData.years).forEach(yData => {
+                    parsedData.maxYearDist = Math.max(parsedData.maxYearDist, yData.dist);
+                    Object.values(yData.months).forEach(mData => {
+                        parsedData.maxMonthDist = Math.max(parsedData.maxMonthDist, mData.dist);
+                    });
+                });
+
+                renderHome();
+            } catch (err) {
+                document.getElementById('app').innerHTML = '<div class="loading">加载失败，请检查网络或跨域设置。</div>';
+            }
+        }
+
+        function renderHome() {
+            const app = document.getElementById('app');
+            let html = `
+                <h1>生涯总计</h1>
+                <p>共奔跑 <span class="stat-secondary">${parsedData.total.count}</span> 次，累计 <span class="stat-dist">${(parsedData.total.dist).toFixed(2)}</span> 公里</p>
+                <ul>
             `;
-            exportBox.appendChild(style);
-            body.appendChild(exportBox);
+            
+            const years = Object.keys(parsedData.years).sort((a, b) => b - a);
+            years.forEach(year => {
+                const yData = parsedData.years[year];
+                const percentage = (yData.dist / parsedData.maxYearDist * 100).toFixed(1);
+                html += `
+                    <li class="li-item" onclick="renderYear(${year})">
+                        <div class="li-title">
+                            <a href="#">${year} 年</a>
+                            <span class="stats">${yData.count} 次</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar year-bar" style="width: ${percentage}%"></div>
+                        </div>
+                        <span class="stats"><span class="stat-dist">${(yData.dist).toFixed(2)}</span> 公里</span>
+                    </li>
+                `;
+            });
+            html += `</ul>`;
+            app.innerHTML = html;
         }
-    }).then(canvas => {
-        const link = document.createElement('a');
-        link.download = `run-card-${new Date().getTime()}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-    }).catch(err => {
-        console.error('Export failed:', err);
-    });
-}
-// --- 数据处理 ---
-function processData(data) {
-   data.forEach(r => {
-       const fullDate = (r.start_date_local || r.start_date).split(' ')[0];
-       const startTime = (r.start_date_local || r.start_date).split(' ')[1]?.slice(0,5) || "--:--";
-       const km = Number(r.distance || 0) / 1000;
-       const movingTime = parseDuration(r.moving_time);
-       const paceVal = movingTime / km;
 
-       if (!appState.runsRaw[fullDate]) appState.runsRaw[fullDate] = { totalKm: 0, runs: [], mainRun: null };
-       appState.runsRaw[fullDate].totalKm += km;
-       appState.runsRaw[fullDate].runs.push(r);
-       
-       if (!appState.runsRaw[fullDate].mainRun || km > appState.runsRaw[fullDate].mainRun.dist) {
-          appState.runsRaw[fullDate].mainRun = { dist: km, time: movingTime, pace: paceVal, start: startTime, hr: r.average_heartrate };
-       }
+        function renderYear(year) {
+            const app = document.getElementById('app');
+            const yData = parsedData.years[year];
+            if (!yData) return;
 
-       const mKey = fullDate.slice(0, 7), yKey = fullDate.slice(0, 4);
-       if (!appState.months[mKey]) appState.months[mKey] = { km: 0, time: 0, hrSum: 0, hrCount: 0, dailyMax: 0 };
-       appState.months[mKey].km += km;
-       appState.months[mKey].time += movingTime;
-       appState.months[mKey].dailyMax = Math.max(appState.months[mKey].dailyMax, appState.runsRaw[fullDate].totalKm);
-       if (r.average_heartrate) { appState.months[mKey].hrSum += r.average_heartrate; appState.months[mKey].hrCount++; }
+            // --- 构建热力图数据：计算该年所有日期所在的周矩阵 (周日开始) ---
+            const startDate = new Date(year, 0, 1);
+            const firstSunday = new Date(startDate);
+            const dayOfWeek = startDate.getDay(); // 0 = 周日
+            if (dayOfWeek !== 0) {
+                firstSunday.setDate(startDate.getDate() - dayOfWeek);
+            }
+            
+            const endDate = new Date(year, 11, 31);
+            const lastDate = new Date(endDate);
+            const lastDay = endDate.getDay();
+            if (lastDay !== 6) {
+                lastDate.setDate(endDate.getDate() + (6 - lastDay));
+            }
 
-       if (!appState.years[yKey]) appState.years[yKey] = { total: 0, months: {}, maxMonth: 0 };
-       appState.years[yKey].months[mKey] = (appState.years[yKey].months[mKey] || 0) + km;
-       appState.years[yKey].total += km;
-       appState.years[yKey].maxMonth = Math.max(appState.years[yKey].maxMonth, appState.years[yKey].months[mKey]);
-       
-       appState.stats.totalKm += km;
-       if (km > appState.stats.pb.val) appState.stats.pb = { val: km, date: fullDate };
-       if (paceVal < appState.stats.fastest.paceVal && km > 1) {
-           appState.stats.fastest = { paceVal, paceStr: formatPace(movingTime, km), date: fullDate };
-       }
-   });
+            let weeks = [];
+            let currentWeek = [];
+            let currentDate = new Date(firstSunday);
 
-   appState.monthKeys = Array.from(new Set(Object.keys(appState.runsRaw).map(d => d.slice(0, 7)))).sort().reverse();
-   
-   const dates = Object.keys(appState.runsRaw).sort();
-   let max = 0, cur = 0, start = '', end = '', tempStart = '';
-   for(let i=0; i<dates.length; i++) {
-     if(i>0 && (new Date(dates[i]) - new Date(dates[i-1]))/86400000 === 1) {
-       cur++; 
-     } else {
-       if(cur > max) { max = cur; start = tempStart; end = dates[i-1]; }
-       cur = 1; tempStart = dates[i];
-     }
-   }
-   if(cur > max) { max = cur; start = tempStart; end = dates[dates.length-1]; }
-   if(max > 0) appState.stats.streak = { count: max, start, end };
-   
-   const topMonth = Object.entries(appState.months).sort((a,b)=>b[1].km - a[1].km)[0];
-   if (topMonth) appState.stats.bestMonth = { name: topMonth[0], val: topMonth[1].km };
-}
+            while (currentDate <= lastDate) {
+                currentWeek.push(new Date(currentDate));
+                
+                if (currentWeek.length === 7) {
+                    weeks.push(currentWeek);
+                    currentWeek = [];
+                }
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            if (currentWeek.length > 0) {
+                while (currentWeek.length < 7) {
+                    currentWeek.push(null);
+                }
+                weeks.push(currentWeek);
+            }
 
-// --- 渲染函数 ---
-function renderOneMonth(mKey) {
-   const [y, mo] = mKey.split('-');
-   const mData = appState.months[mKey];
-   const daysInMonth = new Date(y, mo, 0).getDate();
-   const avgPace = formatPace(mData.time, mData.km);
-   const avgHr = mData.hrCount ? Math.round(mData.hrSum / mData.hrCount) + ' bpm' : '--';
-   
-   const box = document.createElement('div');
-   box.className = 'month';
-   box.innerHTML = `
-       <div class="title">
-           <div class="main-info"><span>${y}年${mo}月</span><span>${mData.km.toFixed(1)} km</span></div>
-           <div class="sub-info">
-             <span>🏃 Avg. ${avgPace}</span>
-             <span>💓 Avg. ${avgHr}</span>
-             <span>📅 ${Object.keys(appState.runsRaw).filter(k=>k.startsWith(mKey)).length} Days</span>
-           </div>
-       </div>
-       <div class="${appState.view.mode === 'grid' ? 'grid' : 'bar-view'}"></div>`;
-   
-   const container = box.querySelector(appState.view.mode === 'grid' ? '.grid' : '.bar-view');
-   if (appState.view.mode === 'grid') {
-       const emptyOffset = new Date(y, mo - 1, 1).getDay(); // 周日作为第一天
-       for (let i = 0; i < emptyOffset; i++) container.appendChild(document.createElement('div'));
-   }
+            const weekCount = weeks.length;
 
-   for (let d = 1; d <= daysInMonth; d++) {
-       const dateKey = `${y}-${mo}-${String(d).padStart(2, '0')}`;
-       const dayInfo = appState.runsRaw[dateKey];
-       const km = dayInfo ? dayInfo.totalKm : 0;
-       const el = document.createElement('div');
-       const levelClass = `level-${getLevel(km, 'm')}`;
-       
-       if (appState.view.mode === 'grid') {
-           el.className = `cell ${levelClass} ${km > 0 ? 'has-run' : ''}`;
-           let frontHtml = `<div class="content-layer front"><span class="label">${d}</span>`;
-           if (km > 0) frontHtml += `<span class="distance">${km.toFixed(1)}<span class="unit-sm">km</span></span>`;
-           frontHtml += `</div>`;
+            // --- 顶部月份标签 ---
+            const monthLabels = new Array(weekCount).fill('');
+            weeks.forEach((week, colIdx) => {
+                for (let dayIdx = 0; dayIdx < 7; dayIdx++) {
+                    const d = week[dayIdx];
+                    if (d && d.getFullYear() === year && d.getDate() === 1) {
+                        monthLabels[colIdx] = (d.getMonth() + 1) + '月';
+                        break;
+                    }
+                }
+            });
 
-           let backHtml = '';
-           if (km > 0 && dayInfo.mainRun) {
-             const mr = dayInfo.mainRun;
-             backHtml = `
-              <div class="content-layer back">
-                <div class="detail-group">
-                  <span class="detail-meta">${parseInt(mo)}月${d}日 ${mr.start}</span>
-                  <span class="detail-dist">${mr.dist.toFixed(2)}<span class="unit-sm">km</span></span>
-                  <div class="detail-row">
-                    <span>⚡ ${formatPace(mr.time, mr.dist)}</span>
-                    <span>💓 ${mr.hr ? Math.round(mr.hr) : '-'}</span>
-                  </div>
-                  <div class="detail-row" style="color:var(--sub); font-size:10px;">⏱ ${formatTime(mr.time)}</div>
+            // --- 热力图颜色等级 (仅用于颜色类) ---
+            const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+            const gridLevels = [];
+            for (let row = 0; row < 7; row++) {
+                const rowArr = [];
+                for (let col = 0; col < weekCount; col++) {
+                    const dateObj = weeks[col]?.[row];
+                    let level = 0;
+                    if (dateObj && dateObj.getFullYear() === year) {
+                        const dateKey = formatYMD(dateObj);
+                        const km = parsedData.dayDistMap[dateKey] || 0;
+                        level = getHeatLevel(km);
+                    }
+                    rowArr.push(level);
+                }
+                gridLevels.push(rowArr);
+            }
+
+            let html = `
+                <a class="nav-back" onclick="renderHome()">返回总计</a>
+                <h1>${year} 年</h1>
+                <p>共奔跑 <span class="stat-secondary">${yData.count}</span> 次，累计 <span class="stat-dist">${(yData.dist).toFixed(2)}</span> 公里</p>
+
+                <!-- 热力图区域 -->
+                <div class="heatmap-section">
+                    <div class="heatmap-wrapper">
+                        <div class="month-row" style="--weeks-count: ${weekCount};">
+                            <div></div>
+                            ${monthLabels.map(label => `<div class="month-cell">${label}</div>`).join('')}
+                        </div>
+                        <div class="heatmap-grid" style="--weeks-count: ${weekCount};">
+                            ${weekdays.map((day, row) => `
+                                <div class="weekday-label">${day}</div>
+                                ${gridLevels[row].map((level, col) => 
+                                    `<div class="heat-cell heat-${level}" data-row="${row}" data-col="${col}" title=""></div>`
+                                ).join('')}
+                            `).join('')}
+                        </div>
+                    </div>
                 </div>
-              </div>`;
-           } else {
-             backHtml = `<div class="content-layer back"></div>`;
-           }
-           el.innerHTML = frontHtml + backHtml;
 
-           if (km > 0) {
-               const shareBtn = document.createElement('div');
-               shareBtn.className = 'share-btn';
-               shareBtn.innerHTML = '↗';
-               shareBtn.title = '导出为图片';
-               shareBtn.onclick = (e) => {
-                   e.stopPropagation();
-                   takeScreenshot(el);
-               };
-               el.appendChild(shareBtn);
-           }
+                <!-- 月份列表 左右分列 1-6 和 7-12 -->
+                <div class="months-split">
+                    <div class="left-months"><ul>
+            `;
 
-       } else {
-           el.className = `bar-item ${levelClass}`;
-           const h = km > 0 ? Math.max((km / mData.dailyMax) * 100, 5) : 0;
-           el.style.height = h + '%';
-           if (d === 1 || d === daysInMonth || d % 5 === 0) el.innerHTML = `<span class="label">${d}</span>`;
-       }
-       
-       el.style.animationDelay = `${d * 0.01}s`;
-       
-       const isDesktop = window.innerWidth >= 900;
-       if (km > 0) {
-           if (!isDesktop || appState.view.mode !== 'grid') {
-               bindTip(el, () => buildDayTooltip(dateKey, dayInfo));
-           }
-       }
-       container.appendChild(el);
-   }
-   document.getElementById('calendar').appendChild(box);
-   revealObserver.observe(box);
-}
+            for (let m = 1; m <= 6; m++) {
+                const mData = yData.months[m];
+                html += renderMonthListItem(year, m, mData);
+            }
+            html += `</ul></div><div class="right-months"><ul>`;
+            for (let m = 7; m <= 12; m++) {
+                const mData = yData.months[m];
+                html += renderMonthListItem(year, m, mData);
+            }
+            html += `</ul></div></div>`;
 
-function renderYearView() {
-   const cal = document.getElementById('calendar');
-   cal.innerHTML = '';
-   
-   const d = new Date();
-   const todayKey = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+            app.innerHTML = html;
 
-   Object.keys(appState.years).sort().reverse().forEach(y => {
-       const yData = appState.years[y];
-       const box = document.createElement('div');
-       box.className = 'month'; 
-       
-       let html = `<div class="title"><div class="main-info"><span>${y}年</span><span>${yData.total.toFixed(0)} km</span></div></div>`;
-       
-       if (appState.view.mode === 'grid') {
-           html += `<div class="months-grid"></div>`;
-           box.innerHTML = html;
-           const grid = box.querySelector('.months-grid');
-           
-           for (let mo = 1; mo <= 12; mo++) {
-               const moStr = String(mo).padStart(2, '0');
-               const daysInMonth = new Date(y, mo, 0).getDate();
-               const emptyDays = new Date(y, mo - 1, 1).getDay(); // 周日作为第一天
-               
-               let monthHtml = `
-                   <div class="mini-month">
-                       <div class="mini-month-name">${mo}月</div>
-                       <div class="mini-week-row">
-                           <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
-                       </div>
-                       <div class="mini-day-grid">
-               `;
-               
-               for (let i = 0; i < emptyDays; i++) {
-                   monthHtml += `<div></div>`;
-               }
-               
-               for (let d = 1; d <= daysInMonth; d++) {
-                   const dateKey = `${y}-${moStr}-${String(d).padStart(2, '0')}`;
-                   const dayInfo = appState.runsRaw[dateKey];
-                   const km = dayInfo ? dayInfo.totalKm : 0;
-                   
-                   let classes = 'mini-day';
-                   if (km > 0) {
-                       const lvl = getLevel(km, 'm');
-                       classes += ` has-run level-${lvl}`;
-                   }
-                   if (dateKey === todayKey) classes += ' today';
-                   
-                   monthHtml += `<div class="${classes}" data-date="${dateKey}">${d}</div>`;
-               }
-               
-               monthHtml += `</div></div>`;
-               grid.insertAdjacentHTML('beforeend', monthHtml);
-           }
-           
-           box.querySelectorAll('.mini-day.has-run').forEach(el => {
-               const dateKey = el.getAttribute('data-date');
-               bindTip(el, () => buildDayTooltip(dateKey, appState.runsRaw[dateKey]));
-           });
-
-       } else {
-           html += `<div class="bar-view"></div>`;
-           box.innerHTML = html;
-           const container = box.querySelector('.bar-view');
-           container.style.gridTemplateColumns = 'repeat(6, 1fr)'; 
-
-           Object.entries(yData.months).sort().forEach(([mKey, km], idx) => {
-               const el = document.createElement('div');
-               const mNum = parseInt(mKey.split('-')[1]);
-               const levelClass = `level-${getLevel(km, 'y')}`;
-               el.className = `bar-item ${levelClass}`;
-               el.style.height = (km / yData.maxMonth * 100) + '%';
-               el.innerHTML = `<span class="label">${mNum}月</span>`;
-               el.style.animationDelay = `${idx * 0.05}s`;
-               bindTip(el, `<strong>${mKey}</strong><br>跑量: ${km.toFixed(1)} km`);
-               container.appendChild(el);
-           });
-       }
-       cal.appendChild(box);
-       revealObserver.observe(box);
-   });
-}
-
-// --- 交互与逻辑 ---
-const revealObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.classList.add('is-visible');
-            revealObserver.unobserve(entry.target);
+            // 填充格子title、隐藏非本年格子、标记每月第一天
+            const cells = document.querySelectorAll('.heat-cell');
+            let idx = 0;
+            for (let row = 0; row < 7; row++) {
+                for (let col = 0; col < weekCount; col++) {
+                    const cell = cells[idx++];
+                    if (!cell) continue;
+                    const dateObj = weeks[col]?.[row];
+                    
+                    // 清除可能存在的旧类（但保留 heat- 颜色类）
+                    cell.classList.remove('out-of-year', 'first-day');
+                    
+                    if (dateObj && dateObj.getFullYear() === year) {
+                        // 属于该年
+                        const dateKey = formatYMD(dateObj);
+                        const km = parsedData.dayDistMap[dateKey] || 0;
+                        cell.setAttribute('title', `${dateKey}  ${km.toFixed(2)} km`);
+                        
+                        // 如果是每月第一天，添加特殊标记
+                        if (dateObj.getDate() === 1) {
+                            cell.classList.add('first-day');
+                        }
+                    } else if (dateObj) {
+                        // 不属于该年（前一年或后一年）
+                        const y = dateObj.getFullYear();
+                        const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+                        const d = String(dateObj.getDate()).padStart(2, '0');
+                        cell.setAttribute('title', `${y}-${m}-${d} (不在${year}年)`);
+                        cell.classList.add('out-of-year'); // 添加隐藏类
+                    } else {
+                        // 空占位格子 (null)
+                        cell.setAttribute('title', '');
+                        cell.classList.add('out-of-year'); // 同样隐藏
+                    }
+                }
+            }
         }
-    });
-}, { threshold: 0.05 });
 
-function animateValue(obj, start, end, duration, suffix) {
-    let startTimestamp = null;
-    const step = (timestamp) => {
-        if (!startTimestamp) startTimestamp = timestamp;
-        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-        const ease = 1 - Math.pow(1 - progress, 4);
-        obj.innerHTML = (start + (end - start) * ease).toFixed(1) + suffix;
-        if (progress < 1) window.requestAnimationFrame(step);
-    };
-    window.requestAnimationFrame(step);
-}
+        function renderMonthListItem(year, month, mData) {
+            const hasData = !!mData;
+            const dist = hasData ? mData.dist : 0;
+            const count = hasData ? mData.count : 0;
+            const seconds = hasData ? mData.seconds : 0;
+            const avgPace = hasData ? formatPaceFromSeconds(dist, seconds) : '-';
+            const compactTime = hasData ? formatSecondsToCompactTime(seconds) : '-';
+            const percentage = hasData ? (dist / parsedData.maxMonthDist * 100).toFixed(1) : 0;
+            
+            const liClass = hasData ? 'li-item' : 'li-item month-item-empty';
+            const clickHandler = hasData ? `onclick="renderMonth(${year}, ${month})"` : '';
+            
+            return `
+                <li class="${liClass}" ${clickHandler}>
+                    <div class="li-title">
+                        <a href="#">${month} 月</a>
+                        <span class="stats-compact">
+                            <span class="stat-dist">${dist.toFixed(1)} km</span> · 
+                            <span class="stat-time">${compactTime}</span> · 
+                            <span class="stat-pace">${avgPace}</span> · 
+                            <span class="stat-secondary">${count}次</span>
+                        </span>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar month-bar" style="width: ${percentage}%"></div>
+                    </div>
+                </li>
+            `;
+        }
 
-function bindTip(el, content) {
-    const tip = document.getElementById('tooltip');
-    el.onmouseenter = () => { 
-        const html = typeof content === 'function' ? content() : content;
-        if(!html) return;
-        tip.innerHTML = html; tip.style.opacity = 1; 
-    };
-    el.onmousemove = e => { 
-        tip.style.left = Math.min(e.clientX + 15, window.innerWidth - 200) + 'px'; 
-        tip.style.top = (e.clientY + 15) + 'px'; 
-    };
-    el.onmouseleave = () => tip.style.opacity = 0;
-}
+        function renderMonth(year, month) {
+            const app = document.getElementById('app');
+            const mData = parsedData.years[year].months[month];
+            if (!mData) {
+                alert('该月没有跑步记录');
+                return;
+            }
+            const avgPace = formatPaceFromSeconds(mData.dist, mData.seconds);
+            const totalTime = formatSecondsToSummaryTime(mData.seconds);
 
-function buildDayTooltip(date, dayData) {
-    return dayData.runs.map((r, idx) => {
-        const dist = (r.distance / 1000).toFixed(2);
-        const sec = parseDuration(r.moving_time);
-        return `${idx === 0 ? `<div style="font-weight:700;margin-bottom:4px;border-bottom:1px solid rgba(255,255,255,0.2)">${date}</div>` : `<div style="margin:4px 0;border-top:1px dashed rgba(255,255,255,0.2)"></div>`}
-            <div class="tip-row"><span>🏃 ${dist} km</span> <span style="color:#dcdcdc">${formatPace(sec, dist)}</span></div>`;
-    }).join('');
-}
+            let html = `
+                <a class="nav-back" onclick="renderYear(${year})">返回 ${year} 年</a>
+                <h1>${month} 月统计</h1>
+                <div class="month-summary">
+                    <div class="summary-item">
+                        <span class="summary-val stat-time">${totalTime}</span>
+                        <span class="summary-unit">总用时</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-val stat-dist">${(mData.dist).toFixed(1)}<span class="summary-unit">km</span></span>
+                        <span class="summary-unit">总距离</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-val stat-pace">${avgPace}</span>
+                        <span class="summary-unit">平均配速</span>
+                    </div>
+                </div>
+                <p class="stat-secondary">${mData.count} 次跑步</p>
+                <ul>
+            `;
+            
+            mData.runs.forEach(run => {
+                const dist = (run.distance / 1000).toFixed(2);
+                const durationSeconds = timeStringToSeconds(run.moving_time);
+                const hmsTime = formatSecondsToHMS(durationSeconds);
+                const pace = formatPaceFromSeconds(dist, durationSeconds);
+                const hr = run.average_heartrate ? Math.round(run.average_heartrate) : '-';
 
-function renderPBs(pbData) {
-   const pbContainer = document.getElementById('pb-container');
-   const pbMap = { 7: "1km", 6: "3km", 5: "5km", 4: "10km", 2: "半马", 1: "全马" };
-   const targetTypes = [7, 6, 5, 4, 2, 1];
-   const filtered = pbData.filter(item => targetTypes.includes(item.type)).sort((a, b) => targetTypes.indexOf(a.type) - targetTypes.indexOf(b.type));
-   filtered.forEach((item, idx) => {
-       const b = document.createElement('div');
-       b.className = 'badge';
-       b.textContent = `${pbMap[item.type]} ${formatTime(item.record)}`;
-       b.style.animation = `cellAppear 0.5s ease-out both ${idx * 0.1}s`;
-       const dateStr = item.happenDay.toString();
-       const formattedDate = `${dateStr.slice(0, 4)}-${dateStr.slice(4, 6)}-${dateStr.slice(6, 8)}`;
-       bindTip(b, `<strong>${pbMap[item.type]} PB</strong><br>时间：${formatTime(item.record)}<br>配速：${formatPace(item.record, item.distance / 1000)}<br>日期：${formattedDate}`);
-       pbContainer.appendChild(b);
-   });
-}
+                html += `
+                    <li class="run-record">
+                        <div class="run-header">
+                            <span class="run-date">${formatDate(run.start_date_local)}</span>
+                            <span class="run-city">${run.city || '未知城市'}</span>
+                        </div>
+                        <div class="run-data">
+                            <div>距离: <span class="run-val stat-dist">${dist} km</span></div>
+                            <div>用时: <span class="run-val stat-time">${hmsTime}</span></div>
+                            <div>配速: <span class="run-val stat-pace">${pace}</span></div>
+                            <div>心率: <span class="run-val stat-hr">${hr} bpm</span></div>
+                        </div>
+                    </li>
+                `;
+            });
+            html += `</ul>`;
+            app.innerHTML = html;
+        }
 
-function renderSummary() {
-   animateValue(document.getElementById('total'), 0, appState.stats.totalKm, 1500, '');
-   const earth = 40075, pct = Math.min(appState.stats.totalKm / earth * 100, 100);
-   animateValue(document.getElementById('ppct'), 0, pct, 1500, '%');
-   setTimeout(() => document.getElementById('globe').style.width = pct + '%', 100);
-
-   const bEl = document.getElementById('badges');
-   bEl.innerHTML = '';
-   const items = [
-       { label: `🏆 最长 ${appState.stats.pb.val.toFixed(1)} km`, tip: `${appState.stats.pb.date}` },
-       { label: `⚡ 最快 ${appState.stats.fastest.paceStr}`, tip: `${appState.stats.fastest.date}` },
-       { label: `🔥 最猛 ${appState.stats.bestMonth.name}`, tip: `${appState.stats.bestMonth.val.toFixed(1)} km` },
-       { label: `📅 连续 ${appState.stats.streak.count} 天`, tip: `${appState.stats.streak.start} ~ ${appState.stats.streak.end}` }
-   ];
-   items.forEach(item => {
-       const b = document.createElement('div');
-       b.className = 'badge'; b.textContent = item.label;
-       bindTip(b, `<div style="padding:4px">${item.tip}</div>`);
-       bEl.appendChild(b);
-   });
-}
-
-// --- 初始化与事件 ---
-const menu = document.getElementById('menu');
-const overlay = document.getElementById('overlay');
-const toggleMenu = (show) => { menu.classList.toggle('open', show); overlay.style.display = show ? 'block' : 'none'; };
-document.getElementById('openMenu').onclick = () => toggleMenu(true);
-overlay.onclick = () => toggleMenu(false);
-
-function refresh() {
-    document.getElementById('calendar').innerHTML = '';
-    appState.view.cursor = 0;
-    appState.view.type === 'month' ? renderNextBatch() : renderYearView();
-    saveSettings(); 
-}
-
-function updateToggleState(id, isActive) {
-  const btn = document.getElementById(id);
-  if(isActive) {
-     Array.from(btn.parentElement.children).forEach(b => b.classList.remove('active'));
-     btn.classList.add('active');
-  }
-}
-function switchTheme(themeVal) {
-    appState.theme = themeVal;
-    document.body.setAttribute('data-theme', themeVal);
-    document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.val === themeVal));
-    saveSettings();
-}
-
-document.getElementById('btnMonth').onclick = function() { appState.view.type = 'month'; updateToggleState(this.id, true); refresh(); };
-document.getElementById('btnYear').onclick = function() { appState.view.type = 'year'; updateToggleState(this.id, true); refresh(); };
-document.getElementById('btnGrid').onclick = function() { appState.view.mode = 'grid'; updateToggleState(this.id, true); refresh(); };
-document.getElementById('btnBar').onclick = function() { appState.view.mode = 'bar'; updateToggleState(this.id, true); refresh(); };
-document.querySelectorAll('.theme-btn').forEach(btn => btn.onclick = () => switchTheme(btn.dataset.val));
-
-document.getElementById('togglePb').onclick = function() {
-  const container = document.getElementById('pb-container');
-  const isHidden = getComputedStyle(container).display === 'none';
-  container.style.display = isHidden ? 'flex' : 'none';
-  this.textContent = isHidden ? '收起个人纪录 (PB) ↑' : '展开个人纪录 (PB) ↓';
-};
-
-function renderNextBatch() {
-   if (appState.view.type !== 'month' || appState.view.cursor >= appState.monthKeys.length) return;
-   const batch = appState.monthKeys.slice(appState.view.cursor, appState.view.cursor + BATCH_SIZE);
-   batch.forEach(m => renderOneMonth(m));
-   appState.view.cursor += BATCH_SIZE;
-}
-
-const observer = new IntersectionObserver(e => { if(e[0].isIntersecting) renderNextBatch(); }, { rootMargin: '200px' });
-observer.observe(document.getElementById('loading-sentinel'));
-
-window.onscroll = () => document.getElementById('toTop').style.display = window.scrollY > 500 ? 'block' : 'none';
-document.getElementById('toTop').onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-
-loadSettings(); 
-Promise.all([
-   fetch(DATA_URL).then(r => r.json()),
-   fetch(PB_URL).then(r => r.json())
-]).then(([allData, pbData]) => {
-   processData(allData);
-   renderSummary();
-   renderPBs(pbData);
-   refresh(); 
-});
-</script>
+        init();
+    </script>
 </body>
 </html>
