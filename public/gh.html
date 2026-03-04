@@ -236,7 +236,7 @@
             
             // 写入数字 (原 html 内已有 id 绑定)
             document.getElementById('total-dist-val').innerHTML = `${fmtDist(processedData.totalDistance)}`;
-            document.getElementById('pct').innerHTML = `${((processedData.totalDistance / 40075.02) * 100).toFixed(1)}%`
+            document.getElementById('pct').innerHTML = `${(((processedData.totalDistance/1000) / 40075.02) * 100).toFixed(1)}%`
 
             // 渲染图表
             renderChart(chartLabels, chartValues);
