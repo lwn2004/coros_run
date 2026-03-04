@@ -87,12 +87,6 @@
         .heatmap-cell[data-level="2"] { background-color: var(--color-calendar-2); }
         .heatmap-cell[data-level="3"] { background-color: var(--color-calendar-3); }
         .heatmap-cell[data-level="4"] { background-color: var(--color-calendar-4); }
-        .heatmap-cell:hover::after {
-            content: attr(data-title);
-            position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
-            background: #24292f; color: #fff; padding: 4px 8px; border-radius: 4px;
-            font-size: 11px; white-space: nowrap; z-index: 10; margin-bottom: 4px;
-        }
 
         /* Monthly List - 更紧凑 */
         .section-info { font-size: 15px; color: var(--color-text); margin-bottom: 15px; font-weight: 500; }
