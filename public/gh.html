@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的跑步记录</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --color-bg: #f6f8fa;
@@ -46,17 +47,33 @@
         /* Header & Lifetime Stats */
         .header { margin-bottom: 20px; }
         .header h1 { font-size: 22px; margin-bottom: 12px; font-weight: 600; }
-        .lifetime-stats { display: flex; gap: 12px; }
+        .lifetime-stats { display: flex; gap: 12px; align-items: stretch; height: 100px; }
+        
         .stat-box {
-            flex: 1;
             background: var(--color-card-bg);
             border: 1px solid var(--color-border);
             border-radius: 8px;
-            padding: 12px;
-            text-align: center;
         }
-        .stat-box .value { font-size: 24px; font-weight: 700; color: var(--color-primary); }
-        .stat-box .label { font-size: 12px; color: var(--color-text-muted); text-transform: uppercase; }
+        
+        .dist-box {
+            flex: 0 0 140px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 12px;
+        }
+        
+        .chart-box {
+            flex: 1;
+            padding: 10px;
+            position: relative; /* 必须设置以限制 canvas 大小 */
+            display: flex;
+            align-items: center;
+        }
+
+        .stat-box .value { font-size: 26px; font-weight: 700; color: var(--color-primary); line-height: 1.2;}
+        .stat-box .label { font-size: 12px; color: var(--color-text-muted); text-transform: uppercase; margin-top: 4px;}
 
         /* Year Tabs */
         .year-tabs { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 2px; }
@@ -120,8 +137,13 @@
     <div class="header">
         <h1>🏃 我的跑步记录</h1>
         <div class="lifetime-stats">
-            <div class="stat-box"><div class="value" id="total-dist-val">0</div><div class="label">总公里数</div></div>
-            <div class="stat-box"><div class="value" id="total-runs-val">0</div><div class="label">累计次数</div></div>
+            <div class="stat-box dist-box">
+                <div class="value" id="total-dist-val">0</div>
+                <div class="label">总公里数</div>
+            </div>
+            <div class="stat-box chart-box">
+                <canvas id="cumulative-chart"></canvas>
+            </div>
         </div>
     </div>
 
@@ -155,7 +177,24 @@
             const res = await fetch(DATA_URL);
             const raw = await res.json();
             let maxMonthDist = 0;
+            
+            // 按日期倒序排列（最新的在最前）
             raw.sort((a, b) => new Date(b.start_date_local) - new Date(a.start_date_local));
+            
+            // 提取图表数据（按正序计算累计跑量）
+            let chartLabels = [];
+            let chartValues = [];
+            let currentCumulative = 0;
+            
+            // 从后往前遍历，以便数据按时间正序排列给图表
+            for (let i = raw.length - 1; i >= 0; i--) {
+                const run = raw[i];
+                const ds = run.start_date_local.split(' ')[0];
+                currentCumulative += run.distance / 1000;
+                chartLabels.push(ds);
+                chartValues.push(currentCumulative.toFixed(2));
+            }
+
             raw.forEach(run => {
                 const ds = run.start_date_local.split(' ')[0]; // 获取 "2026-02-15"
                 const d = new Date(run.start_date_local);
@@ -181,20 +220,71 @@
                 processedData.years[y].months[m].time += dur;
                 processedData.years[y].daily[ds] = (processedData.years[y].daily[ds] || 0) + run.distance;
             });
+
             Object.values(processedData.years).forEach(yearData => {
                 Object.values(yearData.months).forEach(monthData => {
                     if (monthData.dist > maxMonthDist) maxMonthDist = monthData.dist;
                 });
             });
+
             processedData.maxMonthDist = maxMonthDist;
             document.getElementById('total-dist-val').innerText = fmtDist(processedData.totalDistance);
-            document.getElementById('total-runs-val').innerText = processedData.totalRuns;
+
+            // 绘制累计跑量趋势图
+            renderChart(chartLabels, chartValues);
 
             window.addEventListener('popstate', handleRoute);
             handleRoute();
         } catch (e) {
+            console.error(e);
             document.getElementById('app-content').innerHTML = "数据加载失败";
         }
+    }
+
+    function renderChart(labels, data) {
+        const ctx = document.getElementById('cumulative-chart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '累计跑量 (km)',
+                    data: data,
+                    borderColor: '#00bfff', // 使用原主题的蓝色 --color-bar
+                    backgroundColor: 'rgba(0, 191, 255, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    pointRadius: 0, // 隐藏数据点，使线条更清爽
+                    pointHoverRadius: 4,
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: function(context) {
+                                return context.parsed.y + ' km';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        display: false // 隐藏 x 轴，保持顶部卡片整洁
+                    },
+                    y: {
+                        display: false, // 隐藏 y 轴
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
     }
 
     function navigateTo(path) {
