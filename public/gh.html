@@ -313,11 +313,18 @@
                             }
                         },
                         afterBuildTicks: (scale) => {
-                            const ticks = [];
-                            const startYear = new Date(firstX).getFullYear();
-                            const endYear   = new Date(lastX).getFullYear();
                     
-                            for (let y = startYear; y <= endYear; y++) {
+                            const ticks = [];
+                    
+                            const firstDate = new Date(firstX);
+                            const lastDate  = new Date(lastX);
+                    
+                            const startYear = firstDate.getFullYear();
+                            const endYear   = lastDate.getFullYear();
+                    
+                            ticks.push({ value: firstX });
+                    
+                            for (let y = startYear + 1; y <= endYear; y++) {
                                 ticks.push({
                                     value: new Date(y, 0, 1).getTime()
                                 });
