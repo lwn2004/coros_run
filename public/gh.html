@@ -310,7 +310,7 @@
         let html = `<div class="year-tabs">${yearsList.map(v => `<div class="year-tab ${v===y?'active':''}" onclick="navigateTo('${BASE_PATH}/${v}')">${v}</div>`).join('')}</div>`;
         
         html += `<div class="card">
-            <div class="section-info">共奔跑 ${data.runs} 次，累计 ${fmtDist(data.dist)} 公里</div>
+            <div class="section-info">${y} 年共奔跑 ${data.runs} 次，累计 ${fmtDist(data.dist)} 公里</div>
             <div class="heatmap-container">${drawHeatmap(y)}</div>
             <div class="month-list">`;
 
