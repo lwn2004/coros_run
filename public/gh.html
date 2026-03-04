@@ -251,14 +251,18 @@
 
     function renderChart(labels, data) {
         const ctx = document.getElementById('cumulative-chart').getContext('2d');
+    
         const timeData = labels.map((d, i) => ({
             x: new Date(d).getTime(),
             y: parseFloat(data[i])
         }));
+    
+        const firstX = timeData[0].x;
+        const lastX  = timeData[timeData.length - 1].x;
+    
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: labels,
                 datasets: [{
                     label: '累计跑量',
                     data: timeData,
@@ -266,14 +270,17 @@
                     backgroundColor: 'rgba(0, 191, 255, 0.1)',
                     borderWidth: 2,
                     fill: true,
-                    pointRadius: 0, 
+                    pointRadius: 0,
                     pointHoverRadius: 4,
-                    tension: 0.1
+                    tension: 0
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                layout: {
+                    padding: 0
+                },
                 plugins: {
                     legend: { display: false },
                     tooltip: {
@@ -281,7 +288,6 @@
                         intersect: false,
                         callbacks: {
                             title: function(context) {
-                                // 把时间戳转回可读日期
                                 const ts = context[0].parsed.x;
                                 const d = new Date(ts);
                                 return d.toISOString().split('T')[0];
@@ -293,8 +299,21 @@
                     }
                 },
                 scales: {
-                    x: { type: 'linear', display: false },
-                    y: { display: false, beginAtZero: true }
+                    x: {
+                        type: 'linear',
+                        min: firstX,
+                        max: lastX,
+                        offset: false,
+                        grid: { display: false },
+                        border: { display: false },
+                        ticks: { display: false }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { display: false },
+                        border: { display: false },
+                        ticks: { display: false }
+                    }
                 }
             }
         });
