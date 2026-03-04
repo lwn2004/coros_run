@@ -306,7 +306,21 @@
                         offset: false,
                         grid: { display: false },
                         border: { display: false },
-                        ticks: { display: false }
+                        ticks: {
+                          autoSkip: false,
+                          maxRotation: 0,
+                          padding: 8,
+                          color: '#999',
+                          callback: function(value, index, ticks) {
+                              const d = new Date(value);
+                              const year = d.getFullYear();
+                      
+                              if (index === 0) return year;
+                      
+                              const prevYear = new Date(ticks[index - 1].value).getFullYear();
+                              return year !== prevYear ? year : '';
+                          }
+                      }
                     },
                     y: {
                         beginAtZero: true,
