@@ -154,7 +154,7 @@
         try {
             const res = await fetch(DATA_URL);
             const raw = await res.json();
-            
+            let maxMonthDist = 0;
             raw.sort((a, b) => new Date(b.start_date_local) - new Date(a.start_date_local));
             raw.forEach(run => {
                 const ds = run.start_date_local.split(' ')[0]; // 获取 "2026-02-15"
@@ -181,7 +181,12 @@
                 processedData.years[y].months[m].time += dur;
                 processedData.years[y].daily[ds] = (processedData.years[y].daily[ds] || 0) + run.distance;
             });
-
+            Object.values(processedData.years).forEach(yearData => {
+                Object.values(yearData.months).forEach(monthData => {
+                    if (monthData.dist > maxMonthDist) maxMonthDist = monthData.dist;
+                });
+            });
+            processedData.maxMonthDist = maxMonthDist;
             document.getElementById('total-dist-val').innerText = fmtDist(processedData.totalDistance);
             document.getElementById('total-runs-val').innerText = processedData.totalRuns;
 
@@ -220,11 +225,12 @@
             <div class="month-list">`;
 
         const mkeys = Object.keys(data.months).sort((a, b) => b - a);
-        const maxM = Math.max(...mkeys.map(k => data.months[k].dist));
+        const globalMax = processedData.maxMonthDist || 1;
 
         mkeys.forEach(m => {
             const md = data.months[m];
             const avgS = md.list.reduce((acc, r) => acc + r.average_speed, 0) / md.list.length;
+            const percentage = (md.dist / globalMax) * 100;
             html += `
                 <div class="month-item" onclick="navigateTo('${BASE_PATH}/${y}/${m}')">
                     <div class="month-header">
@@ -236,7 +242,7 @@
                             <span>${md.list.length}次</span>
                         </div>
                     </div>
-                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${(md.dist/maxM)*100}%"></div></div>
+                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${percentage}%"></div></div>
                 </div>`;
         });
         html += `</div></div>`;
