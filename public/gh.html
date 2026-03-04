@@ -68,6 +68,7 @@
         .dist-info .value { font-size: 32px; font-weight: 700; color: var(--color-primary); line-height: 1.1; }
         .dist-info .value span { font-size: 16px; font-weight: normal; margin-left: 2px; }
         .dist-info .label { font-size: 13px; color: var(--color-text-muted); margin-top: 4px; }
+        .dist-info .label span { font-weight: 700; color: var(--color-primary); }
 
         .chart-wrapper {
             flex: 1;
@@ -141,8 +142,9 @@
         <h1>🏃 我的跑步记录</h1>
         <div class="summary-card">
             <div class="dist-info">
+                <div class="label">总跑量(公里)</div>              
                 <div class="value" id="total-dist-val">0</div>
-                <div class="label">总跑量(公里)</div>
+                <div class="label">占地球赤道周长 <span id="pct" class="pct-value"></span></div>
             </div>
             <div class="chart-wrapper">
                 <canvas id="cumulative-chart"></canvas>
@@ -234,6 +236,7 @@
             
             // 写入数字 (原 html 内已有 id 绑定)
             document.getElementById('total-dist-val').innerHTML = `${fmtDist(processedData.totalDistance)}`;
+            document.getElementById('pct').innerHTML = `${((processedData.totalDistance / 40075.02) * 100).toFixed(1)}%`
 
             // 渲染图表
             renderChart(chartLabels, chartValues);
