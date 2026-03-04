@@ -181,42 +181,39 @@
         try {
             const res = await fetch(DATA_URL);
             const raw = await res.json();
+            let maxMonthDist = 0;
             
-            // 按日期正序排列用于计算
-            raw.sort((a, b) => new Date(a.start_date_local) - new Date(b.start_date_local));
+            // 按日期倒序排列
+            raw.sort((a, b) => new Date(b.start_date_local) - new Date(a.start_date_local));
             
-            const EARTH_CIR = 40075.02; // 赤道周长
-            const now = new Date();
-            const hundredDaysAgo = new Date();
-            hundredDaysAgo.setDate(now.getDate() - 100);
-
-            let chartData = [];
+            // 图表数据提取
+            let chartLabels = [];
+            let chartValues = [];
             let currentCumulative = 0;
-            let recentDist = 0;
+            
+            // 从后往前计算累计量（正序）
+            for (let i = raw.length - 1; i >= 0; i--) {
+                const run = raw[i];
+                const ds = run.start_date_local.split(' ')[0];
+                currentCumulative += run.distance / 1000;
+                chartLabels.push(ds);
+                chartValues.push(currentCumulative.toFixed(2));
+            }
 
             raw.forEach(run => {
-                const d = new Date(run.start_date_local);
                 const ds = run.start_date_local.split(' ')[0];
-                const distKm = run.distance / 1000;
-                
-                currentCumulative += distKm;
-                chartData.push({ x: ds, y: currentCumulative.toFixed(2) });
-
-                // 计算近100天总跑量
-                if (d >= hundredDaysAgo && d <= now) {
-                    recentDist += distKm;
-                }
-
-                // 处理 processedData (保持原有的年度/月度统计逻辑)
+                const d = new Date(run.start_date_local);
                 const y = d.getFullYear().toString();
                 const m = (d.getMonth() + 1).toString().padStart(2, '0');
+
                 if (!processedData.years[y]) processedData.years[y] = { dist: 0, runs: 0, time: 0, months: {}, daily: {} };
                 if (!processedData.years[y].months[m]) processedData.years[y].months[m] = { list: [], dist: 0, time: 0 };
-                
+
                 processedData.totalDistance += run.distance;
                 processedData.totalRuns += 1;
                 processedData.years[y].dist += run.distance;
                 processedData.years[y].runs += 1;
+                
                 let dur = 0;
                 if (typeof run.moving_time === 'string' && run.moving_time.includes(':')) {
                     const p = run.moving_time.split(':');
@@ -229,29 +226,20 @@
                 processedData.years[y].daily[ds] = (processedData.years[y].daily[ds] || 0) + run.distance;
             });
 
-            // --- 预测逻辑 ---
-            const totalKm = processedData.totalDistance / 1000;
-            // 如果近100天没跑，则用总平均值，兜底每天0.01km防止除以0
-            const avgDaily = Math.max(recentDist / 100, (totalKm / chartData.length) || 0.01);
-            const remaining = EARTH_CIR - totalKm;
-            const daysToTarget = Math.max(0, remaining / avgDaily);
+            Object.values(processedData.years).forEach(yearData => {
+                Object.values(yearData.months).forEach(monthData => {
+                    if (monthData.dist > maxMonthDist) maxMonthDist = monthData.dist;
+                });
+            });
+
+            processedData.maxMonthDist = maxMonthDist;
             
-            const targetDate = new Date();
-            targetDate.setDate(now.getDate() + daysToTarget);
-            const targetDateStr = targetDate.toISOString().split('T')[0];
-
-            // 构造预测数据集
-            const projectionData = [
-                { x: chartData[chartData.length-1].x, y: totalKm.toFixed(2) },
-                { x: targetDateStr, y: EARTH_CIR.toFixed(2) }
-            ];
-
-            // 写入总数字
+            // 写入数字 (原 html 内已有 id 绑定)
             document.getElementById('total-dist-val').innerHTML = `${fmtDist(processedData.totalDistance)}`;
-            document.getElementById('pct').innerHTML = `${((totalKm / EARTH_CIR) * 100).toFixed(2)}%`;
+            document.getElementById('pct').innerHTML = `${(((processedData.totalDistance/1000) / 40075.02) * 100).toFixed(1)}%`
 
             // 渲染图表
-            renderChart(chartData, projectionData);
+            renderChart(chartLabels, chartValues);
 
             window.addEventListener('popstate', handleRoute);
             handleRoute();
@@ -261,73 +249,42 @@
         }
     }
 
-    function renderChart(historical, projection) {
+    function renderChart(labels, data) {
         const ctx = document.getElementById('cumulative-chart').getContext('2d');
-        
-        // 提取关键日期
-        const startDate = historical[0].x;
-        const todayDate = historical[historical.length - 1].x;
-        const endDate = projection[projection.length - 1].x;
-
         new Chart(ctx, {
             type: 'line',
             data: {
-                datasets: [
-                    {
-                        label: '已完成',
-                        data: historical,
-                        borderColor: '#0969da',
-                        backgroundColor: 'rgba(9, 105, 218, 0.1)',
-                        borderWidth: 2,
-                        fill: true,
-                        pointRadius: 0,
-                        tension: 0.2
-                    },
-                    {
-                        label: '预测趋势',
-                        data: projection,
-                        borderColor: '#0969da',
-                        borderDash: [5, 5], // 虚线
-                        borderWidth: 2,
-                        pointRadius: 0,
-                        fill: false,
-                        tension: 0
-                    }
-                ]
+                labels: labels,
+                datasets: [{
+                    label: '累计跑量',
+                    data: data,
+                    borderColor: '#00bfff',
+                    backgroundColor: 'rgba(0, 191, 255, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    pointRadius: 0, 
+                    pointHoverRadius: 4,
+                    tension: 0.1
+                }]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false,
+                maintainAspectRatio: false, // 必须为 false 才能在移动端正确响应高度
                 plugins: {
                     legend: { display: false },
                     tooltip: {
+                        mode: 'index',
+                        intersect: false,
                         callbacks: {
-                            label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y} km`
+                            label: function(context) {
+                                return context.parsed.y + ' km';
+                            }
                         }
                     }
                 },
                 scales: {
-                    x: {
-                        type: 'category',
-                        ticks: {
-                            autoSkip: false,
-                            callback: function(val, index) {
-                                const label = this.getLabelForValue(val);
-                                // 只显示起点、今天、终点
-                                if (label === startDate || label === todayDate || label === endDate) {
-                                    return label;
-                                }
-                                return null;
-                            },
-                            font: { size: 10 }
-                        },
-                        grid: { display: false }
-                    },
-                    y: {
-                        display: false,
-                        beginAtZero: true,
-                        max: 42000 // 略高于赤道长度，留出视觉空间
-                    }
+                    x: { display: false },
+                    y: { display: false, beginAtZero: true }
                 }
             }
         });
