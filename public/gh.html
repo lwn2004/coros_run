@@ -20,7 +20,7 @@
             --color-bar: #00bfff;
         }
 
-        /* 预留滚动条占位，防止页面跳动 */
+        /* 预留滚动条占位，防止切换页面时布局抖动 */
         html { overflow-y: scroll; scrollbar-gutter: stable; }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -35,83 +35,119 @@
             margin: 0 auto;
         }
 
+        /* 顶部统计卡片 */
+        .header { margin-bottom: 20px; }
+        .header h1 { font-size: 22px; margin-bottom: 12px; font-weight: 600; text-align: center; }
+        .lifetime-stats { display: flex; gap: 12px; margin-bottom: 20px; }
+        .stat-box {
+            flex: 1;
+            background: var(--color-card-bg);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .stat-box .value { font-size: 26px; font-weight: 800; color: var(--color-primary); }
+        .stat-box .label { font-size: 12px; color: var(--color-text-muted); font-weight: 600; }
+
+        /* 年份切换 Tabs */
+        .year-tabs { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 4px; }
+        .year-tab {
+            padding: 6px 16px;
+            border: 1px solid var(--color-border);
+            border-radius: 20px;
+            background: var(--color-card-bg);
+            color: var(--color-text-muted);
+            cursor: pointer;
+            font-size: 13px;
+            white-space: nowrap;
+            transition: 0.2s;
+        }
+        .year-tab.active { background-color: var(--color-primary); color: white; border-color: var(--color-primary); }
+
+        /* 年度数据主卡片 */
         .card {
             background-color: var(--color-card-bg);
             border: 1px solid var(--color-border);
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 20px;
+            position: relative;
         }
 
-        /* Header & Lifetime Stats */
-        .header { margin-bottom: 20px; }
-        .header h1 { font-size: 22px; margin-bottom: 12px; font-weight: 600; }
-        .lifetime-stats { display: flex; gap: 12px; }
-        .stat-box {
-            flex: 1;
-            background: var(--color-card-bg);
-            border: 1px solid var(--color-border);
-            border-radius: 8px;
-            padding: 12px;
-            text-align: center;
-        }
-        .stat-box .value { font-size: 24px; font-weight: 700; color: var(--color-primary); }
-        .stat-box .label { font-size: 12px; color: var(--color-text-muted); text-transform: uppercase; }
-
-        /* Year Tabs */
-        .year-tabs { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 2px; }
-        .year-tab {
-            padding: 6px 14px;
-            border: 1px solid var(--color-border);
-            border-radius: 6px;
-            background: var(--color-card-bg);
-            color: var(--color-text-muted);
-            cursor: pointer;
-            font-size: 13px;
-            white-space: nowrap;
-        }
-        .year-tab.active { background-color: var(--color-primary); color: white; border-color: var(--color-primary); }
-
-        /* Heatmap - 紧凑型 */
-        .heatmap-container { 
-            margin: 15px 0 15px 0; 
-            overflow-x: auto; 
-            padding: 10px;
+        /* 视图切换按钮 */
+        .view-toggle-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 4px 10px;
+            font-size: 11px;
             background: #fff;
-            border: 1px solid #f0f0f0;
+            border: 1px solid var(--color-border);
             border-radius: 4px;
+            cursor: pointer;
+            color: var(--color-text-muted);
+            z-index: 10;
         }
-        .heatmap-grid { display: grid; grid-template-rows: repeat(7, 10px); grid-auto-flow: column; gap: 3px; width: fit-content; }
+        .view-toggle-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+
+        .section-info { font-size: 15px; font-weight: 600; margin-bottom: 15px; color: var(--color-text); }
+
+        /* 布局容器 */
+        .year-layout-container { display: flex; flex-direction: column; gap: 20px; }
+        
+        /* 竖向视图模式下的桌面端排版 */
+        .layout-vertical .year-layout-container { flex-direction: row; align-items: flex-start; }
+        .layout-vertical .heatmap-container { flex-shrink: 0; position: sticky; top: 20px; }
+        .layout-vertical .month-list { flex: 1; }
+
+        /* 热力图网格 */
+        .heatmap-container { overflow-x: auto; padding-bottom: 5px; }
+        .heatmap-grid { display: grid; gap: 3px; width: fit-content; }
+        
+        /* 横向网格：7行 */
+        .grid-horizontal { grid-template-rows: repeat(7, 10px); grid-auto-flow: column; }
+        /* 竖向网格：7列 */
+        .grid-vertical { grid-template-columns: repeat(7, 10px); grid-auto-flow: row; }
+
         .heatmap-cell { width: 12px; height: 12px; border-radius: 2px; background-color: var(--color-calendar-0); position: relative; }
         .heatmap-cell[data-level="1"] { background-color: var(--color-calendar-1); }
         .heatmap-cell[data-level="2"] { background-color: var(--color-calendar-2); }
         .heatmap-cell[data-level="3"] { background-color: var(--color-calendar-3); }
         .heatmap-cell[data-level="4"] { background-color: var(--color-calendar-4); }
-
-        /* Monthly List - 更紧凑 */
-        .section-info { font-size: 15px; color: var(--color-text); margin-bottom: 15px; font-weight: 500; }
-        .month-item { 
-            padding: 8px 4px; 
-            border-bottom: 1px solid #f0f0f0; 
-            cursor: pointer; 
-            transition: background 0.1s;
+        .heatmap-cell:hover::after {
+            content: attr(data-title);
+            position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+            background: #24292f; color: #fff; padding: 4px 8px; border-radius: 4px;
+            font-size: 11px; white-space: nowrap; z-index: 20; margin-bottom: 5px;
         }
+
+        /* 月度列表 - 紧凑设计 */
+        .month-item { padding: 8px 0; border-bottom: 1px solid #f3f4f6; cursor: pointer; transition: 0.1s; }
         .month-item:last-child { border-bottom: none; }
         .month-item:hover { background-color: #f9f9f9; }
-        .month-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-        .month-name { font-size: 15px; font-weight: 600; }
-        .month-stats { font-size: 12px; color: var(--color-text-muted); display: flex; gap: 8px; }
-        .month-stats .dist { color: var(--color-bar); font-weight: 700; }
-        .progress-bar-bg { background-color: var(--color-calendar-0); height: 4px; border-radius: 2px; width: 100%; }
-        .progress-bar-fill { background-color: var(--color-bar); height: 100%; border-radius: 2px; }
+        .month-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+        .month-name { font-size: 14px; font-weight: 700; min-width: 40px; }
+        .month-stats { font-size: 12px; color: var(--color-text-muted); display: flex; gap: 10px; }
+        .month-stats .dist { color: var(--color-bar); font-weight: 800; font-size: 13px; }
+        .progress-bar-bg { background-color: var(--color-calendar-0); height: 5px; border-radius: 3px; width: 100%; }
+        .progress-bar-fill { background-color: var(--color-bar); height: 100%; border-radius: 3px; transition: width 0.3s; }
 
-        /* Daily Details */
-        .breadcrumb { display: inline-block; font-size: 13px; margin-bottom: 12px; color: var(--color-primary); cursor: pointer; }
-        .monthly-summary { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid var(--color-border); margin-bottom: 10px; }
-        .monthly-summary .val { font-size: 20px; font-weight: 700; display: block; }
-        .run-item { padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
-        .run-date-row { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
-        .run-meta { display: flex; gap: 12px; font-size: 12px; color: var(--color-text-muted); }
+        /* 手机端适配：月度统计简化 */
+        @media (max-width: 600px) {
+            .month-stats span:not(.dist) { display: none; } /* 仅保留距离 */
+            .layout-vertical .year-layout-container { flex-direction: column; } /* 手机强制上下排 */
+            .stat-box .value { font-size: 20px; }
+        }
+
+        /* 明细页面 */
+        .breadcrumb { font-size: 13px; margin-bottom: 15px; color: var(--color-primary); cursor: pointer; font-weight: 600; display: inline-block; }
+        .monthly-summary { display: flex; justify-content: space-around; padding: 20px 0; border-bottom: 1px solid var(--color-border); margin-bottom: 15px; text-align: center; }
+        .monthly-summary .val { font-size: 22px; font-weight: 800; display: block; color: var(--color-primary); }
+        .run-item { padding: 12px 0; border-bottom: 1px solid #f1f1f1; }
+        .run-date-row { display: flex; justify-content: space-between; font-size: 14px; font-weight: 700; margin-bottom: 5px; }
+        .run-meta { display: flex; flex-wrap: wrap; gap: 10px; font-size: 12px; color: var(--color-text-muted); }
         .run-meta b { color: var(--color-text); }
     </style>
 </head>
@@ -125,14 +161,14 @@
         </div>
     </div>
 
-    <div id="app-content">加载中...</div>
+    <div id="app-content">数据加载中...</div>
 
 <script>
     const DATA_URL = 'https://run.linwn.net/data/all.json';
     const BASE_PATH = '/gh'; 
-    let processedData = { totalDistance: 0, totalRuns: 0, years: {} };
+    let processedData = { totalDistance: 0, totalRuns: 0, maxMonthDist: 0, years: {} };
+    let isVerticalView = false; // 视图切换状态
 
-    // 工具函数
     const fmtDist = (m) => (m / 1000).toFixed(2);
     const fmtPace = (s) => {
         if (!s || s <= 0) return "0'00\"";
@@ -154,13 +190,13 @@
         try {
             const res = await fetch(DATA_URL);
             const raw = await res.json();
-            let maxMonthDist = 0;
+            
             raw.sort((a, b) => new Date(b.start_date_local) - new Date(a.start_date_local));
+            
             raw.forEach(run => {
-                const ds = run.start_date_local.split(' ')[0]; // 获取 "2026-02-15"
-                const d = new Date(run.start_date_local);
-                const y = d.getFullYear().toString();
-                const m = (d.getMonth() + 1).toString().padStart(2, '0');
+                const ds = run.start_date_local.split(' ')[0]; // 修复时区：直接用字符串截取
+                const dParts = ds.split('-');
+                const y = dParts[0], m = dParts[1];
 
                 if (!processedData.years[y]) processedData.years[y] = { dist: 0, runs: 0, time: 0, months: {}, daily: {} };
                 if (!processedData.years[y].months[m]) processedData.years[y].months[m] = { list: [], dist: 0, time: 0 };
@@ -181,19 +217,23 @@
                 processedData.years[y].months[m].time += dur;
                 processedData.years[y].daily[ds] = (processedData.years[y].daily[ds] || 0) + run.distance;
             });
-            Object.values(processedData.years).forEach(yearData => {
-                Object.values(yearData.months).forEach(monthData => {
-                    if (monthData.dist > maxMonthDist) maxMonthDist = monthData.dist;
+
+            // 计算全局最大月跑量用于进度条
+            let globalMax = 0;
+            Object.values(processedData.years).forEach(yData => {
+                Object.values(yData.months).forEach(mData => {
+                    if (mData.dist > globalMax) globalMax = mData.dist;
                 });
             });
-            processedData.maxMonthDist = maxMonthDist;
+            processedData.maxMonthDist = globalMax;
+
             document.getElementById('total-dist-val').innerText = fmtDist(processedData.totalDistance);
             document.getElementById('total-runs-val').innerText = processedData.totalRuns;
 
             window.addEventListener('popstate', handleRoute);
             handleRoute();
         } catch (e) {
-            document.getElementById('app-content').innerHTML = "数据加载失败";
+            document.getElementById('app-content').innerHTML = "数据加载失败: " + e.message;
         }
     }
 
@@ -208,8 +248,13 @@
         else if (path.length === 1) renderYear(path[0]);
         else {
             const ys = Object.keys(processedData.years).sort((a,b)=>b-a);
-            renderYear(ys[0]);
+            renderYear(ys[0] || '');
         }
+    }
+
+    function toggleView(year) {
+        isVerticalView = !isVerticalView;
+        renderYear(year);
     }
 
     function renderYear(y) {
@@ -217,20 +262,27 @@
         if (!data) return;
 
         const yearsList = Object.keys(processedData.years).sort((a, b) => b - a);
+        const layoutClass = isVerticalView ? 'layout-vertical' : '';
+        const gridClass = isVerticalView ? 'grid-vertical' : 'grid-horizontal';
+        const btnText = isVerticalView ? '切换横向' : '切换竖向';
+
         let html = `<div class="year-tabs">${yearsList.map(v => `<div class="year-tab ${v===y?'active':''}" onclick="navigateTo('${BASE_PATH}/${v}')">${v}</div>`).join('')}</div>`;
         
-        html += `<div class="card">
+        html += `<div class="card ${layoutClass}">
+            <button class="view-toggle-btn" onclick="toggleView('${y}')">${btnText}</button>
             <div class="section-info">共奔跑 ${data.runs} 次，累计 ${fmtDist(data.dist)} 公里</div>
-            <div class="heatmap-container">${drawHeatmap(y)}</div>
-            <div class="month-list">`;
+            
+            <div class="year-layout-container">
+                <div class="heatmap-container">
+                    <div class="heatmap-grid ${gridClass}">${drawHeatmap(y)}</div>
+                </div>
+                <div class="month-list">`;
 
         const mkeys = Object.keys(data.months).sort((a, b) => b - a);
-        const globalMax = processedData.maxMonthDist || 1;
-
         mkeys.forEach(m => {
             const md = data.months[m];
             const avgS = md.list.reduce((acc, r) => acc + r.average_speed, 0) / md.list.length;
-            const percentage = (md.dist / globalMax) * 100;
+            const barWidth = (md.dist / processedData.maxMonthDist) * 100;
             html += `
                 <div class="month-item" onclick="navigateTo('${BASE_PATH}/${y}/${m}')">
                     <div class="month-header">
@@ -242,10 +294,10 @@
                             <span>${md.list.length}次</span>
                         </div>
                     </div>
-                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${percentage}%"></div></div>
+                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${barWidth}%"></div></div>
                 </div>`;
         });
-        html += `</div></div>`;
+        html += `</div></div></div>`;
         document.getElementById('app-content').innerHTML = html;
     }
 
@@ -256,10 +308,10 @@
 
         let html = `<div class="breadcrumb" onclick="navigateTo('${BASE_PATH}/${y}')">← 返回 ${y} 年概览</div>
             <div class="card">
-                <div class="section-info" style="text-align:center; font-size:18px;">${y}年${parseInt(m)}月 跑步明细</div>
+                <div class="section-info" style="text-align:center; font-size:17px; margin-bottom:0;">${y}年${parseInt(m)}月 明细</div>
                 <div class="monthly-summary">
                     <div><span class="label">距离</span><span class="val">${fmtDist(md.dist)}<small>km</small></span></div>
-                    <div><span class="label">时长</span><span class="val">${fmtTime(md.time)}</span></div>
+                    <div><span class="label">总时长</span><span class="val">${fmtTime(md.time)}</span></div>
                     <div><span class="label">平均配速</span><span class="val">${fmtPace(avgS)}</span></div>
                 </div>
                 <div>`;
@@ -270,7 +322,7 @@
                 <div class="run-item">
                     <div class="run-date-row"><span>${d.getMonth()+1}月${d.getDate()}日</span><span style="color:var(--color-text-muted); font-size:12px;">${r.city||''}</span></div>
                     <div class="run-meta">
-                        <span>距离 <b>${fmtDist(r.distance)}</b></span>
+                        <span>距离 <b>${fmtDist(r.distance)} km</b></span>
                         <span>配速 <b>${fmtPace(r.average_speed)}</b></span>
                         <span>用时 <b>${r.moving_time.split('.')[0]}</b></span>
                         ${r.average_heartrate ? `<span>心率 <b>${Math.round(r.average_heartrate)}</b></span>`:''}
@@ -284,19 +336,22 @@
     function drawHeatmap(y) {
         const data = processedData.years[y];
         const start = new Date(y, 0, 1), end = new Date(y, 11, 31);
-        let h = '<div class="heatmap-grid">';
+        let h = '';
+        // 填充1月1日之前的空格
         for (let i = 0; i < start.getDay(); i++) h += `<div class="heatmap-cell" style="background:transparent"></div>`;
+        
         for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-            const year = d.getFullYear();
-            const month = (d.getMonth() + 1).toString().padStart(2, '0');
-            const day = d.getDate().toString().padStart(2, '0');
-            const ds = `${year}-${month}-${day}`;          
+            const yStr = d.getFullYear();
+            const mStr = (d.getMonth() + 1).toString().padStart(2, '0');
+            const dStr = d.getDate().toString().padStart(2, '0');
+            const ds = `${yStr}-${mStr}-${dStr}`;
+            
             const dist = data.daily[ds] || 0, km = dist / 1000;
             let lv = 0;
             if (km > 0) lv = km < 5 ? 1 : km < 10 ? 2 : km < 20 ? 3 : 4;
-            h += `<div class="heatmap-cell" data-level="${lv}" title="${ds}: ${km.toFixed(2)}km"></div>`;
+            h += `<div class="heatmap-cell" data-level="${lv}" data-title="${ds}: ${km.toFixed(2)}km"></div>`;
         }
-        return h + '</div>';
+        return h;
     }
 
     init();
