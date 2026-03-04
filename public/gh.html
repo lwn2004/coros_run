@@ -44,36 +44,37 @@
             margin-bottom: 20px;
         }
 
-        /* Header & Lifetime Stats */
+        /* Header & Summary Card */
         .header { margin-bottom: 20px; }
-        .header h1 { font-size: 22px; margin-bottom: 12px; font-weight: 600; }
-        .lifetime-stats { display: flex; gap: 12px; align-items: stretch; height: 100px; }
+        .header h1 { font-size: 22px; margin-bottom: 16px; font-weight: 600; }
         
-        .stat-box {
+        .summary-card {
+            display: flex;
+            align-items: center;
             background: var(--color-card-bg);
             border: 1px solid var(--color-border);
             border-radius: 8px;
-        }
-        
-        .dist-box {
-            flex: 0 0 140px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 12px;
-        }
-        
-        .chart-box {
-            flex: 1;
-            padding: 10px;
-            position: relative; /* 必须设置以限制 canvas 大小 */
-            display: flex;
-            align-items: center;
+            padding: 16px 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
         }
 
-        .stat-box .value { font-size: 26px; font-weight: 700; color: var(--color-primary); line-height: 1.2;}
-        .stat-box .label { font-size: 12px; color: var(--color-text-muted); text-transform: uppercase; margin-top: 4px;}
+        .dist-info {
+            flex: 0 0 auto;
+            padding-right: 20px;
+            border-right: 1px solid var(--color-border);
+            margin-right: 20px;
+        }
+
+        .dist-info .value { font-size: 32px; font-weight: 700; color: var(--color-primary); line-height: 1.1; }
+        .dist-info .value span { font-size: 16px; font-weight: normal; margin-left: 2px; }
+        .dist-info .label { font-size: 13px; color: var(--color-text-muted); margin-top: 4px; }
+
+        .chart-wrapper {
+            flex: 1;
+            min-width: 0; /* 防止 flex 子项溢出，这是适配移动端宽度的关键 */
+            position: relative;
+            height: 70px; /* 控制图表高度 */
+        }
 
         /* Year Tabs */
         .year-tabs { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 2px; }
@@ -89,7 +90,7 @@
         }
         .year-tab.active { background-color: var(--color-primary); color: white; border-color: var(--color-primary); }
 
-        /* Heatmap - 紧凑型 */
+        /* Heatmap */
         .heatmap-container { 
             margin: 15px 0 15px 0; 
             overflow-x: auto; 
@@ -105,14 +106,9 @@
         .heatmap-cell[data-level="3"] { background-color: var(--color-calendar-3); }
         .heatmap-cell[data-level="4"] { background-color: var(--color-calendar-4); }
 
-        /* Monthly List - 更紧凑 */
+        /* Monthly List */
         .section-info { font-size: 15px; color: var(--color-text); margin-bottom: 15px; font-weight: 500; }
-        .month-item { 
-            padding: 8px 4px; 
-            border-bottom: 1px solid #f0f0f0; 
-            cursor: pointer; 
-            transition: background 0.1s;
-        }
+        .month-item { padding: 8px 4px; border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: background 0.1s; }
         .month-item:last-child { border-bottom: none; }
         .month-item:hover { background-color: #f9f9f9; }
         .month-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
@@ -130,18 +126,25 @@
         .run-date-row { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
         .run-meta { display: flex; gap: 12px; font-size: 12px; color: var(--color-text-muted); }
         .run-meta b { color: var(--color-text); }
+
+        /* 移动端细微适配：屏幕更小的时候缩小间距 */
+        @media (max-width: 480px) {
+            .summary-card { padding: 12px; }
+            .dist-info { padding-right: 12px; margin-right: 12px; }
+            .dist-info .value { font-size: 24px; }
+        }
     </style>
 </head>
 <body>
 
     <div class="header">
         <h1>🏃 我的跑步记录</h1>
-        <div class="lifetime-stats">
-            <div class="stat-box dist-box">
+        <div class="summary-card">
+            <div class="dist-info">
                 <div class="value" id="total-dist-val">0</div>
-                <div class="label">总公里数</div>
+                <div class="label">总跑量(公里)</div>
             </div>
-            <div class="stat-box chart-box">
+            <div class="chart-wrapper">
                 <canvas id="cumulative-chart"></canvas>
             </div>
         </div>
@@ -178,15 +181,15 @@
             const raw = await res.json();
             let maxMonthDist = 0;
             
-            // 按日期倒序排列（最新的在最前）
+            // 按日期倒序排列
             raw.sort((a, b) => new Date(b.start_date_local) - new Date(a.start_date_local));
             
-            // 提取图表数据（按正序计算累计跑量）
+            // 图表数据提取
             let chartLabels = [];
             let chartValues = [];
             let currentCumulative = 0;
             
-            // 从后往前遍历，以便数据按时间正序排列给图表
+            // 从后往前计算累计量（正序）
             for (let i = raw.length - 1; i >= 0; i--) {
                 const run = raw[i];
                 const ds = run.start_date_local.split(' ')[0];
@@ -196,7 +199,7 @@
             }
 
             raw.forEach(run => {
-                const ds = run.start_date_local.split(' ')[0]; // 获取 "2026-02-15"
+                const ds = run.start_date_local.split(' ')[0];
                 const d = new Date(run.start_date_local);
                 const y = d.getFullYear().toString();
                 const m = (d.getMonth() + 1).toString().padStart(2, '0');
@@ -228,9 +231,11 @@
             });
 
             processedData.maxMonthDist = maxMonthDist;
-            document.getElementById('total-dist-val').innerText = fmtDist(processedData.totalDistance);
+            
+            // 写入数字 (原 html 内已有 id 绑定)
+            document.getElementById('total-dist-val').innerHTML = `${fmtDist(processedData.totalDistance)}`;
 
-            // 绘制累计跑量趋势图
+            // 渲染图表
             renderChart(chartLabels, chartValues);
 
             window.addEventListener('popstate', handleRoute);
@@ -248,20 +253,20 @@
             data: {
                 labels: labels,
                 datasets: [{
-                    label: '累计跑量 (km)',
+                    label: '累计跑量',
                     data: data,
-                    borderColor: '#00bfff', // 使用原主题的蓝色 --color-bar
+                    borderColor: '#00bfff',
                     backgroundColor: 'rgba(0, 191, 255, 0.1)',
                     borderWidth: 2,
                     fill: true,
-                    pointRadius: 0, // 隐藏数据点，使线条更清爽
+                    pointRadius: 0, 
                     pointHoverRadius: 4,
                     tension: 0.1
                 }]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false,
+                maintainAspectRatio: false, // 必须为 false 才能在移动端正确响应高度
                 plugins: {
                     legend: { display: false },
                     tooltip: {
@@ -275,13 +280,8 @@
                     }
                 },
                 scales: {
-                    x: {
-                        display: false // 隐藏 x 轴，保持顶部卡片整洁
-                    },
-                    y: {
-                        display: false, // 隐藏 y 轴
-                        beginAtZero: true
-                    }
+                    x: { display: false },
+                    y: { display: false, beginAtZero: true }
                 }
             }
         });
