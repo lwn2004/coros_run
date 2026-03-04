@@ -307,20 +307,24 @@
                         grid: { display: false },
                         border: { display: false },
                         ticks: {
-                          autoSkip: false,
-                          maxRotation: 0,
-                          padding: 2,
-                          color: '#999',
-                          callback: function(value, index, ticks) {
-                              const d = new Date(value);
-                              const year = d.getFullYear();
-                      
-                              if (index === 0) return year;
-                      
-                              const prevYear = new Date(ticks[index - 1].value).getFullYear();
-                              return year !== prevYear ? year : '';
-                          }
-                      }
+                            maxRotation: 0,
+                            callback: function(value) {
+                                return new Date(value).getFullYear();
+                            }
+                        },
+                        afterBuildTicks: (scale) => {
+                            const ticks = [];
+                            const startYear = new Date(firstX).getFullYear();
+                            const endYear   = new Date(lastX).getFullYear();
+                    
+                            for (let y = startYear; y <= endYear; y++) {
+                                ticks.push({
+                                    value: new Date(y, 0, 1).getTime()
+                                });
+                            }
+                    
+                            scale.ticks = ticks;
+                        }
                     },
                     y: {
                         beginAtZero: true,
