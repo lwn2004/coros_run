@@ -74,7 +74,7 @@
             flex: 1;
             min-width: 0; /* 防止 flex 子项溢出，这是适配移动端宽度的关键 */
             position: relative;
-            height: 70px; /* 控制图表高度 */
+            height: 120px; /* 控制图表高度 */
         }
 
         /* Year Tabs */
@@ -309,7 +309,7 @@
                         ticks: {
                           autoSkip: false,
                           maxRotation: 0,
-                          padding: 8,
+                          padding: 2,
                           color: '#999',
                           callback: function(value, index, ticks) {
                               const d = new Date(value);
