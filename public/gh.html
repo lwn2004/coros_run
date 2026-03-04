@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的跑步记录</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.0/Chart.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js"></script>
     <style>
         :root {
             --color-bg: #f6f8fa;
@@ -75,7 +74,7 @@
             flex: 1;
             min-width: 0; /* 防止 flex 子项溢出，这是适配移动端宽度的关键 */
             position: relative;
-            height: 100px; /* 控制图表高度 */
+            height: 70px; /* 控制图表高度 */
         }
 
         /* Year Tabs */
@@ -284,7 +283,7 @@
                     }
                 },
                 scales: {
-                    x: { display: false, type: 'time', time: { unit: 'month'} },
+                    x: { display: false },
                     y: { display: false, beginAtZero: true }
                 }
             }
