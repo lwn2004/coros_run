@@ -82,7 +82,7 @@
             border-radius: 4px;
         }
         .heatmap-grid { display: grid; grid-template-rows: repeat(7, 10px); grid-auto-flow: column; gap: 3px; width: fit-content; }
-        .heatmap-cell { width: 10px; height: 10px; border-radius: 2px; background-color: var(--color-calendar-0); position: relative; }
+        .heatmap-cell { width: 12px; height: 12px; border-radius: 2px; background-color: var(--color-calendar-0); position: relative; }
         .heatmap-cell[data-level="1"] { background-color: var(--color-calendar-1); }
         .heatmap-cell[data-level="2"] { background-color: var(--color-calendar-2); }
         .heatmap-cell[data-level="3"] { background-color: var(--color-calendar-3); }
@@ -163,10 +163,10 @@
             
             raw.sort((a, b) => new Date(b.start_date_local) - new Date(a.start_date_local));
             raw.forEach(run => {
+                const ds = run.start_date_local.split(' ')[0]; // 获取 "2026-02-15"
                 const d = new Date(run.start_date_local);
                 const y = d.getFullYear().toString();
                 const m = (d.getMonth() + 1).toString().padStart(2, '0');
-                const ds = d.toISOString().split('T')[0];
 
                 if (!processedData.years[y]) processedData.years[y] = { dist: 0, runs: 0, time: 0, months: {}, daily: {} };
                 if (!processedData.years[y].months[m]) processedData.years[y].months[m] = { list: [], dist: 0, time: 0 };
@@ -287,11 +287,14 @@
         let h = '<div class="heatmap-grid">';
         for (let i = 0; i < start.getDay(); i++) h += `<div class="heatmap-cell" style="background:transparent"></div>`;
         for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-            const ds = d.toISOString().split('T')[0];
+            const year = d.getFullYear();
+            const month = (d.getMonth() + 1).toString().padStart(2, '0');
+            const day = d.getDate().toString().padStart(2, '0');
+            const ds = `${year}-${month}-${day}`;          
             const dist = data.daily[ds] || 0, km = dist / 1000;
             let lv = 0;
             if (km > 0) lv = km < 5 ? 1 : km < 10 ? 2 : km < 20 ? 3 : 4;
-            h += `<div class="heatmap-cell" data-level="${lv}" data-title="${ds}: ${km.toFixed(2)}km"></div>`;
+            h += `<div class="heatmap-cell" data-level="${lv}" title="${ds}: ${km.toFixed(2)}km"></div>`;
         }
         return h + '</div>';
     }
