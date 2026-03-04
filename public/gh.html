@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的跑步记录</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.0.1/chartjs-plugin-annotation.min.js"></script>
     <style>
         :root {
             --color-bg: #f6f8fa;
@@ -259,8 +260,8 @@
     
         const firstX = timeData[0].x;
         const lastX  = timeData[timeData.length - 1].x;
-    
-        new Chart(ctx, {
+        Chart.register(window['chartjs-plugin-annotation']);
+        window.runChart = new Chart(ctx, {
             type: 'line',
             data: {
                 datasets: [{
@@ -364,7 +365,9 @@
         if (!data) return;
 
         const yearsList = Object.keys(processedData.years).sort((a, b) => b - a);
-        let html = `<div class="year-tabs">${yearsList.map(v => `<div class="year-tab ${v===y?'active':''}" onclick="navigateTo('${BASE_PATH}/${v}')">${v}</div>`).join('')}</div>`;
+        let html = `<div class="year-tabs">${yearsList.map(v => `<div class="year-tab ${v===y?'active':''}"
+     style="${v===y?'background:'+getComputedStyle(document.documentElement).getPropertyValue('--color-primary'):''}"
+     onclick="navigateTo('${BASE_PATH}/${v}'); highlightYear(${v}, getComputedStyle(this).backgroundColor)">${v}</div>`).join('')}</div>`;
         
         html += `<div class="card">
             <div class="section-info">${y} 年共奔跑 ${data.runs} 次，累计 ${fmtDist(data.dist)} 公里</div>
@@ -445,7 +448,30 @@
         }
         return h + '</div>';
     }
-
+    function highlightYear(year, color) {
+    
+        if (!window.runChart) return;
+    
+        const firstX = window.runChart.scales.x.min;
+        const lastX  = window.runChart.scales.x.max;
+    
+        const start = new Date(year, 0, 1).getTime();
+        const end   = new Date(year + 1, 0, 1).getTime();
+    
+        window.runChart.options.plugins.annotation = {
+            annotations: {
+                yearHighlight: {
+                    type: 'box',
+                    xMin: Math.max(start, firstX),
+                    xMax: Math.min(end, lastX),
+                    backgroundColor: color + '22',   // 半透明
+                    borderWidth: 0
+                }
+            }
+        };
+    
+        window.runChart.update();
+    }
     init();
 </script>
 </body>
