@@ -8,132 +8,152 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.0.1/chartjs-plugin-annotation.min.js"></script>
     <style>
         :root {
-            --color-bg: #f6f8fa;
+            /* 统一运动主题色：活力橙 */
+            --color-bg: #f8fafc;
             --color-card-bg: #ffffff;
-            --color-text: #1f2328;
-            --color-text-muted: #636c76;
-            --color-border: #d0d7de;
-            --color-primary: #0969da;
-            --color-calendar-0: #ebedf0;
-            --color-calendar-1: #9be9a8;
-            --color-calendar-2: #40c463;
-            --color-calendar-3: #30a14e;
-            --color-calendar-4: #216e39;
-            --color-bar: #00bfff;
+            --color-text: #334155;
+            --color-text-muted: #64748b;
+            --color-border: #e2e8f0;
+            --color-primary: #ea580c;       /* 核心主色 */
+            --color-primary-alpha: rgba(234, 88, 12, 0.15); /* 图表填充色 */
+            
+            /* 热力图色阶 (统一为橙色系) */
+            --color-heat-0: #f1f5f9;
+            --color-heat-1: #fed7aa;
+            --color-heat-2: #fb923c;
+            --color-heat-3: #ea580c;
+            --color-heat-4: #9a3412;
         }
 
-        /* 预留滚动条占位，防止页面跳动 */
+        /* 基础重置与排版 */
         html { overflow-y: scroll; scrollbar-gutter: stable; }
-
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
             color: var(--color-text);
             background-color: var(--color-bg);
-            line-height: 1.5;
+            line-height: 1.6;
             padding: 20px;
             max-width: 900px;
             margin: 0 auto;
         }
 
+        /* 卡片通用样式 */
         .card {
             background-color: var(--color-card-bg);
             border: 1px solid var(--color-border);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
 
-        /* Header & Summary Card */
-        .header { margin-bottom: 20px; }
-        .header h1 { font-size: 22px; margin-bottom: 16px; font-weight: 600; }
+        /* 头部信息区 */
+        .header { margin-bottom: 24px; }
+        .header h1 { font-size: 24px; margin-bottom: 16px; font-weight: 700; color: var(--color-text); }
         
         .summary-card {
             display: flex;
             align-items: center;
             background: var(--color-card-bg);
             border: 1px solid var(--color-border);
-            border-radius: 8px;
-            padding: 16px 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            border-radius: 12px;
+            padding: 20px 24px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
         }
 
+        /* 核心公里数展示区 */
         .dist-info {
             flex: 0 0 auto;
-            padding-right: 20px;
+            padding-right: 24px;
             border-right: 1px solid var(--color-border);
-            margin-right: 20px;
+            margin-right: 24px;
+            min-width: 180px;
         }
-
-        .dist-info .value { font-size: 32px; font-weight: 700; color: var(--color-primary); line-height: 1.1; }
-        .dist-info .value span { font-size: 16px; font-weight: normal; margin-left: 2px; }
-        .dist-info .label { font-size: 13px; color: var(--color-text-muted); margin-top: 4px; }
-        .dist-info .label span { font-weight: 700; color: var(--color-primary); }
+        .dist-info .main-val { 
+            font-size: 42px; 
+            font-weight: 800; 
+            color: var(--color-primary); 
+            line-height: 1.1; 
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+        .dist-info .main-val .unit { font-size: 18px; font-weight: 600; margin-left: 2px; }
+        .dist-info .sub-info { 
+            font-size: 13px; 
+            color: var(--color-text-muted); 
+            line-height: 1.5; 
+        }
+        .dist-info .sub-info strong { color: var(--color-text); font-weight: 600; }
 
         .chart-wrapper {
             flex: 1;
-            min-width: 0; /* 防止 flex 子项溢出，这是适配移动端宽度的关键 */
+            min-width: 0;
             position: relative;
-            height: 120px; /* 控制图表高度 */
+            height: 130px;
         }
 
-        /* Year Tabs */
-        .year-tabs { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 2px; }
+        /* 年份切换标签 */
+        .year-tabs { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px; }
         .year-tab {
-            padding: 6px 14px;
+            padding: 6px 16px;
             border: 1px solid var(--color-border);
-            border-radius: 6px;
+            border-radius: 20px;
             background: var(--color-card-bg);
             color: var(--color-text-muted);
             cursor: pointer;
-            font-size: 13px;
+            font-size: 14px;
+            font-weight: 500;
             white-space: nowrap;
+            transition: all 0.2s ease;
         }
+        .year-tab:hover { border-color: var(--color-primary); color: var(--color-primary); }
         .year-tab.active { background-color: var(--color-primary); color: white; border-color: var(--color-primary); }
 
-        /* Heatmap */
+        /* 热力图 */
         .heatmap-container { 
-            margin: 15px 0 15px 0; 
+            margin: 20px 0; 
             overflow-x: auto; 
-            padding: 10px;
-            background: #fff;
-            border: 1px solid #f0f0f0;
-            border-radius: 4px;
+            padding: 16px;
+            background: var(--color-bg);
+            border-radius: 8px;
         }
-        .heatmap-grid { display: grid; grid-template-rows: repeat(7, 10px); grid-auto-flow: column; gap: 3px; width: fit-content; }
-        .heatmap-cell { width: 12px; height: 12px; border-radius: 2px; background-color: var(--color-calendar-0); position: relative; }
-        .heatmap-cell[data-level="1"] { background-color: var(--color-calendar-1); }
-        .heatmap-cell[data-level="2"] { background-color: var(--color-calendar-2); }
-        .heatmap-cell[data-level="3"] { background-color: var(--color-calendar-3); }
-        .heatmap-cell[data-level="4"] { background-color: var(--color-calendar-4); }
+        .heatmap-grid { display: grid; grid-template-rows: repeat(7, 10px); grid-auto-flow: column; gap: 4px; width: fit-content; }
+        .heatmap-cell { width: 10px; height: 10px; border-radius: 2px; background-color: var(--color-heat-0); }
+        .heatmap-cell[data-level="1"] { background-color: var(--color-heat-1); }
+        .heatmap-cell[data-level="2"] { background-color: var(--color-heat-2); }
+        .heatmap-cell[data-level="3"] { background-color: var(--color-heat-3); }
+        .heatmap-cell[data-level="4"] { background-color: var(--color-heat-4); }
 
-        /* Monthly List */
-        .section-info { font-size: 15px; color: var(--color-text); margin-bottom: 15px; font-weight: 500; }
-        .month-item { padding: 8px 4px; border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: background 0.1s; }
+        /* 月度列表 */
+        .section-info { font-size: 16px; color: var(--color-text); margin-bottom: 16px; font-weight: 600; }
+        .month-item { padding: 12px 8px; border-bottom: 1px solid var(--color-border); cursor: pointer; transition: background 0.2s; }
         .month-item:last-child { border-bottom: none; }
-        .month-item:hover { background-color: #f9f9f9; }
-        .month-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+        .month-item:hover { background-color: var(--color-bg); border-radius: 6px; }
+        .month-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .month-name { font-size: 15px; font-weight: 600; }
-        .month-stats { font-size: 12px; color: var(--color-text-muted); display: flex; gap: 8px; }
-        .month-stats .dist { color: var(--color-bar); font-weight: 700; }
-        .progress-bar-bg { background-color: var(--color-calendar-0); height: 4px; border-radius: 2px; width: 100%; }
-        .progress-bar-fill { background-color: var(--color-bar); height: 100%; border-radius: 2px; }
+        .month-stats { font-size: 13px; color: var(--color-text-muted); display: flex; gap: 12px; }
+        .month-stats .dist { color: var(--color-primary); font-weight: 700; }
+        .progress-bar-bg { background-color: var(--color-heat-0); height: 6px; border-radius: 3px; width: 100%; overflow: hidden; }
+        .progress-bar-fill { background-color: var(--color-primary); height: 100%; border-radius: 3px; transition: width 0.5s ease;}
 
-        /* Daily Details */
-        .breadcrumb { display: inline-block; font-size: 13px; margin-bottom: 12px; color: var(--color-primary); cursor: pointer; }
-        .monthly-summary { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid var(--color-border); margin-bottom: 10px; }
-        .monthly-summary .val { font-size: 20px; font-weight: 700; display: block; }
-        .run-item { padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
-        .run-date-row { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
-        .run-meta { display: flex; gap: 12px; font-size: 12px; color: var(--color-text-muted); }
-        .run-meta b { color: var(--color-text); }
+        /* 日常明细 */
+        .breadcrumb { display: inline-block; font-size: 14px; margin-bottom: 16px; color: var(--color-primary); cursor: pointer; font-weight: 500; }
+        .monthly-summary { display: flex; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid var(--color-border); margin-bottom: 12px; }
+        .monthly-summary .label { font-size: 13px; color: var(--color-text-muted); margin-bottom: 4px; display: block; }
+        .monthly-summary .val { font-size: 22px; font-weight: 700; color: var(--color-primary); }
+        .run-item { padding: 14px 0; border-bottom: 1px dashed var(--color-border); }
+        .run-item:last-child { border-bottom: none; }
+        .run-date-row { display: flex; justify-content: space-between; font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+        .run-meta { display: flex; gap: 16px; font-size: 13px; color: var(--color-text-muted); }
+        .run-meta b { color: var(--color-text); font-weight: 600;}
 
-        /* 移动端细微适配：屏幕更小的时候缩小间距 */
-        @media (max-width: 480px) {
-            .summary-card { padding: 12px; }
-            .dist-info { padding-right: 12px; margin-right: 12px; }
-            .dist-info .value { font-size: 24px; }
+        /* 移动端响应式适配 */
+        @media (max-width: 600px) {
+            .summary-card { flex-direction: column; align-items: stretch; padding: 16px; }
+            .dist-info { border-right: none; border-bottom: 1px solid var(--color-border); margin-right: 0; padding-right: 0; padding-bottom: 16px; margin-bottom: 16px; text-align: center; }
+            .dist-info .main-val { font-size: 36px; }
+            .month-stats { flex-wrap: wrap; gap: 8px; justify-content: flex-end;}
         }
     </style>
 </head>
@@ -143,9 +163,11 @@
         <h1>🏃 我的跑步记录</h1>
         <div class="summary-card">
             <div class="dist-info">
-                <div class="label">总跑量(公里)</div>              
-                <div class="value" id="total-dist-val">0</div>
-                <div class="label">占地球赤道周长 <span id="pct" class="pct-value"></span></div>
+                <div class="main-val"><span id="total-dist-val">0</span><span class="unit"> km</span></div>
+                <div class="sub-info">
+                    <strong><span id="total-years">0</span></strong> 年，共奔跑 <strong><span id="total-runs">0</span></strong> 次<br>
+                    约占地球赤道周长 <strong><span id="pct">0%</span></strong>
+                </div>
             </div>
             <div class="chart-wrapper">
                 <canvas id="cumulative-chart"></canvas>
@@ -153,14 +175,14 @@
         </div>
     </div>
 
-    <div id="app-content">加载中...</div>
+    <div id="app-content">数据加载中，请稍候...</div>
 
 <script>
     const DATA_URL = 'https://run.linwn.net/data/all.json';
     const BASE_PATH = '/gh'; 
-    let processedData = { totalDistance: 0, totalRuns: 0, years: {} };
+    let processedData = { totalDistance: 0, totalRuns: 0, years: {}, maxMonthDist: 0 };
 
-    // 工具函数
+    // --- 工具函数区 ---
     const fmtDist = (m) => (m / 1000).toFixed(2);
     const fmtPace = (s) => {
         if (!s || s <= 0) return "0'00\"";
@@ -168,98 +190,103 @@
         return `${Math.floor(ps / 60)}'${Math.floor(ps % 60).toString().padStart(2, '0')}"`;
     };
     const fmtTime = (ts) => {
-        let s = 0;
-        if (typeof ts === 'string' && ts.includes(':')) {
-            const p = ts.split(':');
-            s = parseInt(p[0]) * 3600 + parseInt(p[1]) * 60 + parseFloat(p[2]);
-        } else s = parseFloat(ts);
-        const h = Math.floor(s / 3600);
-        const m = Math.floor((s % 3600) / 60);
+        let s = typeof ts === 'string' && ts.includes(':') 
+            ? ts.split(':').reduce((acc, val, i) => acc + parseFloat(val) * [3600, 60, 1][i], 0) 
+            : parseFloat(ts);
+        const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
         return h > 0 ? `${h}h ${m}m` : `${m}m ${Math.floor(s % 60)}s`;
     };
+    const getCssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 
+    // --- 初始化与生命周期 ---
     async function init() {
         try {
             const res = await fetch(DATA_URL);
             const raw = await res.json();
-            let maxMonthDist = 0;
             
-            // 按日期倒序排列
-            raw.sort((a, b) => new Date(b.start_date_local) - new Date(a.start_date_local));
+            processData(raw);
+            updateSummaryUI();
             
-            // 图表数据提取
-            let chartLabels = [];
-            let chartValues = [];
-            let currentCumulative = 0;
-            
-            // 从后往前计算累计量（正序）
-            for (let i = raw.length - 1; i >= 0; i--) {
-                const run = raw[i];
-                const ds = run.start_date_local.split(' ')[0];
-                currentCumulative += run.distance / 1000;
-                chartLabels.push(ds);
-                chartValues.push(currentCumulative.toFixed(2));
-            }
-
-            raw.forEach(run => {
-                const ds = run.start_date_local.split(' ')[0];
-                const d = new Date(run.start_date_local);
-                const y = d.getFullYear().toString();
-                const m = (d.getMonth() + 1).toString().padStart(2, '0');
-
-                if (!processedData.years[y]) processedData.years[y] = { dist: 0, runs: 0, time: 0, months: {}, daily: {} };
-                if (!processedData.years[y].months[m]) processedData.years[y].months[m] = { list: [], dist: 0, time: 0 };
-
-                processedData.totalDistance += run.distance;
-                processedData.totalRuns += 1;
-                processedData.years[y].dist += run.distance;
-                processedData.years[y].runs += 1;
-                
-                let dur = 0;
-                if (typeof run.moving_time === 'string' && run.moving_time.includes(':')) {
-                    const p = run.moving_time.split(':');
-                    dur = parseInt(p[0]) * 3600 + parseInt(p[1]) * 60 + parseFloat(p[2]);
-                }
-                processedData.years[y].time += dur;
-                processedData.years[y].months[m].list.push(run);
-                processedData.years[y].months[m].dist += run.distance;
-                processedData.years[y].months[m].time += dur;
-                processedData.years[y].daily[ds] = (processedData.years[y].daily[ds] || 0) + run.distance;
-            });
-
-            Object.values(processedData.years).forEach(yearData => {
-                Object.values(yearData.months).forEach(monthData => {
-                    if (monthData.dist > maxMonthDist) maxMonthDist = monthData.dist;
-                });
-            });
-
-            processedData.maxMonthDist = maxMonthDist;
-            
-            // 写入数字 (原 html 内已有 id 绑定)
-            document.getElementById('total-dist-val').innerHTML = `${fmtDist(processedData.totalDistance)}`;
-            document.getElementById('pct').innerHTML = `${(((processedData.totalDistance/1000) / 40075.02) * 100).toFixed(1)}%`
-
-            // 渲染图表
-            renderChart(chartLabels, chartValues);
+            // 准备图表数据并渲染
+            const chartData = buildChartData(raw);
+            renderChart(chartData.labels, chartData.values);
 
             window.addEventListener('popstate', handleRoute);
             handleRoute();
         } catch (e) {
-            console.error(e);
-            document.getElementById('app-content').innerHTML = "数据加载失败";
+            console.error("Fetch Data Error:", e);
+            document.getElementById('app-content').innerHTML = `<div class="card">数据加载失败，请检查网络或 CORS 设置。</div>`;
         }
+    }
+
+    // --- 数据处理逻辑提取 ---
+    function processData(raw) {
+        raw.sort((a, b) => new Date(b.start_date_local) - new Date(a.start_date_local));
+        let maxMonthDist = 0;
+
+        raw.forEach(run => {
+            const ds = run.start_date_local.split(' ')[0];
+            const d = new Date(run.start_date_local);
+            const y = d.getFullYear().toString();
+            const m = (d.getMonth() + 1).toString().padStart(2, '0');
+
+            if (!processedData.years[y]) processedData.years[y] = { dist: 0, runs: 0, time: 0, months: {}, daily: {} };
+            if (!processedData.years[y].months[m]) processedData.years[y].months[m] = { list: [], dist: 0, time: 0 };
+
+            let dur = typeof run.moving_time === 'string' && run.moving_time.includes(':')
+                ? run.moving_time.split(':').reduce((acc, val, i) => acc + parseFloat(val) * [3600, 60, 1][i], 0)
+                : parseFloat(run.moving_time);
+
+            processedData.totalDistance += run.distance;
+            processedData.totalRuns += 1;
+            
+            const yData = processedData.years[y];
+            yData.dist += run.distance;
+            yData.runs += 1;
+            yData.time += dur;
+            yData.daily[ds] = (yData.daily[ds] || 0) + run.distance;
+            
+            const mData = yData.months[m];
+            mData.list.push(run);
+            mData.dist += run.distance;
+            mData.time += dur;
+        });
+
+        Object.values(processedData.years).forEach(y => {
+            Object.values(y.months).forEach(m => {
+                if (m.dist > maxMonthDist) maxMonthDist = m.dist;
+            });
+        });
+        processedData.maxMonthDist = maxMonthDist;
+    }
+
+    function buildChartData(raw) {
+        let labels = [], values = [], currentCumulative = 0;
+        for (let i = raw.length - 1; i >= 0; i--) {
+            const run = raw[i];
+            currentCumulative += run.distance / 1000;
+            labels.push(run.start_date_local.split(' ')[0]);
+            values.push(currentCumulative.toFixed(2));
+        }
+        return { labels, values };
+    }
+
+    // --- UI 更新与渲染逻辑 ---
+    function updateSummaryUI() {
+        const totalKm = (processedData.totalDistance / 1000).toFixed(2);
+        const yearsCount = Object.keys(processedData.years).length;
+        const equatorPct = ((processedData.totalDistance / 1000) / 40075.02 * 100).toFixed(2);
+
+        document.getElementById('total-dist-val').innerText = totalKm;
+        document.getElementById('total-years').innerText = yearsCount;
+        document.getElementById('total-runs').innerText = processedData.totalRuns;
+        document.getElementById('pct').innerText = `${equatorPct}%`;
     }
 
     function renderChart(labels, data) {
         const ctx = document.getElementById('cumulative-chart').getContext('2d');
-    
-        const timeData = labels.map((d, i) => ({
-            x: new Date(d).getTime(),
-            y: parseFloat(data[i])
-        }));
-    
-        const firstX = timeData[0].x;
-        const lastX  = timeData[timeData.length - 1].x;
+        const timeData = labels.map((d, i) => ({ x: new Date(d).getTime(), y: parseFloat(data[i]) }));
+        
         Chart.register(window['chartjs-plugin-annotation']);
         window.runChart = new Chart(ctx, {
             type: 'line',
@@ -267,84 +294,55 @@
                 datasets: [{
                     label: '累计跑量',
                     data: timeData,
-                    borderColor: '#00bfff',
-                    backgroundColor: 'rgba(0, 191, 255, 0.1)',
-                    borderWidth: 1,
+                    borderColor: getCssVar('--color-primary'),
+                    backgroundColor: getCssVar('--color-primary-alpha'),
+                    borderWidth: 2,
                     fill: true,
                     pointRadius: 0,
-                    pointHoverRadius: 4,
-                    tension: 0.2
+                    pointHoverRadius: 5,
+                    tension: 0.3 // 增加一点曲线平滑度
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                layout: {
-                    padding: 0
-                },
+                layout: { padding: 0 },
                 plugins: {
                     legend: { display: false },
                     tooltip: {
                         mode: 'index',
                         intersect: false,
                         callbacks: {
-                            title: function(context) {
-                                const ts = context[0].parsed.x;
-                                const d = new Date(ts);
-                                return d.toISOString().split('T')[0];
-                            },
-                            label: function(context) {
-                                return context.parsed.y + ' km';
-                            }
+                            title: (ctx) => new Date(ctx[0].parsed.x).toISOString().split('T')[0],
+                            label: (ctx) => `${ctx.parsed.y} km`
                         }
                     }
                 },
                 scales: {
                     x: {
                         type: 'linear',
-                        min: firstX,
-                        max: lastX,
-                        offset: false,
+                        min: timeData[0].x,
+                        max: timeData[timeData.length - 1].x,
                         grid: { display: false },
                         border: { display: false },
-                        ticks: {
-                            maxRotation: 0,
-                            callback: function(value) {
-                                return new Date(value).getFullYear();
-                            }
-                        },
+                        ticks: { callback: (val) => new Date(val).getFullYear() },
                         afterBuildTicks: (scale) => {
-                    
-                            const ticks = [];
-                    
-                            const firstDate = new Date(firstX);
-                            const lastDate  = new Date(lastX);
-                    
-                            const startYear = firstDate.getFullYear();
-                            const endYear   = lastDate.getFullYear();
-                    
-                            ticks.push({ value: firstX });
-                    
-                            for (let y = startYear + 1; y <= endYear; y++) {
-                                ticks.push({
-                                    value: new Date(y, 0, 1).getTime()
-                                });
+                            const ticks = [{ value: scale.min }];
+                            const startY = new Date(scale.min).getFullYear();
+                            const endY = new Date(scale.max).getFullYear();
+                            for (let y = startY + 1; y <= endY; y++) {
+                                ticks.push({ value: new Date(y, 0, 1).getTime() });
                             }
-                    
                             scale.ticks = ticks;
                         }
                     },
-                    y: {
-                        beginAtZero: true,
-                        grid: { display: false },
-                        border: { display: false },
-                        ticks: { display: false }
-                    }
+                    y: { beginAtZero: true, grid: { display: false }, border: { display: false }, ticks: { display: false } }
                 }
             }
         });
     }
 
+    // --- 路由与视图切换 ---
     function navigateTo(path) {
         window.history.pushState({}, '', path);
         handleRoute();
@@ -355,8 +353,8 @@
         if (path.length === 2) renderMonth(path[0], path[1]);
         else if (path.length === 1) renderYear(path[0]);
         else {
-            const ys = Object.keys(processedData.years).sort((a,b)=>b-a);
-            renderYear(ys[0]);
+            const ys = Object.keys(processedData.years).sort((a,b) => b - a);
+            if(ys.length > 0) renderYear(ys[0]);
         }
     }
 
@@ -365,22 +363,21 @@
         if (!data) return;
 
         const yearsList = Object.keys(processedData.years).sort((a, b) => b - a);
-        let html = `<div class="year-tabs">${yearsList.map(v => `<div class="year-tab ${v===y?'active':''}"
-     style="${v===y?'background:'+getComputedStyle(document.documentElement).getPropertyValue('--color-primary'):''}"
-     onclick="navigateTo('${BASE_PATH}/${v}'); highlightYear(${v}, getComputedStyle(this).backgroundColor)">${v}</div>`).join('')}</div>`;
+        let html = `<div class="year-tabs">${yearsList.map(v => 
+            `<div class="year-tab ${v===y?'active':''}" onclick="navigateTo('${BASE_PATH}/${v}'); highlightYear(${v})">${v}</div>`
+        ).join('')}</div>`;
         
-        html += `<div class="card">
-            <div class="section-info">${y} 年共奔跑 ${data.runs} 次，累计 ${fmtDist(data.dist)} 公里</div>
+        html += `
+        <div class="card">
+            <div class="section-info">${y} 年共奔跑 ${data.runs} 次，累计 ${fmtDist(data.dist)} km</div>
             <div class="heatmap-container">${drawHeatmap(y)}</div>
             <div class="month-list">`;
 
         const mkeys = Object.keys(data.months).sort((a, b) => b - a);
-        const globalMax = processedData.maxMonthDist || 1;
-
         mkeys.forEach(m => {
             const md = data.months[m];
             const avgS = md.list.reduce((acc, r) => acc + r.average_speed, 0) / md.list.length;
-            const percentage = (md.dist / globalMax) * 100;
+            const percentage = (md.dist / (processedData.maxMonthDist || 1)) * 100;
             html += `
                 <div class="month-item" onclick="navigateTo('${BASE_PATH}/${y}/${m}')">
                     <div class="month-header">
@@ -388,8 +385,8 @@
                         <div class="month-stats">
                             <span class="dist">${fmtDist(md.dist)} km</span>
                             <span>${fmtTime(md.time)}</span>
-                            <span>${fmtPace(avgS)}</span>
-                            <span>${md.list.length}次</span>
+                            <span>${fmtPace(avgS)} /km</span>
+                            <span>${md.list.length} 次</span>
                         </div>
                     </div>
                     <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${percentage}%"></div></div>
@@ -397,6 +394,7 @@
         });
         html += `</div></div>`;
         document.getElementById('app-content').innerHTML = html;
+        highlightYear(y); // 默认高亮当前年份
     }
 
     function renderMonth(y, m) {
@@ -404,13 +402,14 @@
         if (!md) return;
         const avgS = md.list.reduce((acc, r) => acc + r.average_speed, 0) / md.list.length;
 
-        let html = `<div class="breadcrumb" onclick="navigateTo('${BASE_PATH}/${y}')">← 返回 ${y} 年概览</div>
+        let html = `
+            <div class="breadcrumb" onclick="navigateTo('${BASE_PATH}/${y}')">← 返回 ${y} 年</div>
             <div class="card">
-                <div class="section-info" style="text-align:center; font-size:18px;">${y}年${parseInt(m)}月 跑步明细</div>
+                <div class="section-info" style="font-size:18px;">${y}年${parseInt(m)}月 明细</div>
                 <div class="monthly-summary">
-                    <div><span class="label">距离</span><span class="val">${fmtDist(md.dist)}<small>km</small></span></div>
-                    <div><span class="label">时长</span><span class="val">${fmtTime(md.time)}</span></div>
-                    <div><span class="label">平均配速</span><span class="val">${fmtPace(avgS)}</span></div>
+                    <div><span class="label">距离</span><span class="val">${fmtDist(md.dist)}<small style="font-size:14px;margin-left:2px;">km</small></span></div>
+                    <div><span class="label">时长</span><span class="val" style="color:var(--color-text);">${fmtTime(md.time)}</span></div>
+                    <div><span class="label">平均配速</span><span class="val" style="color:var(--color-text);">${fmtPace(avgS)}</span></div>
                 </div>
                 <div>`;
         
@@ -418,12 +417,15 @@
             const d = new Date(r.start_date_local);
             html += `
                 <div class="run-item">
-                    <div class="run-date-row"><span>${d.getMonth()+1}月${d.getDate()}日</span><span style="color:var(--color-text-muted); font-size:12px;">${r.city||''}</span></div>
+                    <div class="run-date-row">
+                        <span>${d.getMonth()+1}月${d.getDate()}日 ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}</span>
+                        <span style="color:var(--color-text-muted); font-size:13px; font-weight:normal;">${r.city || ''}</span>
+                    </div>
                     <div class="run-meta">
-                        <span>距离 <b>${fmtDist(r.distance)}</b></span>
+                        <span>距离 <b>${fmtDist(r.distance)} km</b></span>
                         <span>配速 <b>${fmtPace(r.average_speed)}</b></span>
-                        <span>用时 <b>${r.moving_time.split('.')[0]}</b></span>
-                        ${r.average_heartrate ? `<span>心率 <b>${Math.round(r.average_heartrate)}</b></span>`:''}
+                        <span>用时 <b>${r.moving_time.split('.')[0] || fmtTime(r.moving_time)}</b></span>
+                        ${r.average_heartrate ? `<span>心率 <b>${Math.round(r.average_heartrate)} bpm</b></span>` : ''}
                     </div>
                 </div>`;
         });
@@ -437,41 +439,37 @@
         let h = '<div class="heatmap-grid">';
         for (let i = 0; i < start.getDay(); i++) h += `<div class="heatmap-cell" style="background:transparent"></div>`;
         for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-            const year = d.getFullYear();
-            const month = (d.getMonth() + 1).toString().padStart(2, '0');
-            const day = d.getDate().toString().padStart(2, '0');
-            const ds = `${year}-${month}-${day}`;          
-            const dist = data.daily[ds] || 0, km = dist / 1000;
-            let lv = 0;
-            if (km > 0) lv = km < 5 ? 1 : km < 10 ? 2 : km < 20 ? 3 : 4;
-            h += `<div class="heatmap-cell" data-level="${lv}" title="${ds}: ${km.toFixed(2)}km"></div>`;
+            const ds = `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`;          
+            const km = (data.daily[ds] || 0) / 1000;
+            let lv = km === 0 ? 0 : km < 5 ? 1 : km < 10 ? 2 : km < 20 ? 3 : 4;
+            h += `<div class="heatmap-cell" data-level="${lv}" title="${ds}: ${km.toFixed(2)} km"></div>`;
         }
         return h + '</div>';
     }
-    function highlightYear(year, color) {
-    
+
+    function highlightYear(year) {
         if (!window.runChart) return;
-    
         const firstX = window.runChart.scales.x.min;
         const lastX  = window.runChart.scales.x.max;
-    
         const start = new Date(year, 0, 1).getTime();
         const end   = new Date(year + 1, 0, 1).getTime();
-    
+        
+        // 动态使用 CSS 定义的主题透明色
         window.runChart.options.plugins.annotation = {
             annotations: {
                 yearHighlight: {
                     type: 'box',
                     xMin: Math.max(start, firstX),
                     xMax: Math.min(end, lastX),
-                    backgroundColor: '#0969da40',   // 半透明
+                    backgroundColor: getCssVar('--color-primary-alpha'),
                     borderWidth: 0
                 }
             }
         };
-    
         window.runChart.update();
     }
+
+    // 启动应用
     init();
 </script>
 </body>
