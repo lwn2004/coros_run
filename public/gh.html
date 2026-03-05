@@ -14,7 +14,7 @@
             --color-text: #1e293b;
             --color-text-muted: #64748b;
             --color-border: #e2e8f0;
-            --color-primary: #2563eb;       /* 核心主色：运动蓝 */
+            --color-primary: #0969da;       /* 核心主色：运动蓝 */
             --color-primary-alpha: rgba(37, 99, 235, 0.15); /* 图表填充色 */
             
             /* 热力图色阶 (统一为蓝色系) */
@@ -71,8 +71,8 @@
             min-width: 180px;
         }
         .dist-info .main-val { 
-            font-size: 42px; 
-            font-weight: 800; 
+            font-size: 32px; 
+            font-weight: 700; 
             color: var(--color-primary); 
             line-height: 1.1; 
             margin-bottom: 8px;
@@ -134,7 +134,7 @@
         .month-name { font-size: 15px; font-weight: 600; }
         .month-stats { font-size: 13px; color: var(--color-text-muted); display: flex; gap: 12px; }
         .month-stats .dist { color: var(--color-primary); font-weight: 700; }
-        .progress-bar-bg { background-color: var(--color-heat-0); height: 6px; border-radius: 3px; width: 100%; overflow: hidden; }
+        .progress-bar-bg { background-color: var(--color-heat-0); height: 1px; border-radius: 3px; width: 100%; overflow: hidden; }
         .progress-bar-fill { background-color: var(--color-primary); height: 100%; border-radius: 3px; transition: width 0.5s ease;}
 
         /* 日常明细 */
@@ -296,11 +296,11 @@
                     data: timeData,
                     borderColor: getCssVar('--color-primary'),
                     backgroundColor: getCssVar('--color-primary-alpha'),
-                    borderWidth: 2,
+                    borderWidth: 1,
                     fill: true,
                     pointRadius: 0,
                     pointHoverRadius: 5,
-                    tension: 0.3 // 增加一点曲线平滑度
+                    tension: 0.1
                 }]
             },
             options: {
