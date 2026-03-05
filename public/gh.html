@@ -165,7 +165,7 @@
             <div class="dist-info">
                 <div class="main-val"><span id="total-dist-val">0</span><span class="unit"> km</span></div>
                 <div class="sub-info">
-                    <strong><span id="total-years">0</span></strong> 年， <strong><span id="total-runs">0</span></strong> 次<br>
+                    <strong><span id="total-years">0</span></strong> 年共跑步 <strong><span id="total-runs">0</span></strong> 次<br>
                     约占地球赤道周长 <strong><span id="pct">0%</span></strong>
                 </div>
             </div>
@@ -369,7 +369,7 @@
         
         html += `
         <div class="card">
-            <div class="section-info">${y} 年共奔跑 ${data.runs} 次，累计 ${fmtDist(data.dist)} km</div>
+            <div class="section-info">${y} 年跑步 ${data.runs} 次，累计 ${fmtDist(data.dist)} km</div>
             <div class="heatmap-container">${drawHeatmap(y)}</div>
             <div class="month-list">`;
 
