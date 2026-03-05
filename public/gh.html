@@ -94,7 +94,7 @@
         }
 
         /* 年份切换标签 */
-        .year-tabs { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px; }
+        .year-tabs { display: flex; gap: 10px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px; }
         .year-tab {
             padding: 6px 16px;
             border: 1px solid var(--color-border);
@@ -112,7 +112,7 @@
 
         /* 热力图 */
         .heatmap-container { 
-            margin: 20px 0; 
+            margin: 0 0 20px 0; 
             overflow-x: auto; 
             padding: 16px;
             background: var(--color-bg);
@@ -125,15 +125,15 @@
         .heatmap-cell[data-level="3"] { background-color: var(--color-heat-3); }
         .heatmap-cell[data-level="4"] { background-color: var(--color-heat-4); }
 
-        /* 月度列表 */
+        /* 列表项 (年/月共用) */
         .section-info { font-size: 16px; color: var(--color-text); margin-bottom: 16px; font-weight: 500; }
-        .month-item { padding: 12px 8px; border-bottom: 1px solid var(--color-border); cursor: pointer; transition: background 0.2s; }
-        .month-item:last-child { border-bottom: none; }
-        .month-item:hover { background-color: var(--color-bg); border-radius: 6px; }
-        .month-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .month-name { font-size: 15px; font-weight: 600; }
-        .month-stats { font-size: 13px; color: var(--color-text-muted); display: flex; gap: 12px; }
-        .month-stats .dist { color: var(--color-primary); font-weight: 700; }
+        .list-item { padding: 12px 8px; border-bottom: 1px solid var(--color-border); cursor: pointer; transition: background 0.2s; }
+        .list-item:last-child { border-bottom: none; }
+        .list-item:hover { background-color: var(--color-bg); border-radius: 6px; }
+        .list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .list-name { font-size: 15px; font-weight: 600; }
+        .list-stats { font-size: 13px; color: var(--color-text-muted); display: flex; gap: 12px; }
+        .list-stats .dist { color: var(--color-primary); font-weight: 700; }
         .progress-bar-bg { background-color: var(--color-heat-0); height: 1px; border-radius: 3px; width: 100%; overflow: hidden; }
         .progress-bar-fill { background-color: var(--color-primary); height: 100%; border-radius: 3px; transition: width 0.5s ease;}
 
@@ -153,7 +153,7 @@
             .summary-card { flex-direction: column; align-items: stretch; padding: 16px; }
             .dist-info { border-right: none; border-bottom: 1px solid var(--color-border); margin-right: 0; padding-right: 0; padding-bottom: 16px; margin-bottom: 16px; text-align: center; }
             .dist-info .main-val { font-size: 36px; }
-            .month-stats { flex-wrap: wrap; gap: 8px; justify-content: flex-end;}
+            .list-stats { flex-wrap: wrap; gap: 8px; justify-content: flex-end;}
         }
     </style>
 </head>
@@ -161,6 +161,7 @@
 
     <div class="header">
         <h1>🏃 我的跑步记录</h1>
+        <div id="tabs-container"></div>
         <div class="summary-card">
             <div class="dist-info">
                 <div class="main-val"><span id="total-dist-val">0</span><span class="unit"> km</span></div>
@@ -179,7 +180,7 @@
 <script>
     const DATA_URL = 'https://run.linwn.net/data/all.json';
     const BASE_PATH = '/gh'; 
-    let processedData = { totalDistance: 0, totalRuns: 0, years: {}, maxMonthDist: 0 };
+    let processedData = { totalDistance: 0, totalRuns: 0, years: {}, maxMonthDist: 0, maxYearDist: 0 };
 
     // --- 工具函数区 ---
     const fmtDist = (m) => (m / 1000).toFixed(2);
@@ -204,7 +205,6 @@
             const raw = await res.json();
             
             processData(raw);
-            updateSummaryUI();
             
             // 准备图表数据并渲染
             const chartData = buildChartData(raw);
@@ -222,6 +222,7 @@
     function processData(raw) {
         raw.sort((a, b) => new Date(b.start_date_local) - new Date(a.start_date_local));
         let maxMonthDist = 0;
+        let maxYearDist = 0;
 
         raw.forEach(run => {
             const ds = run.start_date_local.split(' ')[0];
@@ -252,10 +253,13 @@
         });
 
         Object.values(processedData.years).forEach(y => {
+            if (y.dist > maxYearDist) maxYearDist = y.dist;
             Object.values(y.months).forEach(m => {
                 if (m.dist > maxMonthDist) maxMonthDist = m.dist;
             });
         });
+        
+        processedData.maxYearDist = maxYearDist;
         processedData.maxMonthDist = maxMonthDist;
     }
 
@@ -271,15 +275,38 @@
     }
 
     // --- UI 更新与渲染逻辑 ---
-    function updateSummaryUI() {
-        const totalKm = (processedData.totalDistance / 1000).toFixed(2);
-        const yearsCount = Object.keys(processedData.years).length;
-        const equatorPct = ((processedData.totalDistance / 1000) / 40075.02 * 100).toFixed(2);
+    function updateSummaryUI(year = 'all') {
+        let dist, runs, textYears, pct;
+        
+        if (year === 'all') {
+            dist = (processedData.totalDistance / 1000).toFixed(2);
+            runs = processedData.totalRuns;
+            textYears = Object.keys(processedData.years).length;
+            pct = ((processedData.totalDistance / 1000) / 40075.02 * 100).toFixed(2);
+        } else {
+            const yData = processedData.years[year];
+            if (!yData) return;
+            dist = (yData.dist / 1000).toFixed(2);
+            runs = yData.runs;
+            textYears = year;
+            pct = ((yData.dist / 1000) / 40075.02 * 100).toFixed(2);
+        }
 
-        document.getElementById('total-dist-val').innerText = totalKm;
-        document.getElementById('total-years').innerText = yearsCount;
-        document.getElementById('total-runs').innerText = processedData.totalRuns;
-        document.getElementById('pct').innerText = `${equatorPct}%`;
+        document.getElementById('total-dist-val').innerText = dist;
+        document.getElementById('total-years').innerText = textYears;
+        document.getElementById('total-runs').innerText = runs;
+        document.getElementById('pct').innerText = `${pct}%`;
+    }
+
+    function renderTabs(activeYear = 'all') {
+        const yearsList = Object.keys(processedData.years).sort((a, b) => b - a);
+        let html = `<div class="year-tabs">
+            <div class="year-tab ${activeYear === 'all' ? 'active' : ''}" onclick="navigateTo('${BASE_PATH}')">全部</div>
+            ${yearsList.map(v => 
+                `<div class="year-tab ${v === activeYear ? 'active' : ''}" onclick="navigateTo('${BASE_PATH}/${v}')">${v}</div>`
+            ).join('')}
+        </div>`;
+        document.getElementById('tabs-container').innerHTML = html;
     }
 
     function renderChart(labels, data) {
@@ -349,28 +376,71 @@
 
     function handleRoute() {
         const path = window.location.pathname.replace(BASE_PATH, '').split('/').filter(Boolean);
-        if (path.length === 2) renderMonth(path[0], path[1]);
-        else if (path.length === 1) renderYear(path[0]);
-        else {
-            const ys = Object.keys(processedData.years).sort((a,b) => b - a);
-            if(ys.length > 0) renderYear(ys[0]);
+        if (path.length === 2) {
+            renderTabs(path[0]);
+            updateSummaryUI(path[0]);
+            highlightYear(path[0]);
+            renderMonth(path[0], path[1]);
+        } else if (path.length === 1) {
+            renderTabs(path[0]);
+            updateSummaryUI(path[0]);
+            highlightYear(path[0]);
+            renderYear(path[0]);
+        } else {
+            renderTabs('all');
+            updateSummaryUI('all');
+            highlightYear('all');
+            renderAllYears();
         }
     }
 
+    // --- 视图渲染：所有年份汇总 ---
+    function renderAllYears() {
+        let html = `<div class="card"><div class="list-wrapper">`;
+        const ykeys = Object.keys(processedData.years).sort((a, b) => b - a);
+        
+        ykeys.forEach(y => {
+            const yd = processedData.years[y];
+            
+            // 计算该年度整体平均配速
+            let totalSpeed = 0, speedCount = 0;
+            Object.values(yd.months).forEach(m => {
+                m.list.forEach(r => {
+                    totalSpeed += r.average_speed;
+                    speedCount++;
+                });
+            });
+            const avgS = speedCount > 0 ? totalSpeed / speedCount : 0;
+            const percentage = (yd.dist / (processedData.maxYearDist || 1)) * 100;
+            
+            html += `
+                <div class="list-item" onclick="navigateTo('${BASE_PATH}/${y}')">
+                    <div class="list-header">
+                        <div class="list-name">${y}年</div>
+                        <div class="list-stats">
+                            <span class="dist">${fmtDist(yd.dist)} km</span>
+                            <span>${fmtTime(yd.time)}</span>
+                            <span>${fmtPace(avgS)} /km</span>
+                            <span>${yd.runs} 次</span>
+                        </div>
+                    </div>
+                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${percentage}%"></div></div>
+                </div>`;
+        });
+        
+        html += `</div></div>`;
+        document.getElementById('app-content').innerHTML = html;
+    }
+
+    // --- 视图渲染：特定年份 ---
     function renderYear(y) {
         const data = processedData.years[y];
         if (!data) return;
 
-        const yearsList = Object.keys(processedData.years).sort((a, b) => b - a);
-        let html = `<div class="year-tabs">${yearsList.map(v => 
-            `<div class="year-tab ${v===y?'active':''}" onclick="navigateTo('${BASE_PATH}/${v}'); highlightYear(${v})">${v}</div>`
-        ).join('')}</div>`;
-        
-        html += `
+        let html = `
         <div class="card">
-            <div class="section-info">${y} 年跑步 ${data.runs} 次，累计 ${fmtDist(data.dist)} km</div>
             <div class="heatmap-container">${drawHeatmap(y)}</div>
-            <div class="month-list">`;
+            <div class="list-wrapper">`;
 
         const mkeys = Object.keys(data.months).sort((a, b) => b - a);
         mkeys.forEach(m => {
@@ -378,10 +448,10 @@
             const avgS = md.list.reduce((acc, r) => acc + r.average_speed, 0) / md.list.length;
             const percentage = (md.dist / (processedData.maxMonthDist || 1)) * 100;
             html += `
-                <div class="month-item" onclick="navigateTo('${BASE_PATH}/${y}/${m}')">
-                    <div class="month-header">
-                        <div class="month-name">${parseInt(m)}月</div>
-                        <div class="month-stats">
+                <div class="list-item" onclick="navigateTo('${BASE_PATH}/${y}/${m}')">
+                    <div class="list-header">
+                        <div class="list-name">${parseInt(m)}月</div>
+                        <div class="list-stats">
                             <span class="dist">${fmtDist(md.dist)} km</span>
                             <span>${fmtTime(md.time)}</span>
                             <span>${fmtPace(avgS)} /km</span>
@@ -393,9 +463,9 @@
         });
         html += `</div></div>`;
         document.getElementById('app-content').innerHTML = html;
-        highlightYear(y); // 默认高亮当前年份
     }
 
+    // --- 视图渲染：特定月份明细 ---
     function renderMonth(y, m) {
         const md = processedData.years[y]?.months[m];
         if (!md) return;
@@ -448,10 +518,18 @@
 
     function highlightYear(year) {
         if (!window.runChart) return;
+
+        if (year === 'all') {
+            // 取消遮罩
+            window.runChart.options.plugins.annotation = { annotations: {} };
+            window.runChart.update();
+            return;
+        }
+
         const firstX = window.runChart.scales.x.min;
         const lastX  = window.runChart.scales.x.max;
         const start = new Date(year, 0, 1).getTime();
-        const end   = new Date(year + 1, 0, 1).getTime();
+        const end   = new Date(parseInt(year) + 1, 0, 1).getTime();
         
         // 动态使用 CSS 定义的主题透明色
         window.runChart.options.plugins.annotation = {
