@@ -8,21 +8,21 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.0.1/chartjs-plugin-annotation.min.js"></script>
     <style>
         :root {
-            /* 统一运动主题色：活力橙 */
+            /* 统一运动主题色：运动蓝 */
             --color-bg: #f8fafc;
             --color-card-bg: #ffffff;
-            --color-text: #334155;
+            --color-text: #1e293b;
             --color-text-muted: #64748b;
             --color-border: #e2e8f0;
-            --color-primary: #ea580c;       /* 核心主色 */
-            --color-primary-alpha: rgba(234, 88, 12, 0.15); /* 图表填充色 */
+            --color-primary: #2563eb;       /* 核心主色：运动蓝 */
+            --color-primary-alpha: rgba(37, 99, 235, 0.15); /* 图表填充色 */
             
-            /* 热力图色阶 (统一为橙色系) */
-            --color-heat-0: #f1f5f9;
-            --color-heat-1: #fed7aa;
-            --color-heat-2: #fb923c;
-            --color-heat-3: #ea580c;
-            --color-heat-4: #9a3412;
+            /* 热力图色阶 (统一为蓝色系) */
+            --color-heat-0: #f1f5f9;        /* 无数据：极浅灰蓝 */
+            --color-heat-1: #bfdbfe;        /* 级别 1：浅蓝 */
+            --color-heat-2: #60a5fa;        /* 级别 2：天蓝 */
+            --color-heat-3: #2563eb;        /* 级别 3：主色蓝 */
+            --color-heat-4: #1e3a8a;        /* 级别 4：深邃蓝 */
         }
 
         /* 基础重置与排版 */
@@ -165,7 +165,7 @@
             <div class="dist-info">
                 <div class="main-val"><span id="total-dist-val">0</span><span class="unit"> km</span></div>
                 <div class="sub-info">
-                    <strong><span id="total-years">0</span></strong> 年，共奔跑 <strong><span id="total-runs">0</span></strong> 次<br>
+                    <strong><span id="total-years">0</span></strong> 年， <strong><span id="total-runs">0</span></strong> 次<br>
                     约占地球赤道周长 <strong><span id="pct">0%</span></strong>
                 </div>
             </div>
