@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>奔跑天际线 Skyline</title>
+<style>
+:root {
+  --bg: #fafafa;
+  --card: #ffffff;
+  --text-main: #1f2328;
+  --text-sub: #656d76;
+  --baseline: #e1e4e8;
+  
+  /* 山脉/天际线颜色 - 翡翠绿渐变 */
+  --skyline-bottom: #30a14e;
+  --skyline-top: #216e39;
+  --skyline-hover: #40c463;
+
+  --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 40px 20px;
+  background-color: var(--bg);
+  color: var(--text-main);
+  font-family: var(--font-main);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+}
+
+header {
+  width: 100%;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+header h1 {
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.5px;
+}
+
+header p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-sub);
+  font-weight: 500;
+}
+
+.app {
+	width: 100%;
+}
+.year-block {
+  max-width: 900px;
+  width: 100%;
+  background: var(--card);
+  border-radius: 16px;
+  padding: 40px;
+  margin-bottom: 40px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+  box-sizing: border-box;
+}
+
+.year-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 40px;
+}
+
+.year-title {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.year-stats {
+  font-size: 14px;
+  color: var(--text-sub);
+  font-weight: 600;
+}
+
+.year-stats strong {
+  color: var(--text-main);
+  font-size: 18px;
+  margin: 0 4px;
+}
+
+/* --- 天际线核心样式 --- */
+.skyline-container {
+  position: relative;
+  width: 100%;
+  height: 160px; /* 控制山峰最高高度 */
+  display: flex;
+  align-items: flex-end;
+  border-bottom: 1px solid var(--baseline); /* 地平线 */
+  gap: 1px; /* 竖线之间的极细间距 */
+}
+
+.skyline-bar {
+  flex: 1; /* 自动均分宽度，小屏幕会变细，大屏幕变宽 */
+  background: linear-gradient(to top, var(--skyline-bottom), var(--skyline-top));
+  border-radius: 2px 2px 0 0;
+  transition: opacity 0.2s, background 0.2s;
+  cursor: crosshair;
+}
+
+.skyline-bar.zero {
+  background: transparent;
+}
+
+.skyline-bar:hover {
+  background: var(--skyline-hover);
+  opacity: 0.9;
+}
+
+/* --- X轴月份标记 --- */
+.month-labels {
+  position: relative;
+  width: 100%;
+  height: 20px;
+  margin-top: 8px;
+}
+
+.month-label {
+  position: absolute;
+  top: 0;
+  font-size: 10px;
+  color: var(--text-sub);
+  transform: translateX(-50%);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* --- Tooltip --- */
+#tooltip {
+  position: fixed;
+  background: rgba(13, 17, 23, 0.9);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 9999;
+  transition: opacity 0.15s, transform 0.1s ease-out;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  line-height: 1.4;
+  transform: translate(-50%, -100%);
+  margin-top: -10px; /* 与鼠标保持距离 */
+}
+
+#tooltip strong {
+  display: block;
+  font-size: 11px;
+  color: #8b949e;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.tooltip-val {
+  font-size: 16px;
+  font-weight: 800;
+  color: #58a6ff;
+}
+
+.tooltip-val span {
+  font-size: 12px;
+  margin-left: 2px;
+  color: #fff;
+}
+
+@media (max-width: 600px) {
+  .year-block { padding: 24px 16px; }
+  .month-label:nth-child(even) { display: none; } /* 手机端隐藏部分月份防拥挤 */
+  .skyline-container { gap: 0; } /* 手机端取消间距，让线连在一起 */
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>奔跑天际线</h1>
+</header>
+
+<div id="app" class="app"></div>
+<div id="tooltip"></div>
+
+<script>
+const DATA_URL = 'https://run.linwn.net/data/all.json';
+
+// 工具：判断闰年
+const isLeapYear = (year) => (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+
+// 工具：生成一年中所有日期的数组 ['YYYY-MM-DD', ...]
+function generateFullYearDates(year) {
+  const dates = [];
+  const days = isLeapYear(year) ? 366 : 365;
+  const d = new Date(year, 0, 1);
+  for (let i = 0; i < days; i++) {
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    dates.push(`${yyyy}-${mm}-${dd}`);
+    d.setDate(d.getDate() + 1);
+  }
+  return dates;
+}
+
+// 核心：处理数据并渲染
+async function init() {
+  try {
+    const res = await fetch(DATA_URL);
+    const runs = await res.json();
+    
+    const yearData = {}; // 结构： { "2023": { dates: { "2023-01-01": 5.2, ... }, total: 100, maxDaily: 15 } }
+
+    // 1. 将源数据归类映射到日期上
+    runs.forEach(run => {
+      const dateStr = (run.start_date_local || run.start_date).split(' ')[0];
+      const year = dateStr.slice(0, 4);
+      const km = Number(run.distance || 0) / 1000;
+
+      if (!yearData[year]) {
+        yearData[year] = { dates: {}, total: 0, maxDaily: 0 };
+      }
+      
+      yearData[year].dates[dateStr] = (yearData[year].dates[dateStr] || 0) + km;
+      yearData[year].total += km;
+    });
+
+    // 2. 补全全年的空白日期，并计算当年的“最高山峰”（最大单日跑量）
+    const sortedYears = Object.keys(yearData).sort().reverse();
+    
+    sortedYears.forEach(year => {
+      const allDates = generateFullYearDates(year);
+      let maxDist = 0;
+      
+      allDates.forEach(date => {
+        if (!yearData[year].dates[date]) {
+          yearData[year].dates[date] = 0;
+        } else {
+          maxDist = Math.max(maxDist, yearData[year].dates[date]);
+        }
+      });
+      yearData[year].maxDaily = maxDist;
+    });
+
+    // 3. 渲染 DOM
+    const app = document.getElementById('app');
+    const tooltip = document.getElementById('tooltip');
+
+    sortedYears.forEach(year => {
+      const data = yearData[year];
+      // 如果这一年没跑过步，跳过
+      if (data.total === 0) return;
+
+      const block = document.createElement('div');
+      block.className = 'year-block';
+
+      // 顶部标题和数据统计
+      const headerHtml = `
+        <div class="year-header">
+          <div class="year-title">${year}</div>
+          <div class="year-stats">
+            累计 <strong>${data.total.toFixed(1)}</strong> km 
+            / 最高 <strong>${data.maxDaily.toFixed(1)}</strong> km
+          </div>
+        </div>
+      `;
+
+      // 天际线容器
+      const skylineContainer = document.createElement('div');
+      skylineContainer.className = 'skyline-container';
+
+      // 生成每一天的竖线
+      const dates = Object.keys(data.dates).sort();
+      dates.forEach(date => {
+        const km = data.dates[date];
+        const bar = document.createElement('div');
+        
+        if (km === 0) {
+          bar.className = 'skyline-bar zero';
+        } else {
+          bar.className = 'skyline-bar';
+          // 计算高度百分比：(当天跑量 / 全年最高跑量) * 100
+          // 设定最低高度为 2% 以防有数据但太短看不见
+          const heightPct = Math.max((km / data.maxDaily) * 100, 2);
+          bar.style.height = `${heightPct}%`;
+        }
+
+        // 绑定 Tooltip 事件
+        bar.addEventListener('mouseenter', (e) => {
+          tooltip.innerHTML = `<strong>${date}</strong><div class="tooltip-val">${km > 0 ? km.toFixed(2) : '0.00'} <span>km</span></div>`;
+          tooltip.style.opacity = 1;
+          // 根据鼠标位置更新 tooltip
+          updateTooltipPos(e);
+        });
+        
+        bar.addEventListener('mousemove', updateTooltipPos);
+        bar.addEventListener('mouseleave', () => { tooltip.style.opacity = 0; });
+
+        skylineContainer.appendChild(bar);
+      });
+
+      // 月份刻度容器
+      const monthLabels = document.createElement('div');
+      monthLabels.className = 'month-labels';
+      
+      // 每个月 1 号所在的百分比位置
+      const daysInYear = isLeapYear(year) ? 366 : 365;
+      const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+      let dayCount = 0;
+      
+      for (let m = 0; m < 12; m++) {
+        const pct = (dayCount / daysInYear) * 100;
+        const label = document.createElement('div');
+        label.className = 'month-label';
+        label.style.left = `${pct}%`;
+        label.innerText = monthNames[m];
+        monthLabels.appendChild(label);
+        
+        // 累加当月天数，寻找下一个月1号的位置
+        const daysInThisMonth = new Date(year, m + 1, 0).getDate();
+        dayCount += daysInThisMonth;
+      }
+
+      block.innerHTML = headerHtml;
+      block.appendChild(skylineContainer);
+      block.appendChild(monthLabels);
+      app.appendChild(block);
+    });
+
+    function updateTooltipPos(e) {
+      tooltip.style.left = `${e.clientX}px`;
+      tooltip.style.top = `${e.clientY}px`;
+    }
+
+  } catch (error) {
+    console.error('Data load failed:', error);
+    document.getElementById('app').innerHTML = '<p>数据加载失败，请检查网络或跨域设置。</p>';
+  }
+}
+
+init();
+</script>
+</body>
+</html>
