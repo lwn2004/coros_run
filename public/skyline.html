@@ -53,7 +53,7 @@ header p {
 }
 
 .app {
-	width: 100%;
+    width: 100%;
 }
 .year-block {
   max-width: 1200px;
@@ -235,8 +235,9 @@ async function init() {
       yearData[year].total += km;
     });
 
-    // 2. 补全全年的空白日期，并计算当年的“最高山峰”（最大单日跑量）
+    // 2. 补全全年的空白日期，并计算当年的“最高山峰”以及全局的最高山峰
     const sortedYears = Object.keys(yearData).sort().reverse();
+    let globalMaxDaily = 0; // 新增：用于记录全局最大单日跑量
     
     sortedYears.forEach(year => {
       const allDates = generateFullYearDates(year);
@@ -250,6 +251,7 @@ async function init() {
         }
       });
       yearData[year].maxDaily = maxDist;
+      globalMaxDaily = Math.max(globalMaxDaily, maxDist); // 更新全局最大值
     });
 
     // 3. 渲染 DOM
@@ -264,7 +266,7 @@ async function init() {
       const block = document.createElement('div');
       block.className = 'year-block';
 
-      // 顶部标题和数据统计
+      // 顶部标题和数据统计（文本依然显示当年的最大值）
       const headerHtml = `
         <div class="year-header">
           <div class="year-title">${year}</div>
@@ -289,9 +291,9 @@ async function init() {
           bar.className = 'skyline-bar zero';
         } else {
           bar.className = 'skyline-bar';
-          // 计算高度百分比：(当天跑量 / 全年最高跑量) * 100
+          // 计算高度百分比：(当天跑量 / 全局最高跑量) * 100
           // 设定最低高度为 2% 以防有数据但太短看不见
-          const heightPct = Math.max((km / data.maxDaily) * 100, 2);
+          const heightPct = Math.max((km / globalMaxDaily) * 100, 2); 
           bar.style.height = `${heightPct}%`;
         }
 
