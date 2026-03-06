@@ -16,7 +16,8 @@
   --skyline-bottom: #30a14e;
   --skyline-top: #216e39;
   --skyline-hover: #40c463;
-
+  --skyline-color: #b8b8d0; /* 建筑主色调 */
+  --window-color: #fffae0;  /* 窗户灯光色 */
   --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
 }
 
@@ -32,7 +33,9 @@ body {
   min-height: 100vh;
 }
 
+/* 让header成为相对定位容器，方便svg背景定位 */
 header {
+  position: relative;
   width: 100%;
   margin-bottom: 20px;
   text-align: left;
@@ -51,7 +54,40 @@ header p {
   color: var(--text-sub);
   font-weight: 500;
 }
+.header-container {
+    display: flex;
+    align-items: flex-end; /* 底部对齐，形成地平线 */
+    gap: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f0f0f0;
+}
 
+/* 文字样式 */
+.title-group {
+    flex-shrink: 0; /* 防止文字换行 */
+}
+
+.title-group h1 {
+    margin: 0;
+    font-size: 32px;
+    color: #333;
+    letter-spacing: 2px;
+}
+
+.title-group p {
+    margin: 5px 0 0 0;
+    font-size: 14px;
+    color: #888;
+}
+
+/* SVG 容器样式 */
+.skyline-svg {
+    height: 60px; /* 控制天际线的高度 */
+    width: auto;
+    flex-grow: 1;
+}
+
+/* 以下原有样式不变 */
 .app {
     width: 100%;
 }
@@ -185,9 +221,33 @@ header p {
 </head>
 <body>
 
-<header>
-  <h1>奔跑天际线</h1>
-</header>
+
+    <header class="header-container">
+        <div class="title-group">
+            <h1>奔跑天际线</h1>
+            <p>用奔跑勾勒城市轮廓</p>
+        </div>
+
+        <svg class="skyline-svg" viewBox="0 0 400 60" preserveAspectRatio="xMinYMin meet">
+            <rect x="0" y="20" width="15" height="40" fill="#c4c4e0" />
+            <rect x="18" y="10" width="12" height="50" fill="#b8b8d0" />
+            <rect x="35" y="30" width="18" height="30" fill="#d2d2e8" />
+            <g>
+                <rect x="58" y="5" width="20" height="55" fill="#a8a8c0" />
+                <rect x="62" y="10" width="4" height="4" fill="var(--window-color)" />
+                <rect x="70" y="10" width="4" height="4" fill="var(--window-color)" />
+                <rect x="62" y="20" width="4" height="4" fill="var(--window-color)" />
+            </g>
+            <rect x="82" y="25" width="15" height="35" fill="#b8b8d0" />
+            <rect x="100" y="15" width="12" height="45" fill="#c4c4e0" />
+            <rect x="115" y="35" width="25" height="25" fill="#d2d2e8" />
+            <rect x="145" y="8" width="10" height="52" fill="#a8a8c0" />
+            <rect x="160" y="22" width="18" height="38" fill="#b8b8d0" />
+            <rect x="185" y="30" width="12" height="30" fill="#c4c4e0" />
+            <rect x="202" y="12" width="15" height="48" fill="#a8a8c0" />
+        </svg>
+    </header>
+
 
 <div id="app" class="app"></div>
 <div id="tooltip"></div>
