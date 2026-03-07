@@ -81,6 +81,7 @@
 
   .year-block {
     max-width: 1200px;
+    min-width: 700px;
     width: 100%;
     background: var(--card);
     border-radius: 16px;
@@ -247,12 +248,10 @@
 
   /* --- 响应式 --- */
   @media (max-width: 768px) {
-    .year-block { padding: 14px 16px; }
+    .year-block { padding: 14px 8px; }
     .year-header { flex-direction: column; align-items: flex-start; gap: 12px; margin-bottom: 15px;}
     .year-stats-wrap { margin-left: 0; width: 100%; }
     .year-stats { justify-content: flex-start; gap: 8px; }
-    .month-label:nth-child(even) { display: none; } /* 缩小挤压时隐藏偶数月份 */
-    .skyline-container { gap: 1px; }
   }
 </style>
 </head>
@@ -260,7 +259,7 @@
 
   <header class="header-container">
     <div class="title-group">
-      <h1>奔跑天际线</h1>
+      <h1>跑出天际线</h1>
       <p>用奔跑勾勒城市轮廓</p>
     </div>
 
