@@ -147,19 +147,38 @@
     font-size: 12px;
     color: var(--text-sub);
     white-space: nowrap;
+    align-items: center;
   }
 
   .stat-item {
     background: #f6f8fa;
     padding: 4px 8px;
     border-radius: 6px;
+    display: flex;
+    align-items: center;
   }
 
   .stat-item strong {
     color: var(--text-main);
     font-size: 14px;
-    margin: 0 2px;
+    margin: 0 4px;
   }
+
+  /* --- 趋势标识徽章样式 (新增) --- */
+  .trend {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    margin-left: 6px;
+    padding: 2px 5px;
+    border-radius: 10px;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .trend.good { color: #1a7f37; background: #dafbe1; } /* 更好：绿色背景 */
+  .trend.bad { color: #cf222e; background: #ffebe9; } /* 变差：红色背景 */
+  .trend.flat { color: #656d76; background: #eaecef; } /* 持平：灰色背景 */
 
   /* --- 天际线图表 & Zoom Pan 视口 --- */
   .chart-viewport {
@@ -171,11 +190,8 @@
   }
   .chart-viewport::-webkit-scrollbar { display: none; }
 
-  /* 核心修复区：增加 min-width 和 padding */
   .chart-inner {
-    /* 强制最小宽度，确保 365天 + 1px gap 能够完美展示，不挤在一起 */
     min-width: 800px; 
-    /* 左右增加 20px 缓冲，防止首尾月份文字被 overflow 裁剪 */
     padding: 0 20px; 
     box-sizing: border-box;
     transform-origin: left top; 
@@ -188,7 +204,7 @@
     display: flex;
     align-items: flex-end;
     border-bottom: 1px solid var(--baseline);
-    gap: 1px; /* 强制保留间隙 */
+    gap: 1px; 
   }
 
   .skyline-bar {
@@ -265,24 +281,25 @@
         <h1>跑出天际线</h1>
         <p>用脚步勾勒城市轮廓</p>
       </div>
-<svg class="skyline-svg" preserveAspectRatio="xMinYMin meet">
-      <rect x="0" y="20" width="15" height="40" fill="#c4c4e0" />
-      <rect x="18" y="10" width="12" height="50" fill="#b8b8d0" />
-      <rect x="35" y="30" width="18" height="30" fill="#d2d2e8" />
-      <g>
-        <rect x="58" y="5" width="20" height="55" fill="#a8a8c0" />
-        <rect x="62" y="10" width="4" height="4" fill="var(--window-color)" />
-        <rect x="70" y="10" width="4" height="4" fill="var(--window-color)" />
-        <rect x="62" y="20" width="4" height="4" fill="var(--window-color)" />
-      </g>
-      <rect x="82" y="25" width="15" height="35" fill="#b8b8d0" />
-      <rect x="100" y="15" width="12" height="45" fill="#c4c4e0" />
-      <rect x="115" y="35" width="25" height="25" fill="#d2d2e8" />
-      <rect x="145" y="8" width="10" height="52" fill="#a8a8c0" />
-      <rect x="160" y="22" width="18" height="38" fill="#b8b8d0" />
-      <rect x="185" y="30" width="12" height="30" fill="#c4c4e0" />
-      <rect x="202" y="12" width="15" height="48" fill="#a8a8c0" />
-    </svg>    </div>
+      <svg class="skyline-svg" preserveAspectRatio="xMinYMin meet">
+        <rect x="0" y="20" width="15" height="40" fill="#c4c4e0" />
+        <rect x="18" y="10" width="12" height="50" fill="#b8b8d0" />
+        <rect x="35" y="30" width="18" height="30" fill="#d2d2e8" />
+        <g>
+          <rect x="58" y="5" width="20" height="55" fill="#a8a8c0" />
+          <rect x="62" y="10" width="4" height="4" fill="var(--window-color)" />
+          <rect x="70" y="10" width="4" height="4" fill="var(--window-color)" />
+          <rect x="62" y="20" width="4" height="4" fill="var(--window-color)" />
+        </g>
+        <rect x="82" y="25" width="15" height="35" fill="#b8b8d0" />
+        <rect x="100" y="15" width="12" height="45" fill="#c4c4e0" />
+        <rect x="115" y="35" width="25" height="25" fill="#d2d2e8" />
+        <rect x="145" y="8" width="10" height="52" fill="#a8a8c0" />
+        <rect x="160" y="22" width="18" height="38" fill="#b8b8d0" />
+        <rect x="185" y="30" width="12" height="30" fill="#c4c4e0" />
+        <rect x="202" y="12" width="15" height="48" fill="#a8a8c0" />
+      </svg>
+    </div>
   </header>
 
   <div id="loader">
@@ -331,7 +348,6 @@
     return `${m}'${s.toString().padStart(2, '0')}''`;
   }
 
-  // 手势缩放逻辑
   function attachZoomGestures(viewport, inner) {
     let currentScale = 1;
     let startDist = 0;
@@ -360,7 +376,6 @@
     }, { passive: false });
   }
 
-  // 纯粹的数学计算层 (速度极快)
   function processRunData(runs) {
     const yearData = {};
     let globalMaxDaily = 0;
@@ -410,8 +425,8 @@
     return { yearData, sortedYears, globalMaxDaily };
   }
 
-  // 渲染单个年份的 DOM (剥离出来以便异步调用)
-  function renderYearBlock(year, yd, globalMaxDaily, container, tooltip) {
+  // --- 新增：接收 prevYd（前一年数据）用来对比 ---
+  function renderYearBlock(year, yd, globalMaxDaily, container, tooltip, prevYd = null) {
     if (yd.totalDistance === 0) return;
 
     const block = document.createElement('div');
@@ -420,17 +435,47 @@
     const avgPaceStr = yd.totalDistance > 0 ? formatPace(yd.totalTime / yd.totalDistance) : "-'-''";
     const minPaceStr = yd.minPace !== Infinity ? formatPace(yd.minPace) : "-'-''";
 
+    // --- 新增：计算对比趋势 HTML ---
+    let trends = { dist: '', max: '', avgPace: '', minPace: '', half: '', full: '' };
+
+    if (prevYd && prevYd.totalDistance > 0) {
+      // 辅助函数：生成趋势标签 (lowerIsBetter: 如果数值越低越好，则设为 true，比如配速)
+      const getTrendHtml = (curr, prev, lowerIsBetter = false) => {
+        if (curr === Infinity || prev === Infinity) return ''; 
+        const diff = curr - prev;
+        if (Math.abs(diff) < 0.001) return '<span class="trend flat">-</span>'; // 容忍浮点数误差
+        
+        if (diff > 0) {
+          // 数值变大：如果是配速，则代表变差(bad)；否则代表更好(good)
+          return `<span class="trend ${lowerIsBetter ? 'bad' : 'good'}">↑</span>`;
+        } else {
+          // 数值变小：如果是配速，代表更好(good)；否则代表变差(bad)
+          return `<span class="trend ${lowerIsBetter ? 'good' : 'bad'}">↓</span>`;
+        }
+      };
+
+      const currAvgPace = yd.totalDistance > 0 ? yd.totalTime / yd.totalDistance : 0;
+      const prevAvgPace = prevYd.totalDistance > 0 ? prevYd.totalTime / prevYd.totalDistance : 0;
+
+      trends.dist = getTrendHtml(yd.totalDistance, prevYd.totalDistance);
+      trends.max = getTrendHtml(yd.maxDaily, prevYd.maxDaily);
+      trends.avgPace = getTrendHtml(currAvgPace, prevAvgPace, true); 
+      trends.minPace = getTrendHtml(yd.minPace, prevYd.minPace, true); 
+      trends.half = getTrendHtml(yd.halfCount, prevYd.halfCount);
+      trends.full = getTrendHtml(yd.fullCount, prevYd.fullCount);
+    }
+
     const headerHtml = `
       <div class="year-header">
         <div class="year-title">${year}</div>
         <div class="year-stats-wrap">
           <div class="year-stats">
-            <span class="stat-item">全年累计 <strong>${yd.totalDistance.toFixed(1)}</strong> km</span>
-            <span class="stat-item">单日最高 <strong>${yd.maxDaily.toFixed(1)}</strong> km</span>
-            <span class="stat-item">平均配速 <strong>${avgPaceStr}</strong></span>
-            <span class="stat-item">最快配速 <strong>${minPaceStr}</strong></span>
-            <span class="stat-item">半马 <strong>${yd.halfCount}</strong></span>
-            <span class="stat-item">全马 <strong>${yd.fullCount}</strong></span>
+            <span class="stat-item">全年累计 <strong>${yd.totalDistance.toFixed(1)}</strong> km ${trends.dist}</span>
+            <span class="stat-item">单日最高 <strong>${yd.maxDaily.toFixed(1)}</strong> km ${trends.max}</span>
+            <span class="stat-item">平均配速 <strong>${avgPaceStr}</strong> ${trends.avgPace}</span>
+            <span class="stat-item">最快配速 <strong>${minPaceStr}</strong> ${trends.minPace}</span>
+            <span class="stat-item">半马 <strong>${yd.halfCount}</strong> ${trends.half}</span>
+            <span class="stat-item">全马 <strong>${yd.fullCount}</strong> ${trends.full}</span>
           </div>
         </div>
       </div>
@@ -448,10 +493,7 @@
     const skylineContainer = document.createElement('div');
     skylineContainer.className = 'skyline-container';
 
-    // 渲染柱子
     const dates = Object.keys(yd.dates).sort();
-    
-    // 提升性能：使用 DocumentFragment 批量挂载节点
     const frag = document.createDocumentFragment();
     
     dates.forEach(date => {
@@ -466,7 +508,6 @@
         bar.style.height = `${heightPct}%`;
       }
 
-      // Tooltip 事件交由鼠标和触摸处理
       const showTooltip = (e) => {
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
@@ -512,24 +553,26 @@
     container.appendChild(block);
   }
 
-  // 渐进式渲染机制 (Time Slicing)，防止白屏和卡顿
   async function renderAppAsync(processedData) {
     const { yearData, sortedYears, globalMaxDaily } = processedData;
     const app = document.getElementById('app');
     const tooltip = document.getElementById('tooltip');
     
-    // 隐藏 Loader
     document.getElementById('loader').style.display = 'none';
 
-    // 逐年渲染，每次渲染后向浏览器让出控制权 (yield)
-    for (const year of sortedYears) {
-      renderYearBlock(year, yearData[year], globalMaxDaily, app, tooltip);
-      // 等待一个宏任务周期，让浏览器有时间把刚才生成的 DOM 画在屏幕上
+    // --- 新增：遍历时抓取前一年数据 (只限于 i===0，即最新一年) ---
+    for (let i = 0; i < sortedYears.length; i++) {
+      const year = sortedYears[i];
+      const yd = yearData[year];
+      
+      // 仅在最新的一年 (i === 0) 时，传入前一年 (i + 1) 的数据作对比
+      const prevYd = (i === 0 && i + 1 < sortedYears.length) ? yearData[sortedYears[i + 1]] : null;
+
+      renderYearBlock(year, yd, globalMaxDaily, app, tooltip, prevYd);
       await new Promise(resolve => setTimeout(resolve, 0));
     }
   }
 
-  // --- 初始化 ---
   async function init() {
     try {
       const res = await fetch(DATA_URL);
