@@ -90,40 +90,78 @@
     box-sizing: border-box;
   }
 
-  /* 标题优化：增加视觉层级和装饰 */
   .year-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px;
+    margin-bottom: 25px;
     padding-bottom: 15px;
     border-bottom: 1px solid #eaeaea;
   }
 
   .year-title {
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 800;
     line-height: 1;
     display: flex;
     align-items: center;
     gap: 12px;
-    letter-spacing: 0.5px;
+    flex-shrink: 0;
   }
 
+  /* --- 年度统计数据单行滑动区 --- */
+  .year-stats-wrap {
+    flex: 1;
+    margin-left: 20px;
+    overflow-x: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
+  .year-stats-wrap::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+  }
 
   .year-stats {
-    font-size: 14px;
+    display: flex;
+    gap: 14px;
+    justify-content: flex-end;
+    align-items: baseline;
+    font-size: 13px;
     color: var(--text-sub);
-    font-weight: 500;
+    white-space: nowrap; /* 强制单行 */
   }
 
-  .year-stats strong {
+  .stat-item {
+    background: #f6f8fa;
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+
+  .stat-item strong {
     color: var(--text-main);
-    font-size: 18px;
-    margin: 0 4px;
+    font-size: 16px;
+    margin: 0 2px;
   }
 
-  /* --- 天际线核心图表 --- */
+  /* --- 天际线图表 & Zoom Pan 视口 --- */
+  .chart-viewport {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    touch-action: pan-x pan-y; /* 保证原生拖拽顺滑 */
+  }
+  .chart-viewport::-webkit-scrollbar {
+    display: none;
+  }
+
+  .chart-inner {
+    min-width: 100%;
+    /* 平滑的伸缩过渡会让缩放显得更有质感 */
+    transform-origin: left top; 
+    padding: 0 20px;
+  }
+
   .skyline-container {
     position: relative;
     width: 100%;
@@ -155,7 +193,7 @@
   .month-labels {
     position: relative;
     width: 100%;
-    height: 20px;
+    height: 25px;
     margin-top: 10px;
   }
 
@@ -166,7 +204,6 @@
     color: var(--text-sub);
     transform: translateX(-50%);
     font-weight: 600;
-    letter-spacing: 0.5px;
   }
 
   /* --- Tooltip 提示框 --- */
@@ -209,9 +246,12 @@
   }
 
   /* --- 响应式 --- */
-  @media (max-width: 600px) {
+  @media (max-width: 768px) {
     .year-block { padding: 14px 16px; }
-    .month-label:nth-child(even) { display: none; }
+    .year-header { flex-direction: column; align-items: flex-start; gap: 12px; margin-bottom: 15px;}
+    .year-stats-wrap { margin-left: 0; width: 100%; }
+    .year-stats { justify-content: flex-start; gap: 8px; }
+    .month-label:nth-child(even) { display: none; } /* 缩小挤压时隐藏偶数月份 */
     .skyline-container { gap: 0; }
   }
 </style>
@@ -267,39 +307,115 @@
     return dates;
   }
 
+  // 解析时间 "0:34:13.320000" 为秒数
+  function parseTime(timeStr) {
+    if (!timeStr) return 0;
+    const parts = timeStr.toString().split(':');
+    let sec = 0;
+    if (parts.length === 3) {
+      sec = parseInt(parts[0], 10) * 3600 + parseInt(parts[1], 10) * 60 + parseFloat(parts[2]);
+    } else if (parts.length === 2) {
+      sec = parseInt(parts[0], 10) * 60 + parseFloat(parts[1]);
+    }
+    return sec;
+  }
+
+  // 格式化秒级配速为 M'SS" 
+  function formatPace(secPerKm) {
+    if (!secPerKm || secPerKm === Infinity || secPerKm <= 0) return "-'-''";
+    const m = Math.floor(secPerKm / 60);
+    const s = Math.floor(secPerKm % 60);
+    return `${m}'${s.toString().padStart(2, '0')}''`;
+  }
+
+  // --- 移动端双指缩放控制逻辑 ---
+  function attachZoomGestures(viewport, inner) {
+    let currentScale = 1;
+    let startDist = 0;
+    let startScale = 1;
+
+    viewport.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 2) {
+        startDist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        startScale = currentScale;
+      }
+    }, { passive: false });
+
+    viewport.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 2) {
+        e.preventDefault(); // 拦截浏览器原生整体页面缩放
+        const dist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        // 限制缩放比例在 1x 到 10x 之间
+        currentScale = Math.max(1, Math.min(10, startScale * (dist / startDist)));
+        // 直接改变内部容器的宽度，外层通过 overflow-x 自带完美丝滑的 Pan 拖拽能力
+        inner.style.width = `${currentScale * 100}%`;
+      }
+    }, { passive: false });
+  }
+
   // --- 数据处理逻辑 ---
   function processRunData(runs) {
     const yearData = {};
     let globalMaxDaily = 0;
 
-    // 1. 归类基础数据
     runs.forEach(run => {
       const dateStr = (run.start_date_local || run.start_date).split(' ')[0];
       const year = dateStr.slice(0, 4);
       const km = Number(run.distance || 0) / 1000;
+      const timeSec = parseTime(run.moving_time);
 
       if (!yearData[year]) {
-        yearData[year] = { dates: {}, total: 0, maxDaily: 0 };
+        yearData[year] = { 
+          dates: {}, 
+          totalDistance: 0, 
+          totalTime: 0, 
+          maxDaily: 0,
+          minPace: Infinity,
+          halfCount: 0,
+          fullCount: 0
+        };
       }
-      yearData[year].dates[dateStr] = (yearData[year].dates[dateStr] || 0) + km;
-      yearData[year].total += km;
+
+      const yd = yearData[year];
+      yd.dates[dateStr] = (yd.dates[dateStr] || 0) + km;
+      yd.totalDistance += km;
+      yd.totalTime += timeSec;
+
+      // 如果有有效跑步距离和时间，计算配速 (排除可能的数据异动，要求起码跑了1公里再算最快配速)
+      if (km >= 1 && timeSec > 0) {
+        const runPace = timeSec / km;
+        yd.minPace = Math.min(yd.minPace, runPace);
+      }
+
+      // 计算半马/全马次数
+      if (km >= 42.195) {
+        yd.fullCount++;
+      } else if (km >= 21.0975) {
+        yd.halfCount++;
+      }
     });
 
-    // 2. 补全空白日期并计算最大值
     const sortedYears = Object.keys(yearData).sort().reverse();
     sortedYears.forEach(year => {
+      const yd = yearData[year];
       const allDates = generateFullYearDates(year);
       let maxDist = 0;
       
       allDates.forEach(date => {
-        if (!yearData[year].dates[date]) {
-          yearData[year].dates[date] = 0;
+        if (!yd.dates[date]) {
+          yd.dates[date] = 0;
         } else {
-          maxDist = Math.max(maxDist, yearData[year].dates[date]);
+          maxDist = Math.max(maxDist, yd.dates[date]);
         }
       });
       
-      yearData[year].maxDaily = maxDist;
+      yd.maxDaily = maxDist;
       globalMaxDaily = Math.max(globalMaxDaily, maxDist);
     });
 
@@ -312,37 +428,55 @@
     const app = document.getElementById('app');
     const tooltip = document.getElementById('tooltip');
     
-    // 更新 Tooltip 位置的方法
     const updateTooltipPos = (e) => {
       tooltip.style.left = `${e.clientX}px`;
       tooltip.style.top = `${e.clientY}px`;
     };
 
     sortedYears.forEach(year => {
-      const data = yearData[year];
-      if (data.total === 0) return; // 无数据跳过
+      const yd = yearData[year];
+      if (yd.totalDistance === 0) return;
 
       const block = document.createElement('div');
       block.className = 'year-block';
 
-      // 构建标题区
+      // 计算聚合显示值
+      const avgPaceStr = yd.totalDistance > 0 ? formatPace(yd.totalTime / yd.totalDistance) : "-'-''";
+      const minPaceStr = yd.minPace !== Infinity ? formatPace(yd.minPace) : "-'-''";
+
       const headerHtml = `
         <div class="year-header">
           <div class="year-title">${year}</div>
-          <div class="year-stats">
-            累计 <strong>${data.total.toFixed(1)}</strong> km 
-            / 最高 <strong>${data.maxDaily.toFixed(1)}</strong> km
+          <div class="year-stats-wrap">
+            <div class="year-stats">
+              <span class="stat-item">累计 <strong>${yd.totalDistance.toFixed(1)}</strong> km</span>
+              <span class="stat-item">最高 <strong>${yd.maxDaily.toFixed(1)}</strong> km</span>
+              <span class="stat-item">均速 <strong>${avgPaceStr}</strong></span>
+              <span class="stat-item">最快 <strong>${minPaceStr}</strong></span>
+              <span class="stat-item">半马 <strong>${yd.halfCount}</strong></span>
+              <span class="stat-item">全马 <strong>${yd.fullCount}</strong></span>
+            </div>
           </div>
         </div>
       `;
+      block.innerHTML = headerHtml;
 
-      // 构建天际线
+      // 缩放视口及内部容器
+      const chartViewport = document.createElement('div');
+      chartViewport.className = 'chart-viewport';
+      
+      const chartInner = document.createElement('div');
+      chartInner.className = 'chart-inner';
+
+      // 绑定移动端手势缩放
+      attachZoomGestures(chartViewport, chartInner);
+
       const skylineContainer = document.createElement('div');
       skylineContainer.className = 'skyline-container';
 
-      const dates = Object.keys(data.dates).sort();
+      const dates = Object.keys(yd.dates).sort();
       dates.forEach(date => {
-        const km = data.dates[date];
+        const km = yd.dates[date];
         const bar = document.createElement('div');
         
         if (km === 0) {
@@ -353,7 +487,7 @@
           bar.style.height = `${heightPct}%`;
         }
 
-        // 交互事件
+        // Tooltip 交互
         bar.addEventListener('mouseenter', (e) => {
           tooltip.innerHTML = `<strong>${date}</strong><div class="tooltip-val">${km > 0 ? km.toFixed(2) : '0.00'} <span>km</span></div>`;
           tooltip.style.opacity = 1;
@@ -365,7 +499,6 @@
         skylineContainer.appendChild(bar);
       });
 
-      // 构建月份标记
       const monthLabels = document.createElement('div');
       monthLabels.className = 'month-labels';
       
@@ -385,10 +518,12 @@
         dayCount += daysInThisMonth;
       }
 
-      // 拼装挂载
-      block.innerHTML = headerHtml;
-      block.appendChild(skylineContainer);
-      block.appendChild(monthLabels);
+      // 拼装DOM
+      chartInner.appendChild(skylineContainer);
+      chartInner.appendChild(monthLabels);
+      chartViewport.appendChild(chartInner);
+      block.appendChild(chartViewport);
+      
       app.appendChild(block);
     });
   }
