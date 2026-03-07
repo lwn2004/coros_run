@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>跑出天际线 Skyline</title>
+<title>跑出天际线</title>
 <style>
   :root {
     --bg: #fafafa;
@@ -16,14 +16,13 @@
     --skyline-bottom: #30a14e;
     --skyline-top: #216e39;
     --skyline-hover: #40c463;
-    --skyline-color: #b8b8d0; /* 建筑主色调 */
-    --window-color: #fffae0;  /* 窗户灯光色 */
+    --window-color: #fffae0;
     --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   }
 
   body {
     margin: 0;
-    padding: 40px 20px;
+    padding: 30px 15px;
     background-color: var(--bg);
     color: var(--text-main);
     font-family: var(--font-main);
@@ -37,8 +36,8 @@
   header {
     position: relative;
     width: 100%;
+    max-width: 1200px;
     margin-bottom: 20px;
-    text-align: left;
   }
 
   .header-container {
@@ -48,98 +47,117 @@
     padding-bottom: 10px;
     border-bottom: 2px solid #f0f0f0;
   }
-
   .title-group {
     flex-shrink: 0;
   }
-
   .title-group h1 {
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 800;
-    margin: 0 0 8px 0;
-    letter-spacing: 2px;
+    margin: 0 0 6px 0;
+    letter-spacing: 1.5px;
     color: #333;
   }
 
   .title-group p {
-    margin: 5px 0 0 0;
-    font-size: 14px;
+    margin: 0;
+    font-size: 13px;
     color: #888;
     font-weight: 500;
   }
 
   .skyline-svg {
-    height: 60px;
-    width: auto;
+    height: 50px;
     flex-grow: 1;
   }
+
+  /* --- 加载状态 --- */
+  #loader {
+    width: 100%;
+    max-width: 1200px;
+    text-align: center;
+    padding: 40px 0;
+    color: var(--text-sub);
+    font-size: 14px;
+    letter-spacing: 1px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(48, 161, 78, 0.2);
+    border-top-color: var(--skyline-bottom);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
 
   /* --- 容器与年度卡片 --- */
   .app {
     width: 100%;
+    max-width: 1200px;
   }
 
   .year-block {
-    max-width: 1200px;
-    width: 100%;
     background: var(--card);
-    border-radius: 16px;
-    padding: 10px 40px;
+    border-radius: 12px;
+    padding: 16px 20px;
     margin-bottom: 20px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
     box-sizing: border-box;
+    animation: fadeIn 0.4s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   .year-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 25px;
-    padding-bottom: 15px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
     border-bottom: 1px solid #eaeaea;
   }
 
   .year-title {
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 800;
-    line-height: 1;
-    display: flex;
-    align-items: center;
-    gap: 12px;
     flex-shrink: 0;
   }
 
-  /* --- 年度统计数据单行滑动区 --- */
   .year-stats-wrap {
     flex: 1;
     margin-left: 20px;
     overflow-x: auto;
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE/Edge */
+    scrollbar-width: none;
   }
-  .year-stats-wrap::-webkit-scrollbar {
-    display: none; /* Chrome/Safari */
-  }
+  .year-stats-wrap::-webkit-scrollbar { display: none; }
 
   .year-stats {
     display: flex;
-    gap: 14px;
+    gap: 10px;
     justify-content: flex-end;
-    align-items: baseline;
-    font-size: 13px;
+    font-size: 12px;
     color: var(--text-sub);
-    white-space: nowrap; /* 强制单行 */
+    white-space: nowrap;
   }
 
   .stat-item {
     background: #f6f8fa;
-    padding: 4px 10px;
+    padding: 4px 8px;
     border-radius: 6px;
   }
 
   .stat-item strong {
     color: var(--text-main);
-    font-size: 16px;
+    font-size: 14px;
     margin: 0 2px;
   }
 
@@ -149,35 +167,35 @@
     overflow-x: auto;
     overflow-y: hidden;
     scrollbar-width: none;
-    touch-action: pan-x pan-y; /* 保证原生拖拽顺滑 */
+    touch-action: pan-x pan-y; 
   }
-  .chart-viewport::-webkit-scrollbar {
-    display: none;
-  }
+  .chart-viewport::-webkit-scrollbar { display: none; }
 
+  /* 核心修复区：增加 min-width 和 padding */
   .chart-inner {
-    min-width: 100%;
-    /* 平滑的伸缩过渡会让缩放显得更有质感 */
+    /* 强制最小宽度，确保 365天 + 1px gap 能够完美展示，不挤在一起 */
+    min-width: 800px; 
+    /* 左右增加 20px 缓冲，防止首尾月份文字被 overflow 裁剪 */
+    padding: 0 20px; 
+    box-sizing: border-box;
     transform-origin: left top; 
-    padding: 0 20px;
   }
 
   .skyline-container {
     position: relative;
     width: 100%;
-    height: 160px;
+    height: 140px;
     display: flex;
     align-items: flex-end;
     border-bottom: 1px solid var(--baseline);
-    gap: 1px;
+    gap: 1px; /* 强制保留间隙 */
   }
 
   .skyline-bar {
     flex: 1;
     background: linear-gradient(to top, var(--skyline-bottom), var(--skyline-top));
     border-radius: 2px 2px 0 0;
-    transition: opacity 0.2s, background 0.2s;
-    cursor: crosshair;
+    transition: background 0.2s;
   }
 
   .skyline-bar.zero {
@@ -186,15 +204,13 @@
 
   .skyline-bar:hover {
     background: var(--skyline-hover);
-    opacity: 0.9;
   }
 
-  /* --- X轴月份标记 --- */
   .month-labels {
     position: relative;
     width: 100%;
     height: 25px;
-    margin-top: 10px;
+    margin-top: 8px;
   }
 
   .month-label {
@@ -206,63 +222,50 @@
     font-weight: 600;
   }
 
-  /* --- Tooltip 提示框 --- */
+  /* --- Tooltip --- */
   #tooltip {
     position: fixed;
     background: rgba(13, 17, 23, 0.9);
     color: #fff;
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-size: 13px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
     pointer-events: none;
     opacity: 0;
     z-index: 9999;
-    transition: opacity 0.15s, transform 0.1s ease-out;
+    transition: opacity 0.1s;
     backdrop-filter: blur(4px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    line-height: 1.4;
     transform: translate(-50%, -100%);
     margin-top: -10px;
   }
 
   #tooltip strong {
     display: block;
-    font-size: 11px;
+    font-size: 10px;
     color: #8b949e;
-    margin-bottom: 4px;
-    font-weight: 600;
+    margin-bottom: 2px;
   }
 
-  .tooltip-val {
-    font-size: 16px;
-    font-weight: 800;
-    color: #58a6ff;
-  }
+  .tooltip-val { font-size: 15px; font-weight: 800; color: #58a6ff; }
+  .tooltip-val span { font-size: 11px; color: #fff; }
 
-  .tooltip-val span {
-    font-size: 12px;
-    margin-left: 2px;
-    color: #fff;
-  }
-
-  /* --- 响应式 --- */
+  /* 响应式适配头部 */
   @media (max-width: 768px) {
-    .year-block { padding: 14px 8px; }
-    .year-header { flex-direction: column; align-items: flex-start; gap: 12px; margin-bottom: 15px;}
+    .year-header { flex-direction: column; align-items: flex-start; gap: 10px; }
     .year-stats-wrap { margin-left: 0; width: 100%; }
-    .year-stats { justify-content: flex-start; gap: 8px; }
+    .year-stats { justify-content: flex-start; }
   }
 </style>
 </head>
 <body>
 
-  <header class="header-container">
-    <div class="title-group">
-      <h1>跑出天际线</h1>
-      <p>用奔跑勾勒城市轮廓</p>
-    </div>
-
-    <svg class="skyline-svg" preserveAspectRatio="xMinYMin meet">
+  <header>
+    <div class="header-container">
+      <div class="title-group">
+        <h1>跑出天际线</h1>
+        <p>用脚步勾勒城市轮廓</p>
+      </div>
+<svg class="skyline-svg" preserveAspectRatio="xMinYMin meet">
       <rect x="0" y="20" width="15" height="40" fill="#c4c4e0" />
       <rect x="18" y="10" width="12" height="50" fill="#b8b8d0" />
       <rect x="35" y="30" width="18" height="30" fill="#d2d2e8" />
@@ -279,8 +282,13 @@
       <rect x="160" y="22" width="18" height="38" fill="#b8b8d0" />
       <rect x="185" y="30" width="12" height="30" fill="#c4c4e0" />
       <rect x="202" y="12" width="15" height="48" fill="#a8a8c0" />
-    </svg>
+    </svg>    </div>
   </header>
+
+  <div id="loader">
+    <div class="spinner"></div>
+    <span>正在同步数据...</span>
+  </div>
 
   <div id="app" class="app"></div>
   <div id="tooltip"></div>
@@ -288,7 +296,6 @@
 <script>
   const DATA_URL = 'https://run.linwn.net/data/all.json';
 
-  // --- 工具函数 ---
   const isLeapYear = (year) => (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
 
   function generateFullYearDates(year) {
@@ -305,7 +312,6 @@
     return dates;
   }
 
-  // 解析时间 "0:34:13.320000" 为秒数
   function parseTime(timeStr) {
     if (!timeStr) return 0;
     const parts = timeStr.toString().split(':');
@@ -318,7 +324,6 @@
     return sec;
   }
 
-  // 格式化秒级配速为 M'SS" 
   function formatPace(secPerKm) {
     if (!secPerKm || secPerKm === Infinity || secPerKm <= 0) return "-'-''";
     const m = Math.floor(secPerKm / 60);
@@ -326,7 +331,7 @@
     return `${m}'${s.toString().padStart(2, '0')}''`;
   }
 
-  // --- 移动端双指缩放控制逻辑 ---
+  // 手势缩放逻辑
   function attachZoomGestures(viewport, inner) {
     let currentScale = 1;
     let startDist = 0;
@@ -344,20 +349,18 @@
 
     viewport.addEventListener('touchmove', (e) => {
       if (e.touches.length === 2) {
-        e.preventDefault(); // 拦截浏览器原生整体页面缩放
+        e.preventDefault(); 
         const dist = Math.hypot(
           e.touches[0].clientX - e.touches[1].clientX,
           e.touches[0].clientY - e.touches[1].clientY
         );
-        // 限制缩放比例在 1x 到 10x 之间
-        currentScale = Math.max(1, Math.min(10, startScale * (dist / startDist)));
-        // 直接改变内部容器的宽度，外层通过 overflow-x 自带完美丝滑的 Pan 拖拽能力
+        currentScale = Math.max(1, Math.min(8, startScale * (dist / startDist)));
         inner.style.width = `${currentScale * 100}%`;
       }
     }, { passive: false });
   }
 
-  // --- 数据处理逻辑 ---
+  // 纯粹的数学计算层 (速度极快)
   function processRunData(runs) {
     const yearData = {};
     let globalMaxDaily = 0;
@@ -370,13 +373,8 @@
 
       if (!yearData[year]) {
         yearData[year] = { 
-          dates: {}, 
-          totalDistance: 0, 
-          totalTime: 0, 
-          maxDaily: 0,
-          minPace: Infinity,
-          halfCount: 0,
-          fullCount: 0
+          dates: {}, totalDistance: 0, totalTime: 0, 
+          maxDaily: 0, minPace: Infinity, halfCount: 0, fullCount: 0
         };
       }
 
@@ -385,18 +383,13 @@
       yd.totalDistance += km;
       yd.totalTime += timeSec;
 
-      // 如果有有效跑步距离和时间，计算配速 (排除可能的数据异动，要求起码跑了1公里再算最快配速)
       if (km >= 1 && timeSec > 0) {
         const runPace = timeSec / km;
         yd.minPace = Math.min(yd.minPace, runPace);
       }
 
-      // 计算半马/全马次数
-      if (km >= 42.195) {
-        yd.fullCount++;
-      } else if (km >= 21.0975) {
-        yd.halfCount++;
-      }
+      if (km >= 42.195) yd.fullCount++;
+      else if (km >= 21.0975) yd.halfCount++;
     });
 
     const sortedYears = Object.keys(yearData).sort().reverse();
@@ -406,11 +399,8 @@
       let maxDist = 0;
       
       allDates.forEach(date => {
-        if (!yd.dates[date]) {
-          yd.dates[date] = 0;
-        } else {
-          maxDist = Math.max(maxDist, yd.dates[date]);
-        }
+        if (!yd.dates[date]) yd.dates[date] = 0;
+        else maxDist = Math.max(maxDist, yd.dates[date]);
       });
       
       yd.maxDaily = maxDist;
@@ -420,128 +410,140 @@
     return { yearData, sortedYears, globalMaxDaily };
   }
 
-  // --- DOM 渲染逻辑 ---
-  function renderApp(processedData) {
+  // 渲染单个年份的 DOM (剥离出来以便异步调用)
+  function renderYearBlock(year, yd, globalMaxDaily, container, tooltip) {
+    if (yd.totalDistance === 0) return;
+
+    const block = document.createElement('div');
+    block.className = 'year-block';
+
+    const avgPaceStr = yd.totalDistance > 0 ? formatPace(yd.totalTime / yd.totalDistance) : "-'-''";
+    const minPaceStr = yd.minPace !== Infinity ? formatPace(yd.minPace) : "-'-''";
+
+    const headerHtml = `
+      <div class="year-header">
+        <div class="year-title">${year}</div>
+        <div class="year-stats-wrap">
+          <div class="year-stats">
+            <span class="stat-item">累计 <strong>${yd.totalDistance.toFixed(1)}</strong></span>
+            <span class="stat-item">单日 <strong>${yd.maxDaily.toFixed(1)}</strong></span>
+            <span class="stat-item">均速 <strong>${avgPaceStr}</strong></span>
+            <span class="stat-item">最快 <strong>${minPaceStr}</strong></span>
+            <span class="stat-item">半马 <strong>${yd.halfCount}</strong></span>
+            <span class="stat-item">全马 <strong>${yd.fullCount}</strong></span>
+          </div>
+        </div>
+      </div>
+    `;
+    block.innerHTML = headerHtml;
+
+    const chartViewport = document.createElement('div');
+    chartViewport.className = 'chart-viewport';
+    
+    const chartInner = document.createElement('div');
+    chartInner.className = 'chart-inner';
+
+    attachZoomGestures(chartViewport, chartInner);
+
+    const skylineContainer = document.createElement('div');
+    skylineContainer.className = 'skyline-container';
+
+    // 渲染柱子
+    const dates = Object.keys(yd.dates).sort();
+    
+    // 提升性能：使用 DocumentFragment 批量挂载节点
+    const frag = document.createDocumentFragment();
+    
+    dates.forEach(date => {
+      const km = yd.dates[date];
+      const bar = document.createElement('div');
+      
+      if (km === 0) {
+        bar.className = 'skyline-bar zero';
+      } else {
+        bar.className = 'skyline-bar';
+        const heightPct = Math.max((km / globalMaxDaily) * 100, 2); 
+        bar.style.height = `${heightPct}%`;
+      }
+
+      // Tooltip 事件交由鼠标和触摸处理
+      const showTooltip = (e) => {
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        tooltip.innerHTML = `<strong>${date}</strong><div class="tooltip-val">${km > 0 ? km.toFixed(2) : '0.00'} <span>km</span></div>`;
+        tooltip.style.opacity = 1;
+        tooltip.style.left = `${clientX}px`;
+        tooltip.style.top = `${clientY}px`;
+      };
+
+      bar.addEventListener('mouseenter', showTooltip);
+      bar.addEventListener('touchstart', showTooltip, {passive: true});
+      bar.addEventListener('mouseleave', () => { tooltip.style.opacity = 0; });
+      bar.addEventListener('touchend', () => { tooltip.style.opacity = 0; });
+
+      frag.appendChild(bar);
+    });
+
+    skylineContainer.appendChild(frag);
+
+    const monthLabels = document.createElement('div');
+    monthLabels.className = 'month-labels';
+    
+    const daysInYear = isLeapYear(year) ? 366 : 365;
+    const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+    let dayCount = 0;
+    
+    for (let m = 0; m < 12; m++) {
+      const pct = (dayCount / daysInYear) * 100;
+      const label = document.createElement('div');
+      label.className = 'month-label';
+      label.style.left = `${pct}%`;
+      label.innerText = monthNames[m];
+      monthLabels.appendChild(label);
+      
+      dayCount += new Date(year, m + 1, 0).getDate();
+    }
+
+    chartInner.appendChild(skylineContainer);
+    chartInner.appendChild(monthLabels);
+    chartViewport.appendChild(chartInner);
+    block.appendChild(chartViewport);
+    
+    container.appendChild(block);
+  }
+
+  // 渐进式渲染机制 (Time Slicing)，防止白屏和卡顿
+  async function renderAppAsync(processedData) {
     const { yearData, sortedYears, globalMaxDaily } = processedData;
     const app = document.getElementById('app');
     const tooltip = document.getElementById('tooltip');
     
-    const updateTooltipPos = (e) => {
-      tooltip.style.left = `${e.clientX}px`;
-      tooltip.style.top = `${e.clientY}px`;
-    };
+    // 隐藏 Loader
+    document.getElementById('loader').style.display = 'none';
 
-    sortedYears.forEach(year => {
-      const yd = yearData[year];
-      if (yd.totalDistance === 0) return;
-
-      const block = document.createElement('div');
-      block.className = 'year-block';
-
-      // 计算聚合显示值
-      const avgPaceStr = yd.totalDistance > 0 ? formatPace(yd.totalTime / yd.totalDistance) : "-'-''";
-      const minPaceStr = yd.minPace !== Infinity ? formatPace(yd.minPace) : "-'-''";
-
-      const headerHtml = `
-        <div class="year-header">
-          <div class="year-title">${year}</div>
-          <div class="year-stats-wrap">
-            <div class="year-stats">
-              <span class="stat-item">累计 <strong>${yd.totalDistance.toFixed(1)}</strong> km</span>
-              <span class="stat-item">最高 <strong>${yd.maxDaily.toFixed(1)}</strong> km</span>
-              <span class="stat-item">均速 <strong>${avgPaceStr}</strong></span>
-              <span class="stat-item">最快 <strong>${minPaceStr}</strong></span>
-              <span class="stat-item">半马 <strong>${yd.halfCount}</strong></span>
-              <span class="stat-item">全马 <strong>${yd.fullCount}</strong></span>
-            </div>
-          </div>
-        </div>
-      `;
-      block.innerHTML = headerHtml;
-
-      // 缩放视口及内部容器
-      const chartViewport = document.createElement('div');
-      chartViewport.className = 'chart-viewport';
-      
-      const chartInner = document.createElement('div');
-      chartInner.className = 'chart-inner';
-
-      // 绑定移动端手势缩放
-      attachZoomGestures(chartViewport, chartInner);
-
-      const skylineContainer = document.createElement('div');
-      skylineContainer.className = 'skyline-container';
-
-      const dates = Object.keys(yd.dates).sort();
-      dates.forEach(date => {
-        const km = yd.dates[date];
-        const bar = document.createElement('div');
-        
-        if (km === 0) {
-          bar.className = 'skyline-bar zero';
-        } else {
-          bar.className = 'skyline-bar';
-          const heightPct = Math.max((km / globalMaxDaily) * 100, 2); 
-          bar.style.height = `${heightPct}%`;
-        }
-
-        // Tooltip 交互
-        bar.addEventListener('mouseenter', (e) => {
-          tooltip.innerHTML = `<strong>${date}</strong><div class="tooltip-val">${km > 0 ? km.toFixed(2) : '0.00'} <span>km</span></div>`;
-          tooltip.style.opacity = 1;
-          updateTooltipPos(e);
-        });
-        bar.addEventListener('mousemove', updateTooltipPos);
-        bar.addEventListener('mouseleave', () => { tooltip.style.opacity = 0; });
-
-        skylineContainer.appendChild(bar);
-      });
-
-      const monthLabels = document.createElement('div');
-      monthLabels.className = 'month-labels';
-      
-      const daysInYear = isLeapYear(year) ? 366 : 365;
-      const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
-      let dayCount = 0;
-      
-      for (let m = 0; m < 12; m++) {
-        const pct = (dayCount / daysInYear) * 100;
-        const label = document.createElement('div');
-        label.className = 'month-label';
-        label.style.left = `${pct}%`;
-        label.innerText = monthNames[m];
-        monthLabels.appendChild(label);
-        
-        const daysInThisMonth = new Date(year, m + 1, 0).getDate();
-        dayCount += daysInThisMonth;
-      }
-
-      // 拼装DOM
-      chartInner.appendChild(skylineContainer);
-      chartInner.appendChild(monthLabels);
-      chartViewport.appendChild(chartInner);
-      block.appendChild(chartViewport);
-      
-      app.appendChild(block);
-    });
+    // 逐年渲染，每次渲染后向浏览器让出控制权 (yield)
+    for (const year of sortedYears) {
+      renderYearBlock(year, yearData[year], globalMaxDaily, app, tooltip);
+      // 等待一个宏任务周期，让浏览器有时间把刚才生成的 DOM 画在屏幕上
+      await new Promise(resolve => setTimeout(resolve, 0));
+    }
   }
 
-  // --- 初始化流程 ---
+  // --- 初始化 ---
   async function init() {
     try {
       const res = await fetch(DATA_URL);
       const runs = await res.json();
       
       const processedData = processRunData(runs);
-      renderApp(processedData);
+      renderAppAsync(processedData);
 
     } catch (error) {
       console.error('Data load failed:', error);
-      document.getElementById('app').innerHTML = '<p style="text-align:center; color:#e74c3c;">数据加载失败，请检查网络或跨域设置。</p>';
+      document.getElementById('loader').innerHTML = '<p style="color:#e74c3c;">数据获取失败，请刷新页面。</p>';
     }
   }
 
-  // 启动应用
   init();
 </script>
 </body>
