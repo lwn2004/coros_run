@@ -469,9 +469,9 @@
         if (Math.abs(diff) < 0.001) return '<span class="trend flat">-</span>'; 
         
         if (diff > 0) {
-          return `<span class="trend ${lowerIsBetter ? 'bad' : 'good'}">↑</span>`;
+          return `<span class="trend ${lowerIsBetter ? 'bad' : 'good'}">${lowerIsBetter ? '↓' : '↑'}</span>`;
         } else {
-          return `<span class="trend ${lowerIsBetter ? 'good' : 'bad'}">↓</span>`;
+          return `<span class="trend ${lowerIsBetter ? 'good' : 'bad'}">${lowerIsBetter ? '↑' : '↓'}</span>`;
         }
       };
 
