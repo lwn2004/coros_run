@@ -233,20 +233,32 @@
   }
 
 
-  .month-labels {
+.month-labels {
     position: relative;
     width: 100%;
     height: 25px;
-    margin-top: 8px;
+    margin-top: 0; /* 移除原本的 margin，让容器直接贴紧上方基线 */
   }
 
   .month-label {
     position: absolute;
-    top: 0;
+    top: 6px; /* 将文字向下移，给刻度线留出空间，同时保持原有的视觉间距 */
     font-size: 11px;
     color: var(--text-sub);
     transform: translateX(-50%);
     font-weight: 600;
+  }
+
+  /* 新增：朝下的刻度线 (tick) */
+  .month-label::before {
+    content: '';
+    position: absolute;
+    top: -6px; /* 向上延伸以贴紧图表底部的边框 */
+    left: 50%;
+    transform: translateX(-50%); /* 确保刻度线相对于文字完美居中 */
+    width: 1px;
+    height: 4px; /* 刻度线的长度，可按需微调 */
+    background-color: var(--baseline); /* 使用与基线相同的颜色 */
   }
 
   /* --- Tooltip --- */
