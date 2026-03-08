@@ -164,7 +164,7 @@
     margin: 0 4px;
   }
 
-  /* --- 趋势标识徽章样式 (新增) --- */
+  /* --- 趋势标识徽章样式 --- */
   .trend {
     display: inline-flex;
     align-items: center;
@@ -176,9 +176,9 @@
     font-weight: 800;
     line-height: 1;
   }
-  .trend.good { color: #1a7f37; background: #dafbe1; } /* 更好：绿色背景 */
-  .trend.bad { color: #cf222e; background: #ffebe9; } /* 变差：红色背景 */
-  .trend.flat { color: #656d76; background: #eaecef; } /* 持平：灰色背景 */
+  .trend.good { color: #1a7f37; background: #dafbe1; }
+  .trend.bad { color: #cf222e; background: #ffebe9; }
+  .trend.flat { color: #656d76; background: #eaecef; }
 
   /* --- 天际线图表 & Zoom Pan 视口 --- */
   .chart-viewport {
@@ -220,6 +220,32 @@
 
   .skyline-bar:hover {
     background: var(--skyline-hover);
+  }
+  
+  /* --- 新增：今天位置的标识线样式 --- */
+  .today-line {
+    position: absolute;
+    bottom: 0;
+    height: calc(100% + 15px);
+    border-left: 1.5px dashed #ff5722;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .today-line::before {
+    content: '今天';
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    font-weight: bold;
+    color: #ffffff;
+    background: #ff5722;
+    padding: 2px 6px;
+    border-radius: 10px;
+    white-space: nowrap;
+    box-shadow: 0 2px 5px rgba(255, 87, 34, 0.3);
   }
 
   .month-labels {
@@ -425,7 +451,6 @@
     return { yearData, sortedYears, globalMaxDaily };
   }
 
-  // --- 新增：接收 prevYd（前一年数据）用来对比 ---
   function renderYearBlock(year, yd, globalMaxDaily, container, tooltip, prevYd = null) {
     if (yd.totalDistance === 0) return;
 
@@ -435,21 +460,17 @@
     const avgPaceStr = yd.totalDistance > 0 ? formatPace(yd.totalTime / yd.totalDistance) : "-'-''";
     const minPaceStr = yd.minPace !== Infinity ? formatPace(yd.minPace) : "-'-''";
 
-    // --- 新增：计算对比趋势 HTML ---
     let trends = { dist: '', max: '', avgPace: '', minPace: '', half: '', full: '' };
 
     if (prevYd && prevYd.totalDistance > 0) {
-      // 辅助函数：生成趋势标签 (lowerIsBetter: 如果数值越低越好，则设为 true，比如配速)
       const getTrendHtml = (curr, prev, lowerIsBetter = false) => {
         if (curr === Infinity || prev === Infinity) return ''; 
         const diff = curr - prev;
-        if (Math.abs(diff) < 0.001) return '<span class="trend flat">-</span>'; // 容忍浮点数误差
+        if (Math.abs(diff) < 0.001) return '<span class="trend flat">-</span>'; 
         
         if (diff > 0) {
-          // 数值变大：如果是配速，则代表变差(bad)；否则代表更好(good)
           return `<span class="trend ${lowerIsBetter ? 'bad' : 'good'}">↑</span>`;
         } else {
-          // 数值变小：如果是配速，代表更好(good)；否则代表变差(bad)
           return `<span class="trend ${lowerIsBetter ? 'good' : 'bad'}">↓</span>`;
         }
       };
@@ -527,6 +548,40 @@
 
     skylineContainer.appendChild(frag);
 
+    // --- 新增逻辑：计算并插入“今天”标识，并且超出屏幕时自动滚动居中 ---
+    const now = new Date();
+    const currentYearStr = String(now.getFullYear());
+    
+    if (year === currentYearStr) {
+      const todayStr = `${currentYearStr}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const todayIndex = dates.indexOf(todayStr);
+      
+      if (todayIndex !== -1) {
+        const todayPct = (todayIndex / dates.length) * 100;
+        
+        const todayLine = document.createElement('div');
+        todayLine.className = 'today-line';
+        todayLine.style.left = `${todayPct}%`;
+        skylineContainer.appendChild(todayLine);
+
+        // 延迟触发滚动，确保 DOM 已经渲染并且计算出了实际像素宽度
+        setTimeout(() => {
+          const viewportWidth = chartViewport.clientWidth;
+          const innerWidth = chartInner.clientWidth;
+          const todayPx = (todayPct / 100) * innerWidth;
+          
+          // 如果今天的位置超过了屏幕视口的 70% (即有点靠右或者已经溢出了)，就让它滚动居中
+          if (todayPx > viewportWidth * 0.7) {
+            chartViewport.scrollTo({
+              left: todayPx - (viewportWidth / 2),
+              behavior: 'smooth'
+            });
+          }
+        }, 300);
+      }
+    }
+    // -----------------------------------------------------------
+
     const monthLabels = document.createElement('div');
     monthLabels.className = 'month-labels';
     
@@ -560,12 +615,10 @@
     
     document.getElementById('loader').style.display = 'none';
 
-    // --- 新增：遍历时抓取前一年数据 (只限于 i===0，即最新一年) ---
     for (let i = 0; i < sortedYears.length; i++) {
       const year = sortedYears[i];
       const yd = yearData[year];
       
-      // 仅在最新的一年 (i === 0) 时，传入前一年 (i + 1) 的数据作对比
       const prevYd = (i === 0 && i + 1 < sortedYears.length) ? yearData[sortedYears[i + 1]] : null;
 
       renderYearBlock(year, yd, globalMaxDaily, app, tooltip, prevYd);
