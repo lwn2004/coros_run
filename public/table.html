@@ -71,6 +71,21 @@
             color: #595959;
             text-align: left;
             border-bottom: 2px solid #f0f0f0;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+        
+        th:hover {
+            background-color: #f0f0f0;
+        }
+
+        .sort-icon {
+            display: inline-block;
+            width: 14px;
+            margin-left: 4px;
+            font-size: 0.8em;
+            color: var(--secondary-accent);
         }
 
         td {
@@ -104,6 +119,65 @@
             font-style: italic;
             color: #bfbfbf;
         }
+        
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        .filters button {
+            border: none;
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: #f0f0f0;
+            color: #595959;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .filters button:hover {
+            background: #e6f7ff;
+            color: var(--secondary-accent);
+        }
+
+        .filters button.active {
+            background: var(--secondary-accent);
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(24, 144, 255, 0.3);
+        }
+
+        /* 细分展示控制 */
+        .unit { display: inline; }
+        .year-text { display: inline; }
+
+        /* 手机适配 */
+        @media (max-width: 700px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 20px 10px;
+            }
+            th, td {
+                padding: 12px 6px;
+                font-size: 0.85rem;
+            }
+            h1 {
+                font-size: 1.8rem;
+            }
+            .filters button {
+                padding: 5px 12px;
+                font-size: 0.85rem;
+            }
+            /* 手机端隐藏多余信息以保重点 */
+            .hide-mobile { display: none !important; }
+            .unit { display: none !important; }
+            .year-text { display: none !important; }
+        }        
     </style>
 </head>
 <body>
@@ -113,20 +187,31 @@
         <h1>步履格间</h1>
         <div class="subtitle">Personal Running Log & Analytics</div>
     </header>
-    
+    <div class="filters">
+        <button id="btn-all" class="active" onclick="applyFilter('all', this)">全部</button>        
+        <button onclick="applyFilter('today', this)">史上今日</button>
+        <button onclick="applyFilter('gz', this)">在广州</button>
+        <button onclick="applyFilter('mm', this)">多么温暖的家乡</button>
+        <button onclick="applyFilter('away', this)">在远方</button>
+        <button onclick="applyFilter('marathon', this)">马拉松</button>
+        <button onclick="applyFilter('hr160', this)">高心率 ≥160</button>
+        <button onclick="applyFilter('longest', this)">最长 Top20</button>
+        <button onclick="applyFilter('fastest', this)">最快 Top20</button>
+        <button onclick="applyFilter('hardest', this)">最虐 Top20</button>
+    </div>    
     <div id="loader" class="loading-status">正在同步运动云端数据...</div>
 
     <div class="table-wrapper">
         <table id="runTable" style="display: none;">
             <thead>
                 <tr>
-                    <th>日期</th>
-                    <th>城市</th>
-                    <th>里程</th>
-                    <th>用时</th>
-                    <th>配速</th>
-                    <th>平均心率</th>
-                    <th>连跑</th>
+                    <th data-col="date" onclick="sortTable('date')">日期<span class="sort-icon"></span></th>
+                    <th data-col="city" class="hide-mobile" onclick="sortTable('city')">城市<span class="sort-icon"></span></th>
+                    <th data-col="distance" onclick="sortTable('distance')">里程<span class="sort-icon"></span></th>
+                    <th data-col="time" onclick="sortTable('time')">用时<span class="sort-icon"></span></th>
+                    <th data-col="pace" onclick="sortTable('pace')">配速<span class="sort-icon"></span></th>
+                    <th data-col="hr" onclick="sortTable('hr')">心率<span class="sort-icon"></span></th>
+                    <th class="hide-mobile">连跑</th>
                 </tr>
             </thead>
             <tbody id="tableBody"></tbody>
@@ -136,6 +221,10 @@
 
 <script>
     const API_URL = 'https://run.linwn.net/data/all.json';
+    let rawData = [];
+    let currentData = [];
+    let currentSortCol = 'date';
+    let sortAsc = false;
 
     // 转换米为公里
     const toKM = m => (m / 1000).toFixed(2);
@@ -147,29 +236,67 @@
         return `${Math.floor(sPerKm / 60)}'${Math.floor(sPerKm % 60).toString().padStart(2, '0')}"`;
     };
 
+    function movingTimeToSeconds(movingTimeStr) {
+        if (!movingTimeStr) return 0;
+        try {
+            const [timePart] = movingTimeStr.split('.');
+            const parts = timePart.split(':').map(v => parseInt(v, 10));
+            if (parts.length === 3) {
+                return parts[0] * 3600 + parts[1] * 60 + parts[2];
+            } else if (parts.length === 2) {
+                return parts[0] * 60 + parts[1];
+            }
+            return 0;
+        } catch {
+            return 0;
+        }
+    }
+
+    function renderTable(data){
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+
+        data.forEach(item => {
+            const row = document.createElement('tr');
+            
+            // 处理日期格式，拆分出年份以便在手机端隐藏
+            let dateStr = item.start_date_local.substring(0,16).replace('T', ' '); // YYYY-MM-DD HH:mm
+            let yearStr = dateStr.substring(0, 5); // "YYYY-"
+            let restDateStr = dateStr.substring(5); // "MM-DD HH:mm"
+
+            row.innerHTML = `
+            <td style="color:#8c8c8c"><span class="year-text">${yearStr}</span>${restDateStr}</td>
+            <td class="hide-mobile">${item.city || '未知地点'}</td>
+            <td class="val-distance">${toKM(item.distance)} <small class="unit">km</small></td>
+            <td>${item.moving_time.split('.')[0]}</td>
+            <td class="val-pace">${toPace(item.average_speed)}</td>
+            <td class="val-heartrate">${item.average_heartrate ? Math.round(item.average_heartrate) : '--'} <small class="unit">bpm</small></td>
+            <td class="hide-mobile">${item.streak > 1 ? `<span class="tag-streak">${item.streak} 天</span>` : '-'}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    // 更新列头排序指示器
+    function updateSortIcons() {
+        document.querySelectorAll('.sort-icon').forEach(el => el.innerHTML = '');
+        if (currentSortCol) {
+            const thIcon = document.querySelector(`th[data-col="${currentSortCol}"] .sort-icon`);
+            if (thIcon) thIcon.innerHTML = sortAsc ? ' ▲' : ' ▼';
+        }
+    }
+
     async function loadData() {
         try {
             const response = await fetch(API_URL);
-            let data = await response.json();
-
-            // 【核心修改】按时间降序排列 (最新的在前)
-            data.sort((a, b) => new Date(b.start_date_local) - new Date(a.start_date_local));
-
-            const tbody = document.getElementById('tableBody');
+            const data = await response.json();
             
-            data.forEach(item => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td style="color: #8c8c8c">${item.start_date_local.substring(0, 16)}</td>
-                    <td>${item.city || '未知地点'}</td>
-                    <td class="val-distance">${toKM(item.distance)} <small>km</small></td>
-                    <td>${item.moving_time.split('.')[0]}</td>
-                    <td class="val-pace">${toPace(item.average_speed)}</td>
-                    <td class="val-heartrate">${item.average_heartrate ? Math.round(item.average_heartrate) : '--'} <small>bpm</small></td>
-                    <td>${item.streak ? `<span class="tag-streak">${item.streak} 天</span>` : '-'}</td>
-                `;
-                tbody.appendChild(row);
-            });
+            // 初始处理：按照时间降序排列
+            rawData = data.sort((a, b) => new Date(b.start_date_local) - new Date(a.start_date_local));
+            currentData = [...rawData];
+            
+            updateSortIcons();
+            renderTable(currentData);
 
             document.getElementById('loader').style.display = 'none';
             document.getElementById('runTable').style.display = 'table';
@@ -180,6 +307,113 @@
         }
     }
 
+    function sortTable(type) {
+        if (currentSortCol === type) {
+            sortAsc = !sortAsc;
+        } else {
+            currentSortCol = type;
+            sortAsc = false; // 切换新列时，默认用降序（更符合跑步数据的查看习惯）
+        }
+
+        updateSortIcons();
+
+        currentData.sort((a, b) => {
+            switch(type){
+                case 'date':
+                    return sortAsc ?
+                    new Date(a.start_date_local) - new Date(b.start_date_local) :
+                    new Date(b.start_date_local) - new Date(a.start_date_local);
+                case 'city':
+                    const cityA = a.city || '';
+                    const cityB = b.city || '';
+                    return sortAsc ? cityA.localeCompare(cityB) : cityB.localeCompare(cityA);
+                case 'distance':
+                    return sortAsc ? a.distance - b.distance : b.distance - a.distance;
+                case 'time':
+                    return sortAsc ? movingTimeToSeconds(a.moving_time) - movingTimeToSeconds(b.moving_time) : movingTimeToSeconds(b.moving_time) - movingTimeToSeconds(a.moving_time);
+                case 'pace':
+                    return sortAsc ? a.average_speed - b.average_speed : b.average_speed - a.average_speed;
+                case 'hr':
+                    return sortAsc ?
+                    (a.average_heartrate || 0) - (b.average_heartrate || 0) :
+                    (b.average_heartrate || 0) - (a.average_heartrate || 0);
+                default:
+                    return 0;
+            }
+        });
+
+        renderTable(currentData);
+    }
+
+    function applyFilter(type, btnObj) {
+        // 更新按钮活跃状态
+        if (btnObj) {
+            document.querySelectorAll('.filters button').forEach(b => b.classList.remove('active'));
+            btnObj.classList.add('active');
+        }
+
+        // 筛选逻辑可能打乱原有排序，清除排序指示器
+        currentSortCol = null;
+        updateSortIcons();
+
+        const today = new Date();
+        const m = today.getMonth();
+        const d = today.getDate();
+
+        switch(type){
+            case 'today':
+                currentData = rawData.filter(r => {
+                    const t = new Date(r.start_date_local);
+                    return t.getMonth() == m && t.getDate() == d;
+                });
+                break;
+            case 'gz':
+                currentData = rawData.filter(r => r.city && r.city.includes('广州'));
+                break;
+            case 'mm':
+                currentData = rawData.filter(r => r.city && r.city.includes('茂名'));
+                break;
+            case 'away':
+                currentData = rawData.filter(r => !r.city || !(r.city.includes('广州') || r.city.includes('茂名')));
+                break;
+            case 'marathon':
+                currentData = rawData.filter(r => r.distance >= 42000);
+                break;
+            case 'hr160':
+                currentData = rawData.filter(r => r.average_heartrate >= 160);
+                break;
+            case 'longest':
+                currentData = [...rawData]
+                .sort((a, b) => b.distance - a.distance)
+                .slice(0, 20);
+                break;
+            case 'fastest':
+                currentData = [...rawData]
+                .sort((a, b) => b.average_speed - a.average_speed)
+                .slice(0, 20);
+                break;
+            case 'hardest':
+                // 优化最虐算法：加重心率的权重(平方计算)，突显高心率带来的疲劳指数
+                currentData = [...rawData]
+                .sort((a, b) => 
+                    (movingTimeToSeconds(b.moving_time) * Math.pow((b.average_heartrate || 0), 2)) -
+                    (movingTimeToSeconds(a.moving_time) * Math.pow((a.average_heartrate || 0), 2))
+                )
+                .slice(0, 20);
+                break;
+            case 'all':
+            default:
+                currentData = [...rawData];
+                // 恢复默认排序指示
+                currentSortCol = 'date';
+                sortAsc = false;
+                updateSortIcons();
+                break;
+        }
+
+        renderTable(currentData);
+    }    
+    
     loadData();
 </script>
 
