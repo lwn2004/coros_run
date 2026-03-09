@@ -267,7 +267,7 @@
             let restDateStr = dateStr.substring(5); // "MM-DD HH:mm"
 
             row.innerHTML = `
-            <td style="color:#8c8c8c">${yearDateStr}<span class="time-text">${timeStr}</span></td>
+            <td style="color:#8c8c8c">${yearDateStr}<span class="time-text"> ${timeStr}</span></td>
             <td class="hide-mobile">${item.city || '未知地点'}</td>
             <td class="val-distance">${toKM(item.distance)} <small class="unit">km</small></td>
             <td>${item.moving_time.split('.')[0]}</td>
