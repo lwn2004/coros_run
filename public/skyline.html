@@ -554,11 +554,11 @@
       const todayIndex = dates.indexOf(todayStr);
       
       if (todayIndex !== -1) {
-        const todayPct = (todayIndex / dates.length) * 100;
-        
+        const todayPct = ((todayIndex + 0.5) / dates.length) * 100;
         const todayLine = document.createElement('div');
         todayLine.className = 'today-line';
         todayLine.style.left = `${todayPct}%`;
+        todayLine.style.transform = 'translateX(-50%)';
         skylineContainer.appendChild(todayLine);
 
         // 延迟触发滚动，确保 DOM 已经渲染并且计算出了实际像素宽度
