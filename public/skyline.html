@@ -10,7 +10,7 @@
     --card: #ffffff;
     --text-main: #1f2328;
     --text-sub: #656d76;
-    --baseline: #e1e4e8;
+    --baseline: #b8babd;
     
     /* 山脉/天际线颜色 - 翡翠绿渐变 */
     --skyline-bottom: #30a14e;
@@ -211,7 +211,7 @@
     flex: 1;
     background: linear-gradient(to top, var(--skyline-bottom), var(--skyline-top));
     border-radius: 2px 2px 0 0;
-    transition: background 0.2s;
+    transition: background 0.2s, height 0.3s ease;
   }
 
   .skyline-bar.zero {
@@ -221,39 +221,50 @@
   .skyline-bar:hover {
     background: var(--skyline-hover);
   }
+
+  /* --- 今天的特殊标识样式 --- */
   
-  /* --- 新增：今天位置的标识线样式 --- */
-  .today-line {
-    backgound-color: #ff5722;
+  /* 今天有跑步：高亮渐变色并增加辉光 */
+  .skyline-bar.today-active {
+    background: linear-gradient(to top, #ff9800, #ff5722);
+    box-shadow: 0 0 6px rgba(255, 87, 34, 0.6);
+    z-index: 2; /* 确保辉光不被遮挡 */
   }
 
+  /* 今天无跑步：虚线框虚拟柱子 */
+  .skyline-bar.today-empty {
+    background-color: rgba(255, 152, 0, 0.1);
+    border: 1px dashed #ff9800;
+    border-bottom: none;
+    box-sizing: border-box;
+    z-index: 1;
+  }
 
-.month-labels {
+  .month-labels {
     position: relative;
     width: 100%;
     height: 25px;
-    margin-top: 0; /* 移除原本的 margin，让容器直接贴紧上方基线 */
+    margin-top: 0;
   }
 
   .month-label {
     position: absolute;
-    top: 6px; /* 将文字向下移，给刻度线留出空间，同时保持原有的视觉间距 */
+    top: 6px;
     font-size: 11px;
     color: var(--text-sub);
     transform: translateX(-50%);
     font-weight: 600;
   }
 
-  /* 新增：朝下的刻度线 (tick) */
   .month-label::before {
     content: '';
     position: absolute;
-    top: -6px; /* 向上延伸以贴紧图表底部的边框 */
+    top: -6px;
     left: 50%;
-    transform: translateX(-50%); /* 确保刻度线相对于文字完美居中 */
+    transform: translateX(-50%);
     width: 1px;
-    height: 4px; /* 刻度线的长度，可按需微调 */
-    background-color: var(--baseline); /* 使用与基线相同的颜色 */
+    height: 4px;
+    background-color: var(--baseline);
   }
 
   /* --- Tooltip --- */
@@ -506,19 +517,37 @@
     const skylineContainer = document.createElement('div');
     skylineContainer.className = 'skyline-container';
 
+    // 获取“今天”的字符串，用于匹配
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    let todayBarPct = null; // 用于记录今天柱子的百分比位置，方便后续滚动
+
     const dates = Object.keys(yd.dates).sort();
     const frag = document.createDocumentFragment();
     
-    dates.forEach(date => {
+    dates.forEach((date, index) => {
       const km = yd.dates[date];
       const bar = document.createElement('div');
+      const isToday = (date === todayStr);
       
       if (km === 0) {
         bar.className = 'skyline-bar zero';
+        if (isToday) {
+          bar.classList.add('today-empty');
+          bar.style.height = '15%'; // 虚拟柱子的高度
+        }
       } else {
         bar.className = 'skyline-bar';
+        if (isToday) {
+          bar.classList.add('today-active');
+        }
         const heightPct = Math.max((km / globalMaxDaily) * 100, 2); 
         bar.style.height = `${heightPct}%`;
+      }
+
+      if (isToday) {
+        // 记录今天在横向进度中的百分比
+        todayBarPct = ((index + 0.5) / dates.length) * 100;
       }
 
       const showTooltip = (e) => {
@@ -540,37 +569,21 @@
 
     skylineContainer.appendChild(frag);
 
-    // --- 新增逻辑：计算并插入“今天”标识，并且超出屏幕时自动滚动居中 ---
-    const now = new Date();
-    const currentYearStr = String(now.getFullYear());
-    
-    if (year === currentYearStr) {
-      const todayStr = `${currentYearStr}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-      const todayIndex = dates.indexOf(todayStr);
-      
-      if (todayIndex !== -1) {
-        const todayPct = ((todayIndex + 0.5) / dates.length) * 100;
-        const todayLine = document.createElement('div');
-        todayLine.className = 'today-line';
-        todayLine.style.left = `${todayPct}%`;
-        todayLine.style.transform = 'translateX(-50%)';
-        skylineContainer.appendChild(todayLine);
-
-        // 延迟触发滚动，确保 DOM 已经渲染并且计算出了实际像素宽度
-        setTimeout(() => {
-          const viewportWidth = chartViewport.clientWidth;
-          const innerWidth = chartInner.clientWidth;
-          const todayPx = (todayPct / 100) * innerWidth;
-          
-          // 如果今天的位置超过了屏幕视口的 70% (即有点靠右或者已经溢出了)，就让它滚动居中
-          if (todayPx > viewportWidth * 0.7) {
-            chartViewport.scrollTo({
-              left: todayPx - (viewportWidth / 2),
-              behavior: 'smooth'
-            });
-          }
-        }, 300);
-      }
+    // --- 滚动逻辑：超出屏幕时自动滚动居中 ---
+    if (year === String(now.getFullYear()) && todayBarPct !== null) {
+      setTimeout(() => {
+        const viewportWidth = chartViewport.clientWidth;
+        const innerWidth = chartInner.clientWidth;
+        const todayPx = (todayBarPct / 100) * innerWidth;
+        
+        // 如果今天的位置超过了屏幕视口的 70% (即有点靠右或者已经溢出了)，就让它滚动居中
+        if (todayPx > viewportWidth * 0.7) {
+          chartViewport.scrollTo({
+            left: todayPx - (viewportWidth / 2),
+            behavior: 'smooth'
+          });
+        }
+      }, 300);
     }
     // -----------------------------------------------------------
 
