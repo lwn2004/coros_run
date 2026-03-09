@@ -176,7 +176,7 @@
             /* 手机端隐藏多余信息以保重点 */
             .hide-mobile { display: none !important; }
             .unit { display: none !important; }
-            .year-text { display: none !important; }
+            .time-text { display: none !important; }
         }        
     </style>
 </head>
@@ -190,7 +190,7 @@
     <div class="filters">
         <button id="btn-all" class="active" onclick="applyFilter('all', this)">全部</button>        
         <button onclick="applyFilter('today', this)">史上今日</button>
-        <button onclick="applyFilter('gz', this)">在广州</button>
+        <button onclick="applyFilter('gz', this)">在省城</button>
         <button onclick="applyFilter('mm', this)">多么温暖的家乡</button>
         <button onclick="applyFilter('away', this)">去远方</button>
         <button onclick="applyFilter('marathon', this)">马拉松</button>
@@ -261,11 +261,13 @@
             
             // 处理日期格式，拆分出年份以便在手机端隐藏
             let dateStr = item.start_date_local.substring(0,16).replace('T', ' '); // YYYY-MM-DD HH:mm
+            let yearDateStr = dateStr.substring(0, 10);
+            let timeStr = dateStr.substring(11);
             let yearStr = dateStr.substring(0, 5); // "YYYY-"
             let restDateStr = dateStr.substring(5); // "MM-DD HH:mm"
 
             row.innerHTML = `
-            <td style="color:#8c8c8c"><span class="year-text">${yearStr}</span>${restDateStr}</td>
+            <td style="color:#8c8c8c">${yearDateStr}<span class="time-text">${timeStr}</span></td>
             <td class="hide-mobile">${item.city || '未知地点'}</td>
             <td class="val-distance">${toKM(item.distance)} <small class="unit">km</small></td>
             <td>${item.moving_time.split('.')[0]}</td>
