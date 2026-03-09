@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>步履格间 | 个人跑步数据看板</title>
+    <style>
+        :root {
+            --primary-accent: #ff4d4f; /* 动感红 */
+            --secondary-accent: #1890ff; /* 科技蓝 */
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --card-bg: rgba(255, 255, 255, 0.95);
+        }
+
+        body {
+            font-family: 'PingFang SC', 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            margin: 0;
+            padding: 40px 20px;
+            color: #262626;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 40px;
+            backdrop-filter: blur(10px);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin: 0;
+            background: linear-gradient(to right, #1d1d1f, #434343);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            color: #86868b;
+            margin-top: 10px;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        th {
+            background-color: #fafafa;
+            padding: 16px;
+            font-weight: 600;
+            color: #595959;
+            text-align: left;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid #f0f0f0;
+            font-variant-numeric: tabular-nums;
+        }
+
+        tr:last-child td { border-bottom: none; }
+        
+        tr:hover td {
+            background-color: #f9f9f9;
+        }
+
+        /* 核心数值美化 */
+        .val-distance { font-weight: 700; color: var(--secondary-accent); font-size: 1.1rem; }
+        .val-pace { font-weight: 600; color: #52c41a; }
+        .val-heartrate { color: var(--primary-accent); }
+        .tag-streak {
+            background: #fff2e8;
+            color: #fa541c;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            border: 1px solid #ffbb96;
+        }
+
+        .loading-status {
+            text-align: center;
+            padding: 50px;
+            font-style: italic;
+            color: #bfbfbf;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>步履格间</h1>
+        <div class="subtitle">Personal Running Log & Analytics</div>
+    </header>
+    
+    <div id="loader" class="loading-status">正在同步运动云端数据...</div>
+
+    <div class="table-wrapper">
+        <table id="runTable" style="display: none;">
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>城市</th>
+                    <th>里程</th>
+                    <th>用时</th>
+                    <th>配速</th>
+                    <th>平均心率</th>
+                    <th>连跑</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const API_URL = 'https://run.linwn.net/data/all.json';
+
+    // 转换米为公里
+    const toKM = m => (m / 1000).toFixed(2);
+
+    // 转换速度(m/s)为配速(min/km)
+    const toPace = ms => {
+        if (!ms || ms <= 0) return '--:--';
+        const sPerKm = 1000 / ms;
+        return `${Math.floor(sPerKm / 60)}'${Math.floor(sPerKm % 60).toString().padStart(2, '0')}"`;
+    };
+
+    async function loadData() {
+        try {
+            const response = await fetch(API_URL);
+            let data = await response.json();
+
+            // 【核心修改】按时间降序排列 (最新的在前)
+            data.sort((a, b) => new Date(b.start_date_local) - new Date(a.start_date_local));
+
+            const tbody = document.getElementById('tableBody');
+            
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td style="color: #8c8c8c">${item.start_date_local.substring(0, 16)}</td>
+                    <td>${item.city || '未知地点'}</td>
+                    <td class="val-distance">${toKM(item.distance)} <small>km</small></td>
+                    <td>${item.moving_time.split('.')[0]}</td>
+                    <td class="val-pace">${toPace(item.average_speed)}</td>
+                    <td class="val-heartrate">${item.average_heartrate ? Math.round(item.average_heartrate) : '--'} <small>bpm</small></td>
+                    <td>${item.streak ? `<span class="tag-streak">${item.streak} 天</span>` : '-'}</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('runTable').style.display = 'table';
+            
+        } catch (err) {
+            document.getElementById('loader').innerHTML = '<span style="color:red">数据加载失败，请检查网络访问权限</span>';
+            console.error(err);
+        }
+    }
+
+    loadData();
+</script>
+
+</body>
+</html>
