@@ -39,36 +39,43 @@
         h1 {
             font-size: 2.5rem;
             margin: 0;
-            background: linear-gradient(to right, #1d1d1f, #434343);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
             letter-spacing: 2px;
-        }
-
-        .subtitle {
-            color: #86868b;
-            margin-top: 10px;
-            font-size: 0.95rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* --- 新增：文艺模式开关样式 --- */
-        .mode-toggle-container {
+            /* Flex 布局实现绝对居中对齐 */
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 30px;
-            font-size: 0.9rem;
-            color: #86868b;
+            gap: 12px; /* 字母与开关之间的间距 */
         }
 
+        /* 文字的基础颜色设置 */
+        #title-beyond, #title-running {
+            background-image: linear-gradient(to right, #1d1d1f, #434343);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            transition: all 0.4s ease; /* 让变色过程平滑 */
+        }
+
+        /* --- 修正：安全地将文本本身变为彩色渐变 --- */
+        .beyond-colorful {
+            background-image: linear-gradient(90deg, #ff4d4f, #1890ff, #52c41a, #fa541c) !important;
+            -webkit-background-clip: text !important;
+            background-clip: text !important;
+            color: transparent !important;
+        }
+        /* ------------------------------------- */
+
+        .title-switch-container {
+            display: flex;
+            align-items: center; /* 确保容器内部也绝对居中 */
+        }
+
+        /* --- 修改：更精致小巧的开关 --- */
         .switch {
             position: relative;
             display: inline-block;
-            width: 44px;
-            height: 24px;
+            width: 36px;  /* 宽度改小 */
+            height: 20px; /* 高度改小 */
         }
 
         .switch input {
@@ -83,14 +90,14 @@
             top: 0; left: 0; right: 0; bottom: 0;
             background-color: #d9d9d9;
             transition: .4s;
-            border-radius: 24px;
+            border-radius: 20px;
         }
 
         .slider:before {
             position: absolute;
             content: "";
-            height: 18px;
-            width: 18px;
+            height: 14px; /* 圆球改小 */
+            width: 14px;  /* 圆球改小 */
             left: 3px;
             bottom: 3px;
             background-color: white;
@@ -104,9 +111,17 @@
         }
 
         input:checked + .slider:before {
-            transform: translateX(20px);
+            transform: translateX(16px); /* 对应的位移距离也改小 */
         }
         /* ------------------------- */
+
+        .subtitle {
+            color: #86868b;
+            margin-top: 10px;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
 
         .table-wrapper {
             overflow-x: auto;
@@ -221,7 +236,7 @@
             body { padding: 10px; }
             .container { padding: 20px 10px; }
             th, td { padding: 12px 6px; font-size: 0.85rem; }
-            h1 { font-size: 1.8rem; }
+            h1 { font-size: 1.8rem; gap: 8px; } /* 手机端标题间距略微缩小 */
             .filters button { padding: 5px 12px; font-size: 0.85rem; }
             .hide-mobile { display: none !important; }
             .unit { display: none !important; }
@@ -233,16 +248,18 @@
 
 <div class="container">
     <header>
-        <h1>Beyond Running</h1>
+        <h1>
+            <span id="title-beyond">Beyond</span>
+            <span class="title-switch-container">
+                <label class="switch">
+                    <input type="checkbox" id="poeticModeSwitch" onchange="toggleLabels()">
+                    <span class="slider"></span>
+                </label>
+            </span>
+            <span id="title-running">Running</span>
+        </h1>
         <div class="subtitle">Personal Running Log & Analytics</div>
     </header>
-
-    <div class="mode-toggle-container">
-        <label class="switch">
-            <input type="checkbox" id="poeticModeSwitch" onchange="toggleLabels()">
-            <span class="slider"></span>
-        </label>
-    </div>
 
     <div class="filters">
         <button id="btn-all" class="active" onclick="applyFilter('all', this)"></button>        
@@ -284,9 +301,9 @@
     let currentSortCol = 'date';
     let sortAsc = false;
 
-    // ----- 新增：双套文案配置 -----
+    // ----- 双套文案配置 -----
     let isPoeticMode = false;
-    let filterCountsObj = {}; // 存储各个类别的数量
+    let filterCountsObj = {}; 
 
     const labelsStandard = {
         all: '全部',
@@ -308,26 +325,31 @@
         mm: '温暖的家乡',
         away: '遥远的Paradise',
         marathon: '未知赛事的长跑',
-        hr160: '高心率 ≥160',    // 后续不改
-        longest: '最长 Top20',   // 后续不改
-        fastest: '最快 Top20',   // 后续不改
-        hardest: '最虐 Top20'    // 后续不改
+        hr160: '高心率 ≥160',
+        longest: '最长 Top20',
+        fastest: '最快 Top20',
+        hardest: '最虐 Top20'
     };
 
-    // 切换文案开关触发
     function toggleLabels() {
         isPoeticMode = document.getElementById('poeticModeSwitch').checked;
-        renderButtonLabels();
+        
+        const beyondText = document.getElementById('title-beyond');
+        if (isPoeticMode) {
+            beyondText.classList.add('beyond-colorful');
+        } else {
+            beyondText.classList.remove('beyond-colorful');
+        }
+
+        renderButtonLabels(); 
     }
 
-    // 根据当前模式渲染按钮文字和数量
     function renderButtonLabels() {
         const labels = isPoeticMode ? labelsPoetic : labelsStandard;
         
         const setBtnInfo = (id, key, count) => {
             const btn = document.getElementById(id);
             if (btn) {
-                // 如果有count参数，说明需要显示数量（后几个Top20不需要数量统计）
                 btn.innerHTML = `${labels[key]}${count !== undefined ? ` <span class="count">${count}</span>` : ''}`;
             }
         };
@@ -340,17 +362,13 @@
         setBtnInfo('btn-marathon', 'marathon', filterCountsObj.marathon);
         setBtnInfo('btn-hr160', 'hr160', filterCountsObj.hr160);
         
-        // 渲染没有数字的按钮
         setBtnInfo('btn-longest', 'longest');
         setBtnInfo('btn-fastest', 'fastest');
         setBtnInfo('btn-hardest', 'hardest');
     }
-    // ----------------------------
 
-    // 转换米为公里
     const toKM = m => (m / 1000).toFixed(2);
 
-    // 转换速度(m/s)为配速(min/km)
     const toPace = ms => {
         if (!ms || ms <= 0) return '--:--';
         const sPerKm = 1000 / ms;
@@ -373,7 +391,6 @@
         }
     }
 
-    // 计算 TRIMP (Training Impulse)
     function calcTRIMP(movingTimeStr, averageHeartrate) {
         const hr = averageHeartrate || 0;
         const hrRest = 50;
@@ -414,7 +431,6 @@
         });
     }
 
-    // 动态计算条目数，并触发渲染
     function updateFilterCounts() {
         const today = new Date();
         const m = today.getMonth();
@@ -433,7 +449,6 @@
             hr160: rawData.filter(r => r.average_heartrate >= 160).length
         };
 
-        // 计算完毕后，调用渲染按钮文字
         renderButtonLabels();
     }
 
@@ -454,7 +469,7 @@
             currentData = [...rawData];
             
             updateSortIcons();
-            updateFilterCounts(); // 渲染按钮数量
+            updateFilterCounts(); 
             renderTable(currentData);
 
             document.getElementById('loader').style.display = 'none';
@@ -466,7 +481,6 @@
         }
     }
 
-    // （保留原有排序与筛选逻辑）
     function sortTable(type) {
         if (currentSortCol === type) {
             sortAsc = !sortAsc;
