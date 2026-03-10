@@ -3,31 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>跑步记录</title>
+    <title>跑步记录 · 主页展开月/日</title>
     <style>
-        /* 定义颜色变量，方便你随时修改 */
         :root {
-            --bg-color: #ffffff;           /* 网页背景色：纯白 */
-            --text-primary: #222222;       /* 主标题和正文颜色：柔和的深黑 */
-            --text-secondary: #737373;     /* 次要信息颜色（如统计数据）：中灰色 */
-            --link-color: #111111;         /* 可点击文字的颜色：几乎纯黑 */
-            --link-hover: #2563eb;         /* 鼠标悬停时的颜色：明亮的蓝色，增加一点交互感 */
-            --line-color: #e5e5e5;         /* 下划线颜色：浅灰 */
+            --bg-color: #ffffff;
+            --text-primary: #222222;
+            --text-secondary: #737373;
+            --link-color: #111111;
+            --link-hover: #2563eb;
+            --line-color: #e5e5e5;
         }
-
-        /* 自动适应系统的深色模式（如果不需要，可以删掉这一段） */
         @media (prefers-color-scheme: dark) {
             :root {
-                --bg-color: #121212;       /* 深色背景：深灰 */
-                --text-primary: #e0e0e0;   /* 深色模式下的文字：柔和的浅灰白 */
-                --text-secondary: #888888; /* 深色模式下次要信息：稍暗的灰色 */
-                --link-color: #ffffff;     /* 深色模式下的链接：纯白 */
-                --link-hover: #8ab4f8;     /* 深色模式下的悬停色：浅蓝色 */
-                --line-color: #333333;     /* 深色模式下的下划线：深灰 */
+                --bg-color: #121212;
+                --text-primary: #e0e0e0;
+                --text-secondary: #888888;
+                --link-color: #ffffff;
+                --link-hover: #8ab4f8;
+                --line-color: #333333;
             }
         }
-
-        /* 以下是排版样式，应用了上面的颜色变量 */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             max-width: 600px;
@@ -36,7 +31,7 @@
             background-color: var(--bg-color);
             color: var(--text-primary);
             line-height: 1.6;
-            transition: background-color 0.3s, color 0.3s; /* 切换深浅色时增加柔和过渡 */
+            transition: background-color 0.3s, color 0.3s;
         }
         h1, h2 {
             font-weight: 500;
@@ -93,9 +88,62 @@
         .loading {
             color: var(--text-secondary);
         }
+
+        /* 复选框控件 */
+        .drill-controls {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 24px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--line-color);
+            font-size: 0.95rem;
+        }
+        .drill-controls label {
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .drill-controls input[type="checkbox"] {
+            accent-color: var(--link-hover);
+            width: 16px;
+            height: 16px;
+            margin: 0;
+            cursor: pointer;
+        }
+        .drill-controls input:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* 主页展开缩进 */
+        .month-list, .day-list {
+            margin-left: 24px;
+            list-style: none;
+        }
+        .day-list {
+            margin-left: 48px;
+        }
+        .month-item, .day-item {
+            margin-bottom: 12px;
+        }
+        .month-item a, .day-item a {
+            font-size: 1rem;
+        }
     </style>
 </head>
 <body>
+
+    <!-- 两个复选框：展开月份 / 展开日期（日期受月份控制） -->
+    <div class="drill-controls">
+        <label>
+            <input type="checkbox" id="expandMonth"> 展开月份
+        </label>
+        <label>
+            <input type="checkbox" id="expandDay" disabled> 展开日期
+        </label>
+    </div>
 
     <div id="app">
         <div class="loading">正在加载数据...</div>
@@ -106,14 +154,17 @@
         let rawData = [];
         let parsedData = { total: { dist: 0, count: 0 }, years: {} };
 
-        // 格式化时间 (例如 2:03:27 -> 2小时3分)
+        // 复选框状态 & 当前路由
+        let expandMonth = false;
+        let expandDay = false;
+        let currentRoute = { type: 'home' };
+
+        // ---------- 辅助函数 (与原逻辑一致) ----------
         function formatTime(timeStr) {
             if (!timeStr) return '-';
             const parts = timeStr.split(':');
             return `${parseInt(parts[0]) > 0 ? parseInt(parts[0]) + '小时' : ''}${parseInt(parts[1])}分${parseInt(parts[2])}秒`;
         }
-
-        // 格式化配速 (根据 m/s 计算)
         function formatPace(speedMS) {
             if (!speedMS) return '-';
             const secPerKm = 1000 / speedMS;
@@ -121,48 +172,103 @@
             const s = Math.floor(secPerKm % 60);
             return `${m}'${s.toString().padStart(2, '0')}"`;
         }
-
-        // 格式化日期
         function formatDate(dateStr) {
             const d = new Date(dateStr.replace(' ', 'T'));
             return `${d.getMonth() + 1}月${d.getDate()}日 ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
         }
+        function formatShortDate(dateStr) {
+            const d = new Date(dateStr.replace(' ', 'T'));
+            return `${d.getMonth() + 1}月${d.getDate()}日`;
+        }
 
-        // 处理从接口拉取的数据
+        // 生成单条跑步记录HTML
+        function generateRunItemHtml(run) {
+            const dist = (run.distance / 1000).toFixed(2);
+            return `
+                <li>
+                    <div><strong>${formatDate(run.start_date_local)} - ${run.city || '未知城市'}</strong></div>
+                    <span class="stats">
+                        距离: ${dist} km | 
+                        用时: ${formatTime(run.moving_time)} | 
+                        配速: ${formatPace(run.average_speed)} | 
+                        心率: ${run.average_heartrate ? Math.round(run.average_heartrate) + ' bpm' : '-'}
+                    </span>
+                </li>
+            `;
+        }
+
+        // ---------- 数据解析 (增加日汇总) ----------
         async function init() {
             try {
                 const res = await fetch(API_URL);
                 rawData = await res.json();
-                
-                // 按时间降序排序
                 rawData.sort((a, b) => new Date(b.start_date_local.replace(' ', 'T')) - new Date(a.start_date_local.replace(' ', 'T')));
 
                 rawData.forEach(run => {
                     const date = new Date(run.start_date_local.replace(' ', 'T'));
                     const year = date.getFullYear();
                     const month = date.getMonth() + 1;
+                    const day = date.getDate();
                     const distKm = run.distance / 1000;
 
-                    // 汇总总计
+                    // 总计
                     parsedData.total.dist += distKm;
                     parsedData.total.count++;
 
-                    // 汇总年份
+                    // 年份
                     if (!parsedData.years[year]) {
                         parsedData.years[year] = { dist: 0, count: 0, months: {} };
                     }
                     parsedData.years[year].dist += distKm;
                     parsedData.years[year].count++;
 
-                    // 汇总月份
+                    // 月份
                     if (!parsedData.years[year].months[month]) {
-                        parsedData.years[year].months[month] = { dist: 0, count: 0, runs: [] };
+                        parsedData.years[year].months[month] = { dist: 0, count: 0, runs: [], days: {} };
                     }
                     parsedData.years[year].months[month].dist += distKm;
                     parsedData.years[year].months[month].count++;
                     parsedData.years[year].months[month].runs.push(run);
+
+                    // 日 (新增)
+                    if (!parsedData.years[year].months[month].days[day]) {
+                        parsedData.years[year].months[month].days[day] = { dist: 0, count: 0, runs: [] };
+                    }
+                    parsedData.years[year].months[month].days[day].dist += distKm;
+                    parsedData.years[year].months[month].days[day].count++;
+                    parsedData.years[year].months[month].days[day].runs.push(run);
                 });
 
+                // 复选框联动
+                const cbMonth = document.getElementById('expandMonth');
+                const cbDay = document.getElementById('expandDay');
+
+                function updateCheckboxes() {
+                    expandMonth = cbMonth.checked;
+                    if (!expandMonth) {
+                        cbDay.checked = false;
+                        cbDay.disabled = true;
+                        expandDay = false;
+                    } else {
+                        cbDay.disabled = false;
+                        expandDay = cbDay.checked;
+                    }
+                }
+
+                // 初始化状态
+                updateCheckboxes();
+
+                cbMonth.addEventListener('change', () => {
+                    updateCheckboxes();
+                    renderHome(); // 切换复选框即回到主页并应用新状态
+                });
+
+                cbDay.addEventListener('change', () => {
+                    expandDay = cbDay.checked;
+                    renderHome();
+                });
+
+                // 渲染主页
                 renderHome();
             } catch (err) {
                 document.getElementById('app').innerHTML = '<div class="loading">加载失败，请检查网络或跨域设置。</div>';
@@ -170,32 +276,80 @@
             }
         }
 
-        // 渲染主页 (所有年份)
+        // ---------- 重新渲染当前路由 (被复选框变化调用) ----------
+        function reRenderCurrentRoute() {
+            if (currentRoute.type === 'home') renderHome();
+            else if (currentRoute.type === 'year') renderYear(currentRoute.year);
+            else if (currentRoute.type === 'month') renderMonth(currentRoute.year, currentRoute.month);
+            else if (currentRoute.type === 'day') renderDay(currentRoute.year, currentRoute.month, currentRoute.day);
+        }
+
+        // ---------- 主页渲染 (根据复选框动态展开) ----------
         function renderHome() {
+            currentRoute = { type: 'home' };
             const app = document.getElementById('app');
             let html = `
                 <h1>生涯总计</h1>
                 <p>共奔跑 ${parsedData.total.count} 次，累计 ${(parsedData.total.dist).toFixed(2)} 公里</p>
                 <ul>
             `;
-            
-            // 年份降序展示
+
             const years = Object.keys(parsedData.years).sort((a, b) => b - a);
             years.forEach(year => {
                 const yData = parsedData.years[year];
+                // 年份条目
                 html += `
                     <li>
                         <a onclick="renderYear(${year})">${year} 年</a>
                         <span class="stats">${yData.count} 次，${(yData.dist).toFixed(2)} 公里</span>
-                    </li>
                 `;
+
+                // 如果展开月份，添加月份列表
+                if (expandMonth) {
+                    html += `<ul class="month-list">`;
+                    const months = Object.keys(yData.months).sort((a, b) => b - a); // 降序
+                    months.forEach(month => {
+                        const mData = yData.months[month];
+                        html += `
+                            <li class="month-item">
+                                <a onclick="renderMonth(${year}, ${month})">${month} 月</a>
+                                <span class="stats">${mData.count} 次，${(mData.dist).toFixed(2)} 公里</span>
+                        `;
+
+                        // 如果展开日期，添加日列表
+                        if (expandDay && mData.days) {
+                            html += `<ul class="day-list">`;
+                            const days = Object.keys(mData.days).sort((a, b) => b - a); // 降序
+                            days.forEach(day => {
+                                const dData = mData.days[day];
+                                // 找一个样本获取短日期描述
+                                const sampleRun = dData.runs[0];
+                                const dayLabel = sampleRun ? formatShortDate(sampleRun.start_date_local) : `${day}日`;
+                                html += `
+                                    <li class="day-item">
+                                        <a onclick="renderDay(${year}, ${month}, ${day})">${dayLabel}</a>
+                                        <span class="stats">${dData.count} 次，${(dData.dist).toFixed(2)} 公里</span>
+                                    </li>
+                                `;
+                            });
+                            html += `</ul>`;
+                        }
+
+                        html += `</li>`; // 闭合 month-item
+                    });
+                    html += `</ul>`;
+                }
+
+                html += `</li>`; // 闭合年份li
             });
+
             html += `</ul>`;
             app.innerHTML = html;
         }
 
-        // 渲染某年 (所有月份)
+        // ---------- 年份页 (保持原样：仅显示月份列表) ----------
         function renderYear(year) {
+            currentRoute = { type: 'year', year: year };
             const app = document.getElementById('app');
             const yData = parsedData.years[year];
             let html = `
@@ -204,8 +358,6 @@
                 <p>共奔跑 ${yData.count} 次，累计 ${(yData.dist).toFixed(2)} 公里</p>
                 <ul>
             `;
-            
-            // 月份降序展示
             const months = Object.keys(yData.months).sort((a, b) => b - a);
             months.forEach(month => {
                 const mData = yData.months[month];
@@ -220,8 +372,9 @@
             app.innerHTML = html;
         }
 
-        // 渲染某月 (具体记录)
+        // ---------- 月份页 (保持原样：显示该月所有跑步记录) ----------
         function renderMonth(year, month) {
+            currentRoute = { type: 'month', year: year, month: month };
             const app = document.getElementById('app');
             const mData = parsedData.years[year].months[month];
             let html = `
@@ -230,27 +383,47 @@
                 <p>共奔跑 ${mData.count} 次，累计 ${(mData.dist).toFixed(2)} 公里</p>
                 <ul>
             `;
-            
             mData.runs.forEach(run => {
-                const dist = (run.distance / 1000).toFixed(2);
-                html += `
-                    <li>
-                        <div><strong>${formatDate(run.start_date_local)} - ${run.city || '未知城市'}</strong></div>
-                        <span class="stats">
-                            距离: ${dist} km | 
-                            用时: ${formatTime(run.moving_time)} | 
-                            配速: ${formatPace(run.average_speed)} | 
-                            心率: ${run.average_heartrate ? Math.round(run.average_heartrate) + ' bpm' : '-'}
-                        </span>
-                    </li>
-                `;
+                html += generateRunItemHtml(run);
             });
             html += `</ul>`;
             app.innerHTML = html;
         }
 
-        // 启动应用
+        // ---------- 新增：日详情页 ----------
+        function renderDay(year, month, day) {
+            currentRoute = { type: 'day', year: year, month: month, day: day };
+            const app = document.getElementById('app');
+            const dayData = parsedData.years[year].months[month].days[day];
+            if (!dayData) {
+                app.innerHTML = `<a class="nav-back" onclick="renderMonth(${year}, ${month})">返回 ${year} 年 ${month} 月</a><p>没有找到该日数据</p>`;
+                return;
+            }
+            // 构造一个友好的日期标题
+            const sampleRun = dayData.runs[0];
+            const dayTitle = sampleRun ? formatShortDate(sampleRun.start_date_local) : `${year}年${month}月${day}日`;
+            let html = `
+                <a class="nav-back" onclick="renderMonth(${year}, ${month})">返回 ${year} 年 ${month} 月</a>
+                <h1>${dayTitle}</h1>
+                <p>共奔跑 ${dayData.count} 次，累计 ${(dayData.dist).toFixed(2)} 公里</p>
+                <ul>
+            `;
+            // 该日跑步记录按时间倒序（已整体排序，可直接使用）
+            dayData.runs.forEach(run => {
+                html += generateRunItemHtml(run);
+            });
+            html += `</ul>`;
+            app.innerHTML = html;
+        }
+
+        // 启动
         init();
+
+        // 暴露全局函数供onclick调用
+        window.renderHome = renderHome;
+        window.renderYear = renderYear;
+        window.renderMonth = renderMonth;
+        window.renderDay = renderDay;
     </script>
 </body>
 </html>
