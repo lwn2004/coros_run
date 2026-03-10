@@ -33,7 +33,7 @@
 
         header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 20px;
         }
 
         h1 {
@@ -52,6 +52,61 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
+
+        /* --- 新增：文艺模式开关样式 --- */
+        .mode-toggle-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+            color: #86868b;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #d9d9d9;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-accent);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+        /* ------------------------- */
 
         .table-wrapper {
             overflow-x: auto;
@@ -181,18 +236,27 @@
         <h1>Beyond Running</h1>
         <div class="subtitle">Personal Running Log & Analytics</div>
     </header>
+
+    <div class="mode-toggle-container">
+        <label class="switch">
+            <input type="checkbox" id="poeticModeSwitch" onchange="toggleLabels()">
+            <span class="slider"></span>
+        </label>
+    </div>
+
     <div class="filters">
-        <button id="btn-all" class="active" onclick="applyFilter('all', this)">全是爱</button>        
-        <button id="btn-today" onclick="applyFilter('today', this)">过去与今天</button>
-        <button id="btn-gz" onclick="applyFilter('gz', this)">城市猎人</button>
-        <button id="btn-mm" onclick="applyFilter('mm', this)">温暖的家乡</button>
-        <button id="btn-away" onclick="applyFilter('away', this)">遥远的Paradise</button>
-        <button id="btn-marathon" onclick="applyFilter('marathon', this)">未知赛事的长跑</button>
-        <button id="btn-hr160" onclick="applyFilter('hr160', this)">高心率 ≥160</button>
-        <button onclick="applyFilter('longest', this)">最长 Top20</button>
-        <button onclick="applyFilter('fastest', this)">最快 Top20</button>
-        <button onclick="applyFilter('hardest', this)">最虐 Top20</button>
-    </div>    
+        <button id="btn-all" class="active" onclick="applyFilter('all', this)"></button>        
+        <button id="btn-today" onclick="applyFilter('today', this)"></button>
+        <button id="btn-gz" onclick="applyFilter('gz', this)"></button>
+        <button id="btn-mm" onclick="applyFilter('mm', this)"></button>
+        <button id="btn-away" onclick="applyFilter('away', this)"></button>
+        <button id="btn-marathon" onclick="applyFilter('marathon', this)"></button>
+        <button id="btn-hr160" onclick="applyFilter('hr160', this)"></button>
+        <button id="btn-longest" onclick="applyFilter('longest', this)"></button>
+        <button id="btn-fastest" onclick="applyFilter('fastest', this)"></button>
+        <button id="btn-hardest" onclick="applyFilter('hardest', this)"></button>
+    </div>   
+     
     <div id="loader" class="loading-status">正在同步运动云端数据...</div>
 
     <div class="table-wrapper">
@@ -219,6 +283,69 @@
     let currentData = [];
     let currentSortCol = 'date';
     let sortAsc = false;
+
+    // ----- 新增：双套文案配置 -----
+    let isPoeticMode = false;
+    let filterCountsObj = {}; // 存储各个类别的数量
+
+    const labelsStandard = {
+        all: '全部',
+        today: '史上今日',
+        gz: '广州',
+        mm: '茂名',
+        away: '去远方',
+        marathon: '马拉松',
+        hr160: '高心率 ≥160',
+        longest: '最长 Top20',
+        fastest: '最快 Top20',
+        hardest: '最虐 Top20'
+    };
+
+    const labelsPoetic = {
+        all: '全是爱',
+        today: '过去与今天',
+        gz: '城市猎人',
+        mm: '温暖的家乡',
+        away: '遥远的Paradise',
+        marathon: '未知赛事的长跑',
+        hr160: '高心率 ≥160',    // 后续不改
+        longest: '最长 Top20',   // 后续不改
+        fastest: '最快 Top20',   // 后续不改
+        hardest: '最虐 Top20'    // 后续不改
+    };
+
+    // 切换文案开关触发
+    function toggleLabels() {
+        isPoeticMode = document.getElementById('poeticModeSwitch').checked;
+        renderButtonLabels();
+    }
+
+    // 根据当前模式渲染按钮文字和数量
+    function renderButtonLabels() {
+        const labels = isPoeticMode ? labelsPoetic : labelsStandard;
+        
+        const setBtnInfo = (id, key, count) => {
+            const btn = document.getElementById(id);
+            if (btn) {
+                // 如果有count参数，说明需要显示数量（后几个Top20不需要数量统计）
+                btn.innerHTML = `${labels[key]}${count !== undefined ? ` <span class="count">${count}</span>` : ''}`;
+            }
+        };
+
+        setBtnInfo('btn-all', 'all', filterCountsObj.all);
+        setBtnInfo('btn-today', 'today', filterCountsObj.today);
+        setBtnInfo('btn-gz', 'gz', filterCountsObj.gz);
+        setBtnInfo('btn-mm', 'mm', filterCountsObj.mm);
+        setBtnInfo('btn-away', 'away', filterCountsObj.away);
+        setBtnInfo('btn-marathon', 'marathon', filterCountsObj.marathon);
+        setBtnInfo('btn-hr160', 'hr160', filterCountsObj.hr160);
+        
+        // 渲染没有数字的按钮
+        setBtnInfo('btn-longest', 'longest');
+        setBtnInfo('btn-fastest', 'fastest');
+        setBtnInfo('btn-hardest', 'hardest');
+    }
+    // ----------------------------
 
     // 转换米为公里
     const toKM = m => (m / 1000).toFixed(2);
@@ -252,20 +379,14 @@
         const hrRest = 50;
         const hrMax = 191;
         
-        // 如果没有心率数据或低于静息心率，视为无冲动负荷
         if (hr <= hrRest) return 0; 
         
-        // 运动时间 (转换成分钟)
         const durationMinutes = movingTimeToSeconds(movingTimeStr) / 60;
-        
-        // HRratio = (HRexercise - HRrest) / (HRmax - HRrest)
         const hrRatio = (hr - hrRest) / (hrMax - hrRest);
         
-        // Y = e^(α * HRratio), α=1.92
         const alpha = 1.92;
         const y = Math.exp(alpha * hrRatio);
         
-        // TRIMP = 时间(分钟) * HRratio * Y
         return durationMinutes * hrRatio * y;
     }
 
@@ -276,12 +397,9 @@
         data.forEach(item => {
             const row = document.createElement('tr');
             
-            // 处理日期格式，拆分出年份以便在手机端隐藏
-            let dateStr = item.start_date_local.substring(0,16).replace('T', ' '); // YYYY-MM-DD HH:mm
+            let dateStr = item.start_date_local.substring(0,16).replace('T', ' ');
             let yearDateStr = dateStr.substring(0, 10);
             let timeStr = dateStr.substring(11);
-            let yearStr = dateStr.substring(0, 5); // "YYYY-"
-            let restDateStr = dateStr.substring(5); // "MM-DD HH:mm"
 
             row.innerHTML = `
             <td style="color:#8c8c8c">${yearDateStr}<span class="time-text"> ${timeStr}</span></td>
@@ -296,13 +414,13 @@
         });
     }
 
-    // 动态计算并填充过滤按钮的条目数
+    // 动态计算条目数，并触发渲染
     function updateFilterCounts() {
         const today = new Date();
         const m = today.getMonth();
         const d = today.getDate();
 
-        const counts = {
+        filterCountsObj = {
             all: rawData.length,
             today: rawData.filter(r => {
                 const t = new Date(r.start_date_local);
@@ -315,17 +433,10 @@
             hr160: rawData.filter(r => r.average_heartrate >= 160).length
         };
 
-        // 渲染数字到按钮中
-        document.getElementById('btn-all').innerHTML = `全是爱 <span class="count">${counts.all}</span>`;
-        document.getElementById('btn-today').innerHTML = `过去与今天 <span class="count">${counts.today}</span>`;
-        document.getElementById('btn-gz').innerHTML = `城市猎人 <span class="count">${counts.gz}</span>`;
-        document.getElementById('btn-mm').innerHTML = `温暖的家乡 <span class="count">${counts.mm}</span>`;
-        document.getElementById('btn-away').innerHTML = `遥远的Paradise <span class="count">${counts.away}</span>`;
-        document.getElementById('btn-marathon').innerHTML = `未知赛事的长跑 <span class="count">${counts.marathon}</span>`;
-        document.getElementById('btn-hr160').innerHTML = `高心率 ≥160 <span class="count">${counts.hr160}</span>`;
+        // 计算完毕后，调用渲染按钮文字
+        renderButtonLabels();
     }
 
-    // 更新列头排序指示器
     function updateSortIcons() {
         document.querySelectorAll('.sort-icon').forEach(el => el.innerHTML = '');
         if (currentSortCol) {
@@ -339,7 +450,6 @@
             const response = await fetch(API_URL);
             const data = await response.json();
             
-            // 初始处理：按照时间降序排列
             rawData = data.sort((a, b) => new Date(b.start_date_local) - new Date(a.start_date_local));
             currentData = [...rawData];
             
@@ -356,12 +466,13 @@
         }
     }
 
+    // （保留原有排序与筛选逻辑）
     function sortTable(type) {
         if (currentSortCol === type) {
             sortAsc = !sortAsc;
         } else {
             currentSortCol = type;
-            sortAsc = false; // 切换新列时，默认用降序（更符合跑步数据的查看习惯）
+            sortAsc = false;
         }
 
         updateSortIcons();
@@ -395,13 +506,11 @@
     }
 
     function applyFilter(type, btnObj) {
-        // 更新按钮活跃状态
         if (btnObj) {
             document.querySelectorAll('.filters button').forEach(b => b.classList.remove('active'));
             btnObj.classList.add('active');
         }
 
-        // 筛选逻辑可能打乱原有排序，清除排序指示器
         currentSortCol = null;
         updateSortIcons();
 
@@ -442,7 +551,6 @@
                 .slice(0, 20);
                 break;
             case 'hardest':
-                // 更新：使用 TRIMP 训练冲动核心算法进行排序
                 currentData = [...rawData]
                 .sort((a, b) => calcTRIMP(b.moving_time, b.average_heartrate) - calcTRIMP(a.moving_time, a.average_heartrate))
                 .slice(0, 20);
@@ -450,7 +558,6 @@
             case 'all':
             default:
                 currentData = [...rawData];
-                // 恢复默认排序指示
                 currentSortCol = 'date';
                 sortAsc = false;
                 updateSortIcons();
@@ -458,7 +565,7 @@
         }
 
         renderTable(currentData);
-    }    
+    }   
     
     loadData();
 </script>
