@@ -149,6 +149,13 @@
             color: #fff;
             box-shadow: 0 4px 10px rgba(24, 144, 255, 0.3);
         }
+        
+        /* 计数的样式 */
+        .count {
+            font-size: 0.85em;
+            opacity: 0.8;
+            margin-left: 3px;
+        }
 
         /* 细分展示控制 */
         .unit { display: inline; }
@@ -156,24 +163,11 @@
 
         /* 手机适配 */
         @media (max-width: 700px) {
-            body {
-                padding: 10px;
-            }
-            .container {
-                padding: 20px 10px;
-            }
-            th, td {
-                padding: 12px 6px;
-                font-size: 0.85rem;
-            }
-            h1 {
-                font-size: 1.8rem;
-            }
-            .filters button {
-                padding: 5px 12px;
-                font-size: 0.85rem;
-            }
-            /* 手机端隐藏多余信息以保重点 */
+            body { padding: 10px; }
+            .container { padding: 20px 10px; }
+            th, td { padding: 12px 6px; font-size: 0.85rem; }
+            h1 { font-size: 1.8rem; }
+            .filters button { padding: 5px 12px; font-size: 0.85rem; }
             .hide-mobile { display: none !important; }
             .unit { display: none !important; }
             .time-text { display: none !important; }
@@ -189,12 +183,12 @@
     </header>
     <div class="filters">
         <button id="btn-all" class="active" onclick="applyFilter('all', this)">全是爱</button>        
-        <button onclick="applyFilter('today', this)">过去与今天</button>
-        <button onclick="applyFilter('gz', this)">在省城</button>
-        <button onclick="applyFilter('mm', this)">温暖的家乡</button>
-        <button onclick="applyFilter('away', this)">遥远的Paradise</button>
-        <button onclick="applyFilter('marathon', this)">未知赛事的长跑</button>
-        <button onclick="applyFilter('hr160', this)">高心率 ≥160</button>
+        <button id="btn-today" onclick="applyFilter('today', this)">过去与今天</button>
+        <button id="btn-gz" onclick="applyFilter('gz', this)">城市猎人</button>
+        <button id="btn-mm" onclick="applyFilter('mm', this)">温暖的家乡</button>
+        <button id="btn-away" onclick="applyFilter('away', this)">遥远的Paradise</button>
+        <button id="btn-marathon" onclick="applyFilter('marathon', this)">未知赛事的长跑</button>
+        <button id="btn-hr160" onclick="applyFilter('hr160', this)">高心率 ≥160</button>
         <button onclick="applyFilter('longest', this)">最长 Top20</button>
         <button onclick="applyFilter('fastest', this)">最快 Top20</button>
         <button onclick="applyFilter('hardest', this)">最虐 Top20</button>
@@ -252,6 +246,29 @@
         }
     }
 
+    // 计算 TRIMP (Training Impulse)
+    function calcTRIMP(movingTimeStr, averageHeartrate) {
+        const hr = averageHeartrate || 0;
+        const hrRest = 50;
+        const hrMax = 191;
+        
+        // 如果没有心率数据或低于静息心率，视为无冲动负荷
+        if (hr <= hrRest) return 0; 
+        
+        // 运动时间 (转换成分钟)
+        const durationMinutes = movingTimeToSeconds(movingTimeStr) / 60;
+        
+        // HRratio = (HRexercise - HRrest) / (HRmax - HRrest)
+        const hrRatio = (hr - hrRest) / (hrMax - hrRest);
+        
+        // Y = e^(α * HRratio), α=1.92
+        const alpha = 1.92;
+        const y = Math.exp(alpha * hrRatio);
+        
+        // TRIMP = 时间(分钟) * HRratio * Y
+        return durationMinutes * hrRatio * y;
+    }
+
     function renderTable(data){
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = '';
@@ -279,6 +296,35 @@
         });
     }
 
+    // 动态计算并填充过滤按钮的条目数
+    function updateFilterCounts() {
+        const today = new Date();
+        const m = today.getMonth();
+        const d = today.getDate();
+
+        const counts = {
+            all: rawData.length,
+            today: rawData.filter(r => {
+                const t = new Date(r.start_date_local);
+                return t.getMonth() === m && t.getDate() === d;
+            }).length,
+            gz: rawData.filter(r => r.city && r.city.includes('广州')).length,
+            mm: rawData.filter(r => r.city && r.city.includes('茂名')).length,
+            away: rawData.filter(r => !r.city || !(r.city.includes('广州') || r.city.includes('茂名'))).length,
+            marathon: rawData.filter(r => r.distance >= 42000).length,
+            hr160: rawData.filter(r => r.average_heartrate >= 160).length
+        };
+
+        // 渲染数字到按钮中
+        document.getElementById('btn-all').innerHTML = `全是爱 <span class="count">${counts.all}</span>`;
+        document.getElementById('btn-today').innerHTML = `过去与今天 <span class="count">${counts.today}</span>`;
+        document.getElementById('btn-gz').innerHTML = `城市猎人 <span class="count">${counts.gz}</span>`;
+        document.getElementById('btn-mm').innerHTML = `温暖的家乡 <span class="count">${counts.mm}</span>`;
+        document.getElementById('btn-away').innerHTML = `遥远的Paradise <span class="count">${counts.away}</span>`;
+        document.getElementById('btn-marathon').innerHTML = `未知赛事的长跑 <span class="count">${counts.marathon}</span>`;
+        document.getElementById('btn-hr160').innerHTML = `高心率 ≥160 <span class="count">${counts.hr160}</span>`;
+    }
+
     // 更新列头排序指示器
     function updateSortIcons() {
         document.querySelectorAll('.sort-icon').forEach(el => el.innerHTML = '');
@@ -298,6 +344,7 @@
             currentData = [...rawData];
             
             updateSortIcons();
+            updateFilterCounts(); // 渲染按钮数量
             renderTable(currentData);
 
             document.getElementById('loader').style.display = 'none';
@@ -395,12 +442,9 @@
                 .slice(0, 20);
                 break;
             case 'hardest':
-                // 优化最虐算法：加重心率的权重(平方计算)，突显高心率带来的疲劳指数
+                // 更新：使用 TRIMP 训练冲动核心算法进行排序
                 currentData = [...rawData]
-                .sort((a, b) => 
-                    (movingTimeToSeconds(b.moving_time) * Math.pow((b.average_heartrate || 0), 2)) -
-                    (movingTimeToSeconds(a.moving_time) * Math.pow((a.average_heartrate || 0), 2))
-                )
+                .sort((a, b) => calcTRIMP(b.moving_time, b.average_heartrate) - calcTRIMP(a.moving_time, a.average_heartrate))
                 .slice(0, 20);
                 break;
             case 'all':
