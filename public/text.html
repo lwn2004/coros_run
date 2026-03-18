@@ -3,178 +3,224 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>跑步记录</title>
+    <title>跑步记录看板</title>
     <style>
         :root {
-            --bg-color: #ffffff;
-            --text-primary: #111827;
-            --text-secondary: #6b7280;
-            --text-tertiary: #9ca3af;
-            --line-color: #e5e7eb;
-            --accent-color: #111827;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --line-color: #e2e8f0;
+            
+            /* 字段配色：为不同数据赋予独特标识色 */
+            --color-dist: #2563eb;  /* 蓝色 - 距离 */
+            --color-time: #059669;  /* 绿色 - 时间 */
+            --color-pace: #d97706;  /* 橙色 - 配速 */
+            --color-count: #7c3aed; /* 紫色 - 次数 */
             
             --pb-bg: #fef2f2;
             --pb-text: #b91c1c;
-            --pb-border: #fca5a5;
         }
+
         @media (prefers-color-scheme: dark) {
             :root {
                 --bg-color: #0f172a;
+                --card-bg: #1e293b;
                 --text-primary: #f8fafc;
                 --text-secondary: #94a3b8;
-                --text-tertiary: #64748b;
                 --line-color: #334155;
-                --accent-color: #f8fafc;
-
+                --color-dist: #60a5fa;
+                --color-time: #34d399;
+                --color-pace: #fbbf24;
+                --color-count: #a78bfa;
+                
                 --pb-bg: #450a0a;
                 --pb-text: #fca5a5;
-                --pb-border: #991b1b;
             }
         }
         
         body {
-            font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
-            -webkit-font-smoothing: antialiased;
-            max-width: 680px;
+            font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 560px;
             margin: 0 auto;
-            padding: 40px 24px;
+            padding: 40px 20px;
             background-color: var(--bg-color);
             color: var(--text-primary);
             line-height: 1.5;
         }
 
-        /* 顶部区域布局 */
         .top-section {
             display: flex;
             justify-content: space-between;
-            align-items: flex-end;
+            align-items: center;
             margin-bottom: 32px;
-            padding-bottom: 24px;
-            border-bottom: 1px solid var(--line-color);
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
         .summary-card h1 {
-            font-weight: 600;
-            font-size: 1.8rem;
             margin: 0 0 8px 0;
+            font-size: 1.5rem;
         }
+        
         .summary-stats {
+            margin: 0;
             color: var(--text-secondary);
             font-size: 0.95rem;
-            margin: 0;
         }
 
-        /* Dropdown 视图控制 */
         .view-select {
-            padding: 8px 12px;
-            font-size: 0.95rem;
+            padding: 8px 16px;
+            border-radius: 8px;
             border: 1px solid var(--line-color);
-            border-radius: 6px;
-            background-color: var(--bg-color);
+            background: var(--bg-color);
             color: var(--text-primary);
+            font-size: 0.95rem;
             cursor: pointer;
             outline: none;
         }
 
-        @media (max-width: 480px) {
-            .top-section {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 16px;
-            }
+        /* ================= 纯平时间轴样式 ================= */
+        .flat-container {
+            max-width: 560px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 24px 32px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
-        /* 层级样式 */
-        .year-block { margin-bottom: 40px; }
-        .year-title, .month-title, .day-title {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-        }
-        .year-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 16px; }
-        .month-title { font-size: 1.05rem; font-weight: 500; margin-bottom: 12px; }
-        .day-title { font-size: 0.95rem; font-weight: 500; color: var(--text-secondary); margin-bottom: 8px; }
-        
-        .month-block { margin-bottom: 24px; }
-        .day-block { margin-bottom: 16px; }
-        
-        .stats-inline {
-            font-size: 0.85rem;
-            color: var(--text-tertiary);
-            font-variant-numeric: tabular-nums;
-        }
-
-        /* 单次跑步 时间轴 */
         .run-list {
             list-style: none;
             padding: 0;
-            margin: 0 0 0 4px;
+            margin: 0 0 0 8px;
             border-left: 2px solid var(--line-color);
         }
-        .run-list.flat-mode { margin-left: 8px; }
+
         .run-item {
             position: relative;
-            padding: 12px 0 12px 20px;
+            padding: 16px 0 16px 24px;
+            border-bottom: 1px solid var(--line-color);
         }
-        .run-list.flat-mode .run-item {
-            cursor: pointer; /* 提示可交互 */
-        }
+        .run-item:last-child { border-bottom: none; }
+
         .run-item::before {
             content: '';
             position: absolute;
-            left: -5px;
-            top: 18px;
-            width: 8px;
-            height: 8px;
-            background: var(--bg-color);
-            border: 2px solid var(--text-tertiary);
+            left: -6px; /* 居中于 2px 的线 */
+            top: 24px;
+            width: 10px;
+            height: 10px;
+            background: var(--card-bg);
+            border: 2px solid var(--text-secondary);
             border-radius: 50%;
         }
+
         .run-header {
-            font-size: 0.95rem;
-            font-weight: 500;
+            font-size: 1.05rem;
+            font-weight: 600;
             margin-bottom: 4px;
         }
+
         .run-stats-detail {
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             color: var(--text-secondary);
         }
 
-        /* PB 标签样式 */
         .pb-tags {
             display: flex;
             flex-wrap: wrap;
-            gap: 6px;
-            margin-top: 6px;
+            gap: 8px;
+            margin-top: 10px;
         }
+
         .pb-tag {
             background-color: var(--pb-bg);
             color: var(--pb-text);
-            border: 1px solid var(--pb-border);
-            padding: 1px 6px;
+            border: 1px solid currentColor;
+            padding: 2px 8px;
             border-radius: 4px;
             font-size: 0.75rem;
             font-weight: 600;
         }
 
-        /* 路线图 Tooltip */
-        #svg-tooltip {
-            position: fixed; /* 使用 fixed 避免受父元素 overflow 影响 */
-            display: none;
-            z-index: 1000;
-            background: var(--bg-color);
-            border: 1px solid var(--line-color);
-            border-radius: 8px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            width: 200px;
-            height: 200px;
-            pointer-events: none; /* 穿透鼠标事件，防止闪烁 */
-            padding: 8px;
+        /* ================= 按月聚合双列网格样式 ================= */
+        .year-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            row-gap: 40px;
+            column-gap: 60px;
         }
-        #svg-tooltip img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
+
+        @media (min-width: 769px) {
+            .year-container:nth-child(odd) { position: relative; }
+            .year-container:nth-child(odd)::after {
+                content: '';
+                position: absolute;
+                right: -20px; 
+                top: 0;
+                bottom: 0;
+                width: 1px;
+                background: var(--line-color);
+            }
+        }
+
+        .year-container { min-width: 0; }
+
+        .year-header {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--text-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .month-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px dashed var(--line-color);
+        }
+        .month-row:last-child { border-bottom: none; }
+        
+        .month-row.empty { opacity: 0.25; }
+
+        .month-label { 
+            font-weight: 600; 
+            min-width: 45px; 
+            color: var(--text-primary);
+        }
+
+        .stats-group {
+            display: flex;
+            gap: 16px; 
+            font-variant-numeric: tabular-nums;
+            font-size: 0.95rem;
+            text-align: right;
+        }
+
+        .val-dist { color: var(--color-dist); font-weight: 600; width: 65px;}
+        .val-time { color: var(--color-time); width: 65px; }
+        .val-pace { color: var(--color-pace); font-weight: 500; width: 35px; }
+        .val-count { color: var(--color-count); width: 45px; }
+
+        @media (max-width: 768px) {
+            .top-section {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+            .year-grid { 
+                grid-template-columns: 1fr; 
+                row-gap: 32px;
+            }
+            .year-container:nth-child(odd)::after { display: none; }
         }
 
         .loading {
@@ -190,10 +236,6 @@
     <div id="app">
         <div class="loading">正在加载数据...</div>
     </div>
-    
-    <div id="svg-tooltip">
-        <img id="svg-preview-img" src="" alt="Route Preview">
-    </div>
 
     <script>
         const API_URL = 'https://run.linwn.net/data/all.json';
@@ -201,45 +243,41 @@
         
         let parsedData = { total: { dist: 0, time: 0, count: 0 }, years: {} };
         let globalRawData = [];
-        
-        // 优化 PB 字典：同时支持 ID 匹配和 Date 匹配
         let pbMapById = {}; 
         let pbMapByDate = {}; 
         
-        // 默认纯平时间轴
+        // 默认视图：纯平时间轴
         let currentView = 'flat'; 
 
-        function padZero(num) { return num.toString().padStart(2, '0'); }
+        // ---------- 数据处理工具 ----------
 
-        function parseMovingTime(timeStr) {
-            if (!timeStr) return 0;
-            if (typeof timeStr === 'number') return timeStr;
-            const str = String(timeStr).split('.')[0]; 
-            const parts = str.split(':').map(Number);
-            if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
-            else if (parts.length === 2) return parts[0] * 60 + parts[1];
-            return Number(str) || 0;
-        }
+        const padZero = (num) => num.toString().padStart(2, '0');
 
-        function formatTime(timeSec) {
+        const parseTime = (str) => {
+            if (!str) return 0;
+            const parts = String(str).split('.')[0].split(':').map(Number);
+            return parts.length === 3 ? parts[0]*3600 + parts[1]*60 + parts[2] : (parts[0]*60 + parts[1] || 0);
+        };
+
+        const formatTime = (timeSec) => {
             if (!timeSec) return '-';
             const h = Math.floor(timeSec / 3600);
             const m = Math.floor((timeSec % 3600) / 60);
             const s = Math.floor(timeSec % 60);
             return h > 0 ? `${h}:${padZero(m)}:${padZero(s)}` : `${m}:${padZero(s)}`;
-        }
-        
-        function formatPace(speedMS) {
-            if (!speedMS) return '-';
-            const secPerKm = 1000 / speedMS;
-            return `${Math.floor(secPerKm / 60)}'${Math.floor(secPerKm % 60).toString().padStart(2, '0')}"`;
-        }
+        };
 
-        function formatAvgPace(totalTimeSec, totalDistKm) {
-            if (!totalDistKm || totalDistKm <= 0) return '-';
-            const secPerKm = totalTimeSec / totalDistKm;
-            return `${Math.floor(secPerKm / 60)}'${Math.floor(secPerKm % 60).toString().padStart(2, '0')}"`;
-        }
+        const formatPace = (s) => {
+            if (!s) return "-'--\"";
+            const sec = 1000 / s;
+            return `${Math.floor(sec/60)}'${Math.floor(sec%60).toString().padStart(2,'0')}"`;
+        };
+
+        const formatAvgPace = (t, d) => {
+            if (!d) return "-'--\"";
+            const sec = t / d;
+            return `${Math.floor(sec/60)}'${Math.floor(sec%60).toString().padStart(2,'0')}"`;
+        };
 
         function getPbName(type) {
             const map = {
@@ -261,7 +299,7 @@
                 const rawData = await runRes.json();
                 const pbDataArray = await pbRes.json();
 
-                // 构建 PB Map (双重索引：ID 和 Date)
+                // 建立 PB 索引 (双重保障)
                 pbDataArray.forEach(pb => {
                     if (pb.labelIdStr) {
                         if (!pbMapById[pb.labelIdStr]) pbMapById[pb.labelIdStr] = [];
@@ -274,236 +312,176 @@
                     }
                 });
 
-                rawData.sort((a, b) => new Date(b.start_date_local.replace(' ', 'T')) - new Date(a.start_date_local.replace(' ', 'T')));
-                globalRawData = rawData;
+                // 按日期倒序排序
+                globalRawData = rawData.sort((a,b) => new Date(b.start_date_local.replace(' ','T')) - new Date(a.start_date_local.replace(' ','T')));
 
-                rawData.forEach(run => {
-                    const date = new Date(run.start_date_local.replace(' ', 'T'));
-                    const year = date.getFullYear().toString();
-                    const month = date.getMonth() + 1;
-                    const day = date.getDate();
+                // 聚合计算总计及按月数据
+                globalRawData.forEach(run => {
+                    const d = new Date(run.start_date_local.replace(' ','T'));
+                    const year = d.getFullYear().toString();
+                    const month = d.getMonth() + 1;
                     
                     const distKm = run.distance / 1000;
-                    const timeSec = parseMovingTime(run.moving_time);
+                    const timeSec = parseTime(run.moving_time);
 
                     parsedData.total.dist += distKm;
                     parsedData.total.time += timeSec;
                     parsedData.total.count++;
 
-                    if (!parsedData.years[year]) parsedData.years[year] = { dist: 0, time: 0, count: 0, months: {} };
+                    if (!parsedData.years[year]) {
+                        parsedData.years[year] = { dist: 0, time: 0, count: 0, months: {} };
+                    }
                     parsedData.years[year].dist += distKm;
                     parsedData.years[year].time += timeSec;
                     parsedData.years[year].count++;
 
-                    if (!parsedData.years[year].months[month]) parsedData.years[year].months[month] = { dist: 0, time: 0, count: 0, days: {} };
+                    if (!parsedData.years[year].months[month]) {
+                        parsedData.years[year].months[month] = { dist: 0, time: 0, count: 0 };
+                    }
                     parsedData.years[year].months[month].dist += distKm;
                     parsedData.years[year].months[month].time += timeSec;
                     parsedData.years[year].months[month].count++;
-
-                    if (!parsedData.years[year].months[month].days[day]) parsedData.years[year].months[month].days[day] = { dist: 0, time: 0, count: 0, runs: [] };
-                    parsedData.years[year].months[month].days[day].dist += distKm;
-                    parsedData.years[year].months[month].days[day].time += timeSec;
-                    parsedData.years[year].months[month].days[day].count++;
-                    parsedData.years[year].months[month].days[day].runs.push(run);
                 });
 
                 renderApp();
-                initSvgTooltip();
             } catch (err) {
-                document.getElementById('app').innerHTML = '<div class="loading">加载失败，请检查网络连接</div>';
+                document.getElementById('app').innerHTML = '<div class="loading">加载数据失败，请检查网络连接。</div>';
                 console.error(err);
             }
         }
 
-        // ---------- Tooltip 交互 ----------
-        function initSvgTooltip() {
-            const tooltip = document.getElementById('svg-tooltip');
-            const previewImg = document.getElementById('svg-preview-img');
-
-            document.addEventListener('mouseover', (e) => {
-                if (currentView !== 'flat') return; // 仅纯平模式触发
-                
-                const item = e.target.closest('.run-item[data-runid]');
-                if (item) {
-                    const runId = item.getAttribute('data-runid');
-                    if(runId && runId !== 'undefined') {
-                        previewImg.src = `https://run.linwn.net/images/routesvg/${runId}.svg`;
-                        tooltip.style.display = 'block';
-                    }
-                }
-            });
-
-            document.addEventListener('mousemove', (e) => {
-                if (tooltip.style.display === 'block') {
-                    // 跟随鼠标，稍微偏移防止遮挡
-                    tooltip.style.left = (e.clientX + 15) + 'px';
-                    tooltip.style.top = (e.clientY + 15) + 'px';
-                }
-            });
-
-            document.addEventListener('mouseout', (e) => {
-                const item = e.target.closest('.run-item[data-runid]');
-                if (item) {
-                    tooltip.style.display = 'none';
-                    previewImg.src = ''; // 清空避免下次闪烁旧图
-                }
-            });
-        }
-
         // ---------- 视图渲染 ----------
 
-        function bindControls() {
-            const select = document.getElementById('viewModeSelect');
-            select.addEventListener('change', (e) => {
+        function renderApp() {
+            const app = document.getElementById('app');
+            
+            let html = `
+                <div class="top-section">
+                    <div class="summary-card">
+                        <h1>Running Dashboard</h1>
+                        <p class="summary-stats">总计 ${parsedData.total.count} 次跑 · ${(parsedData.total.dist).toFixed(2)} km</p>
+                    </div>
+                    
+                    <select id="viewModeSelect" class="view-select">
+                        <option value="flat" ${currentView === 'flat' ? 'selected' : ''}>按时间轴</option>
+                        <option value="month" ${currentView === 'month' ? 'selected' : ''}>按月聚合</option>
+                    </select>
+                </div>
+            `;
+
+            if (currentView === 'month') {
+                html += renderMonthComparison();
+            } else {
+                html += renderFlatTimeline();
+            }
+
+            app.innerHTML = html;
+            
+            document.getElementById('viewModeSelect').addEventListener('change', (e) => {
                 currentView = e.target.value;
                 renderApp();
             });
         }
 
-        function renderSingleRun(run, showFullDate = false) {
-            const dist = (run.distance / 1000).toFixed(2);
-            const timeStr = formatTime(parseMovingTime(run.moving_time));
-            const paceStr = formatPace(run.average_speed);
-            const hrStr = run.average_heartrate ? `${Math.round(run.average_heartrate)} bpm` : '-';
-            const city = run.city || '未知城市';
-            const runId = String(run.run_id || run.id);
+        // 渲染 1：纯平时间轴
+        function renderFlatTimeline() {
+            let html = `<div class="flat-container"><ul class="run-list">`;
             
-            const d = new Date(run.start_date_local.replace(' ', 'T'));
-            let timeText = `${padZero(d.getHours())}:${padZero(d.getMinutes())}`;
+            globalRawData.forEach(run => {
+                const dist = (run.distance / 1000).toFixed(2);
+                const timeStr = formatTime(parseTime(run.moving_time));
+                const paceStr = formatPace(run.average_speed);
+                const hrStr = run.average_heartrate ? `${Math.round(run.average_heartrate)} bpm` : '-';
+                const city = run.city || '未知城市';
+                const runId = String(run.run_id || run.id);
+                
+                const d = new Date(run.start_date_local.replace(' ', 'T'));
+                const timeText = `${d.getFullYear()}-${padZero(d.getMonth() + 1)}-${padZero(d.getDate())} ${padZero(d.getHours())}:${padZero(d.getMinutes())}`;
+                
+                // 提取 YYYYMMDD 用于后备匹配
+                const dateKey = `${d.getFullYear()}${padZero(d.getMonth() + 1)}${padZero(d.getDate())}`;
+
+                // 双重匹配查找 PB
+                let pbs = pbMapById[runId];
+                if (!pbs || pbs.length === 0) pbs = pbMapByDate[dateKey];
+
+                let pbHtml = '';
+                if (pbs && pbs.length > 0) {
+                    let tagsHtml = pbs.map(pb => {
+                        let name = getPbName(pb.type);
+                        let val = '';
+                        if (pb.type < 100) val = ` ${formatTime(pb.record)}`; 
+                        else if (pb.type === 101) val = ` ${(pb.record/1000).toFixed(2)}km`; 
+                        return `<span class="pb-tag">${name}${val}</span>`;
+                    }).join('');
+                    pbHtml = `<div class="pb-tags">${tagsHtml}</div>`;
+                }
+
+                html += `
+                    <li class="run-item">
+                        <div class="run-header">${timeText} · ${city}</div>
+                        <div class="run-stats-detail">${dist} km · ${timeStr} · ${paceStr}/km · 心率 ${hrStr}</div>
+                        ${pbHtml}
+                    </li>
+                `;
+            });
             
-            // 提取 YYYYMMDD 用于后备匹配
-            const dateKey = `${d.getFullYear()}${padZero(d.getMonth() + 1)}${padZero(d.getDate())}`;
-
-            if (showFullDate) {
-                timeText = `${d.getFullYear()}-${padZero(d.getMonth() + 1)}-${padZero(d.getDate())} ${timeText}`;
-            }
-
-            // 双重匹配查找 PB
-            let pbs = pbMapById[runId];
-            if (!pbs || pbs.length === 0) {
-                pbs = pbMapByDate[dateKey];
-            }
-
-            let pbHtml = '';
-            if (pbs && pbs.length > 0) {
-                let tagsHtml = pbs.map(pb => {
-                    let name = getPbName(pb.type);
-                    let val = '';
-                    if (pb.type < 100) val = ` ${formatTime(pb.record)}`; 
-                    else if (pb.type === 101) val = ` ${(pb.record/1000).toFixed(2)}km`; 
-                    return `<span class="pb-tag">${name}${val}</span>`;
-                }).join('');
-                pbHtml = `<div class="pb-tags">${tagsHtml}</div>`;
-            }
-
-            // 附带 data-runid 供 hover 识别
-            return `
-                <li class="run-item" data-runid="${runId}">
-                    <div class="run-header">${timeText} · ${city}</div>
-                    <div class="run-stats-detail">${dist} km · ${timeStr} · ${paceStr}/km · 心率 ${hrStr}</div>
-                    ${pbHtml}
-                </li>
-            `;
+            html += `</ul></div>`;
+            return html;
         }
 
-        function renderApp() {
-            const app = document.getElementById('app');
-            const isFlatMode = currentView === 'flat';
-            const collapseRuns = ['day', 'month', 'year'].includes(currentView);
-            const collapseDays = ['month', 'year'].includes(currentView);
-            const collapseMonths = currentView === 'year';
+        // 渲染 2：按月并排对比
+        function renderMonthComparison() {
+            const years = Object.keys(parsedData.years).sort((a, b) => b - a);
+            let gridHtml = `<div class="year-grid">`;
 
-            let html = `
-                <div class="top-section">
-                    <div class="summary-card">
-                        <h1>运动总览</h1>
-                        <p class="summary-stats">累计跑步 ${parsedData.total.count} 次 · 总里程 ${(parsedData.total.dist).toFixed(2)} km</p>
-                    </div>
-                    
-                    <select id="viewModeSelect" class="view-select">
-                        <option value="flat" ${currentView === 'flat' ? 'selected' : ''}>纯平时间轴</option>
-                        <option value="hierarchy" ${currentView === 'hierarchy' ? 'selected' : ''}>完整层级</option>
-                        <option value="day" ${currentView === 'day' ? 'selected' : ''}>按日聚合</option>
-                        <option value="month" ${currentView === 'month' ? 'selected' : ''}>按月聚合</option>
-                        <option value="year" ${currentView === 'year' ? 'selected' : ''}>按年聚合</option>
-                    </select>
-                </div>
-                <div class="timeline">
-            `;
-
-            if (isFlatMode) {
-                html += `<ul class="run-list flat-mode">`;
-                globalRawData.forEach(run => {
-                    html += renderSingleRun(run, true); 
-                });
-                html += `</ul>`;
-            } else {
-                const years = Object.keys(parsedData.years).sort((a, b) => b - a);
-                years.forEach(year => {
-                    const yData = parsedData.years[year];
-                    const avgPace = formatAvgPace(yData.time, yData.dist);
-                    
-                    html += `
-                        <div class="year-block">
-                            <div class="year-title">
-                                <span>${year}</span>
-                                <span class="stats-inline">${yData.count} 次 · ${(yData.dist).toFixed(2)} km · ${avgPace}/km</span>
-                            </div>
-                    `;
-
-                    if (!collapseMonths) {
-                        html += `<div class="month-list">`;
-                        const months = Object.keys(yData.months).sort((a, b) => b - a);
-                        months.forEach(month => {
-                            const mData = yData.months[month];
-                            const mAvgPace = formatAvgPace(mData.time, mData.dist);
-
-                            html += `
-                                <div class="month-block">
-                                    <div class="month-title">
-                                        <span>${padZero(month)} 月</span>
-                                        <span class="stats-inline">${mData.count} 次 · ${(mData.dist).toFixed(2)} km · ${mAvgPace}/km</span>
-                                    </div>
-                            `;
-
-                            if (!collapseDays) {
-                                html += `<div class="day-list">`;
-                                const days = Object.keys(mData.days).sort((a, b) => b - a);
-                                days.forEach(day => {
-                                    const dData = mData.days[day];
-                                    const dAvgPace = formatAvgPace(dData.time, dData.dist);
-                                    
-                                    html += `
-                                        <div class="day-block">
-                                            <div class="day-title">
-                                                <span>${padZero(month)} / ${padZero(day)}</span>
-                                                <span class="stats-inline">${dData.count} 次 · ${(dData.dist).toFixed(2)} km · ${dAvgPace}/km</span>
+            for (let i = 0; i < years.length; i++) {
+                const year = years[i];
+                const yData = parsedData.years[year];
+                
+                gridHtml += `
+                    <div class="year-container">
+                        <div class="year-header">
+                            <span>${year} 年</span>
+                            <span class="stats-inline" style="font-size:0.9rem; font-weight:400; color: var(--text-secondary);">
+                                <span class="val-dist" style="color:var(--text-secondary); width:auto">${yData.dist.toFixed(1)} km</span> · 
+                                <span class="val-pace" style="color:var(--text-secondary); width:auto">${formatAvgPace(yData.time, yData.dist)} /km</span>
+                            </span>
+                        </div>
+                        <div class="month-table">
+                            ${
+                                Array.from({length: 12}, (_, k) => 12 - k).map(m => {
+                                    const mData = yData.months[m];
+                                    if (!mData) {
+                                        return `
+                                            <div class="month-row empty">
+                                                <span class="month-label">${padZero(m)} 月</span>
+                                                <div class="stats-group">
+                                                    <span class="val-count">0 次</span>
+                                                    <span class="val-dist">0.0 km</span>
+                                                    <span class="val-pace">-'-"</span>
+                                                </div>
                                             </div>
-                                    `;
-
-                                    if (!collapseRuns && dData.runs) {
-                                        html += `<ul class="run-list">`;
-                                        dData.runs.forEach(run => {
-                                            html += renderSingleRun(run, false); 
-                                        });
-                                        html += `</ul>`;
+                                        `;
                                     }
-                                    html += `</div>`; 
-                                });
-                                html += `</div>`; 
+                                    return `
+                                        <div class="month-row">
+                                            <span class="month-label">${padZero(m)} 月</span>
+                                            <div class="stats-group">
+                                                <span class="val-count">${mData.count} 次</span>
+                                                <span class="val-dist">${mData.dist.toFixed(1)} km</span>
+                                                <span class="val-pace">${formatAvgPace(mData.time, mData.dist)}</span>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')
                             }
-                            html += `</div>`; 
-                        });
-                        html += `</div>`; 
-                    }
-                    html += `</div>`; 
-                });
+                        </div>
+                    </div>
+                `;
             }
-
-            html += `</div>`; 
-            app.innerHTML = html;
-            
-            bindControls();
+            gridHtml += `</div>`;
+            return gridHtml;
         }
 
         init();
