@@ -72,7 +72,6 @@
         .month-title {
             display: inline-block;
             width: 2em;
-            text-align: right;
             font-size: 1rem;
             white-space: nowrap;
          }
@@ -177,11 +176,11 @@
         let expandedMonths = new Set();
 
         let displayOptions = {
-            showCount: true,
+            showCount: false,
             showDistance: true,
-            showTotalTime: false,    // 总用时默认关闭
+            showTotalTime: false,
             showAvgPace: true,
-            showAvgHr: false          // 平均心率默认关闭
+            showAvgHr: false
         };
 
         window.toggleDisplayOption = function(opt) {
