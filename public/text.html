@@ -12,6 +12,7 @@
             --link-color: #111111;
             --link-hover: #2563eb;
             --line-color: #e5e5e5;
+            --checkbox-bg: #f5f5f5;
         }
         @media (prefers-color-scheme: dark) {
             :root {
@@ -21,6 +22,7 @@
                 --link-color: #ffffff;
                 --link-hover: #8ab4f8;
                 --line-color: #333333;
+                --checkbox-bg: #2a2a2a;
             }
         }
         body {
@@ -132,6 +134,31 @@
             font-weight: 500;
             color: var(--text-primary);
         }
+
+        .display-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem 1.5rem;
+            background: var(--checkbox-bg);
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+            border: 1px solid var(--line-color);
+        }
+        .display-options label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            color: var(--text-primary);
+        }
+        .display-options input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: var(--link-hover);
+        }
     </style>
 </head>
 <body>
@@ -143,40 +170,65 @@
     <script>
         const API_URL = 'https://run.linwn.net/data/all.json';
         
-        // 增加了 totalSecs, hrSum, hrCount 用于计算配速和心率
         let parsedData = { total: { dist: 0, count: 0, totalSecs: 0, hrSum: 0, hrCount: 0 }, years: {} };
         
+        // 展开状态
         let expandedYears = new Set();
         let expandedMonths = new Set();
+
+        let displayOptions = {
+            showCount: true,
+            showDistance: true,
+            showTotalTime: false,    // 总用时默认关闭
+            showAvgPace: true,
+            showAvgHr: false          // 平均心率默认关闭
+        };
+
+        window.toggleDisplayOption = function(opt) {
+            displayOptions[opt] = !displayOptions[opt];
+            renderApp();
+        };
 
         function padZero(num) { return num.toString().padStart(2, '0'); }
         
         function formatTime(timeStr) {
             if (!timeStr) return '-';
             const parts = timeStr.split(':');
-            return `${parseInt(parts[0]) > 0 ? parseInt(parts[0]) + '小时' : ''}${parseInt(parts[1])}分${parseInt(parts[2])}秒`;
+            return `${parseInt(parts[0]) > 0 ? parseInt(parts[0]) + ':' : ''}${parseInt(parts[1])}:${parseInt(parts[2])}`;
         }
 
-        // 新增：将 moving_time 字符串 ("2:03:27.090000") 转换为总秒数
         function parseTimeToSeconds(timeStr) {
             if (!timeStr) return 0;
             const parts = timeStr.split(':');
             const h = parseInt(parts[0]) || 0;
             const m = parseInt(parts[1]) || 0;
-            const s = parseFloat(parts[2]) || 0; // parseFloat 处理带有小数的秒数
+            const s = parseFloat(parts[2]) || 0;
             return (h * 3600) + (m * 60) + s;
         }
 
-        // 新增：根据总耗时（秒）和总距离（公里）计算平均配速
         function calcAvgPace(totalSecs, totalDistKm) {
             if (!totalDistKm || totalDistKm <= 0) return '-';
             const secPerKm = totalSecs / totalDistKm;
             return `${Math.floor(secPerKm / 60)}'${Math.floor(secPerKm % 60).toString().padStart(2, '0')}"`;
         }
 
-        // 新增：计算平均心率
         function calcAvgHr(hrSum, hrCount) {
             return hrCount > 0 ? Math.round(hrSum / hrCount) + ' bpm' : '-';
+        }
+
+        function formatTotalTime(seconds) {
+            if (!seconds || seconds <= 0) return '0min';
+            const totalSecsInt = Math.floor(seconds); // 忽略毫秒
+            const hours = Math.floor(totalSecsInt / 3600);
+            const minutes = Math.floor((totalSecsInt % 3600) / 60);
+            const secs = totalSecsInt % 60;
+            if (hours > 0) {
+                return `${hours}h${minutes}min`;
+            } else if (minutes > 0) {
+                return `${minutes}min`;
+            } else {
+                return `${secs}sec`;
+            }
         }
         
         function formatPace(speedMS) {
@@ -207,7 +259,6 @@
                     const timeSecs = parseTimeToSeconds(run.moving_time);
                     const hr = run.average_heartrate ? parseFloat(run.average_heartrate) : 0;
 
-                    // 统计总计数据
                     parsedData.total.dist += distKm;
                     parsedData.total.count++;
                     parsedData.total.totalSecs += timeSecs;
@@ -216,7 +267,6 @@
                         parsedData.total.hrCount++;
                     }
 
-                    // 统计按年数据
                     if (!parsedData.years[year]) parsedData.years[year] = { dist: 0, count: 0, totalSecs: 0, hrSum: 0, hrCount: 0, months: {} };
                     parsedData.years[year].dist += distKm;
                     parsedData.years[year].count++;
@@ -226,7 +276,6 @@
                         parsedData.years[year].hrCount++;
                     }
 
-                    // 统计按月数据
                     if (!parsedData.years[year].months[month]) parsedData.years[year].months[month] = { dist: 0, count: 0, totalSecs: 0, hrSum: 0, hrCount: 0, days: {} };
                     parsedData.years[year].months[month].dist += distKm;
                     parsedData.years[year].months[month].count++;
@@ -236,7 +285,6 @@
                         parsedData.years[year].months[month].hrCount++;
                     }
 
-                    // 按日数据记录
                     if (!parsedData.years[year].months[month].days[day]) parsedData.years[year].months[month].days[day] = { dist: 0, count: 0, runs: [] };
                     parsedData.years[year].months[month].days[day].dist += distKm;
                     parsedData.years[year].months[month].days[day].count++;
@@ -283,15 +331,36 @@
         function renderApp() {
             const app = document.getElementById('app');
             
-            // 计算生涯总配速与总心率
             const totalPace = calcAvgPace(parsedData.total.totalSecs, parsedData.total.dist);
             const totalHr = calcAvgHr(parsedData.total.hrSum, parsedData.total.hrCount);
 
-            let html = `
-                <h1>生涯总计</h1>
-                <p>共奔跑 ${parsedData.total.count} 次，累计 ${(parsedData.total.dist).toFixed(2)} 公里<br>平均配速: ${totalPace} | 平均心率: ${totalHr}</p>
-                <ul>
+            let optionsHtml = `
+                <div class="display-options">
+                    <label><input type="checkbox" ${displayOptions.showCount ? 'checked' : ''} onchange="toggleDisplayOption('showCount')"> 总次数</label>
+                    <label><input type="checkbox" ${displayOptions.showDistance ? 'checked' : ''} onchange="toggleDisplayOption('showDistance')"> 总里程</label>
+                    <label><input type="checkbox" ${displayOptions.showTotalTime ? 'checked' : ''} onchange="toggleDisplayOption('showTotalTime')"> 总用时</label>
+                    <label><input type="checkbox" ${displayOptions.showAvgPace ? 'checked' : ''} onchange="toggleDisplayOption('showAvgPace')"> 平均配速</label>
+                    <label><input type="checkbox" ${displayOptions.showAvgHr ? 'checked' : ''} onchange="toggleDisplayOption('showAvgHr')"> 平均心率</label>
+                </div>
             `;
+
+            let totalParts1 = [];
+            if (displayOptions.showCount) totalParts1.push(`共奔跑 ${parsedData.total.count} 次`);
+            if (displayOptions.showDistance) totalParts1.push(`累计 ${parsedData.total.dist.toFixed(2)} km`);
+            if (displayOptions.showTotalTime) totalParts1.push(`总用时 ${formatTotalTime(parsedData.total.totalSecs)}`);
+
+            let totalParts2 = [];
+            if (displayOptions.showAvgPace) totalParts2.push(`平均配速: ${totalPace}`);
+            if (displayOptions.showAvgHr) totalParts2.push(`平均心率: ${totalHr}`);
+
+            let totalHtml = `<h1>生涯总计</h1><p>`;
+            if (totalParts1.length > 0) totalHtml += totalParts1.join('，');
+            if (totalParts1.length > 0 && totalParts2.length > 0) totalHtml += '<br>';
+            if (totalParts2.length > 0) totalHtml += totalParts2.join(' | ');
+            if (totalParts1.length === 0 && totalParts2.length === 0) totalHtml += '暂无统计数据';
+            totalHtml += `</p>`;
+
+            let html = optionsHtml + totalHtml + `<ul>`;
 
             const years = Object.keys(parsedData.years).sort((a, b) => b - a);
             
@@ -299,16 +368,23 @@
                 const yData = parsedData.years[year];
                 const isYearExpanded = expandedYears.has(year);
                 
-                // 计算年度平均数据
                 const yPace = calcAvgPace(yData.totalSecs, yData.dist);
                 const yHr = calcAvgHr(yData.hrSum, yData.hrCount);
                 
+                let yearStatsParts = [];
+                if (displayOptions.showCount) yearStatsParts.push(`${yData.count} 次`);
+                if (displayOptions.showDistance) yearStatsParts.push(`${yData.dist.toFixed(2)} km`);
+                if (displayOptions.showTotalTime) yearStatsParts.push(`${formatTotalTime(yData.totalSecs)}`);
+                if (displayOptions.showAvgPace) yearStatsParts.push(`${yPace}`);
+                if (displayOptions.showAvgHr) yearStatsParts.push(`${yHr}`);
+                const yearStatsStr = yearStatsParts.join('，') || '—';
+
                 html += `
                     <li>
                         <div class="toggle-title" onclick="toggleYear('${year}')">
                             ${year} 年
                         </div>
-                        <span class="year-stats">${yData.count} 次，${(yData.dist).toFixed(2)} 公里，${yPace}，${yHr}</span>
+                        <span class="year-stats">${yearStatsStr}</span>
                 `;
 
                 if (isYearExpanded) {
@@ -320,16 +396,23 @@
                         const monthKey = `${year}-${month}`;
                         const isMonthExpanded = expandedMonths.has(monthKey);
 
-                        // 计算月度平均数据
                         const mPace = calcAvgPace(mData.totalSecs, mData.dist);
                         const mHr = calcAvgHr(mData.hrSum, mData.hrCount);
+
+                        let monthStatsParts = [];
+                        if (displayOptions.showCount) monthStatsParts.push(`${mData.count} 次`);
+                        if (displayOptions.showDistance) monthStatsParts.push(`${mData.dist.toFixed(2)} km`);
+                        if (displayOptions.showTotalTime) monthStatsParts.push(`${formatTotalTime(mData.totalSecs)}`);
+                        if (displayOptions.showAvgPace) monthStatsParts.push(`${mPace}`);
+                        if (displayOptions.showAvgHr) monthStatsParts.push(`${mHr}`);
+                        const monthStatsStr = monthStatsParts.join('，') || '—';
 
                         html += `
                             <li class="month-item">
                                 <div class="toggle-title month-title" onclick="toggleMonth('${year}', '${month}')">
                                     ${month} 月
                                 </div>
-                                <span class="month-stats">${mData.count} 次，${(mData.dist).toFixed(2)} 公里，${mPace}，${mHr}</span>
+                                <span class="month-stats">${monthStatsStr}</span>
                         `;
 
                         if (isMonthExpanded && mData.days) {
