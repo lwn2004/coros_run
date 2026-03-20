@@ -11,7 +11,13 @@
     --text-main: #1f2328;
     --text-sub: #656d76;
     --baseline: #b8babd;
-    
+    --trend-bad: #cf222e;
+    --trend-bad-bg:#ffebe9;
+    --trend-good: #1a7f37;
+    --trend-good-bg: #dafbe1;
+    --trend-flat: #656d76;
+    --trend-flat-bg: #eaecef;
+
     /* 山脉/天际线颜色 - 翡翠绿渐变 */
     --skyline-bottom: #30a14e;
     --skyline-top: #216e39;
@@ -19,7 +25,23 @@
     --window-color: #fffae0;
     --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   }
-
+[data-theme="dark"] {
+  --bg: #0d1117;
+  --card: #161b22;
+  --text-main: #e6edf3;
+  --text-sub: #8b949e;
+  --baseline: #30363d;
+    --trend-bad:#ce000e;
+    --trend-bad-bg:#ae756f;
+    --trend-good: #011e09;
+    --trend-good-bg: #459756;  
+    --trend-flat: #000;
+    --trend-flat-bg: #a3a4a6; 
+  --skyline-bottom: #2ea043;
+  --skyline-top: #238636;
+  --skyline-hover: #3fb950;
+  --window-color: #e3b341;
+}
   body {
     margin: 0;
     padding: 30px 15px;
@@ -42,7 +64,7 @@
 
   .header-container {
     display: flex;
-    align-items: flex-end;
+    align-items: flex-start;
     gap: 20px;
     padding-bottom: 10px;
     border-bottom: 2px solid #f0f0f0;
@@ -66,7 +88,7 @@
   }
 
   .skyline-svg {
-    height: 50px;
+    height: 60px;
     flex-grow: 1;
   }
 
@@ -151,7 +173,7 @@
   }
 
   .stat-item {
-    background: #f6f8fa;
+    background: var(--bg);
     padding: 4px 8px;
     border-radius: 6px;
     display: flex;
@@ -176,9 +198,9 @@
     font-weight: 800;
     line-height: 1;
   }
-  .trend.good { color: #1a7f37; background: #dafbe1; }
-  .trend.bad { color: #cf222e; background: #ffebe9; }
-  .trend.flat { color: #656d76; background: #eaecef; }
+  .trend.good { color: var(--trend-good); background: var(--trend-good-bg); }
+  .trend.bad { color: var(--trend-bad); background: var(--trend-bad-bg); }
+  .trend.flat { color: var(--trend-flat); background: var(--trend-flat-bg); }
 
   /* --- 天际线图表 & Zoom Pan 视口 --- */
   .chart-viewport {
@@ -301,13 +323,18 @@
     .year-stats { justify-content: flex-start; }
   }
 </style>
+<script>
+  const savedTheme = localStorage.getItem('theme-preference') || 
+      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', savedTheme);
+</script>
 </head>
 <body>
 
   <header>
     <div class="header-container">
       <div class="title-group">
-        <h1>跑出天际线</h1>
+        <h1>跑出天际线</h1>    
         <p>用脚步勾勒城市轮廓</p>
       </div>
       <svg class="skyline-svg" preserveAspectRatio="xMinYMin meet">
@@ -328,6 +355,9 @@
         <rect x="185" y="30" width="12" height="30" fill="#c4c4e0" />
         <rect x="202" y="12" width="15" height="48" fill="#a8a8c0" />
       </svg>
+        <button id="theme-toggle">
+          <span id="theme-icon">🌓</span>
+        </button>
     </div>
   </header>
 
@@ -343,6 +373,41 @@
   const DATA_URL = 'https://run.linwn.net/data/all.json';
 
   const isLeapYear = (year) => (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+
+  const themeToggleBtn = document.getElementById('theme-toggle');
+  const themeIcon = document.getElementById('theme-icon');
+
+  // 1. 获取当前的主题偏好
+  // 优先级：本地存储(用户手动选过) > 系统偏好设置 > 默认浅色
+  const getPreferredTheme = () => {
+    const savedTheme = localStorage.getItem('theme-preference');
+    if (savedTheme) {
+      return savedTheme;
+    }
+    // 如果没有缓存，检查操作系统是否开启了深色模式
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return prefersDark ? 'dark' : 'light';
+  };
+
+  // 2. 应用主题并更新 UI
+  const setTheme = (theme) => {
+    // 在 <html> 标签上设置 data-theme 属性
+    document.documentElement.setAttribute('data-theme', theme);
+    // 把用户的选择存起来
+    localStorage.setItem('theme-preference', theme);
+    // 可选：动态改变按钮上的小图标
+    themeIcon.textContent = theme === 'dark' ? '🌙' : '☀️';
+  };
+
+  // 3. 初始化：页面加载时立即执行一次
+  let currentTheme = getPreferredTheme();
+  setTheme(currentTheme);
+
+  // 4. 监听按钮点击事件
+  themeToggleBtn.addEventListener('click', () => {
+    currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+    setTheme(currentTheme);
+  });
 
   function generateFullYearDates(year) {
     const dates = [];
