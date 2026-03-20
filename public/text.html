@@ -72,6 +72,7 @@
         .month-title {
             display: inline-block;
             width: 2em;
+            text-align: right;
             font-size: 1rem;
             white-space: nowrap;
          }
@@ -89,7 +90,7 @@
             margin-left: 10px;
         }
         .run-stats {
-            display: block;
+            /*display: block;*/
             color: var(--text-secondary);
             font-size: 0.9rem;
             margin-top: 4px;
@@ -129,11 +130,15 @@
             border-radius: 6px;
         }
         .run-item-title {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 500;
             color: var(--text-primary);
         }
-
+        .run-item-sub-title {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }        
         .display-options {
             display: flex;
             flex-wrap: wrap;
@@ -240,7 +245,37 @@
             const d = new Date(dateStr.replace(' ', 'T'));
             return `${padZero(d.getHours())}:${padZero(d.getMinutes())}`;
         }
+        function getRunTypeByTime(timeString) {
+          let hour;
 
+          // 1. 判断是否是 "HH:mm" 或 "HH:mm:ss" 的简写格式
+          if (/^\d{1,2}:\d{2}/.test(timeString)) {
+            hour = parseInt(timeString.split(':')[0], 10);
+          } else {
+            // 2. 尝试作为完整的日期时间字符串解析 (如 ISO 格式)
+            const date = new Date(timeString);
+            if (!isNaN(date.getTime())) {
+              hour = date.getHours();
+            } else {
+              return "未知时间跑"; // 如果格式不正确，返回默认值
+            }
+          }
+
+          // 3. 根据小时数返回对应的跑步类型
+          if (hour >= 5 && hour < 9) {
+            return "晨跑";      // 05:00 - 08:59
+          } else if (hour >= 9 && hour < 12) {
+            return "上午跑";    // 09:00 - 11:59
+          } else if (hour >= 12 && hour < 14) {
+            return "午跑";      // 12:00 - 13:59
+          } else if (hour >= 14 && hour < 18) {
+            return "下午跑";    // 14:00 - 17:59
+          } else if (hour >= 18 && hour <= 23) {
+            return "夜跑";      // 18:00 - 23:59
+          } else {
+            return "凌晨跑";    // 00:00 - 04:59 (深夜到凌晨)
+          }
+        }
         async function init() {
             try {
                 const res = await fetch(API_URL);
@@ -433,12 +468,20 @@
                                 
                                 dData.runs.forEach(run => {
                                     const dist = (run.distance / 1000).toFixed(2);
+                                    let runStatsParts = [];
+                                    //runStatsParts.push(`${dist} km`);
+                                    if (displayOptions.showTotalTime) runStatsParts.push(`${formatTime(run.moving_time)}`);
+                                    if (displayOptions.showAvgPace) runStatsParts.push(`${formatPace(run.average_speed)}`);
+                                    if (displayOptions.showAvgHr) runStatsParts.push(`${run.average_heartrate ? Math.round(run.average_heartrate) + ' bpm' : '-'}`);
+                                    runStatsParts.push(`${run.city || '未知城市'} ${formatTimeOnly(run.start_date_local)} ${getRunTypeByTime(formatTimeOnly(run.start_date_local))}`);
+                                    const runStatsStr = runStatsParts.join('，') || '—';                                    
                                     html += `
                                         <li class="run-item">
-                                            <div class="run-item-title">${formatTimeOnly(run.start_date_local)} - ${run.city || '未知城市'}</div>
-                                            <span class="run-stats" style="margin-top: 2px;">
-                                                距离: ${dist} km | 用时: ${formatTime(run.moving_time)} | 配速: ${formatPace(run.average_speed)} | 心率: ${run.average_heartrate ? Math.round(run.average_heartrate) + ' bpm' : '-'}
-                                            </span>
+                                            <div class="run-item-title">${dist} km -
+                                                <span class="run-stats" style="margin-top: 2px;">
+                                                    ${runStatsStr}
+                                                </span>
+                                            </div>
                                         </li>
                                     `;
                                 });
