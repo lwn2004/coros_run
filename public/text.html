@@ -332,7 +332,7 @@
             if (displayOptions.showAvgHr) totalParts2.push(`平均心率: ${totalHr}`);
 
             let totalHtml = `<h1>生涯总计</h1><p>`;
-            if (totalParts1.length > 0) totalHtml += totalParts1.join('，');
+            if (totalParts1.length > 0) totalHtml += totalParts1.join(', ');
             if (totalParts1.length > 0 && totalParts2.length > 0) totalHtml += '<br>';
             if (totalParts2.length > 0) totalHtml += totalParts2.join(' | ');
             if (totalParts1.length === 0 && totalParts2.length === 0) totalHtml += '暂无统计数据';
@@ -351,12 +351,12 @@
                 
                 // 根据用户的复选框动态拼装年份数据
                 let yearStatsParts = [];
+                if (displayOptions.showCount) yearStatsParts.push(`${yData.count} 次`);
                 if (displayOptions.showDistance) yearStatsParts.push(`${yData.dist.toFixed(2)} km`);
                 if (displayOptions.showAvgPace) yearStatsParts.push(`${yPace}`);
-                if (displayOptions.showCount) yearStatsParts.push(`${yData.count} 次`);
                 if (displayOptions.showTotalTime) yearStatsParts.push(`${formatTotalTime(yData.totalSecs)}`);
                 if (displayOptions.showAvgHr) yearStatsParts.push(`${yHr}`);
-                const yearStatsStr = yearStatsParts.join('，') || '—';
+                const yearStatsStr = yearStatsParts.join(', ') || '—';
 
                 html += `
                     <li>
@@ -379,12 +379,12 @@
 
                         // 拼装月份数据
                         let monthStatsParts = [];
+                        if (displayOptions.showCount) monthStatsParts.push(`${mData.count} 次`);
                         if (displayOptions.showDistance) monthStatsParts.push(`${mData.dist.toFixed(2)} km`);
                         if (displayOptions.showAvgPace) monthStatsParts.push(`${mPace}`);
-                        if (displayOptions.showCount) monthStatsParts.push(`${mData.count} 次`);
                         if (displayOptions.showTotalTime) monthStatsParts.push(`${formatTotalTime(mData.totalSecs)}`);
                         if (displayOptions.showAvgHr) monthStatsParts.push(`${mHr}`);
-                        const monthStatsStr = monthStatsParts.join('，') || '—';
+                        const monthStatsStr = monthStatsParts.join(', ') || '—';
 
                         html += `
                             <li class="month-item">
@@ -413,7 +413,7 @@
                                     const cityInfo = `${run.city || '未知城市'} ${formatTimeOnly(run.start_date_local)} ${getRunTypeByTime(formatTimeOnly(run.start_date_local))}`;
                                     
                                     // 格式化为： 23.10 km, 5'40"，广州市 06:29 晨跑
-                                    const runStatsStr = runStatsParts.join(', ') + '，' + cityInfo;
+                                    const runStatsStr = runStatsParts.join(', ') + ', ' + cityInfo;
                                     
                                     // 同一日期的第二条数据隐藏日期标签，实现整齐的留白对齐
                                     let dateText = `${day}日,`;
