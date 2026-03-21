@@ -52,13 +52,13 @@
             margin: 0;
         }
         li {
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
         
         .toggle-title {
             color: var(--link-color);
             cursor: pointer;
-            border-bottom: 1px solid var(--line-color);
+            border-bottom: 1px solid transparent;
             padding-bottom: 1px;
             font-size: 1.1rem;
             transition: color 0.2s, border-bottom-color 0.2s;
@@ -69,32 +69,6 @@
             color: var(--link-hover);
             border-bottom-color: var(--link-hover);
         }
-        .month-title {
-            display: inline-block;
-            width: 2em;
-            text-align: right;
-            font-size: 1rem;
-            white-space: nowrap;
-         }
-        
-        .year-stats {
-            display: block;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin-top: 4px;
-        }
-        .month-stats {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin-top: 4px;
-            margin-left: 10px;
-        }
-        .run-stats {
-            /*display: block;*/
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin-top: 4px;
-        }
         
         .loading {
             color: var(--text-secondary);
@@ -102,43 +76,16 @@
 
         .month-list {
             margin-left: 24px;
-            margin-top: 12px;
+            margin-top: 8px;
         }
         .day-list {
             margin-left: 24px;
-            margin-top: 12px;
+            margin-top: 8px;
         }
         .month-item {
             margin-bottom: 12px;
         }
-        .day-item {
-            margin-bottom: 20px;
-        }
-        .day-header {
-            font-size: 1rem;
-            color: var(--text-primary);
-            margin-bottom: 8px;
-            padding-left: 8px;
-        }
-        .run-list {
-            margin-left: 12px;
-        }
-        .run-item {
-            margin-bottom: 10px;
-            padding: 8px 12px;
-            background-color: rgba(115, 115, 115, 0.05);
-            border-radius: 6px;
-        }
-        .run-item-title {
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: var(--text-primary);
-        }
-        .run-item-sub-title {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin-top: 4px;
-        }        
+        
         .display-options {
             display: flex;
             flex-wrap: wrap;
@@ -222,7 +169,7 @@
 
         function formatTotalTime(seconds) {
             if (!seconds || seconds <= 0) return '0min';
-            const totalSecsInt = Math.floor(seconds); // 忽略毫秒
+            const totalSecsInt = Math.floor(seconds);
             const hours = Math.floor(totalSecsInt / 3600);
             const minutes = Math.floor((totalSecsInt % 3600) / 60);
             const secs = totalSecsInt % 60;
@@ -247,35 +194,32 @@
         }
         function getRunTypeByTime(timeString) {
           let hour;
-
-          // 1. 判断是否是 "HH:mm" 或 "HH:mm:ss" 的简写格式
           if (/^\d{1,2}:\d{2}/.test(timeString)) {
             hour = parseInt(timeString.split(':')[0], 10);
           } else {
-            // 2. 尝试作为完整的日期时间字符串解析 (如 ISO 格式)
             const date = new Date(timeString);
             if (!isNaN(date.getTime())) {
               hour = date.getHours();
             } else {
-              return "未知时间跑"; // 如果格式不正确，返回默认值
+              return "未知时间跑";
             }
           }
 
-          // 3. 根据小时数返回对应的跑步类型
           if (hour >= 5 && hour < 9) {
-            return "晨跑";      // 05:00 - 08:59
+            return "晨跑";      
           } else if (hour >= 9 && hour < 12) {
-            return "上午跑";    // 09:00 - 11:59
+            return "上午跑";    
           } else if (hour >= 12 && hour < 14) {
-            return "午跑";      // 12:00 - 13:59
+            return "午跑";      
           } else if (hour >= 14 && hour < 18) {
-            return "下午跑";    // 14:00 - 17:59
+            return "下午跑";    
           } else if (hour >= 18 && hour <= 23) {
-            return "夜跑";      // 18:00 - 23:59
+            return "夜跑";      
           } else {
-            return "凌晨跑";    // 00:00 - 04:59 (深夜到凌晨)
+            return "凌晨跑";    
           }
         }
+        
         async function init() {
             try {
                 const res = await fetch(API_URL);
@@ -405,20 +349,20 @@
                 const yPace = calcAvgPace(yData.totalSecs, yData.dist);
                 const yHr = calcAvgHr(yData.hrSum, yData.hrCount);
                 
+                // 根据用户的复选框动态拼装年份数据
                 let yearStatsParts = [];
-                if (displayOptions.showCount) yearStatsParts.push(`${yData.count} 次`);
                 if (displayOptions.showDistance) yearStatsParts.push(`${yData.dist.toFixed(2)} km`);
-                if (displayOptions.showTotalTime) yearStatsParts.push(`${formatTotalTime(yData.totalSecs)}`);
                 if (displayOptions.showAvgPace) yearStatsParts.push(`${yPace}`);
+                if (displayOptions.showCount) yearStatsParts.push(`${yData.count} 次`);
+                if (displayOptions.showTotalTime) yearStatsParts.push(`${formatTotalTime(yData.totalSecs)}`);
                 if (displayOptions.showAvgHr) yearStatsParts.push(`${yHr}`);
                 const yearStatsStr = yearStatsParts.join('，') || '—';
 
                 html += `
                     <li>
                         <div class="toggle-title" onclick="toggleYear('${year}')">
-                            ${year} 年
+                            ${year}年 ${yearStatsStr}
                         </div>
-                        <span class="year-stats">${yearStatsStr}</span>
                 `;
 
                 if (isYearExpanded) {
@@ -433,20 +377,20 @@
                         const mPace = calcAvgPace(mData.totalSecs, mData.dist);
                         const mHr = calcAvgHr(mData.hrSum, mData.hrCount);
 
+                        // 拼装月份数据
                         let monthStatsParts = [];
-                        if (displayOptions.showCount) monthStatsParts.push(`${mData.count} 次`);
                         if (displayOptions.showDistance) monthStatsParts.push(`${mData.dist.toFixed(2)} km`);
-                        if (displayOptions.showTotalTime) monthStatsParts.push(`${formatTotalTime(mData.totalSecs)}`);
                         if (displayOptions.showAvgPace) monthStatsParts.push(`${mPace}`);
+                        if (displayOptions.showCount) monthStatsParts.push(`${mData.count} 次`);
+                        if (displayOptions.showTotalTime) monthStatsParts.push(`${formatTotalTime(mData.totalSecs)}`);
                         if (displayOptions.showAvgHr) monthStatsParts.push(`${mHr}`);
                         const monthStatsStr = monthStatsParts.join('，') || '—';
 
                         html += `
                             <li class="month-item">
-                                <div class="toggle-title month-title" onclick="toggleMonth('${year}', '${month}')">
-                                    ${month} 月
+                                <div class="toggle-title" style="font-size: 1rem;" onclick="toggleMonth('${year}', '${month}')">
+                                    ${month}月 ${monthStatsStr}
                                 </div>
-                                <span class="month-stats">${monthStatsStr}</span>
                         `;
 
                         if (isMonthExpanded && mData.days) {
@@ -455,37 +399,33 @@
                             
                             days.forEach(day => {
                                 const dData = mData.days[day];
-                                html += `
-                                    <li class="day-item">
-                                        <div class="day-header">
-                                            ${month}月${day}日
-                                            <span style="font-weight: normal; font-size: 0.85rem; color: var(--text-secondary); margin-left: 8px; display:none;">
-                                                (${dData.count}次, ${(dData.dist).toFixed(2)}km)
-                                            </span>
-                                        </div>
-                                        <ul class="run-list">
-                                `;
                                 
-                                dData.runs.forEach(run => {
+                                dData.runs.forEach((run, index) => {
                                     const dist = (run.distance / 1000).toFixed(2);
+                                    
+                                    // 拼装具体单次跑步的数据（公里，配速等）
                                     let runStatsParts = [];
-                                    //runStatsParts.push(`${dist} km`);
-                                    if (displayOptions.showTotalTime) runStatsParts.push(`${formatTime(run.moving_time)}`);
+                                    if (displayOptions.showDistance) runStatsParts.push(`${dist} km`);
                                     if (displayOptions.showAvgPace) runStatsParts.push(`${formatPace(run.average_speed)}`);
+                                    if (displayOptions.showTotalTime) runStatsParts.push(`${formatTime(run.moving_time)}`);
                                     if (displayOptions.showAvgHr) runStatsParts.push(`${run.average_heartrate ? Math.round(run.average_heartrate) + ' bpm' : '-'}`);
-                                    runStatsParts.push(`${run.city || '未知城市'} ${formatTimeOnly(run.start_date_local)} ${getRunTypeByTime(formatTimeOnly(run.start_date_local))}`);
-                                    const runStatsStr = runStatsParts.join('，') || '—';                                    
+                                    
+                                    const cityInfo = `${run.city || '未知城市'} ${formatTimeOnly(run.start_date_local)} ${getRunTypeByTime(formatTimeOnly(run.start_date_local))}`;
+                                    
+                                    // 格式化为： 23.10 km, 5'40"，广州市 06:29 晨跑
+                                    const runStatsStr = runStatsParts.join(', ') + '，' + cityInfo;
+                                    
+                                    // 同一日期的第二条数据隐藏日期标签，实现整齐的留白对齐
+                                    let dateText = `${day}日,`;
+                                    let dateHtml = index === 0 ? dateText : `<span style="visibility: hidden;">${dateText}</span>`;
+
                                     html += `
-                                        <li class="run-item">
-                                            <div class="run-item-title">${dist} km -
-                                                <span class="run-stats" style="margin-top: 2px;">
-                                                    ${runStatsStr}
-                                                </span>
-                                            </div>
+                                        <li style="margin-bottom: 6px; font-size: 0.95rem; color: var(--text-secondary); display: flex;">
+                                            <span style="margin-right: 0.5rem; white-space: pre;">${dateHtml}</span>
+                                            <span>${runStatsStr}</span>
                                         </li>
                                     `;
                                 });
-                                html += `</ul></li>`;
                             });
                             html += `</ul>`;
                         }
