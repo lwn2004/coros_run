@@ -662,6 +662,8 @@ def generate_share_card(bg_file, run_data, save_img_file):
 def main():
     runs_file = os.path.join(parent, "src", "static", "all.json")
     shutil.copyfile(runs_file, os.path.join(parent, "public", "data", "all.json"))
+    activities_file = os.path.join(parent, "src", "static", "activities.json")
+    shutil.copyfile(activities_file, os.path.join(parent, "public", "data", "activities.json"))
     pb_file = os.path.join(parent, "src", "static", "pb.json")
     shutil.copyfile(pb_file, os.path.join(parent, "public", "data", "pb.json"))
     events_file = os.path.join(parent, "src", "static", "events.json")
