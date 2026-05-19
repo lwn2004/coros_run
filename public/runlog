@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Running Dashboard</title>
+<style>
+    :root {
+        --bg-color: #000000;
+        --card-bg: #1a1a1a;
+        --text-main: #ffffff;
+        --text-muted: #888888;
+        --text-dark: #666666;
+        --accent-red: #e93342;
+        --border-color: #2a2a2a;
+        --progress-bg: #2c2c2e;
+    }
+
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+        background-color: var(--bg-color);
+        color: var(--text-main);
+        padding: 24px;
+        min-height: 100vh;
+    }
+
+    .container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    /* Top Cards Section */
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .card {
+        background-color: var(--card-bg);
+        border-radius: 12px;
+        padding: 20px;
+        border: 1px solid var(--border-color);
+    }
+
+    .card-title {
+        color: var(--text-muted);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+    }
+
+    .card-value {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 12px;
+    }
+
+    .card-value span {
+        font-size: 14px;
+        color: var(--text-muted);
+        font-weight: normal;
+    }
+
+    /* Progress Bar */
+    .progress-container {
+        width: 100%;
+        height: 4px;
+        background-color: var(--progress-bg);
+        border-radius: 2px;
+        margin-bottom: 16px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background-color: var(--accent-red);
+        width: 0%;
+        border-radius: 2px;
+        transition: width 0.8s ease-out;
+    }
+
+    .sub-stats {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        font-size: 13px;
+        color: var(--text-muted);
+    }
+
+    .stat-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        justify-content: space-between;
+    }
+
+    .stat-row.left-aligned {
+        justify-content: flex-start;
+    }
+
+    .icon {
+        color: var(--accent-red);
+        font-style: normal;
+    }
+
+    .trend-down { color: var(--text-muted); }
+    .trend-up { color: var(--accent-red); }
+
+    /* Activity Log Section */
+    .activity-section {
+        background-color: var(--card-bg);
+        border-radius: 12px;
+        padding: 20px;
+        border: 1px solid var(--border-color);
+    }
+
+    .activity-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .activity-title {
+        font-size: 20px;
+        font-weight: 700;
+    }
+
+    .activity-count {
+        color: var(--text-dark);
+        font-size: 13px;
+    }
+
+    /* Filters */
+    .filters {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 24px;
+    }
+
+    .filter-btn {
+        background-color: #2c2c2e;
+        color: var(--text-muted);
+        border: none;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .filter-btn.active {
+        background-color: var(--accent-red);
+        color: white;
+    }
+
+    /* Table */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+        text-align: left;
+    }
+
+    th {
+        color: var(--text-dark);
+        font-weight: 600;
+        padding-bottom: 16px;
+        font-size: 11px;
+        letter-spacing: 0.5px;
+    }
+
+    td {
+        padding: 16px 0;
+        color: #d1d1d1;
+    }
+
+    .bold-white {
+        color: white;
+        font-weight: 600;
+    }
+
+    .unit {
+        color: var(--text-dark);
+        font-size: 11px;
+        font-weight: normal;
+    }
+
+    /* Pagination */
+    .pagination {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 24px;
+        color: var(--text-muted);
+        font-size: 13px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .page-btn {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        font-size: 16px;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div class="summary-grid">
+        <div class="card">
+            <div class="card-title">TOTAL DISTANCE</div>
+            <div class="card-value" id="total-distance">0.00 <span>/ 40000km</span></div>
+            <div class="progress-container">
+                <div class="progress-bar" id="total-progress"></div>
+            </div>
+            <div class="sub-stats">
+                <div class="stat-row left-aligned"><span class="icon">⚡</span> <span id="total-runs">0</span> runs</div>
+                <div class="stat-row left-aligned"><span class="icon">⏱</span> <span id="total-duration">0h 0m</span></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">YEARLY GOAL</div>
+            <div class="card-value" id="yearly-dist">0.00 <span>/ 2400 km</span></div>
+            <div class="progress-container">
+                <div class="progress-bar" id="yearly-progress"></div>
+            </div>
+            <div class="sub-stats">
+                <div class="stat-row">
+                    <span><span id="yearly-runs">0</span> runs</span>
+                    <span id="yearly-duration">0h 0m</span>
+                </div>
+                <div class="stat-row left-aligned" id="yearly-vs-container">
+                    </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">MONTHLY GOAL</div>
+            <div class="card-value" id="monthly-dist">0.00 <span>/ 200 km</span></div>
+            <div class="progress-container">
+                <div class="progress-bar" id="monthly-progress"></div>
+            </div>
+            <div class="sub-stats">
+                <div class="stat-row">
+                    <span><span id="monthly-runs">0</span> runs</span>
+                    <span id="monthly-duration">0h 0m</span>
+                </div>
+                <div class="stat-row left-aligned" id="monthly-vs-container">
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="activity-section">
+        <div class="activity-header">
+            <div class="activity-title">Activity Log</div>
+            <div class="activity-count" id="showing-text">Showing 1-16 of 0</div>
+        </div>
+
+        <div class="filters" id="year-filters">
+            <button class="filter-btn active" data-year="all">All</button>
+            <button class="filter-btn" data-year="2026">2026</button>
+            <button class="filter-btn" data-year="2025">2025</button>
+            <button class="filter-btn" data-year="2024">2024</button>
+            <button class="filter-btn" data-year="2023">2023</button>
+            <button class="filter-btn" data-year="2022">2022</button>
+            <button class="filter-btn" data-year="2021">2021</button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 25%">DATE</th>
+                    <th style="width: 15%">NAME</th>
+                    <th style="width: 15%">DISTANCE</th>
+                    <th style="width: 15%">DURATION</th>
+                    <th style="width: 15%">PACE</th>
+                    <th style="width: 15%">HR</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                </tbody>
+        </table>
+
+        <div class="pagination">
+            <button class="page-btn" id="prev-page">&lt;</button>
+            <span id="page-info">Page 1 of 1</span>
+            <button class="page-btn" id="next-page">&gt;</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let allRuns = [];
+    let filteredRuns = [];
+    let currentPage = 1;
+    const itemsPerPage = 16;
+    let currentYearFilter = 'all';
+
+    // 目标常量设置
+    const GOAL_TOTAL = 40000;
+    const GOAL_YEARLY = 2400;
+    const GOAL_MONTHLY = 200;
+
+    // 解析 "2:03:39.55" 这种格式的时间为秒数
+    function parseMovingTime(timeStr) {
+        if (!timeStr) return 0;
+        const parts = timeStr.split('.')[0].split(':');
+        let seconds = 0;
+        if (parts.length === 3) {
+            seconds += parseInt(parts[0], 10) * 3600;
+            seconds += parseInt(parts[1], 10) * 60;
+            seconds += parseInt(parts[2], 10);
+        } else if (parts.length === 2) {
+            seconds += parseInt(parts[0], 10) * 60;
+            seconds += parseInt(parts[1], 10);
+        }
+        return seconds;
+    }
+
+    // 将总秒数格式化为 "Xh Ym"
+    function formatHoursMins(totalSeconds) {
+        const hours = Math.floor(totalSeconds / 3600);
+        const mins = Math.floor((totalSeconds % 3600) / 60);
+        return `${hours}h ${mins}m`;
+    }
+
+    // 核心计算方法：基于真实数据统计顶部面板
+    function calculateSummaries() {
+        const currentYear = "2026";
+        const currentMonth = "2026-05";
+        const lastYearPrefix = "2025";
+        const lastMonthPrefix = "2026-04";
+        const sameDayMD = "05-19"; // 基于系统当前日期
+        const sameDayD = "19";
+
+        let totalDist = 0, totalSeconds = 0, totalRunsCount = allRuns.length;
+        let yearlyDist = 0, yearlySeconds = 0, yearlyRunsCount = 0, lastYearSamePeriodDist = 0;
+        let monthlyDist = 0, monthlySeconds = 0, monthlyRunsCount = 0, lastMonthSamePeriodDist = 0;
+
+        allRuns.forEach(run => {
+            const distKm = (run.distance || 0) / 1000;
+            const seconds = parseMovingTime(run.moving_time);
+            const dateStr = run.start_date_local || "";
+
+            // 1. 累计总量
+            totalDist += distKm;
+            totalSeconds += seconds;
+
+            // 2. 今年总量 (2026)
+            if (dateStr.startsWith(currentYear)) {
+                yearlyDist += distKm;
+                yearlySeconds += seconds;
+                yearlyRunsCount++;
+            }
+
+            // 3. 去年同期总量 (2025年截至同日)
+            if (dateStr.startsWith(lastYearPrefix)) {
+                const md = dateStr.substring(5, 10);
+                if (md <= sameDayMD) {
+                    lastYearSamePeriodDist += distKm;
+                }
+            }
+
+            // 4. 本月总量 (2026-05)
+            if (dateStr.startsWith(currentMonth)) {
+                monthlyDist += distKm;
+                monthlySeconds += seconds;
+                monthlyRunsCount++;
+            }
+
+            // 5. 上月同期总量 (2026-04编截至同日)
+            if (dateStr.startsWith(lastMonthPrefix)) {
+                const d = dateStr.substring(8, 10);
+                if (d <= sameDayD) {
+                    lastMonthSamePeriodDist += distKm;
+                }
+            }
+        });
+
+        // 渲染 TOTAL DISTANCE 卡片与进度条
+        document.getElementById('total-distance').innerHTML = `${totalDist.toFixed(2)} <span>/ ${GOAL_TOTAL} km</span>`;
+        document.getElementById('total-progress').style.width = `${Math.min(100, (totalDist / GOAL_TOTAL) * 100)}%`;
+        document.getElementById('total-runs').innerText = totalRunsCount;
+        document.getElementById('total-duration').innerText = formatHoursMins(totalSeconds);
+
+        // 渲染 YEARLY GOAL 卡片与进度条
+        document.getElementById('yearly-dist').innerHTML = `${yearlyDist.toFixed(2)} <span>/ ${GOAL_YEARLY} km</span>`;
+        document.getElementById('yearly-progress').style.width = `${Math.min(100, (yearlyDist / GOAL_YEARLY) * 100)}%`;
+        document.getElementById('yearly-runs').innerText = yearlyRunsCount;
+        document.getElementById('yearly-duration').innerText = formatHoursMins(yearlySeconds);
+        
+        const yearlyVs = yearlyDist - lastYearSamePeriodDist;
+        const yearlyVsContainer = document.getElementById('yearly-vs-container');
+        if (yearlyVs >= 0) {
+            yearlyVsContainer.className = "stat-row left-aligned trend-up";
+            yearlyVsContainer.innerHTML = `↗ ${yearlyVs.toFixed(2)} km vs 去年同期`;
+        } else {
+            yearlyVsContainer.className = "stat-row left-aligned trend-down";
+            yearlyVsContainer.innerHTML = `↘ ${Math.abs(yearlyVs).toFixed(2)} km vs 去年同期`;
+        }
+
+        // 渲染 MONTHLY GOAL 卡片与进度条
+        document.getElementById('monthly-dist').innerHTML = `${monthlyDist.toFixed(2)} <span>/ ${GOAL_MONTHLY} km</span>`;
+        document.getElementById('monthly-progress').style.width = `${Math.min(100, (monthlyDist / GOAL_MONTHLY) * 100)}%`;
+        document.getElementById('monthly-runs').innerText = monthlyRunsCount;
+        document.getElementById('monthly-duration').innerText = formatHoursMins(monthlySeconds);
+
+        const monthlyVs = monthlyDist - lastMonthSamePeriodDist;
+        const monthlyVsContainer = document.getElementById('monthly-vs-container');
+        if (monthlyVs >= 0) {
+            monthlyVsContainer.className = "stat-row left-aligned trend-up";
+            monthlyVsContainer.innerHTML = `↗ ${monthlyVs.toFixed(2)} km vs 上月同期`;
+        } else {
+            monthlyVsContainer.className = "stat-row left-aligned trend-down";
+            monthlyVsContainer.innerHTML = `↘ ${Math.abs(monthlyVs).toFixed(2)} km vs 上月同期`;
+        }
+    }
+
+    async function fetchData() {
+        try {
+            const response = await fetch('https://run.linwn.net/data/all.json');
+            if (!response.ok) throw new Error('无法获取接口数据');
+            allRuns = await response.json();
+        } catch (error) {
+            console.warn('Fetch请求失败', error);
+        }
+        
+        // 按时间倒序排序
+        allRuns.sort((a, b) => new Date(b.start_date_local.replace(/-/g, '/')) - new Date(a.start_date_local.replace(/-/g, '/')));
+        
+        // 执行真实数据计算
+        calculateSummaries();
+        // 渲染表格
+        applyFilters();
+    }
+
+
+    function calculatePace(speedMs) {
+        if (!speedMs) return "-";
+        const secPerKm = 1000 / speedMs;
+        const mins = Math.floor(secPerKm / 60);
+        const secs = Math.floor(secPerKm % 60);
+        return `${mins}'${secs.toString().padStart(2, '0')}"`;
+    }
+
+    function getNameByTime(dateStr) {
+        if (!dateStr) return "跑步";
+        const parts = dateStr.split(' ');
+        if (parts.length < 2) return "跑步";
+        const hour = parseInt(parts[1].split(':')[0], 10);
+        if (hour >= 4 && hour < 10) return "晨跑";
+        if (hour >= 10 && hour < 14) return "上午跑步";
+        if (hour >= 14 && hour < 17) return "午后跑步";
+        if (hour >= 17 && hour < 20) return "傍晚跑步";
+        return "夜跑";
+    }
+
+    function formatDuration(timeStr) {
+        if (!timeStr) return "0:00:00";
+        return timeStr.split('.')[0];
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById('table-body');
+        tbody.innerHTML = '';
+
+        const startIdx = (currentPage - 1) * itemsPerPage;
+        const endIdx = startIdx + itemsPerPage;
+        const pageData = filteredRuns.slice(startIdx, endIdx);
+
+        pageData.forEach(run => {
+            const distKm = (run.distance / 1000).toFixed(2);
+            const pace = calculatePace(run.average_speed);
+            const duration = formatDuration(run.moving_time);
+            const name = run.name || getNameByTime(run.start_date_local);
+            const hr = run.average_heartrate ? Math.round(run.average_heartrate) : '-';
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${run.start_date_local || ''}</td>
+                <td class="bold-white">${name}</td>
+                <td><span class="bold-white">${distKm}</span> <span class="unit">km</span></td>
+                <td>${duration}</td>
+                <td>${pace}</td>
+                <td>${hr}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        const totalPages = Math.ceil(filteredRuns.length / itemsPerPage) || 1;
+        document.getElementById('page-info').innerText = `Page ${currentPage} of ${totalPages}`;
+        
+        const showEnd = Math.min(endIdx, filteredRuns.length);
+        const showStart = filteredRuns.length === 0 ? 0 : startIdx + 1;
+        document.getElementById('showing-text').innerText = `Showing ${showStart}-${showEnd} of ${filteredRuns.length}`;
+    }
+
+    function applyFilters() {
+        if (currentYearFilter === 'all') {
+            filteredRuns = [...allRuns];
+        } else {
+            filteredRuns = allRuns.filter(run => run.start_date_local && run.start_date_local.startsWith(currentYearFilter));
+        }
+        currentPage = 1;
+        renderTable();
+    }
+
+    // 过滤器绑定
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            currentYearFilter = e.target.getAttribute('data-year');
+            applyFilters();
+        });
+    });
+
+    // 分页绑定
+    document.getElementById('prev-page').addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            renderTable();
+        }
+    });
+
+    document.getElementById('next-page').addEventListener('click', () => {
+        const totalPages = Math.ceil(filteredRuns.length / itemsPerPage);
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderTable();
+        }
+    });
+
+    // 页面初始化加载
+    fetchData();
+</script>
+</body>
+</html>
