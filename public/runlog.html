@@ -435,8 +435,10 @@
         }
     }    
 </style>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" rel="stylesheet">
+  </noscript>
 <script src="https://unpkg.com/@mapbox/polyline"></script>
 <script src="./leaflet.ChineseCRS.js"></script>
 </head>
@@ -838,7 +840,7 @@
 
     async function fetchData() {
         try {
-            const response = await fetch('https://raw.githubusercontent.com/lwn2004/coros_run/refs/heads/master/src/static/activities.json');
+            const response = await fetch('https://run.linwn.net/data/activities.json');
             if (!response.ok) throw new Error('接口失败');
             allRuns = await response.json();
 
