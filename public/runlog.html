@@ -124,11 +124,14 @@
         .main-layout { display: flex; flex-direction: column; gap: 16px; }
         .column-left, .column-right { display: contents; }
         .summary-grid { order: 1; }
-        .map-card { order: 2; height: 350px; }
+        .map-card { order: 2; height: 200px; }
         .calendar-card { order: 3; }
         .activity-section { order: 4; }
         .summary-grid { grid-template-columns: repeat(2, 1fr); }
         .summary-grid .card:first-child { display: none; }
+        .mobile-hide { display: none; }
+        .card-value { font-size: 16px; }
+        .compare-info { font-size: 11px; }
     }    
 </style>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" rel="stylesheet">
@@ -154,8 +157,8 @@
                     <div class="card-value" id="yearly-dist">0.00 <span>/ 2400 km</span></div>
                     <div class="progress-container"><div class="progress-bar" id="yearly-progress"></div></div>
                     <div class="sub-stats">
-                        <div class="stat-row"><span><span id="yearly-runs">0</span> runs</span><span id="yearly-duration">0h 0m</span></div>
-                        <div class="stat-row left-aligned" id="yearly-vs-container"></div>
+                        <div class="stat-row mobile-hide"><span><span id="yearly-runs">0</span> runs</span><span id="yearly-duration">0h 0m</span></div>
+                        <div class="stat-row left-aligned compare-info" id="yearly-vs-container"></div>
                     </div>
                 </div>
 
@@ -164,8 +167,8 @@
                     <div class="card-value" id="monthly-dist">0.00 <span>/ 200 km</span></div>
                     <div class="progress-container"><div class="progress-bar" id="monthly-progress"></div></div>
                     <div class="sub-stats">
-                        <div class="stat-row"><span><span id="monthly-runs">0</span> runs</span><span id="monthly-duration">0h 0m</span></div>
-                        <div class="stat-row left-aligned" id="monthly-vs-container"></div>
+                        <div class="stat-row mobile-hide"><span><span id="monthly-runs">0</span> runs</span><span id="monthly-duration">0h 0m</span></div>
+                        <div class="stat-row left-aligned compare-info" id="monthly-vs-container"></div>
                     </div>
                 </div>
             </div>
