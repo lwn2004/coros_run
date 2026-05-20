@@ -68,7 +68,21 @@
     .calendar-nav-btn:hover { background-color: #2c2c2e; color: white; }
     .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; text-align: center; }
     .calendar-weekday { color: var(--text-dark); font-weight: 600; font-size: 11px; padding-bottom: 8px; }
-    .calendar-day { position: relative; min-height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 50%; cursor: pointer; color: var(--text-dark); transition: all 0.2s; }
+    
+    /* 优化项 3：日历格子改为1:1圆角矩形 */
+    .calendar-day { 
+        position: relative; 
+        width: 100%;
+        aspect-ratio: 1 / 1; /* 严格保持 1:1 宽高比 */
+        display: flex; 
+        flex-direction: column; 
+        align-items: center; 
+        justify-content: center; 
+        border-radius: 8px; /* 圆角矩形 */
+        cursor: pointer; 
+        color: var(--text-dark); 
+        transition: all 0.2s; 
+    }
     .calendar-day.current-month-day { color: #a1a1a1; }
     .calendar-day.has-run { background-color: #2c2c2e; color: white; }
     .calendar-day.has-run.long-run { background-color: var(--accent-red); }
@@ -80,8 +94,19 @@
     .activity-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
     .activity-title { font-size: 20px; font-weight: 700; }
     .activity-count { color: var(--text-dark); font-size: 13px; }
-    .filters { display: flex; gap: 8px; margin-bottom: 24px; }
-    .filter-btn { background-color: #2c2c2e; color: var(--text-muted); border: none; padding: 6px 16px; border-radius: 20px; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+    
+    /* 优化项 2：支持左右滑动拨动，隐藏多余框外内容 */
+    .filters { 
+        display: flex; 
+        gap: 8px; 
+        margin-bottom: 24px; 
+        overflow-x: auto; /* 支持横向平滑滚动 */
+        white-space: nowrap; 
+        scrollbar-width: none; /* Firefox 隐藏滚动条 */
+        -webkit-overflow-scrolling: touch; /* iOS 弹性滚动 */
+    }
+    .filters::-webkit-scrollbar { display: none; } /* Chrome/Safari 隐藏滚动条 */
+    .filter-btn { flex-shrink: 0; background-color: #2c2c2e; color: var(--text-muted); border: none; padding: 6px 16px; border-radius: 20px; font-size: 13px; cursor: pointer; transition: all 0.2s; }
     .filter-btn.active { background-color: var(--accent-red); color: white; }
 
     table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
@@ -203,8 +228,10 @@
     const itemsPerPage = 10;
     let currentYearFilter = 'all';
 
-    let calendarYear = 2026;
-    let calendarMonth = 5; 
+    // 优化项 1：全局初始化时间动态获取
+    const systemDate = new Date();
+    let calendarYear = systemDate.getFullYear();
+    let calendarMonth = systemDate.getMonth() + 1; 
     let selectedCalendarDate = null; 
 
     const GOAL_TOTAL = 40000;
@@ -217,7 +244,6 @@
             crs: L.ChineseCRS.CRS_GCJ02_3857 
         }).setView([23.1, 113.3], 12);
 
-        // 延迟加载底图，把网络带宽优先让给 JSON 数据下载
         setTimeout(() => {
             L.tileLayer(
                 'https://wprd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=6&x={x}&y={y}&z={z}',
@@ -280,13 +306,21 @@
         return `${hours}h ${mins}m`;
     }
 
+    // 优化项 1：统计卡片时间动态计算
     function calculateSummaries() {
-        const currentYear = "2026";
-        const currentMonth = "2026-05";
-        const lastYearPrefix = "2025";
-        const lastMonthPrefix = "2026-04";
-        const sameDayMD = "05-19"; 
-        const sameDayD = "19";
+        const now = new Date();
+        const currentYear = now.getFullYear().toString();
+        const currentMonth = `${currentYear}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+        const lastYearPrefix = (now.getFullYear() - 1).toString();
+        
+        // 动态精准计算上个月年份和月份前缀
+        let lmYear = now.getFullYear();
+        let lmMonth = now.getMonth(); 
+        if (lmMonth === 0) { lmMonth = 12; lmYear--; }
+        const lastMonthPrefix = `${lmYear}-${lmMonth.toString().padStart(2, '0')}`;
+        
+        const sameDayMD = `${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}`;
+        const sameDayD = now.getDate().toString().padStart(2, '0');
 
         let totalDist = 0, totalSeconds = 0, totalRunsCount = allRuns.length;
         let yearlyDist = 0, yearlySeconds = 0, yearlyRunsCount = 0, lastYearSamePeriodDist = 0;
@@ -361,7 +395,7 @@
         card.innerHTML = `
             <div class="calendar-header">
                 <div class="calendar-title-group">
-                    <div class="calendar-month" id="cal-month-title">05/2026</div>
+                    <div class="calendar-month" id="cal-month-title"></div>
                     <div class="calendar-month-dist" id="cal-month-dist">0 km</div>
                 </div>
                 <div class="calendar-nav">
@@ -420,7 +454,12 @@
         const firstDayIdx = new Date(calendarYear, calendarMonth - 1, 1).getDay();
         const totalDays = new Date(calendarYear, calendarMonth, 0).getDate();
 
-        for (let i = 0; i < firstDayIdx; i++) grid.appendChild(document.createElement('div'));
+        // 优化项 3：保持空置格子的长宽比同步
+        for (let i = 0; i < firstDayIdx; i++) {
+            const emptyCell = document.createElement('div');
+            emptyCell.style.aspectRatio = "1 / 1";
+            grid.appendChild(emptyCell);
+        }
 
         for (let day = 1; day <= totalDays; day++) {
             const dayCell = document.createElement('div');
@@ -455,19 +494,14 @@
         }
     }
 
-    // 统一处理数据并触发视图渲染
     function processAndRenderRuns(data) {
         allRuns = data;
-        
-        // 日期倒序排序
         allRuns.sort((a, b) => new Date(b.start_date_local.replace(/-/g, '/')) - new Date(a.start_date_local.replace(/-/g, '/')));
-        initCalendar();
-        applyFilters();         
-
-
+       
         calculateSummaries();
-        // 原生极速解码 polyline
-        allRuns.forEach(run => {
+        initCalendar();
+        applyFilters();
+		allRuns.forEach(run => {
             if (run.summary_polyline) {
                 try {
                     run._cachedLatlngs = polyline.decode(run.summary_polyline);
@@ -478,15 +512,13 @@
                 run._cachedLatlngs = [];
             }
         });		
-        if (!map) initMap(); 
+		if (!map) initMap(); 
     }
 
-    // 单请求 + Cache API 混合方案
     async function fetchData() {
         const URL = 'https://run.linwn.net/data/activities.json';
         
         try {
-            // 1. 尝试优先使用本地 Cache，实现 0 毫秒首屏渲染
             const cache = await caches.open('run-data-cache');
             const cachedResponse = await cache.match(URL);
             
@@ -495,16 +527,13 @@
                 processAndRenderRuns(cachedData);
             }
 
-            // 2. 无论有没有缓存，静默拉取线上最新数据
             const response = await fetch(URL);
             if (response.ok) {
-                // 【核心修复】：在读取 .json() 之前，先克隆一份干净的数据流用于缓存！
                 const responseToCache = response.clone(); 
                 const freshData = await response.json();
                 
-                // 如果是第一次访问（无缓存）或者发现了新增的跑步记录，则更新缓存并重绘界面
                 if (!cachedResponse || freshData.length !== allRuns.length) {
-                    await cache.put(URL, responseToCache); // 使用之前克隆好的副本存入缓存
+                    await cache.put(URL, responseToCache); 
                     processAndRenderRuns(freshData);
                 }
             }
@@ -619,6 +648,7 @@
         renderTable();
     }
 
+    // 优化项 1：年份按钮点击后，日历自动切到该年的“动态月份”
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -627,12 +657,14 @@
             
             selectedCalendarDate = null; 
             
+            const now = new Date();
             if (currentYearFilter !== 'all') {
                 calendarYear = parseInt(currentYearFilter, 10);
-                calendarMonth = (calendarYear === 2026) ? 5 : 12;
+                // 如果是今年则切到当前月份，如果是历史年份则默认停在 12 月
+                calendarMonth = (calendarYear === now.getFullYear()) ? (now.getMonth() + 1) : 12;
             } else {
-                calendarYear = 2026;
-                calendarMonth = 5;
+                calendarYear = now.getFullYear();
+                calendarMonth = now.getMonth() + 1;
             }
             
             applyFilters();
@@ -649,7 +681,6 @@
         if (currentPage < totalPages) { currentPage++; renderTable(); }
     });
 
-    // 启动入口
     fetchData();
 </script>
 </body>
