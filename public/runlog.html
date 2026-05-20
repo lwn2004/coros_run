@@ -240,7 +240,8 @@
 
     function initMap() {
         map = L.map('map', {
-            zoomControl: true,
+            zoomControl: false,
+			attributionControl: false,
             crs: L.ChineseCRS.CRS_GCJ02_3857 
         }).setView([23.1, 113.3], 12);
 
