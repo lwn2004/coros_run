@@ -30,51 +30,12 @@
         min-height: 100vh;
     }
 
-    /* 全局暗黑风 Loading 遮罩层样式 */
-    #loading-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: var(--bg-color);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-        transition: opacity 0.4s ease, visibility 0.4s ease;
-    }
-
-    .spinner {
-        width: 44px;
-        height: 44px;
-        border: 3px solid var(--progress-bg);
-        border-top: 3px solid var(--accent-red);
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
-        margin-bottom: 16px;
-    }
-
-    .loading-text {
-        color: var(--text-muted);
-        font-size: 13px;
-        letter-spacing: 2px;
-        font-weight: 500;
-        text-transform: uppercase;
-    }
-
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
 
     .container {
         max-width: 1200px;
         margin: 0 auto;
     }
 
-    /* 电脑端左右栏独立列容器 */
     .main-layout {
         display: flex;
         gap: 24px;
@@ -94,7 +55,6 @@
         gap: 24px;
     }
 
-    /* Top Cards Section */
     .summary-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -129,7 +89,6 @@
         font-weight: normal;
     }
 
-    /* Progress Bar */
     .progress-container {
         width: 100%;
         height: 4px;
@@ -174,7 +133,6 @@
     .trend-down { color: var(--text-muted); }
     .trend-up { color: var(--accent-red); }
 
-    /* Map Card */
     .map-card {
         background-color: var(--card-bg);
         border-radius: 16px;
@@ -188,7 +146,6 @@
         height: 100%;
     }
 
-    /* 日历控件样式 */
     .calendar-card {
         background-color: var(--card-bg);
         border-radius: 16px;
@@ -297,7 +254,6 @@
         margin-top: 1px;
     }
 
-    /* Activity Log Section */
     .activity-section {
         background-color: var(--card-bg);
         border-radius: 12px;
@@ -322,7 +278,6 @@
         font-size: 13px;
     }
 
-    /* Filters */
     .filters {
         display: flex;
         gap: 8px;
@@ -345,7 +300,6 @@
         color: white;
     }
 
-    /* Table */
     table {
         width: 100%;
         border-collapse: collapse;
@@ -386,7 +340,6 @@
         font-weight: normal;
     }
 
-    /* Pagination */
     .pagination {
         display: flex;
         justify-content: space-between;
@@ -406,48 +359,21 @@
         font-size: 16px;
     }
 
-    /* 手机端流式重排规则 */
     @media (max-width: 768px) {
-        body {
-            padding: 12px;
-        }
-
-        .main-layout {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .column-left, .column-right {
-            display: contents;
-        }
-
+        body { padding: 12px; }
+        .main-layout { display: flex; flex-direction: column; gap: 16px; }
+        .column-left, .column-right { display: contents; }
         .summary-grid { order: 1; }
         .map-card { order: 2; height: 350px; }
         .calendar-card { order: 3; }
         .activity-section { order: 4; }
-
-        .summary-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-        .summary-grid .card:first-child {
-            display: none;
-        }
+        .summary-grid { grid-template-columns: repeat(2, 1fr); }
+        .summary-grid .card:first-child { display: none; }
     }    
 </style>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" rel="stylesheet" media="print" onload="this.media='all'">
-  <noscript>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" rel="stylesheet">
-  </noscript>
-<script src="https://unpkg.com/@mapbox/polyline"></script>
-<script src="./leaflet.ChineseCRS.js"></script>
 </head>
 <body>
-
-<div id="loading-overlay">
-    <div class="spinner"></div>
-    <div class="loading-text">Loading Dashboard</div>
-</div>
 
 <div class="container">
     <div class="main-layout">
@@ -546,16 +472,19 @@
     </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/gumblex/leaflet.ChineseCRS/leaflet.ChineseCRS.js"></script>
+<script src="https://unpkg.com/@mapbox/polyline"></script>
+
 <script>
     let map;
     let routeLayer; 
     let allRuns = [];
     let filteredRuns = [];
     let currentPage = 1;
-    const itemsPerPage = 16;
+    const itemsPerPage = 10;
     let currentYearFilter = 'all';
 
-    // 日历状态监控
     let calendarYear = 2026;
     let calendarMonth = 5; 
     let selectedCalendarDate = null; 
@@ -565,40 +494,31 @@
     const GOAL_MONTHLY = 200;
 
     function initMap() {
+        // 核心改动 1：通过指定 CRS 让 Leaflet 原生支持 WGS84 坐标在 GCJ02 底图上的无缝贴合
         map = L.map('map', {
             zoomControl: true,
-            crs: L.ChineseCRS.CRS_GCJ02_3857,
+            crs: L.ChineseCRS.CRS_GCJ02_3857 
         }).setView([23.1, 113.3], 12);
 
         L.tileLayer(
             'https://wprd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=6&x={x}&y={y}&z={z}',
             {
                 subdomains: ['1', '2', '3', '4'],
-                "name": "Gaode",
-                "attribution": "高德",
-                "overlay": true
+                overlay: true
             }
         ).addTo(map);
     }
 
-    // 地图高速渲染内核优化
     function renderMap(runsOrRun) {
         if (!map) return;
-        let runs = [];
-        if (Array.isArray(runsOrRun)) {
-            runs = runsOrRun;
-        } else if (runsOrRun) {
-            runs = [runsOrRun];
-        }
+        let runs = Array.isArray(runsOrRun) ? runsOrRun : (runsOrRun ? [runsOrRun] : []);
 
         try {
-            if (routeLayer) {
-                map.removeLayer(routeLayer);
-            }
+            if (routeLayer) map.removeLayer(routeLayer);
             routeLayer = L.featureGroup().addTo(map);
             let hasValidCoords = false;
 
-            // 优化：多轨合并渲染 (Multi-polyline)，极大减小图层树层级，提升缩放/平移和切换年份的性能
+            // 核心改动 2：直接使用解压出来的原始 WGS84 坐标数组，因为 CRS 已经处理了偏移
             if (runs.length > 1) {
                 const multiLatlngs = [];
                 runs.forEach(run => {
@@ -616,7 +536,6 @@
                     hasValidCoords = true;
                 }
             } else if (runs.length === 1) {
-                // 精准单条高亮
                 const run = runs[0];
                 if (run && run._cachedLatlngs && run._cachedLatlngs.length > 0) {
                     L.polyline(run._cachedLatlngs, {
@@ -838,26 +757,15 @@
         }
     }
 
+    // 阶段 1：首屏秒级加载
     async function fetchData() {
         try {
-            const response = await fetch('https://run.linwn.net/data/activities.json');
-            if (!response.ok) throw new Error('接口失败');
+            const response = await fetch('https://run.linwn.net/data/all.json');
+            if (!response.ok) throw new Error('基础接口失败');
             allRuns = await response.json();
-
-            // 核心性能优化：获取完数据，立即在后台预解压缩并缓存所有地理坐标
-            allRuns.forEach(run => {
-                if (run.summary_polyline) {
-                    try {
-                        const coords = polyline.decode(run.summary_polyline);
-                        run._cachedLatlngs = coords.map(c => [c[0], c[1]]);
-                    } catch(err) {
-                        run._cachedLatlngs = [];
-                    }
-                } else {
-                    run._cachedLatlngs = [];
-                }
-            });
-        } catch (error) {}
+        } catch (error) {
+            console.error('All数据加载异常:', error);
+        }
         
         allRuns.sort((a, b) => new Date(b.start_date_local.replace(/-/g, '/')) - new Date(a.start_date_local.replace(/-/g, '/')));
         
@@ -866,12 +774,60 @@
         initCalendar();
         applyFilters(); 
 
-        // 数据加载完毕后，平滑淡出并移除 Loading 遮罩层
-        const overlay = document.getElementById('loading-overlay');
-        if (overlay) {
-            overlay.style.opacity = '0';
-            overlay.style.visibility = 'hidden';
-            setTimeout(() => overlay.remove(), 400);
+        fetchPolylineData();
+    }
+
+    // 阶段 2：轻量级路径匹配
+    async function fetchPolylineData() {
+        try {
+            const response = await fetch('https://run.linwn.net/data/activities.json');
+            if (!response.ok) return;
+            const activityData = await response.json();
+
+            const activityMap = new Map();
+            activityData.forEach(act => {
+                if (act.id) activityMap.set(String(act.id), act);
+                if (act.start_date_local) activityMap.set(act.start_date_local, act);
+            });
+
+            // 核心改动 3：彻底移除冗重的坐标系迭代转换，直接提取 polyline 本身的数组，耗时基本在毫秒级
+            allRuns.forEach(run => {
+                const match = activityMap.get(String(run.id)) || activityMap.get(run.start_date_local);
+                if (match && match.summary_polyline) {
+                    try {
+                        run._cachedLatlngs = polyline.decode(match.summary_polyline);
+                    } catch (err) {
+                        run._cachedLatlngs = [];
+                    }
+                } else {
+                    run._cachedLatlngs = [];
+                }
+            });
+
+            lazyUpdateMapRoutes();
+
+        } catch (e) {
+            console.error('路径关联异常:', e);
+        }
+    }
+
+    function lazyUpdateMapRoutes() {
+        if (selectedCalendarDate) {
+            const yearMonthPrefix = selectedCalendarDate.substring(0, 7); 
+            const currentFiltered = allRuns.filter(run => run.start_date_local && run.start_date_local.startsWith(yearMonthPrefix));
+            const dayRun = allRuns.find(run => run.start_date_local && run.start_date_local.startsWith(selectedCalendarDate));
+            if (dayRun) {
+                renderMap(dayRun);
+            } else {
+                renderMap(currentFiltered);
+            }
+        } else {
+            if (currentYearFilter === 'all') {
+                renderMap(allRuns);
+            } else {
+                const currentFiltered = allRuns.filter(run => run.start_date_local && run.start_date_local.startsWith(currentYearFilter));
+                renderMap(currentFiltered);
+            }
         }
     }
 
