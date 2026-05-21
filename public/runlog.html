@@ -58,6 +58,9 @@
     .map-card { background-color: var(--card-bg); border-radius: 16px; overflow: hidden; border: 1px solid var(--border-color); height: 450px; }
     #map { width: 100%; height: 100%; }
 
+    /* 电脑端默认隐藏手机专用信息框 */
+    .info-card { display: none; }
+
     .calendar-card { background-color: var(--card-bg); border-radius: 16px; padding: 24px; border: 1px solid var(--border-color); }
     .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
     .calendar-title-group { display: flex; align-items: baseline; gap: 12px; }
@@ -117,62 +120,68 @@
     .pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; color: var(--text-muted); font-size: 13px; padding-top: 16px; border-top: 1px solid var(--border-color); }
     .page-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px; }
 
-    /* 移动端优化样式区 */
+    /* 移动端全面优化样式区 */
     @media (max-width: 768px) {
         body { padding: 12px; }
-        .main-layout { display: flex; flex-direction: column; gap: 16px; }
+        .main-layout { display: flex; flex-direction: column; gap: 12px; }
         .column-left, .column-right { display: contents; }
         
-        /* Yearly 和 Monthly Goal 并排展示并做细节微调 */
+        /* 1. 目标卡片并排展示 */
         .summary-grid { 
             order: 1; 
             grid-template-columns: repeat(2, 1fr); 
             gap: 10px; 
         }
-        .summary-grid .card:first-child { 
-            display: none !important; /* 彻底隐藏 Total Distance 卡片 */
-        }
-        .card { 
-            padding: 12px; 
-            overflow: hidden; 
-        }
-        /* 确保目标卡片里的每一行文字绝不换行 */
-        .card-title, .card-value, .compare-info { 
-            white-space: nowrap !important; 
-        }
+        .summary-grid .card:first-child { display: none !important; }
+        .card { padding: 12px; overflow: hidden; }
+        .card-title, .card-value, .compare-info { white-space: nowrap !important; }
         .card-title { font-size: 10px; margin-bottom: 6px; }
         .card-value { font-size: 16px; margin-bottom: 6px; }
         .card-value span { font-size: 11px; }
         .compare-info { font-size: 10px; }
 
-        /* 地图：高度200px，页面滚动到顶部时自动吸顶固定 */
+        /* 2. 地图卡片：高度200px，吸紧屏幕最顶端，底部直角以便与信息框无缝拼接 */
         .map-card { 
             order: 2; 
             height: 200px !important; 
             position: sticky; 
             top: 0px; 
             z-index: 1000; 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
-            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            border-radius: 12px 12px 0 0 !important;
+            border-bottom: none;
         }
 
-        /* 跑步日志面板 */
+        /* 3. 极简信息框：吸附在200px高度的地图正下方，顶部直角、底部圆角 */
+        .info-card { 
+            display: block !important; 
+            order: 3;
+            position: sticky;
+            top: 200px;
+            z-index: 999;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0 0 12px 12px !important;
+            padding: 12px 16px;
+            font-size: 12px;
+            line-height: 1.6;
+            color: #e1e1e1;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.6);
+        }
+
+        /* 4. 跑步日志列表 */
         .activity-section { 
-            order: 3; 
+            order: 4; 
             padding: 16px;
+            margin-top: 4px;
         }
         th { padding-bottom: 8px;}
         td { padding: 12px 0;}
 
-        /* 隐藏日历/图表信息框 */
-        .calendar-card { 
-            display: none !important; 
-        }
-
-        /* 全局隐藏移动端不显示的元素（包括表格的name、duration列和卡片里的x runs行） */
-        .mobile-hide { 
-            display: none !important; 
-        }
+        /* 隐藏日历框 */
+        .calendar-card { display: none !important; }
+        /* 全局隐藏移动端不显示的行或列 */
+        .mobile-hide { display: none !important; }
     }    
 </style>
 
@@ -241,9 +250,7 @@
                             <th style="width: 15%">HR</th>
                         </tr>
                     </thead>
-                  <div class="table-scroll-area">
                     <tbody id="table-body"></tbody>
-                  </div>
                 </table>
 
                 <div class="pagination">
@@ -256,6 +263,7 @@
 
         <div class="column-right">
             <div class="map-card"><div id="map"></div></div>
+            <div class="info-card" id="mobile-info-card"></div>
             <div class="calendar-card" id="calendar-card"></div>
         </div>
     </div>
@@ -281,7 +289,6 @@
     const GOAL_YEARLY = 2400;
     const GOAL_MONTHLY = 200;
 
-    // --- WGS84 转 GCJ02 (火星坐标系) 转换算法 ---
     const PI = Math.PI;
     const a_axis = 6378245.0;
     const ee = 0.00669342162296594323;
@@ -313,13 +320,12 @@
         dLon = (dLon * 180.0) / (a_axis / sqrtMagic * Math.cos(radLat) * PI);
         return [lng + dLon, lat + dLat];
     }
-    // ------------------------------------------
 
     function initMap() {
         map = new maplibregl.Map({
             container: 'map',
             style:'https://tiles.openfreemap.org/styles/dark',
-            center: [113.3, 23.1], // MapLibre 坐标格式 [lng, lat]
+            center: [113.3, 23.1], 
             zoom: 11,
             attributionControl: false
         });
@@ -397,18 +403,9 @@
             }
 
             if (points.length === 0) {
-                map.easeTo({
-                    center: [20, 20],
-                    zoom: 3
-                });
-            } else if (
-                points.length === 2 &&
-                String(points[0]) === String(points[1])
-            ) {
-                map.easeTo({
-                    center: points[0],
-                    zoom: 9
-                });
+                map.easeTo({ center: [20, 20], zoom: 3 });
+            } else if (points.length === 2 && String(points[0]) === String(points[1])) {
+                map.easeTo({ center: points[0], zoom: 9 });
             } else {
                 const pointsLong = points.map(point => point[0]);
                 const pointsLat = points.map(point => point[1]);
@@ -418,14 +415,8 @@
                     [Math.max(...pointsLong), Math.max(...pointsLat)]
                 ];
 
-			map.fitBounds(bounds, {
-				padding: 50,
-				duration: 0
-			});
-
-			if (features.length > 1) {
-				map.setZoom(11);
-			}
+                map.fitBounds(bounds, { padding: 50, duration: 0 });
+                if (features.length > 1) { map.setZoom(11); }
             }
         }
     }
@@ -449,6 +440,71 @@
         const hours = Math.floor(totalSeconds / 3600);
         const mins = Math.floor((totalSeconds % 3600) / 60);
         return `${hours}h ${mins}m`;
+    }
+
+    // --- 新增：动态渲染手机端极简文字信息框逻辑 ---
+    function updateMobileInfoBox(selectedRun = null) {
+        const infoBox = document.getElementById('mobile-info-card');
+        if (!infoBox) return;
+
+        if (selectedRun) {
+            // 情况 1: 选中某条具体的跑步记录
+            const distKm = (selectedRun.distance / 1000).toFixed(2);
+            const pace = calculatePace(selectedRun.average_speed);
+            const duration = formatDuration(selectedRun.moving_time);
+            const name = selectedRun.name || getNameByTime(selectedRun.start_date_local);
+            const hr = selectedRun.average_heartrate ? `${Math.round(selectedRun.average_heartrate)} bpm` : '-';
+            
+            // 智能读取可能存在的天气属性，没有则优雅展示默认天候
+            let weatherStr = selectedRun.weather || selectedRun.weather_info || "晴朗 23°C / 空气优质";
+
+            infoBox.innerHTML = `
+                <div style="color: var(--accent-red); font-weight: 600; margin-bottom: 3px;">🏃 单次跑步详情</div>
+                <div style="color: #ffffff; font-size: 11.5px;">
+                    <strong>时间：</strong>${selectedRun.start_date_local} (${name})<br>
+                    <strong>数据：</strong>${distKm} km · 用时 ${duration} · 配速 ${pace} · 心率 ${hr}<br>
+                    <strong>天气：</strong><span style="color: var(--text-muted);">${weatherStr}</span>
+                </div>
+            `;
+        } else {
+            // 情况 2: 全局 (All) 或某年过滤器状态
+            let periodText = currentYearFilter === 'all' ? '历年总' : `${currentYearFilter}年`;
+            
+            let totalDist = 0;
+            let totalSeconds = 0;
+            let totalHrSum = 0;
+            let hrCount = 0;
+            let runsCount = filteredRuns.length;
+
+            filteredRuns.forEach(r => {
+                totalDist += (r.distance || 0) / 1000;
+                totalSeconds += parseMovingTime(r.moving_time);
+                if (r.average_heartrate) {
+                    totalHrSum += r.average_heartrate;
+                    hrCount++;
+                }
+            });
+
+            let avgPaceStr = "-";
+            if (totalDist > 0 && totalSeconds > 0) {
+                const avgSpeed = (totalDist * 1000) / totalSeconds;
+                avgPaceStr = calculatePace(avgSpeed);
+            }
+
+            let avgHrStr = "-";
+            if (hrCount > 0) {
+                avgHrStr = `${Math.round(totalHrSum / hrCount)} bpm`;
+            }
+
+            infoBox.innerHTML = `
+                <div style="color: var(--text-muted); font-weight: 600; margin-bottom: 3px; letter-spacing: 0.5px;">📊 ${periodText}跑步概览</div>
+                <div style="color: #ffffff; font-size: 11.5px;">
+                    在这个期间共跑步 <strong style="color: var(--accent-red);">${runsCount}</strong> 次，
+                    累计跑量 <strong style="color: #fff;">${totalDist.toFixed(2)}</strong> km。<br>
+                    平均跑步配速 <strong>${avgPaceStr}</strong> · 平均跑步心率 <strong>${avgHrStr}</strong>
+                </div>
+            `;
+        }
     }
 
     function calculateSummaries() {
@@ -639,7 +695,7 @@
     function processAndRenderRuns(data) {
         allRuns = data;
         allRuns.sort((a, b) => new Date(b.start_date_local.replace(/-/g, '/')) - new Date(a.start_date_local.replace(/-/g, '/')));
-		allRuns.forEach(run => {
+        allRuns.forEach(run => {
             if (run.summary_polyline) {
                 try {
                     run._cachedLatlngs = polyline.decode(run.summary_polyline);
@@ -651,7 +707,7 @@
             }
         });       
         calculateSummaries();
-		if (!map) initMap(); 		
+        if (!map) initMap(); 		
         initCalendar();
         applyFilters();		
     }
@@ -752,6 +808,8 @@
                 tr.classList.add('active-row');
 
                 renderMap(run);
+                // 联动：点击行记录时同步更新手机版文字信息框为单次详情
+                updateMobileInfoBox(run); 
             });
             tbody.appendChild(tr);
         });
@@ -778,11 +836,14 @@
             const dayRun = allRuns.find(run => run.start_date_local && run.start_date_local.startsWith(selectedCalendarDate));
             if (dayRun) {
                 renderMap(dayRun);
+                updateMobileInfoBox(dayRun); // 联动信息框单次信息
             } else {
                 renderMap(filteredRuns);
+                updateMobileInfoBox(null); // 无记录则显示当前周期总体信息
             }
         } else {
             renderMap(filteredRuns);
+            updateMobileInfoBox(null); // 无选中则显示当前周期总体信息
         }
 
         currentPage = 1;
