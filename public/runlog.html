@@ -126,7 +126,36 @@
         .summary-grid { order: 1; }
         .map-card { order: 2; height: 250px; position: sticky; top: 0px; z-index: 1000; box-shadow: 0 10px 20px rgba(0,0,0,0.5);}
         .calendar-card { order: 3; }
-        .activity-section { order: 4; }
+        .activity-section { 
+            order: 4; 
+            position: sticky; 
+            top: 378px; /* 12px(屏幕顶距) + 350px(地图高) + 16px(模块间距) */
+            height: calc(100vh - 390px); /* 100vh - 顶部占用(378) - body底部padding(12) */
+            display: flex; 
+            flex-direction: column;
+            padding-bottom: 0; /* 底部留白交给内部滚动区 */
+            z-index: 990; /* 确保它上滑时盖过日历 */
+        }
+      .table-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            margin: 0 -20px; /* 负边距抵消父容器的 padding，让滚动区域贴边 */
+            padding: 0 20px; /* 恢复内部内容的对齐 */
+            -webkit-overflow-scrolling: touch; /* 保证 iOS 顺滑回弹滚动 */
+        }
+
+        /* (可选) 隐藏滚动区的滚动条，让界面更干净 */
+        .table-scroll-area::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* 3. 表头在独立滚动区内吸顶，加上背景色防止下方数据划过时文字穿透重叠 */
+        th {
+            position: sticky;
+            top: 0;
+            background-color: var(--card-bg);
+            z-index: 10;
+        }
         .summary-grid { grid-template-columns: repeat(2, 1fr); }
         .summary-grid .card:first-child { display: none; }
         .mobile-hide { display: none; }
@@ -188,7 +217,7 @@
                     <button class="filter-btn" data-year="2022">2022</button>
                     <button class="filter-btn" data-year="2021">2021</button>
                 </div>
-
+              <div class="table-scroll-area">
                 <table>
                     <thead>
                         <tr>
@@ -200,7 +229,9 @@
                             <th style="width: 15%">HR</th>
                         </tr>
                     </thead>
+                  <div class="table-scroll-area">
                     <tbody id="table-body"></tbody>
+                  </div>
                 </table>
 
                 <div class="pagination">
@@ -208,6 +239,7 @@
                     <span id="page-info">Page 1 of 1</span>
                     <button class="page-btn" id="next-page">&gt;</button>
                 </div>
+              </div>
             </div>
         </div>
 
