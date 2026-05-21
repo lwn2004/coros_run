@@ -222,11 +222,11 @@
                     <thead>
                         <tr>
                             <th style="width: 25%">DATE</th>
-                            <th style="width: 15%">NAME</th>
+                            <th class="mobile-hide" style="width: 15%">NAME</th>
                             <th style="width: 15%">DISTANCE</th>
-                            <th style="width: 15%">DURATION</th>
+                            <th class="mobile-hide" style="width: 15%">DURATION</th>
                             <th style="width: 15%">PACE</th>
-                            <th style="width: 15%">HR</th>
+                            <th class="mobile-hide" style="width: 15%">HR</th>
                         </tr>
                     </thead>
                   <div class="table-scroll-area">
@@ -404,10 +404,10 @@
         const yearlyVsContainer = document.getElementById('yearly-vs-container');
         if (yearlyVs >= 0) {
             yearlyVsContainer.className = "stat-row left-aligned compare-info trend-up";
-            yearlyVsContainer.innerHTML = `↗ ${yearlyVs.toFixed(2)} km vs 去年同期`;
+            yearlyVsContainer.innerHTML = `↗ ${yearlyVs.toFixed(0)} km vs 去年同期`;
         } else {
             yearlyVsContainer.className = "stat-row left-aligned compare-info trend-down";
-            yearlyVsContainer.innerHTML = `↘ ${Math.abs(yearlyVs).toFixed(2)} km vs 去年同期`;
+            yearlyVsContainer.innerHTML = `↘ ${Math.abs(yearlyVs).toFixed(0)} km vs 去年同期`;
         }
 
         document.getElementById('monthly-dist').innerHTML = `${monthlyDist.toFixed(2)} <span>/ ${GOAL_MONTHLY} km</span>`;
@@ -419,10 +419,10 @@
         const monthlyVsContainer = document.getElementById('monthly-vs-container');
         if (monthlyVs >= 0) {
             monthlyVsContainer.className = "stat-row left-aligned compare-info trend-up";
-            monthlyVsContainer.innerHTML = `↗ ${monthlyVs.toFixed(2)} km vs 上月同期`;
+            monthlyVsContainer.innerHTML = `↗ ${monthlyVs.toFixed(0)} km vs 上月同期`;
         } else {
             monthlyVsContainer.className = "stat-row left-aligned compare-info trend-down";
-            monthlyVsContainer.innerHTML = `↘ ${Math.abs(monthlyVs).toFixed(2)} km vs 上月同期`;
+            monthlyVsContainer.innerHTML = `↘ ${Math.abs(monthlyVs).toFixed(0)} km vs 上月同期`;
         }
     }
 
@@ -626,11 +626,11 @@
 
             tr.innerHTML = `
                 <td>${run.start_date_local || ''}</td>
-                <td class="bold-white">${name}</td>
+                <td class="bold-white mobile-hide">${name}</td>
                 <td><span class="bold-white">${distKm}</span> <span class="unit">km</span></td>
-                <td>${duration}</td>
+                <td class="mobile-hide">${duration}</td>
                 <td>${pace}</td>
-                <td>${hr}</td>
+                <td class="mobile-hide">${hr}</td>
             `;
             tr.style.cursor = 'pointer';
 
