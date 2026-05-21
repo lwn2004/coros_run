@@ -716,7 +716,30 @@
         const totalPages = Math.ceil(filteredRuns.length / itemsPerPage);
         if (currentPage < totalPages) { currentPage++; renderTable(); }
     });
+// 移动端专属：嵌套滚动（Nested Scroll）交接控制
+    const handleMobileNestedScroll = () => {
+        if (window.innerWidth <= 768) {
+            const activitySection = document.querySelector('.activity-section');
+            const tableArea = document.querySelector('.table-scroll-area');
+            
+            if (activitySection && tableArea) {
+                // 266px 是 CSS 中 activity-section 设定的 top 吸顶距离，这里给 1px 容差
+                if (activitySection.getBoundingClientRect().top <= 267) {
+                    // 容器已吸附到地图底部，允许表格自身开始滑动
+                    tableArea.style.overflowY = 'auto';
+                } else {
+                    // 容器还在随页面上滑途中，强制锁定表格的自身滑动，将手指事件全部交还给整个页面
+                    tableArea.style.overflowY = 'hidden';
+                }
+            }
+        }
+    };
 
+    // 监听页面的滚动事件（passive 提升滑动性能）
+    window.addEventListener('scroll', handleMobileNestedScroll, { passive: true });
+    
+    // 页面加载或刷新时主动执行一次，防止初始状态错乱
+    handleMobileNestedScroll();
     fetchData();
 </script>
 </body>
