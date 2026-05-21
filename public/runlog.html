@@ -156,6 +156,7 @@
             background-color: var(--card-bg);
             z-index: 10;
         }
+          td { padding: 8px 0;}
         .summary-grid { grid-template-columns: repeat(2, 1fr); }
         .summary-grid .card:first-child { display: none; }
         .mobile-hide { display: none; }
@@ -226,7 +227,7 @@
                             <th style="width: 15%">DISTANCE</th>
                             <th class="mobile-hide" style="width: 15%">DURATION</th>
                             <th style="width: 15%">PACE</th>
-                            <th class="mobile-hide" style="width: 15%">HR</th>
+                            <th style="width: 15%">HR</th>
                         </tr>
                     </thead>
                   <div class="table-scroll-area">
@@ -630,7 +631,7 @@
                 <td><span class="bold-white">${distKm}</span> <span class="unit">km</span></td>
                 <td class="mobile-hide">${duration}</td>
                 <td>${pace}</td>
-                <td class="mobile-hide">${hr}</td>
+                <td>${hr}</td>
             `;
             tr.style.cursor = 'pointer';
 
