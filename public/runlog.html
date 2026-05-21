@@ -386,10 +386,10 @@
         const monthlyVs = monthlyDist - lastMonthSamePeriodDist;
         const monthlyVsContainer = document.getElementById('monthly-vs-container');
         if (monthlyVs >= 0) {
-            monthlyVsContainer.className = "stat-row left-aligned trend-up";
+            monthlyVsContainer.className = "stat-row left-aligned compare-info trend-up";
             monthlyVsContainer.innerHTML = `↗ ${monthlyVs.toFixed(2)} km vs 上月同期`;
         } else {
-            monthlyVsContainer.className = "stat-row left-aligned trend-down";
+            monthlyVsContainer.className = "stat-row left-aligned compare-info trend-down";
             monthlyVsContainer.innerHTML = `↘ ${Math.abs(monthlyVs).toFixed(2)} km vs 上月同期`;
         }
     }
