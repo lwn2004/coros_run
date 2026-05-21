@@ -128,13 +128,6 @@
         .calendar-card { order: 3; }
         .activity-section { 
             order: 4; 
-            position: sticky; 
-            top: 266px; /* 0px(屏幕顶距) + 250px(地图高) + 16px(模块间距) */
-            height: calc(100vh - 278px); /* 100vh - 顶部占用(266) - body底部padding(12) */
-            display: flex; 
-            flex-direction: column;
-            padding-bottom: 0; /* 底部留白交给内部滚动区 */
-            z-index: 990; /* 确保它上滑时盖过日历 */
         }
       th { padding-bottom: 6px;}
           td { padding: 8px 0;}
