@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Running Dashboard</title>
 
 <link rel="preconnect" href="https://cdnjs.cloudflare.com">
@@ -31,111 +31,370 @@
     body {
         background-color: var(--bg-color);
         color: var(--text-main);
-        padding: 24px;
-        min-height: 100vh;
+        padding: 16px;
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
     }
 
-    .container { max-width: 1200px; margin: 0 auto; }
-    .main-layout { display: flex; gap: 24px; }
-    .column-left { flex: 3; display: flex; flex-direction: column; gap: 24px; }
-    .column-right { flex: 2; display: flex; flex-direction: column; gap: 24px; }
-
-    .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-    .card { background-color: var(--card-bg); border-radius: 12px; padding: 20px; border: 1px solid var(--border-color); }
-    .card-title { color: var(--text-muted); font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
-    .card-value { font-size: 24px; font-weight: 700; margin-bottom: 12px; }
-    .card-value span { font-size: 14px; color: var(--text-muted); font-weight: normal; }
-
-    .progress-container { width: 100%; height: 4px; background-color: var(--progress-bg); border-radius: 2px; margin-bottom: 16px; overflow: hidden; }
-    .progress-bar { height: 100%; background-color: var(--accent-red); width: 0%; border-radius: 2px; transition: width 0.8s ease-out; }
-    .sub-stats { display: flex; flex-direction: column; gap: 8px; font-size: 12px; color: var(--text-muted); }
-    .stat-row { display: flex; align-items: center; gap: 8px; justify-content: space-between; }
-    .stat-row.left-aligned { justify-content: flex-start; }
-    .icon { color: var(--accent-red); font-style: normal; }
-    .trend-down { color: var(--text-muted); }
-    .trend-up { color: var(--accent-red); }
-
-    .map-card { background-color: var(--card-bg); border-radius: 16px; overflow: hidden; border: 1px solid var(--border-color); height: 450px; }
-    #map { width: 100%; height: 100%; }
-
-    .calendar-card { background-color: var(--card-bg); border-radius: 16px; padding: 24px; border: 1px solid var(--border-color); }
-    .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .calendar-title-group { display: flex; align-items: baseline; gap: 12px; }
-    .calendar-month { font-size: 20px; font-weight: 700; letter-spacing: 0.5px; }
-    .calendar-month-dist { color: var(--text-muted); font-size: 13px; }
-    .calendar-nav { display: flex; gap: 4px; }
-    .calendar-nav-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 18px; padding: 4px 10px; border-radius: 6px; transition: background 0.2s; }
-    .calendar-nav-btn:hover { background-color: #2c2c2e; color: white; }
-    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; text-align: center; }
-    .calendar-weekday { color: var(--text-dark); font-weight: 600; font-size: 11px; padding-bottom: 8px; }
-    
-    .calendar-day { 
-        position: relative; 
+    .container {
         width: 100%;
-        aspect-ratio: 1 / 1; 
-        display: flex; 
-        flex-direction: column; 
-        align-items: center; 
-        justify-content: center; 
-        border-radius: 8px; 
-        cursor: pointer; 
-        color: var(--text-dark); 
-        transition: all 0.2s; 
+        max-width: 1600px;
+        margin: 0 auto;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
     }
-    .calendar-day.current-month-day { color: #a1a1a1; }
-    .calendar-day.has-run { background-color: #2c2c2e; color: white; }
-    .calendar-day.has-run.long-run { background-color: var(--accent-red); }
-    .calendar-day.selected { outline: 2px solid white; outline-offset: 1px; }
-    .calendar-day-num { font-weight: 600; font-size: 13px; }
-    .calendar-day-dist { font-size: 9px; opacity: 0.8; margin-top: 1px; }
 
-    .activity-section { background-color: var(--card-bg); border-radius: 12px; padding: 20px; border: 1px solid var(--border-color); }
-    .activity-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .activity-title { font-size: 20px; font-weight: 700; }
-    .activity-count { color: var(--text-dark); font-size: 13px; }
+    .main-layout {
+        display: flex;
+        gap: 16px;
+        flex: 1;
+        min-height: 0; /* 关键：允许子元素在弹性盒中缩小 */
+    }
+
+    .column-left {
+        flex: 1.2;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        min-height: 0;
+    }
+
+    .column-right {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        min-height: 0;
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        flex-shrink: 0;
+    }
+
+    .card {
+        background-color: var(--card-bg);
+        border-radius: 12px;
+        padding: 14px 16px;
+        border: 1px solid var(--border-color);
+    }
+
+    .card-title {
+        color: var(--text-muted);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+    }
+
+    .card-value {
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .card-value span {
+        font-size: 13px;
+        color: var(--text-muted);
+        font-weight: normal;
+    }
+
+    .progress-container {
+        width: 100%;
+        height: 4px;
+        background-color: var(--progress-bg);
+        border-radius: 2px;
+        margin-bottom: 12px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background-color: var(--accent-red);
+        width: 0%;
+        border-radius: 2px;
+        transition: width 0.8s ease-out;
+    }
+
+    .sub-stats {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    .stat-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        justify-content: space-between;
+    }
+
+    .stat-row.left-aligned {
+        justify-content: flex-start;
+    }
+
+    .icon {
+        color: var(--accent-red);
+        font-style: normal;
+    }
+
+    .trend-down {
+        color: var(--text-muted);
+    }
+
+    .trend-up {
+        color: var(--accent-red);
+    }
+
+    /* 地图与图表卡片平分右侧空间 */
+    .map-card {
+        background-color: var(--card-bg);
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        flex: 1;
+        min-height: 0;
+    }
+
+    #map {
+        width: 100%;
+        height: 100%;
+    }
+
+    .chart-card {
+        background-color: var(--card-bg);
+        border-radius: 16px;
+        padding: 16px;
+        border: 1px solid var(--border-color);
+        flex: 1.2;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        min-height: 0;
+    }
+
+    .chart-box-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 8px;
+        flex-shrink: 0;
+    }
+
+    .chart-box-title {
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+
+    .weather-badge {
+        font-size: 12px;
+        color: #d1d1d1;
+        background-color: #2c2c2e;
+        padding: 4px 10px;
+        border-radius: 6px;
+        display: none;
+    }
+
+    .chart-container-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        flex: 1;
+        min-height: 0;
+        justify-content: space-between;
+    }
+
+    .chart-sub-container {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+    }
+
+    .chart-item {
+        position: relative;
+        width: 100%;
+        flex: 1;
+        min-height: 0;
+    }
+
+    .chart-sub-title {
+        font-size: 11px;
+        color: var(--text-dark);
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-bottom: 2px;
+        letter-spacing: 0.5px;
+    }
+
+    /* 活动表格区域弹性布局 */
+    .activity-section {
+        background-color: var(--card-bg);
+        border-radius: 12px;
+        padding: 16px;
+        border: 1px solid var(--border-color);
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .activity-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        flex-shrink: 0;
+    }
+
+    .activity-title {
+        font-size: 18px;
+        font-weight: 700;
+    }
+
+    .activity-count {
+        color: var(--text-dark);
+        font-size: 12px;
+    }
     
     .filters { 
         display: flex; 
-        gap: 8px; 
-        margin-bottom: 24px; 
+        gap: 6px; 
+        margin-bottom: 14px; 
         overflow-x: auto; 
         white-space: nowrap; 
         scrollbar-width: none; 
-        -webkit-overflow-scrolling: touch; 
+        flex-shrink: 0;
     }
     .filters::-webkit-scrollbar { display: none; } 
-    .filter-btn { flex-shrink: 0; background-color: #2c2c2e; color: var(--text-muted); border: none; padding: 6px 16px; border-radius: 20px; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+    
+    .filter-btn { 
+        flex-shrink: 0; 
+        background-color: #2c2c2e; 
+        color: var(--text-muted); 
+        border: none; 
+        padding: 6px 14px; 
+        border-radius: 20px; 
+        font-size: 12px; 
+        cursor: pointer; 
+        transition: all 0.2s; 
+    }
     .filter-btn.active { background-color: var(--accent-red); color: white; }
 
+    .table-container {
+        flex: 1;
+        overflow-y: auto;
+        min-height: 0;
+    }
+    .table-container::-webkit-scrollbar { width: 4px; }
+    .table-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
+
     table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
-    th { color: var(--text-dark); font-weight: 600; padding-bottom: 16px; font-size: 11px; letter-spacing: 0.5px; }
-    td { white-space: nowrap; padding: 16px 0; color: #d1d1d1; transition: background-color 0.2s; }
+    th { color: var(--text-dark); font-weight: 600; padding-bottom: 10px; font-size: 11px; letter-spacing: 0.5px; position: sticky; top: 0; background-color: var(--card-bg); z-index: 1; }
+    td { white-space: nowrap; padding: 10px 0; color: #d1d1d1; border-bottom: 1px solid rgba(255,255,255,0.02); }
     tr.active-row td { background-color: rgba(233, 51, 66, 0.12) !important; color: #ffffff !important; }
     tr.active-row td.bold-white { color: var(--accent-red) !important; }
+    
     .bold-white { color: white; font-weight: 600; }
     .unit { color: var(--text-dark); font-size: 11px; font-weight: normal; }
-    .pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; color: var(--text-muted); font-size: 13px; padding-top: 16px; border-top: 1px solid var(--border-color); }
+    
+    .pagination { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        margin-top: 12px; 
+        color: var(--text-muted); 
+        font-size: 12px; 
+        padding-top: 10px; 
+        border-top: 1px solid var(--border-color); 
+        flex-shrink: 0;
+    }
     .page-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px; }
 
-    @media (max-width: 768px) {
-        body { padding: 12px; }
-        .main-layout { display: flex; flex-direction: column; gap: 16px; }
-        .column-left, .column-right { display: contents; }
-        .summary-grid { order: 1; }
-        .map-card { order: 2; height: 250px; position: sticky; top: 0px; z-index: 1000; box-shadow: 0 10px 20px rgba(0,0,0,0.5);}
-        .calendar-card { order: 3; }
-        .activity-section { order: 4; }
-        th { padding-bottom: 6px;}
-        td { padding: 8px 0;}
-        .summary-grid { grid-template-columns: repeat(2, 1fr); }
-        .summary-grid .card:first-child { display: none; }
-        .mobile-hide { display: none; }
-        .card-value { font-size: 18px; }
-        .compare-info { font-size: 10px; }
-    }    
+    /* ==========================================================================
+       手机屏幕/响应式适配代码 (当屏幕宽度小于1024px时生效)
+       ========================================================================== */
+    @media (max-width: 1024px) {
+        body {
+            height: auto;
+            overflow: auto;
+            padding: 12px;
+        }
+
+        .container {
+            height: auto;
+        }
+
+        .main-layout {
+            flex-direction: column;
+            height: auto;
+            overflow: visible;
+            gap: 16px;
+        }
+
+        .column-left, .column-right {
+            flex: none;
+            width: 100%;
+            height: auto;
+        }
+
+        .summary-grid {
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 12px;
+        }
+
+        .activity-section {
+            height: auto;
+            min-height: 480px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            max-height: none;
+        }
+
+        .map-card {
+            height: 320px;
+            flex: none;
+        }
+
+        .chart-card {
+            height: auto;
+            flex: none;
+            min-height: 400px;
+        }
+
+        .chart-container-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            height: auto;
+        }
+
+        .chart-sub-container {
+            flex: none;
+            height: auto;
+        }
+
+        .chart-item {
+            flex: none;
+            height: 180px; /* 手机端滚动视图下赋予图表舒适的固定高度 */
+        }
+    }
 </style>
 
 <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -158,7 +417,7 @@
                     <div class="card-value" id="yearly-dist">0.00 <span>/ 2400 km</span></div>
                     <div class="progress-container"><div class="progress-bar" id="yearly-progress"></div></div>
                     <div class="sub-stats">
-                        <div class="stat-row mobile-hide"><span><span id="yearly-runs">0</span> runs</span><span id="yearly-duration">0h 0m</span></div>
+                        <div class="stat-row"><span><span id="yearly-runs">0</span> runs</span><span id="yearly-duration">0h 0m</span></div>
                         <div class="stat-row left-aligned compare-info" id="yearly-vs-container"></div>
                     </div>
                 </div>
@@ -168,7 +427,7 @@
                     <div class="card-value" id="monthly-dist">0.00 <span>/ 200 km</span></div>
                     <div class="progress-container"><div class="progress-bar" id="monthly-progress"></div></div>
                     <div class="sub-stats">
-                        <div class="stat-row mobile-hide"><span><span id="monthly-runs">0</span> runs</span><span id="monthly-duration">0h 0m</span></div>
+                        <div class="stat-row"><span><span id="monthly-runs">0</span> runs</span><span id="monthly-duration">0h 0m</span></div>
                         <div class="stat-row left-aligned compare-info" id="monthly-vs-container"></div>
                     </div>
                 </div>
@@ -177,7 +436,7 @@
             <div class="activity-section">
                 <div class="activity-header">
                     <div class="activity-title">Activity Log</div>
-                    <div class="activity-count" id="showing-text">Showing 1-16 of 0</div>
+                    <div class="activity-count" id="showing-text">Showing 1-10 of 0</div>
                 </div>
 
                 <div class="filters" id="year-filters">
@@ -189,21 +448,22 @@
                     <button class="filter-btn" data-year="2022">2022</button>
                     <button class="filter-btn" data-year="2021">2021</button>
                 </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width: 25%">DATE</th>
-                            <th class="mobile-hide" style="width: 15%">NAME</th>
-                            <th style="width: 15%">DISTANCE</th>
-                            <th class="mobile-hide" style="width: 15%">DURATION</th>
-                            <th style="width: 15%">PACE</th>
-                            <th style="width: 15%">HR</th>
-                        </tr>
-                    </thead>
-                  <div class="table-scroll-area">
-                    <tbody id="table-body"></tbody>
-                  </div>
-                </table>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 25%">DATE</th>
+                                <th style="width: 15%">NAME</th>
+                                <th style="width: 15%">DISTANCE</th>
+                                <th style="width: 15%">DURATION</th>
+                                <th style="width: 15%">PACE</th>
+                                <th style="width: 15%">HR</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body"></tbody>
+                    </table>
+                </div>
 
                 <div class="pagination">
                     <button class="page-btn" id="prev-page">&lt;</button>
@@ -215,7 +475,15 @@
 
         <div class="column-right">
             <div class="map-card"><div id="map"></div></div>
-            <div class="calendar-card" id="calendar-card"></div>
+            
+            <div class="chart-card" id="info-chart-card">
+                <div class="chart-box-header">
+                    <div class="chart-box-title" id="chart-box-title">Analytics</div>
+                    <div class="weather-badge" id="weather-badge"></div>
+                </div>
+                <div class="chart-container-wrapper" id="chart-container-wrapper">
+                    </div>
+            </div>
         </div>
     </div>
 </div>
@@ -230,17 +498,13 @@
     let currentPage = 1;
     const itemsPerPage = 10;
     let currentYearFilter = 'all';
-
-    const systemDate = new Date();
-    let calendarYear = systemDate.getFullYear();
-    let calendarMonth = systemDate.getMonth() + 1; 
-    let selectedCalendarDate = null; 
+    let chartInstances = []; 
 
     const GOAL_TOTAL = 40000;
     const GOAL_YEARLY = 2400;
     const GOAL_MONTHLY = 200;
 
-    // --- WGS84 转 GCJ02 (火星坐标系) 转换算法 ---
+    // --- WGS84 转 GCJ02 火星坐标算法 ---
     const PI = Math.PI;
     const a_axis = 6378245.0;
     const ee = 0.00669342162296594323;
@@ -272,13 +536,12 @@
         dLon = (dLon * 180.0) / (a_axis / sqrtMagic * Math.cos(radLat) * PI);
         return [lng + dLon, lat + dLat];
     }
-    // ------------------------------------------
 
     function initMap() {
         map = new maplibregl.Map({
             container: 'map',
-            style:'https://tiles.openfreemap.org/styles/dark',
-            center: [113.3, 23.1], // MapLibre 坐标格式 [lng, lat]
+            style: 'https://tiles.openfreemap.org/styles/dark',
+            center: [113.3, 23.1], 
             zoom: 11,
             attributionControl: false
         });
@@ -286,8 +549,7 @@
 
     function renderMap(runsOrRun) {
         if (!map.loaded()) {
-            // 如果地图样式尚未加载完毕，等待触发
-            map.once('load', () => {renderMap(runsOrRun);});
+            map.once('load', () => { renderMap(runsOrRun); });
             return;
         }
 
@@ -297,65 +559,39 @@
 
         runs.forEach(run => {
             if (run && run._cachedLatlngs && run._cachedLatlngs.length > 0) {
-                // @mapbox/polyline 解码出来的格式是 [lat, lng]，需转成 GeoJSON 标准的 [lng, lat]
-                // 并且为了匹配高德底图，同步执行 WGS84 -> GCJ02 转换
-                //let geojsonCoords = run._cachedLatlngs.map(coord => wgs84ToGcj02(coord[1], coord[0]));
                 let geojsonCoords = run._cachedLatlngs.map(coord => [coord[1], coord[0]]);
                 features.push({
                     'type': 'Feature',
-                    'geometry': {
-                        'type': 'LineString',
-                        'coordinates': geojsonCoords
-                    }
+                    'geometry': { 'type': 'LineString', 'coordinates': geojsonCoords }
                 });
                 allCoordinates.push(...geojsonCoords);
             }
         });
 
-        const geojsonData = {
-            'type': 'FeatureCollection',
-            'features': features
-        };
-
+        const geojsonData = { 'type': 'FeatureCollection', 'features': features };
         const sourceId = 'route-source';
         const layerId = 'route-layer';
 
         if (map.getSource(sourceId)) {
             map.getSource(sourceId).setData(geojsonData);
         } else {
-            map.addSource(sourceId, {
-                'type': 'geojson',
-                'data': geojsonData
-            });
-
+            map.addSource(sourceId, { 'type': 'geojson', 'data': geojsonData });
             map.addLayer({
                 'id': layerId,
                 'type': 'line',
                 'source': sourceId,
-                'layout': {
-                    'line-join': 'round',
-                    'line-cap': 'round'
-                },
-                'paint': {
-                    'line-color': '#ff1744',
-                    'line-width': 2,
-                    'line-opacity': 0.4
-                }
+                'layout': { 'line-join': 'round', 'line-cap': 'round' },
+                'paint': { 'line-color': '#ff1744', 'line-width': 2, 'line-opacity': 0.4 }
             });
         }
 
         if (map.getLayer(layerId)) {
-            // 根据单轨迹还是多轨迹，动态调节透明度和线宽
             map.setPaintProperty(layerId, 'line-width', runs.length === 1 ? 4 : 2);
             map.setPaintProperty(layerId, 'line-opacity', runs.length === 1 ? 0.9 : 0.4);
         }
 
-        // 根据轨迹自适应缩放范围
-                // 根据轨迹自适应缩放范围（按 getBoundsForGeoData 逻辑）
         if (features.length > 0) {
             let points = [];
-
-            // 找到第一条有坐标的数据
             for (const f of features) {
                 if (f.geometry.coordinates.length) {
                     points = f.geometry.coordinates;
@@ -364,35 +600,18 @@
             }
 
             if (points.length === 0) {
-                map.easeTo({
-                    center: [20, 20],
-                    zoom: 3
-                });
-            } else if (
-                points.length === 2 &&
-                String(points[0]) === String(points[1])
-            ) {
-                map.easeTo({
-                    center: points[0],
-                    zoom: 9
-                });
+                map.easeTo({ center: [20, 20], zoom: 3 });
+            } else if (points.length === 2 && String(points[0]) === String(points[1])) {
+                map.easeTo({ center: points[0], zoom: 9 });
             } else {
                 const pointsLong = points.map(point => point[0]);
                 const pointsLat = points.map(point => point[1]);
-
                 const bounds = [
                     [Math.min(...pointsLong), Math.min(...pointsLat)],
                     [Math.max(...pointsLong), Math.max(...pointsLat)]
                 ];
-
-			map.fitBounds(bounds, {
-				padding: 50,
-				duration: 0
-			});
-
-			if (features.length > 1) {
-				map.setZoom(11);
-			}
+                map.fitBounds(bounds, { padding: 40, duration: 0 });
+                if (features.length > 1) map.setZoom(11);
             }
         }
     }
@@ -402,12 +621,9 @@
         const parts = timeStr.split('.')[0].split(':');
         let seconds = 0;
         if (parts.length === 3) {
-            seconds += parseInt(parts[0], 10) * 3600;
-            seconds += parseInt(parts[1], 10) * 60;
-            seconds += parseInt(parts[2], 10);
+            seconds += parseInt(parts[0], 10) * 3600 + parseInt(parts[1], 10) * 60 + parseInt(parts[2], 10);
         } else if (parts.length === 2) {
-            seconds += parseInt(parts[0], 10) * 60;
-            seconds += parseInt(parts[1], 10);
+            seconds += parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
         }
         return seconds;
     }
@@ -450,8 +666,7 @@
                 yearlyRunsCount++;
             }
             if (dateStr.startsWith(lastYearPrefix)) {
-                const md = dateStr.substring(5, 10);
-                if (md <= sameDayMD) lastYearSamePeriodDist += distKm;
+                if (dateStr.substring(5, 10) <= sameDayMD) lastYearSamePeriodDist += distKm;
             }
             if (dateStr.startsWith(currentMonth)) {
                 monthlyDist += distKm;
@@ -459,8 +674,7 @@
                 monthlyRunsCount++;
             }
             if (dateStr.startsWith(lastMonthPrefix)) {
-                const d = dateStr.substring(8, 10);
-                if (d <= sameDayD) lastMonthSamePeriodDist += distKm;
+                if (dateStr.substring(8, 10) <= sameDayD) lastMonthSamePeriodDist += distKm;
             }
         });
 
@@ -476,13 +690,8 @@
         
         const yearlyVs = yearlyDist - lastYearSamePeriodDist;
         const yearlyVsContainer = document.getElementById('yearly-vs-container');
-        if (yearlyVs >= 0) {
-            yearlyVsContainer.className = "stat-row left-aligned compare-info trend-up";
-            yearlyVsContainer.innerHTML = `↗ ${yearlyVs.toFixed(0)} km vs 去年同期`;
-        } else {
-            yearlyVsContainer.className = "stat-row left-aligned compare-info trend-down";
-            yearlyVsContainer.innerHTML = `↘ ${Math.abs(yearlyVs).toFixed(0)} km vs 去年同期`;
-        }
+        yearlyVsContainer.className = "stat-row left-aligned compare-info " + (yearlyVs >= 0 ? "trend-up" : "trend-down");
+        yearlyVsContainer.innerHTML = `${yearlyVs >= 0 ? '↗' : '↘'} ${Math.abs(yearlyVs).toFixed(0)} km vs 去年同期`;
 
         document.getElementById('monthly-dist').innerHTML = `${monthlyDist.toFixed(2)} <span>/ ${GOAL_MONTHLY} km</span>`;
         document.getElementById('monthly-progress').style.width = `${Math.min(100, (monthlyDist / GOAL_MONTHLY) * 100)}%`;
@@ -491,171 +700,53 @@
 
         const monthlyVs = monthlyDist - lastMonthSamePeriodDist;
         const monthlyVsContainer = document.getElementById('monthly-vs-container');
-        if (monthlyVs >= 0) {
-            monthlyVsContainer.className = "stat-row left-aligned compare-info trend-up";
-            monthlyVsContainer.innerHTML = `↗ ${monthlyVs.toFixed(0)} km vs 上月同期`;
-        } else {
-            monthlyVsContainer.className = "stat-row left-aligned compare-info trend-down";
-            monthlyVsContainer.innerHTML = `↘ ${Math.abs(monthlyVs).toFixed(0)} km vs 上月同期`;
-        }
-    }
-
-    function initCalendar() {
-        const card = document.getElementById('calendar-card');
-        card.innerHTML = `
-            <div class="calendar-header">
-                <div class="calendar-title-group">
-                    <div class="calendar-month" id="cal-month-title"></div>
-                    <div class="calendar-month-dist" id="cal-month-dist">0 km</div>
-                </div>
-                <div class="calendar-nav">
-                    <button class="calendar-nav-btn" id="cal-prev-btn">&lt;</button>
-                    <button class="calendar-nav-btn" id="cal-next-btn">&gt;</button>
-                </div>
-            </div>
-            <div class="calendar-grid" id="cal-grid"></div>
-        `;
-
-        document.getElementById('cal-prev-btn').addEventListener('click', () => {
-            calendarMonth--;
-            if (calendarMonth < 1) { calendarMonth = 12; calendarYear--; }
-            renderCalendar();
-        });
-
-        document.getElementById('cal-next-btn').addEventListener('click', () => {
-            calendarMonth++;
-            if (calendarMonth > 12) { calendarMonth = 1; calendarYear++; }
-            renderCalendar();
-        });
-
-        renderCalendar();
-    }
-
-    function renderCalendar() {
-        const monthStr = calendarMonth.toString().padStart(2, '0');
-        document.getElementById('cal-month-title').innerText = `${monthStr}/${calendarYear}`;
-
-        const dailyData = {};
-        let monthTotalDist = 0;
-        const prefix = `${calendarYear}-${monthStr}`;
-
-        allRuns.forEach(run => {
-            if (run.start_date_local && run.start_date_local.startsWith(prefix)) {
-                const dayStr = run.start_date_local.substring(8, 10);
-                const dayNum = parseInt(dayStr, 10);
-                const km = (run.distance || 0) / 1000;
-                dailyData[dayNum] = (dailyData[dayNum] || 0) + km;
-                monthTotalDist += km;
-            }
-        });
-
-        document.getElementById('cal-month-dist').innerText = `${monthTotalDist.toFixed(1)} km`;
-        const grid = document.getElementById('cal-grid');
-        grid.innerHTML = '';
-
-        const weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-        weekdays.forEach(w => {
-            const div = document.createElement('div');
-            div.className = 'calendar-weekday';
-            div.innerText = w;
-            grid.appendChild(div);
-        });
-
-        const firstDayIdx = new Date(calendarYear, calendarMonth - 1, 1).getDay();
-        const totalDays = new Date(calendarYear, calendarMonth, 0).getDate();
-
-        for (let i = 0; i < firstDayIdx; i++) {
-            const emptyCell = document.createElement('div');
-            emptyCell.style.aspectRatio = "1 / 1";
-            grid.appendChild(emptyCell);
-        }
-
-        for (let day = 1; day <= totalDays; day++) {
-            const dayCell = document.createElement('div');
-            dayCell.className = 'calendar-day current-month-day';
-            
-            const dateString = `${calendarYear}-${monthStr}-${day.toString().padStart(2, '0')}`;
-            if (selectedCalendarDate === dateString) dayCell.classList.add('selected');
-
-            const dayNumDiv = document.createElement('div');
-            dayNumDiv.className = 'calendar-day-num';
-            dayNumDiv.innerText = day;
-            dayCell.appendChild(dayNumDiv);
-
-            if (dailyData[day]) {
-                dayCell.classList.add('has-run');
-                const dist = dailyData[day];
-                if (dist >= 15) dayCell.classList.add('long-run');
-                
-                const distDiv = document.createElement('div');
-                distDiv.className = 'calendar-day-dist';
-                distDiv.innerText = dist.toFixed(1);
-                dayCell.appendChild(distDiv);
-            }
-
-            dayCell.addEventListener('click', () => {
-                selectedCalendarDate = (selectedCalendarDate === dateString) ? null : dateString;
-                applyFilters(); 
-                renderCalendar(); 
-            });
-
-            grid.appendChild(dayCell);
-        }
+        monthlyVsContainer.className = "stat-row left-aligned compare-info " + (monthlyVs >= 0 ? "trend-up" : "trend-down");
+        monthlyVsContainer.innerHTML = `${monthlyVs >= 0 ? '↗' : '↘'} ${Math.abs(monthlyVs).toFixed(0)} km vs 上月同期`;
     }
 
     function processAndRenderRuns(data) {
         allRuns = data;
         allRuns.sort((a, b) => new Date(b.start_date_local.replace(/-/g, '/')) - new Date(a.start_date_local.replace(/-/g, '/')));
-		allRuns.forEach(run => {
+        allRuns.forEach(run => {
             if (run.summary_polyline) {
-                try {
-                    run._cachedLatlngs = polyline.decode(run.summary_polyline);
-                } catch (err) {
-                    run._cachedLatlngs = [];
-                }
-            } else {
-                run._cachedLatlngs = [];
-            }
+                try { run._cachedLatlngs = polyline.decode(run.summary_polyline); } catch (err) { run._cachedLatlngs = []; }
+            } else { run._cachedLatlngs = []; }
         });       
         calculateSummaries();
-		if (!map) initMap(); 		
-        initCalendar();
+        if (!map) initMap(); 		
         applyFilters();		
     }
 
     async function fetchData() {
         const URL = 'https://run.linwn.net/data/activities.json';
-        
         try {
             const cache = await caches.open('run-data-cache');
             const cachedResponse = await cache.match(URL);
-            
             if (cachedResponse) {
                 const cachedData = await cachedResponse.json();
                 processAndRenderRuns(cachedData);
             }
-
             const response = await fetch(URL);
             if (response.ok) {
                 const responseToCache = response.clone(); 
                 const freshData = await response.json();
-                
                 if (!cachedResponse || freshData.length !== allRuns.length) {
                     await cache.put(URL, responseToCache); 
                     processAndRenderRuns(freshData);
                 }
             }
-        } catch (error) {
-            console.error('数据拉取失败，尝试使用离线缓存:', error);
-        }
+        } catch (error) { console.error('Data loading failed:', error); }
     }
 
     function calculatePace(speedMs) {
         if (!speedMs) return "-";
         const secPerKm = 1000 / speedMs;
-        const mins = Math.floor(secPerKm / 60);
-        const secs = Math.floor(secPerKm % 60);
-        return `${mins}'${secs.toString().padStart(2, '0')}"`;
+        return `${Math.floor(secPerKm / 60)}'${Math.floor(secPerKm % 60).toString().padStart(2, '0')}"`;
+    }
+
+    function formatPaceFromSeconds(seconds) {
+        if (!seconds || isNaN(seconds)) return "-";
+        return `${Math.floor(seconds / 60)}'${Math.floor(seconds % 60).toString().padStart(2, '0')}"`;
     }
 
     function getNameByTime(dateStr) {
@@ -675,6 +766,209 @@
         return timeStr.split('.')[0];
     }
 
+    // --- 图表管理核心逻辑 ---
+    function destroyExistingCharts() {
+        chartInstances.forEach(chart => chart.destroy());
+        chartInstances = [];
+        document.getElementById('weather-badge').style.display = 'none';
+    }
+
+    const commonChartOptions = {
+        responsive: true,
+        maintainAspectRatio: false, // 允许 Flexbox 自由压缩高度而不会溢出
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: '#1a1a1a',
+                titleColor: '#888888',
+                bodyColor: '#ffffff',
+                borderColor: '#2a2a2a',
+                borderWidth: 1,
+                displayColors: false
+            }
+        },
+        scales: {
+            x: { grid: { color: '#2a2a2a' }, ticks: { color: '#888888', font: { size: 10 } } },
+            y: { grid: { color: '#2a2a2a' }, ticks: { color: '#888888', font: { size: 10 } } }
+        }
+    };
+
+    function renderGlobalOrYearCharts() {
+        destroyExistingCharts();
+        const wrapper = document.getElementById('chart-container-wrapper');
+        wrapper.innerHTML = '';
+
+        if (currentYearFilter === 'all') {
+            document.getElementById('chart-box-title').innerText = 'Annual Distance History';
+            const yearlyData = {};
+            allRuns.forEach(run => {
+                if (run.start_date_local) {
+                    const year = run.start_date_local.substring(0, 4);
+                    yearlyData[year] = (yearlyData[year] || 0) + ((run.distance || 0) / 1000);
+                }
+            });
+
+            const sortedYears = Object.keys(yearlyData).sort();
+            const distances = sortedYears.map(yr => yearlyData[yr].toFixed(2));
+
+            wrapper.innerHTML = `
+                <div class="chart-sub-container">
+                    <div class="chart-item"><canvas id="global-bar-chart"></canvas></div>
+                </div>
+            `;
+
+            const ctx = document.getElementById('global-bar-chart').getContext('2d');
+            chartInstances.push(new Chart(ctx, {
+                type: 'bar',
+                data: { labels: sortedYears, datasets: [{ data: distances, backgroundColor: '#e93342', borderRadius: 4 }] },
+                options: {
+                    ...commonChartOptions,
+                    plugins: { ...commonChartOptions.plugins, tooltip: { ...commonChartOptions.plugins.tooltip, callbacks: { label: (c) => ` ${c.parsed.y} km` } } }
+                }
+            }));
+
+        } else {
+            document.getElementById('chart-box-title').innerText = `${currentYearFilter} Yearly Analytics`;
+
+            const monthlyDistance = Array(12).fill(0);
+            const monthlyPaceSum = Array(12).fill(0);
+            const monthlyPaceCount = Array(12).fill(0);
+            const monthlyHrSum = Array(12).fill(0);
+            const monthlyHrCount = Array(12).fill(0);
+
+            allRuns.forEach(run => {
+                if (run.start_date_local && run.start_date_local.startsWith(currentYearFilter)) {
+                    const monthIdx = parseInt(run.start_date_local.substring(5, 7), 10) - 1;
+                    const distKm = (run.distance || 0) / 1000;
+                    monthlyDistance[monthIdx] += distKm;
+                    if (run.average_speed) {
+                        monthlyPaceSum[monthIdx] += (1000 / run.average_speed);
+                        monthlyPaceCount[monthIdx]++;
+                    }
+                    if (run.average_heartrate) {
+                        monthlyHrSum[monthIdx] += run.average_heartrate;
+                        monthlyHrCount[monthIdx]++;
+                    }
+                }
+            });
+
+            const finalDist = monthlyDistance.map(d => d > 0 ? d.toFixed(2) : null);
+            const finalPace = monthlyPaceSum.map((sum, i) => monthlyPaceCount[i] > 0 ? Math.round(sum / monthlyPaceCount[i]) : null);
+            const finalHr = monthlyHrSum.map((sum, i) => monthlyHrCount[i] > 0 ? Math.round(sum / monthlyHrCount[i]) : null);
+
+            wrapper.innerHTML = `
+                <div class="chart-sub-container">
+                    <div class="chart-sub-title">Monthly Distance (km)</div>
+                    <div class="chart-item"><canvas id="month-dist-chart"></canvas></div>
+                </div>
+                <div class="chart-sub-container">
+                    <div class="chart-sub-title">Average Pace (min/km)</div>
+                    <div class="chart-item"><canvas id="month-pace-chart"></canvas></div>
+                </div>
+                <div class="chart-sub-container">
+                    <div class="chart-sub-title">Average Heart Rate (bpm)</div>
+                    <div class="chart-item"><canvas id="month-hr-chart"></canvas></div>
+                </div>
+            `;
+
+            const monthsLabels = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+
+            chartInstances.push(new Chart(document.getElementById('month-dist-chart').getContext('2d'), {
+                type: 'line',
+                data: { labels: monthsLabels, datasets: [{ data: finalDist, borderColor: '#e93342', backgroundColor: 'rgba(233,51,66,0.05)', tension: 0.1, pointRadius: 3, spanGaps: false }] },
+                options: commonChartOptions
+            }));
+
+            chartInstances.push(new Chart(document.getElementById('month-pace-chart').getContext('2d'), {
+                type: 'line',
+                data: { labels: monthsLabels, datasets: [{ data: finalPace, borderColor: '#ff9f43', tension: 0.1, pointRadius: 3, spanGaps: false }] },
+                options: {
+                    ...commonChartOptions,
+                    scales: { x: commonChartOptions.scales.x, y: { ...commonChartOptions.scales.y, reverse: true, ticks: { ...commonChartOptions.scales.y.ticks, callback: (v) => formatPaceFromSeconds(v) } } },
+                    plugins: { ...commonChartOptions.plugins, tooltip: { ...commonChartOptions.plugins.tooltip, callbacks: { label: (ctx) => ` Pace: ${formatPaceFromSeconds(ctx.parsed.y)}` } } }
+                }
+            }));
+
+chartInstances.push(new Chart(document.getElementById('month-hr-chart').getContext('2d'), {
+    type: 'line',
+    data: { labels: monthsLabels, datasets: [{ data: finalHr, borderColor: '#4cd137', tension: 0.1, pointRadius: 3, spanGaps: false }] },
+    options: {
+        ...commonChartOptions,
+        scales: {
+            x: commonChartOptions.scales.x,
+            y: { 
+                ...commonChartOptions.scales.y, 
+                min: 30, 
+                max: 210 
+            }
+        }
+    }
+}));
+        }
+    }
+
+    async function renderSingleRunCharts(runId, runName) {
+        destroyExistingCharts();
+        document.getElementById('chart-box-title').innerText = runName || 'Workout Details';
+        const wrapper = document.getElementById('chart-container-wrapper');
+        wrapper.innerHTML = '<div style="color:var(--text-muted);font-size:12px;padding:12px 0;">Loading details...</div>';
+
+        try {
+            const res = await fetch(`https://run.linwn.net/data/details/${runId}.json`);
+            if (!res.ok) throw new Error('Detail not found');
+            const detail = await res.json();
+            wrapper.innerHTML = '';
+
+            if (detail.weather) {
+                const w = detail.weather;
+                const weatherBadge = document.getElementById('weather-badge');
+                weatherBadge.innerHTML = `☀️ ${w.temperature_c}°C  |  ${w.condition}  |  💨 ${w.wind_speed_kmh} km/h`;
+                weatherBadge.style.display = 'block';
+            }
+
+            wrapper.innerHTML = `
+                <div class="chart-sub-container">
+                    <div class="chart-sub-title">Pace Curve</div>
+                    <div class="chart-item"><canvas id="single-pace-chart"></canvas></div>
+                </div>
+                <div class="chart-sub-container">
+                    <div class="chart-sub-title">Heart Rate Monitor</div>
+                    <div class="chart-item"><canvas id="single-hr-chart"></canvas></div>
+                </div>
+            `;
+
+            chartInstances.push(new Chart(document.getElementById('single-pace-chart').getContext('2d'), {
+                type: 'line',
+                data: { labels: detail.charts.pace.labels || [], datasets: [{ data: detail.charts.pace.data || [], borderColor: '#ff9f43', borderWidth: 1.5, pointRadius: 0, fill: false, tension: 0.1 }] },
+                options: {
+                    ...commonChartOptions,
+                    scales: { x: commonChartOptions.scales.x, y: { ...commonChartOptions.scales.y, reverse: true, ticks: { ...commonChartOptions.scales.y.ticks, callback: (v) => formatPaceFromSeconds(v) } } },
+                    plugins: { ...commonChartOptions.plugins, tooltip: { ...commonChartOptions.plugins.tooltip, callbacks: { label: (ctx) => ` Pace: ${formatPaceFromSeconds(ctx.parsed.y)}` } } }
+                }
+            }));
+
+chartInstances.push(new Chart(document.getElementById('single-hr-chart').getContext('2d'), {
+    type: 'line',
+    data: { labels: detail.charts.hr.labels || [], datasets: [{ data: detail.charts.hr.data || [], borderColor: '#4cd137', borderWidth: 1.5, pointRadius: 0, fill: false, tension: 0.1 }] },
+    options: {
+        ...commonChartOptions,
+        scales: {
+            x: commonChartOptions.scales.x,
+            y: { 
+                ...commonChartOptions.scales.y, 
+                min: 30, 
+                max: 210 
+            }
+        }
+    }
+}));
+
+        } catch (err) {
+            console.error(err);
+            wrapper.innerHTML = '<div style="color:var(--text-muted);font-size:12px;padding:12px 0;">Detailed charts unavailable for this activity.</div>';
+        }
+    }
+
     function renderTable() {
         const tbody = document.getElementById('table-body');
         tbody.innerHTML = '';
@@ -691,34 +985,22 @@
             const hr = run.average_heartrate ? Math.round(run.average_heartrate) : '-';
 
             const tr = document.createElement('tr');
-            
-            if (selectedCalendarDate && run.start_date_local.startsWith(selectedCalendarDate)) {
-                tr.className = "active-row";
-            }
-
+            tr.setAttribute('data-run-id', run.run_id || '');
             tr.innerHTML = `
                 <td>${run.start_date_local || ''}</td>
-                <td class="bold-white mobile-hide">${name}</td>
+                <td class="bold-white">${name}</td>
                 <td><span class="bold-white">${distKm}</span> <span class="unit">km</span></td>
-                <td class="mobile-hide">${duration}</td>
+                <td>${duration}</td>
                 <td>${pace}</td>
                 <td>${hr}</td>
             `;
             tr.style.cursor = 'pointer';
 
             tr.addEventListener('click', () => {
-                const runDate = run.start_date_local.substring(0, 10); 
-                selectedCalendarDate = runDate;
-
-                const parts = runDate.split('-');
-                calendarYear = parseInt(parts[0], 10);
-                calendarMonth = parseInt(parts[1], 10);
-                renderCalendar(); 
-
                 document.querySelectorAll('#table-body tr').forEach(r => r.classList.remove('active-row'));
                 tr.classList.add('active-row');
-
                 renderMap(run);
+                if (run.run_id) renderSingleRunCharts(run.run_id, name);
             });
             tbody.appendChild(tr);
         });
@@ -738,22 +1020,10 @@
             filteredRuns = allRuns.filter(run => run.start_date_local && run.start_date_local.startsWith(currentYearFilter));
         }
 
-        if (selectedCalendarDate) {
-            const yearMonthPrefix = selectedCalendarDate.substring(0, 7); 
-            filteredRuns = allRuns.filter(run => run.start_date_local && run.start_date_local.startsWith(yearMonthPrefix));
-            
-            const dayRun = allRuns.find(run => run.start_date_local && run.start_date_local.startsWith(selectedCalendarDate));
-            if (dayRun) {
-                renderMap(dayRun);
-            } else {
-                renderMap(filteredRuns);
-            }
-        } else {
-            renderMap(filteredRuns);
-        }
-
+        renderMap(filteredRuns);
         currentPage = 1;
         renderTable();
+        renderGlobalOrYearCharts();
     }
 
     document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -761,20 +1031,7 @@
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             e.target.classList.add('active');
             currentYearFilter = e.target.getAttribute('data-year');
-            
-            selectedCalendarDate = null; 
-            
-            const now = new Date();
-            if (currentYearFilter !== 'all') {
-                calendarYear = parseInt(currentYearFilter, 10);
-                calendarMonth = (calendarYear === now.getFullYear()) ? (now.getMonth() + 1) : 12;
-            } else {
-                calendarYear = now.getFullYear();
-                calendarMonth = now.getMonth() + 1;
-            }
-            
             applyFilters();
-            renderCalendar();
         });
     });
 
