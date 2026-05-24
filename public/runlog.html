@@ -43,337 +43,151 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 4px 0 24px 0;
+        padding: 4px 1.5rem 24px 1.5rem;
         flex-shrink: 0;
         width: 100%;
         max-width: 80rem;
         margin: 0 auto;
     }
 
-    .logo {
-        font-size: 22px;
-        font-weight: 900;
-        letter-spacing: -0.5px;
-    }
-    
-    .logo span {
-        color: var(--accent-red);
-    }
+    .logo { font-size: 22px; font-weight: 900; letter-spacing: -0.5px; }
+    .logo span { color: var(--accent-red); }
 
-    .desktop-menu {
-        display: flex;
-        gap: 28px;
-    }
-
-    .desktop-menu a {
-        color: var(--text-muted);
-        text-decoration: none;
-        font-size: 14px;
-        font-weight: 600;
-        transition: color 0.2s;
-    }
-
-    .desktop-menu a.active, .desktop-menu a:hover {
-        color: #ffffff;
-    }
+    .desktop-menu { display: flex; gap: 28px; }
+    .desktop-menu a { color: var(--text-muted); text-decoration: none; font-size: 14px; font-weight: 600; transition: color 0.2s; }
+    .desktop-menu a.active, .desktop-menu a:hover { color: #ffffff; }
 
     /* --- Main Layout --- */
     .container {
-        width: 100%;
-        max-width: 80rem;
-        margin: 0 auto;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
+        width: 100%; max-width: 80rem; margin: 0 auto;
+        height: 100%; display: flex; flex-direction: column; min-height: 0;
     }
 
-    .main-layout {
-        display: flex;
-        gap: 16px;
-        flex: 1;
-        min-height: 0;
-    }
+    .main-layout { display: flex; gap: 16px; flex: 1; min-height: 0; }
+    .column-left { flex: 1.5; display: flex; flex-direction: column; gap: 16px; min-height: 0; padding-left: 1.5rem;}
+    .column-right { flex: 1; display: flex; flex-direction: column; gap: 16px; min-height: 0; padding-right: 1.5rem;}
 
-    .column-left {
-        flex: 1.2;
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        min-height: 0;
-    }
-
-    .column-right {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        min-height: 0;
-    }
-
-    .summary-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 12px;
-        flex-shrink: 0;
-    }
-
-    .card {
-        background-color: var(--card-bg);
-        border-radius: 12px;
-        padding: 14px 16px;
-        border: 1px solid var(--border-color);
-    }
-
-    .card-title {
-        color: var(--text-muted);
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        margin-bottom: 8px;
-    }
-
-    .card-value {
-        font-size: 22px;
-        font-weight: 700;
-        margin-bottom: 8px;
-    }
-
-    .card-value span {
-        font-size: 13px;
-        color: var(--text-muted);
-        font-weight: normal;
-    }
-
-    .progress-container {
-        width: 100%;
-        height: 4px;
-        background-color: var(--progress-bg);
-        border-radius: 2px;
-        margin-bottom: 12px;
-        overflow: hidden;
-    }
-
-    .progress-bar {
-        height: 100%;
-        background-color: var(--accent-red);
-        width: 0%;
-        border-radius: 2px;
-        transition: width 0.8s ease-out;
-    }
-
-    .sub-stats {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        font-size: 12px;
-        color: var(--text-muted);
-    }
-
-    .stat-row {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        justify-content: space-between;
-    }
-
-    .stat-row.left-aligned {
-        justify-content: flex-start;
-    }
-
-    .icon {
-        color: var(--accent-red);
-        font-style: normal;
-    }
-
+    .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; flex-shrink: 0; }
+    .card { background-color: var(--card-bg); border-radius: 12px; padding: 14px 16px; border: 1px solid var(--border-color); }
+    .card-title { color: var(--text-muted); font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+    .card-value { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+    .card-value span { font-size: 13px; color: var(--text-muted); font-weight: normal; }
+    
+    .progress-container { width: 100%; height: 4px; background-color: var(--progress-bg); border-radius: 2px; margin-bottom: 12px; overflow: hidden; }
+    .progress-bar { height: 100%; background-color: var(--accent-red); width: 0%; border-radius: 2px; transition: width 0.8s ease-out; }
+    
+    .sub-stats { display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-muted); }
+    .stat-row { display: flex; align-items: center; gap: 8px; justify-content: space-between; }
+    .stat-row.left-aligned { justify-content: flex-start; }
+    .icon { color: var(--accent-red); font-style: normal; }
     .trend-down { color: var(--text-muted); }
     .trend-up { color: var(--accent-red); }
 
     /* Map and Info Box */
-    .map-card {
-        background-color: var(--card-bg);
-        border-radius: 16px;
-        overflow: hidden;
-        border: 1px solid var(--border-color);
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
-    }
-
-    #map {
-        width: 100%;
-        flex: 1;
-        min-height: 0;
-    }
-
-    .map-info-box {
-        flex-shrink: 0;
-        height: 44px;
-        padding: 0 16px;
-        display: flex;
-        align-items: center;
-        border-top: 1px solid var(--border-color);
-        font-size: 12px;
-        color: var(--text-muted);
-        background-color: #111;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .chart-card {
-        background-color: var(--card-bg);
-        border-radius: 16px;
-        padding: 16px;
-        border: 1px solid var(--border-color);
-        flex: 1.2;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        min-height: 0;
-    }
-
-    .chart-box-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid var(--border-color);
-        padding-bottom: 8px;
-        flex-shrink: 0;
-    }
-
-    .chart-box-title {
-        font-size: 15px;
-        font-weight: 700;
-        letter-spacing: 0.5px;
-    }
-
-    .weather-badge {
-        font-size: 12px;
-        color: #d1d1d1;
-        background-color: #2c2c2e;
-        padding: 4px 10px;
-        border-radius: 6px;
-        display: none;
-    }
-
-    .chart-container-wrapper {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        flex: 1;
-        min-height: 0;
-        justify-content: space-between;
-    }
-
-    .chart-sub-container {
-        display: flex;
-        flex-direction: column;
-        flex: 1;
-        min-height: 0;
-    }
-
-    .chart-item {
-        position: relative;
-        width: 100%;
-        flex: 1;
-        min-height: 0;
-    }
-
-    .chart-sub-title {
-        font-size: 11px;
-        color: var(--text-dark);
-        font-weight: 600;
-        text-transform: uppercase;
-        margin-bottom: 2px;
-        letter-spacing: 0.5px;
-    }
+    .map-card { background-color: var(--card-bg); border-radius: 16px; overflow: hidden; border: 1px solid var(--border-color); flex: 1; display: flex; flex-direction: column; min-height: 0; height: 250px;}
+    #map { width: 100%; flex: 1; min-height: 0; }
+    .map-info-box { flex-shrink: 0; height: 44px; padding: 0 16px; display: flex; align-items: center; border-top: 1px solid var(--border-color); font-size: 12px; color: var(--text-muted); background-color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     /* Activity Log Area */
-    .activity-section {
-        background-color: var(--card-bg);
-        border-radius: 12px;
-        padding: 16px;
-        border: 1px solid var(--border-color);
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
-    }
-
-    .activity-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 12px;
-        flex-shrink: 0;
-    }
-
-    .activity-title {
-        font-size: 18px;
-        font-weight: 700;
-    }
-
-    .activity-count {
-        color: var(--text-dark);
-        font-size: 12px;
-    }
+    .activity-section { background-color: var(--card-bg); border-radius: 12px; padding: 16px; border: 1px solid var(--border-color); flex: 1; display: flex; flex-direction: column; min-height: 0; }
+    .activity-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-shrink: 0; }
+    .activity-title { font-size: 18px; font-weight: 700; }
+    .activity-count { color: var(--text-dark); font-size: 12px; }
     
-    .filters { 
-        display: flex; 
-        gap: 6px; 
-        margin-bottom: 14px; 
-        overflow-x: auto; 
-        white-space: nowrap; 
-        scrollbar-width: none; 
-        flex-shrink: 0;
-    }
+    .filters { display: flex; gap: 6px; margin-bottom: 14px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-shrink: 0; }
     .filters::-webkit-scrollbar { display: none; } 
-    
-    .filter-btn { 
-        flex-shrink: 0; 
-        background-color: #2c2c2e; 
-        color: var(--text-muted); 
-        border: none; 
-        padding: 6px 14px; 
-        border-radius: 20px; 
-        font-size: 12px; 
-        cursor: pointer; 
-        transition: all 0.2s; 
-    }
+    .filter-btn { flex-shrink: 0; background-color: #2c2c2e; color: var(--text-muted); border: none; padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.2s; }
     .filter-btn.active { background-color: var(--accent-red); color: white; }
 
-    .table-container {
-        flex: 1;
-        overflow-y: auto;
-        min-height: 0;
-    }
+    .table-container { flex: 1; overflow-y: auto; min-height: 0; scroll-behavior: smooth; }
     .table-container::-webkit-scrollbar { width: 4px; }
     .table-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
 
     table { width: 100%; border-collapse: collapse; font-size: 0.875rem; text-align: left; }
     th { color: var(--text-dark); font-weight: 600; padding-bottom: 10px; font-size: 11px; letter-spacing: 0.5px; position: sticky; top: 0; background-color: var(--card-bg); z-index: 1; }
     td { white-space: nowrap; padding: 10px 0; color: #d1d1d1; border-bottom: 1px solid rgba(255,255,255,0.02); }
+    tr { transition: background-color 0.2s; }
     tr.active-row td { background-color: rgba(233, 51, 66, 0.12) !important; color: #ffffff !important; }
     tr.active-row td.bold-white { color: var(--accent-red) !important; }
     
     .bold-white { color: white; font-weight: 600; }
     .unit { color: var(--text-dark); font-size: 11px; font-weight: normal; }
     
-    .pagination { 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center; 
-        margin-top: 12px; 
-        color: var(--text-muted); 
-        font-size: 16px; 
-        padding-top: 10px; 
-        border-top: 1px solid var(--border-color); 
-        flex-shrink: 0;
-    }
+    .pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; color: var(--text-muted); font-size: 16px; padding-top: 10px; border-top: 1px solid var(--border-color); flex-shrink: 0; }
     .page-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 30px; }
+
+    /* ==========================================================================
+       Calendar Card Styles
+       ========================================================================== */
+    .chart-card { background-color: var(--card-bg); border-radius: 16px; border: 1px solid var(--border-color); flex: 1.2; display: flex; flex-direction: column; min-height: 0; position: relative; }
+    .cal-card-inner { display: flex; flex-direction: column; height: 100%; padding: 20px 24px; }
+    
+    /* Top Row Layout: Left(Controls) - Center(Stats) - Right(Tabs) */
+    .cal-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+    
+    .cal-controls-wrap { flex: 1; display: flex; justify-content: flex-start; }
+    .cal-controls { display: flex; align-items: center; background-color: var(--progress-bg); border-radius: 20px; padding: 4px 12px; }
+    .cal-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 14px; padding: 0 6px; }
+    .cal-btn:hover { color: var(--text-main); }
+    .cal-current-date { font-size: 14px; font-weight: 600; margin: 0 10px; color: var(--text-main); }
+    
+    .cal-center-stat {
+        flex: 1;
+        text-align: center;
+        font-size: 26px;
+        font-weight: 700;
+        color: var(--text-main);
+        white-space: nowrap;
+    }
+    .cal-center-stat small { font-size: 12px; color: var(--text-muted); font-weight: normal; margin-left: 4px; }
+    
+    .cal-toggle-wrap { flex: 1; display: flex; justify-content: flex-end; }
+    .cal-toggle { display: flex; background-color: var(--progress-bg); border-radius: 20px; padding: 3px; }
+    .cal-tab { padding: 4px 18px; font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; border-radius: 18px; transition: all 0.2s; }
+    .cal-tab.active { background-color: #3F3F46; color: var(--text-main); }
+
+    .cal-view { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+    .cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 12px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; flex: 1; align-content: start; }
+    
+    .cal-day {
+        aspect-ratio: 1;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: 600;
+        transition: transform 0.1s, border 0.2s;
+    }
+    
+    /* 0跑量应体现出0的样子 */
+    .cal-day.empty {
+        background-color: transparent;
+        color: var(--border-color);
+        border: 1px dashed rgba(255,255,255,0.05);
+        cursor: default;
+    }
+    .cal-day.empty .dist { color: transparent; } /* 不显示距离文字 */
+    
+    /* 有跑量的样式基础 */
+    .cal-day.has-data {
+        color: #d9d9d9;
+        border: 1px solid rgba(255,255,255,0.1);
+        cursor: pointer;
+    }
+    .cal-day.has-data:hover {
+        transform: scale(1.05);
+        border-color: #fff;
+    }
+    
+    .cal-day .dist { font-size: 10px; margin-top: 2px; font-weight: 500; opacity: 0.8; }
 
     .mobile-bottom-menu { display: none; }
 
@@ -381,151 +195,45 @@
        Mobile Responsive Adaptations
        ========================================================================== */
     @media (max-width: 1024px) {
-        body {
-            height: auto;
-            overflow: auto;
-            padding: 12px;
-            padding-bottom: 70px; /* Space for fixed bottom menu */
-        }
-
+        body { height: auto; overflow: auto; padding: 12px; padding-bottom: 70px; }
         .top-nav-container { display: none; }
-
-        .container {
-            height: auto;
-            overflow: visible;
-        }
-
-        .main-layout {
-            flex-direction: column;
-            height: auto;
-            overflow: visible;
-            gap: 16px;
-        }
-
-        .column-left, .column-right {
-            flex: none;
-            width: 100%;
-            height: auto;
-        }
-		.column-left, .column-right { display: contents; }
+        .container { height: auto; overflow: visible; }
+        .main-layout { flex-direction: column; height: auto; overflow: visible; gap: 16px; }
+        .column-left, .column-right { flex: none; width: 100%; height: auto; display: contents; }
         #card-total-distance { display: none; }
-		#info-chart-card { display: none; }
-        .summary-grid {
-			order: 1;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
+        .summary-grid { order: 1; grid-template-columns: 1fr 1fr; gap: 12px; }
         .hide-mobile-stats { display: none !important; }
-
-        .card-value {
-            font-size: 20px;
-            white-space: nowrap;
-        }
-
+        .card-value { font-size: 20px; white-space: nowrap; }
         .stat-row { white-space: nowrap; font-size: 11px; }
-
-        .map-card {
-			order: 2;
-            position: -webkit-sticky;
-            position: sticky;
-            top: 0;
-            height: 250px;
-            flex: none;
-            z-index: 100;/*
-            margin-left: -12px;
-            margin-right: -12px;
-            border-radius: 0;
-            border-left: none;
-            border-right: none;*/
-        }
-
-        .activity-section {
-			order: 3;
-		/*
-            height: auto;
-            min-height: 400px;
-            padding-left: 0;
-            padding-right: 0;
-            border-left: none;
-            border-right: none;
-            border-radius: 0;*/
-        }
-
-        .activity-header, .filters, .pagination {
-            padding: 0 12px;
-        }
-
-        .table-container {
-            overflow-x: auto;
-            max-height: none;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        table {
-            /*font-size: 1.05rem; */
-        }
-
-        th, td { 
-            padding: 10px 6px; 
-        }
-
-        /* Adjust columns to fit exactly "Date, Name, Distance" into mobile width viewport */
+        .map-card { order: 2; position: -webkit-sticky; position: sticky; top: 0; height: 250px; flex: none; z-index: 100; }
+        .activity-section { order: 4; }
+        .activity-header, .filters, .pagination { padding: 0 12px; }
+        .table-container { overflow-x: auto; max-height: none; -webkit-overflow-scrolling: touch; }
+        th, td { padding: 10px 6px; }
         th:nth-child(1), td:nth-child(1) { width: 33vw; min-width: 110px; }
         th:nth-child(2), td:nth-child(2) { width: 34vw; min-width: 120px; }
         th:nth-child(3), td:nth-child(3) { width: 33vw; min-width: 100px; }
-
-        th {
-            position: sticky;
-            /*top: 250px; */
-            z-index: 99;
-        }
-
-        .chart-card {
-            height: auto;
-            flex: none;
-            min-height: 400px;
-        }
-
-        .chart-container-wrapper {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            height: auto;
-        }
-
-        .chart-item {
-            flex: none;
-            height: 180px; 
-        }
-
-        /* Mobile Bottom Menu */
+        th { position: sticky; z-index: 99; }
+        .chart-card { height: auto; flex: none; min-height: 400px; order: 3;}
+        
         .mobile-bottom-menu {
-            display: flex;
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background-color: #0d0d0d;
-            border-top: 1px solid var(--border-color);
-            justify-content: space-around;
-            padding: 10px 0;
-            padding-bottom: env(safe-area-inset-bottom, 10px); 
-            z-index: 1000;
+            display: flex; position: fixed; bottom: 0; left: 0; right: 0;
+            background-color: #0d0d0d; border-top: 1px solid var(--border-color);
+            justify-content: space-around; padding: 10px 0;
+            padding-bottom: env(safe-area-inset-bottom, 10px); z-index: 1000;
         }
-
-        .mobile-menu-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 10px;
-        }
-
+        .mobile-menu-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); text-decoration: none; font-size: 10px; }
         .mobile-menu-item.active { color: var(--accent-red); }
         .mobile-menu-item svg { width: 22px; height: 22px; fill: currentColor; }
 		.page-btn { font-size: 16px; }
 		#page-info { font-size: 12px; }
+        
+        /* 移动端日历头部微调 */
+        .cal-header-row { padding: 0; }
+        .cal-center-stat { font-size: 18px; }
+        .cal-controls { padding: 4px 8px; }
+        .cal-current-date { margin: 0 6px; font-size: 13px; }
+        .cal-tab { padding: 4px 12px; }
     }
 </style>
 
@@ -627,11 +335,39 @@
             </div>
             
             <div class="chart-card" id="info-chart-card">
-                <div class="chart-box-header" style="display:none">
-                    <div class="chart-box-title" id="chart-box-title">Analytics</div>
-                    <div class="weather-badge" id="weather-badge"></div>
-                </div>
-                <div class="chart-container-wrapper" id="chart-container-wrapper">
+                <div class="cal-card-inner" id="cal-card-inner">
+                    
+                    <div class="cal-header-row">
+                        <div class="cal-controls-wrap">
+                            <div class="cal-controls">
+                                <button class="cal-btn" id="cal-prev">&lt;</button>
+                                <span class="cal-current-date" id="cal-current-label">2026/05</span>
+                                <button class="cal-btn" id="cal-next">&gt;</button>
+                            </div>
+                        </div>
+                        
+                        <div class="cal-center-stat">
+                            <span id="cal-dist-val">0.00</span><small>km</small>
+                        </div>
+                        
+                        <div class="cal-toggle-wrap">
+                            <div class="cal-toggle">
+                                <div class="cal-tab active" data-mode="month">月</div>
+                                <div class="cal-tab" data-mode="year">年</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="cal-view" id="cal-view-month">
+                        <div class="cal-weekdays">
+                            <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+                        </div>
+                        <div class="cal-grid" id="cal-grid"></div>
+                    </div>
+
+                    <div class="cal-view" id="cal-view-year" style="display:none; position: relative;">
+                        <canvas id="cal-year-chart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
@@ -671,12 +407,16 @@
     let currentPage = 1;
     const itemsPerPage = 10;
     let currentYearFilter = 'all';
-    let chartInstances = []; 
+
+    // Calendar state
+    let currentCalMode = 'month';
+    let currentCalDate = new Date(); // 根据你要求，默认为当前时间
+    let calChartInstance = null;
 
     const GOAL_TOTAL = 40000;
     const GOAL_YEARLY = 2400;
     const GOAL_MONTHLY = 200;
-
+    const HALF_MARATHON = 21.0975;
 
     function initMap() {
         map = new maplibregl.Map({
@@ -688,7 +428,7 @@
         });
     }
 
-function renderMap(runsOrRun) {
+    function renderMap(runsOrRun) {
         if (!map.loaded()) {
             map.once('load', () => { renderMap(runsOrRun); });
             return;
@@ -696,7 +436,6 @@ function renderMap(runsOrRun) {
 
         let runs = Array.isArray(runsOrRun) ? runsOrRun : (runsOrRun ? [runsOrRun] : []);
         let features = [];
-        let allCoordinates = [];
 
         runs.forEach(run => {
             if (run && run._cachedLatlngs && run._cachedLatlngs.length > 0) {
@@ -705,7 +444,6 @@ function renderMap(runsOrRun) {
                     'type': 'Feature',
                     'geometry': { 'type': 'LineString', 'coordinates': geojsonCoords }
                 });
-                allCoordinates.push(...geojsonCoords);
             }
         });
 
@@ -775,7 +513,6 @@ function renderMap(runsOrRun) {
         return `${hours}h ${mins}m`;
     }
 
-    // --- Dynamically update map Info box below the map ---
     function updateMapInfoBox(type, data, weather = null) {
         const box = document.getElementById('map-info-text');
         if (!box) return;
@@ -906,11 +643,6 @@ function renderMap(runsOrRun) {
         return `${Math.floor(secPerKm / 60)}'${Math.floor(secPerKm % 60).toString().padStart(2, '0')}"`;
     }
 
-    function formatPaceFromSeconds(seconds) {
-        if (!seconds || isNaN(seconds)) return "-";
-        return `${Math.floor(seconds / 60)}'${Math.floor(seconds % 60).toString().padStart(2, '0')}"`;
-    }
-
     function getNameByTime(dateStr) {
         if (!dateStr) return "日常跑步";
         const parts = dateStr.split(' ');
@@ -928,215 +660,169 @@ function renderMap(runsOrRun) {
         return timeStr.split('.')[0];
     }
 
-    function destroyExistingCharts() {
-        chartInstances.forEach(chart => chart.destroy());
-        chartInstances = [];
-        document.getElementById('weather-badge').style.display = 'none';
-    }
-
-    const commonChartOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false },
-            tooltip: {
-                backgroundColor: '#1a1a1a',
-                titleColor: '#888888',
-                bodyColor: '#ffffff',
-                borderColor: '#2a2a2a',
-                borderWidth: 1,
-                displayColors: false
-            }
-        },
-        scales: {
-            x: { grid: { color: '#2a2a2a' }, ticks: { color: '#888888', font: { size: 10 } } },
-            y: { grid: { color: '#2a2a2a' }, ticks: { color: '#888888', font: { size: 10 } } }
-        }
-    };
-
-    function renderGlobalOrYearCharts() {
-        destroyExistingCharts();
-        const wrapper = document.getElementById('chart-container-wrapper');
-        wrapper.innerHTML = '';
-
-        if (currentYearFilter === 'all') {
-            document.getElementById('chart-box-title').innerText = 'Annual Distance History';
-            const yearlyData = {};
-            allRuns.forEach(run => {
-                if (run.start_date_local) {
-                    const year = run.start_date_local.substring(0, 4);
-                    yearlyData[year] = (yearlyData[year] || 0) + ((run.distance || 0) / 1000);
-                }
-            });
-
-            const sortedYears = Object.keys(yearlyData).sort();
-            const distances = sortedYears.map(yr => yearlyData[yr].toFixed(2));
-
-            wrapper.innerHTML = `
-                <div class="chart-sub-container">
-                    <div class="chart-item"><canvas id="global-bar-chart"></canvas></div>
-                </div>
-            `;
-
-            const ctx = document.getElementById('global-bar-chart').getContext('2d');
-            chartInstances.push(new Chart(ctx, {
-                type: 'bar',
-                data: { labels: sortedYears, datasets: [{ data: distances, backgroundColor: '#3F3F46', borderRadius: 4 }] },
-                options: {
-                    ...commonChartOptions,
-                    plugins: { ...commonChartOptions.plugins, tooltip: { ...commonChartOptions.plugins.tooltip, callbacks: { label: (c) => ` ${c.parsed.y} km` } } }
-                }
-            }));
-
-        } else {
-            document.getElementById('chart-box-title').innerText = `${currentYearFilter} Yearly Analytics`;
-
-            const monthlyDistance = Array(12).fill(0);
-            const monthlyPaceSum = Array(12).fill(0);
-            const monthlyPaceCount = Array(12).fill(0);
-            const monthlyHrSum = Array(12).fill(0);
-            const monthlyHrCount = Array(12).fill(0);
-
-            allRuns.forEach(run => {
-                if (run.start_date_local && run.start_date_local.startsWith(currentYearFilter)) {
-                    const monthIdx = parseInt(run.start_date_local.substring(5, 7), 10) - 1;
-                    const distKm = (run.distance || 0) / 1000;
-                    monthlyDistance[monthIdx] += distKm;
-                    if (run.average_speed) {
-                        monthlyPaceSum[monthIdx] += (1000 / run.average_speed);
-                        monthlyPaceCount[monthIdx]++;
-                    }
-                    if (run.average_heartrate) {
-                        monthlyHrSum[monthIdx] += run.average_heartrate;
-                        monthlyHrCount[monthIdx]++;
-                    }
-                }
-            });
-
-            const finalDist = monthlyDistance.map(d => d > 0 ? d.toFixed(2) : null);
-            const finalPace = monthlyPaceSum.map((sum, i) => monthlyPaceCount[i] > 0 ? Math.round(sum / monthlyPaceCount[i]) : null);
-            const finalHr = monthlyHrSum.map((sum, i) => monthlyHrCount[i] > 0 ? Math.round(sum / monthlyHrCount[i]) : null);
-
-            wrapper.innerHTML = `
-                <div class="chart-sub-container">
-                    <div class="chart-sub-title">Monthly Distance (km)</div>
-                    <div class="chart-item"><canvas id="month-dist-chart"></canvas></div>
-                </div>
-                <div class="chart-sub-container">
-                    <div class="chart-sub-title">Average Pace (min/km)</div>
-                    <div class="chart-item"><canvas id="month-pace-chart"></canvas></div>
-                </div>
-                <div class="chart-sub-container">
-                    <div class="chart-sub-title">Average Heart Rate (bpm)</div>
-                    <div class="chart-item"><canvas id="month-hr-chart"></canvas></div>
-                </div>
-            `;
-
-            const monthsLabels = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
-
-            chartInstances.push(new Chart(document.getElementById('month-dist-chart').getContext('2d'), {
-                type: 'line',
-                data: { labels: monthsLabels, datasets: [{ data: finalDist, borderColor: '#e93342', backgroundColor: 'rgba(233,51,66,0.05)', tension: 0.1, pointRadius: 3, spanGaps: false }] },
-                options: commonChartOptions
-            }));
-
-            chartInstances.push(new Chart(document.getElementById('month-pace-chart').getContext('2d'), {
-                type: 'line',
-                data: { labels: monthsLabels, datasets: [{ data: finalPace, borderColor: '#ff9f43', tension: 0.1, pointRadius: 3, spanGaps: false }] },
-                options: {
-                    ...commonChartOptions,
-                    scales: { x: commonChartOptions.scales.x, y: { ...commonChartOptions.scales.y, reverse: true, ticks: { ...commonChartOptions.scales.y.ticks, callback: (v) => formatPaceFromSeconds(v) } } },
-                    plugins: { ...commonChartOptions.plugins, tooltip: { ...commonChartOptions.plugins.tooltip, callbacks: { label: (ctx) => ` Pace: ${formatPaceFromSeconds(ctx.parsed.y)}` } } }
-                }
-            }));
-
-            chartInstances.push(new Chart(document.getElementById('month-hr-chart').getContext('2d'), {
-                type: 'line',
-                data: { labels: monthsLabels, datasets: [{ data: finalHr, borderColor: '#4cd137', tension: 0.1, pointRadius: 3, spanGaps: false }] },
-                options: {
-                    ...commonChartOptions,
-                    scales: {
-                        x: commonChartOptions.scales.x,
-                        y: { 
-                            ...commonChartOptions.scales.y, 
-                            min: 30, 
-                            max: 210 
-                        }
-                    }
-                }
-            }));
-        }
-    }
-
-    async function renderSingleRunCharts(runObj) {
-        destroyExistingCharts();
-        const runId = runObj.run_id;
-        const runName = runObj.name || getNameByTime(runObj.start_date_local);
+    // 根据跑量生成热力颜色
+    function getCellColor(dist) {
+        if (dist === 0) return 'transparent';
+        if (dist >= HALF_MARATHON) return '#e93342'; // 超过半马：纯正主题红
         
-        document.getElementById('chart-box-title').innerText = runName || 'Workout Details';
-        const wrapper = document.getElementById('chart-container-wrapper');
-        wrapper.innerHTML = '<div style="color:var(--text-muted);font-size:12px;padding:12px 0;">Loading details...</div>';
+        // < 半马：利用透明度区分，距离越近越红 (0.2 ~ 0.85 之间过渡)
+        const minOpacity = 0;
+        const maxOpacity = 0.5;
+        const opacity = minOpacity + (dist / HALF_MARATHON) * (maxOpacity - minOpacity);
+        return `rgba(255, 255, 255, ${opacity})`;
+    }
 
-        try {
-            const res = await fetch(`https://run.linwn.net/data/details/${runId}.json`);
-            if (!res.ok) throw new Error('Detail not found');
-            const detail = await res.json();
-            wrapper.innerHTML = '';
+    // ==========================================================================
+    // Calendar Card Logic
+    // ==========================================================================
+    function updateCalendarCard() {
+        const year = currentCalDate.getFullYear();
+        const month = currentCalDate.getMonth(); 
+        const isMonth = currentCalMode === 'month';
 
-            if (detail.weather) {
-                const w = detail.weather;
-                const weatherBadge = document.getElementById('weather-badge');
-                weatherBadge.innerHTML = `${w.temperature_c}°C  |  ${w.condition}  |  ${w.wind_speed_kmh} km/h`;
-                //weatherBadge.style.display = 'block';
-                
-                // Update Info box below map with weather details
-                updateMapInfoBox('single', runObj, detail.weather);
+        // Update Toggle UI
+        document.querySelectorAll('.cal-tab').forEach(t => t.classList.remove('active'));
+        document.querySelector(`.cal-tab[data-mode="${currentCalMode}"]`).classList.add('active');
+
+        document.getElementById('cal-view-month').style.display = isMonth ? 'flex' : 'none';
+        document.getElementById('cal-view-year').style.display = isMonth ? 'none' : 'flex';
+
+        document.getElementById('cal-current-label').innerText = isMonth 
+            ? `${year}/${(month + 1).toString().padStart(2, '0')}`
+            : `${year}年`;
+
+        // Calculate Data
+        let distSum = 0;
+        const dayMap = {}; 
+        const monthMap = Array(12).fill(0); 
+        
+        const targetPrefix = isMonth ? `${year}-${(month + 1).toString().padStart(2, '0')}` : `${year}`;
+
+        allRuns.forEach(run => {
+            if (run.start_date_local && run.start_date_local.startsWith(targetPrefix)) {
+                const distKm = (run.distance || 0) / 1000;
+                distSum += distKm;
+
+                if (isMonth) {
+                    const day = parseInt(run.start_date_local.substring(8, 10), 10);
+                    if(!dayMap[day]) dayMap[day] = { dist: 0, runs: [] };
+                    dayMap[day].dist += distKm;
+                    dayMap[day].runs.push(run);
+                } else {
+                    const m = parseInt(run.start_date_local.substring(5, 7), 10) - 1;
+                    monthMap[m] += distKm;
+                }
             }
+        });
 
-            wrapper.innerHTML = `
-                <div class="chart-sub-container">
-                    <div class="chart-sub-title">Pace Curve</div>
-                    <div class="chart-item"><canvas id="single-pace-chart"></canvas></div>
-                </div>
-                <div class="chart-sub-container">
-                    <div class="chart-sub-title">Heart Rate Monitor</div>
-                    <div class="chart-item"><canvas id="single-hr-chart"></canvas></div>
-                </div>
-            `;
+        document.getElementById('cal-dist-val').innerText = distSum.toFixed(2);
 
-            chartInstances.push(new Chart(document.getElementById('single-pace-chart').getContext('2d'), {
-                type: 'line',
-                data: { labels: detail.charts.pace.labels || [], datasets: [{ data: detail.charts.pace.data || [], borderColor: '#ff9f43', borderWidth: 1.5, pointRadius: 0, fill: false, tension: 0.1 }] },
-                options: {
-                    ...commonChartOptions,
-                    scales: { x: commonChartOptions.scales.x, y: { ...commonChartOptions.scales.y, reverse: true, ticks: { ...commonChartOptions.scales.y.ticks, callback: (v) => formatPaceFromSeconds(v) } } },
-                    plugins: { ...commonChartOptions.plugins, tooltip: { ...commonChartOptions.plugins.tooltip, callbacks: { label: (ctx) => ` Pace: ${formatPaceFromSeconds(ctx.parsed.y)}` } } }
-                }
-            }));
-
-            chartInstances.push(new Chart(document.getElementById('single-hr-chart').getContext('2d'), {
-                type: 'line',
-                data: { labels: detail.charts.hr.labels || [], datasets: [{ data: detail.charts.hr.data || [], borderColor: '#4cd137', borderWidth: 1.5, pointRadius: 0, fill: false, tension: 0.1 }] },
-                options: {
-                    ...commonChartOptions,
-                    scales: {
-                        x: commonChartOptions.scales.x,
-                        y: { 
-                            ...commonChartOptions.scales.y, 
-                            min: 30, 
-                            max: 210 
-                        }
-                    }
-                }
-            }));
-
-        } catch (err) {
-            console.error(err);
-            wrapper.innerHTML = '<div style="color:var(--text-muted);font-size:12px;padding:12px 0;">Detailed charts unavailable for this activity.</div>';
+        if (isMonth) {
+            renderMonthGrid(year, month, dayMap);
+        } else {
+            renderYearChart(monthMap);
         }
     }
 
-    function renderTable() {
+    function renderMonthGrid(year, month, dayMap) {
+        const grid = document.getElementById('cal-grid');
+        grid.innerHTML = '';
+        
+        const firstDay = new Date(year, month, 1).getDay(); 
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        // 填充空白前导格子
+        for (let i = 0; i < firstDay; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'cal-day empty';
+            grid.appendChild(cell);
+        }
+
+        // 填充实际天数格子
+        for (let i = 1; i <= daysInMonth; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'cal-day';
+            
+            const cellData = dayMap[i];
+            
+            if (cellData && cellData.dist > 0) {
+                cell.classList.add('has-data');
+                cell.style.backgroundColor = getCellColor(cellData.dist);
+                
+                const distStr = `${cellData.dist.toFixed(2)}`;
+                cell.innerHTML = `<div>${i}</div><div class="dist">${distStr}</div>`;
+                
+                // 点击具有数据的格子联动地图和列表
+                cell.onclick = () => {
+                    renderMap(cellData.runs);
+                    updateMapInfoBox('single', cellData.runs[0]);
+                    highlightRunInTable(cellData.runs[0].run_id);
+                };
+            } else {
+                // 0跑量应体现出0的样子: 不可点击，不显示距离
+                cell.classList.add('empty');
+                cell.innerHTML = `<div>${i}</div><div class="dist">0 km</div>`;
+            }
+            
+            grid.appendChild(cell);
+        }
+    }
+
+    function renderYearChart(monthMap) {
+        if (calChartInstance) { calChartInstance.destroy(); }
+        const ctx = document.getElementById('cal-year-chart').getContext('2d');
+        
+        calChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
+                datasets: [{
+                    data: monthMap.map(d => d === 0 ? null : d),
+                    backgroundColor: '#3F3F46',
+                    borderRadius: 4,
+                    barPercentage: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: (c) => ` ${c.raw.toFixed(2)} km` } }
+                },
+                scales: {
+                    x: { grid: { display: false }, ticks: { color: '#888' } },
+                    y: { grid: { color: '#2a2a2a' }, border: {display: false}, ticks: { color: '#888', beginAtZero: true } }
+                }
+            }
+        });
+    }
+
+    // 同步高亮 Activity Log 中的记录（支持翻页）
+    function highlightRunInTable(runId) {
+        const index = filteredRuns.findIndex(r => r.run_id === runId);
+        if (index !== -1) {
+            const targetPage = Math.floor(index / itemsPerPage) + 1;
+            
+            // 如果记录不在当前页，则先翻页并重新渲染表格
+            if (currentPage !== targetPage) {
+                currentPage = targetPage;
+                renderTable(false); 
+            } else {
+                // 如果在当前页，只需移除旧的高亮
+                document.querySelectorAll('#table-body tr').forEach(r => r.classList.remove('active-row'));
+            }
+            
+            // 添加新高亮并滚动到可视区域
+            const row = document.querySelector(`#table-body tr[data-run-id="${runId}"]`);
+            if (row) {
+                row.classList.add('active-row');
+                row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+    }
+
+    function renderTable(resetHighlights = true) {
         const tbody = document.getElementById('table-body');
         tbody.innerHTML = '';
 
@@ -1164,15 +850,22 @@ function renderMap(runsOrRun) {
             tr.style.cursor = 'pointer';
 
             tr.addEventListener('click', () => {
-                document.querySelectorAll('#table-body tr').forEach(r => r.classList.remove('active-row'));
+                if(resetHighlights) {
+                    document.querySelectorAll('#table-body tr').forEach(r => r.classList.remove('active-row'));
+                }
                 tr.classList.add('active-row');
                 
-                // Immediately update map and base text
+                // 1. 同步更新地图
                 renderMap(run);
                 updateMapInfoBox('single', run); 
 
-                // Attempt to load detailed charts (and weather)
-                if (run.run_id) renderSingleRunCharts(run);
+                // 2. 根据点击的记录，切换日历到对应年月
+                if (run.start_date_local) {
+                    const [yyyy, mm, dd] = run.start_date_local.split(' ')[0].split('-');
+                    currentCalDate = new Date(parseInt(yyyy), parseInt(mm) - 1, 1);
+                    currentCalMode = 'month'; 
+                    updateCalendarCard();
+                }
             });
             tbody.appendChild(tr);
         });
@@ -1194,7 +887,6 @@ function renderMap(runsOrRun) {
 
         renderMap(filteredRuns);
         
-        // Update Info Box for current filter selection
         let filterDist = 0;
         let filterSecs = 0;
         filteredRuns.forEach(r => {
@@ -1205,9 +897,38 @@ function renderMap(runsOrRun) {
 
         currentPage = 1;
         renderTable();
-        renderGlobalOrYearCharts();
+        updateCalendarCard(); // 替代原先的 renderGlobalOrYearCharts
     }
 
+    // --- Events binding ---
+    
+    // Calendar Event Listeners
+    document.querySelectorAll('.cal-tab').forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            currentCalMode = e.target.getAttribute('data-mode');
+            updateCalendarCard();
+        });
+    });
+
+    document.getElementById('cal-prev').addEventListener('click', () => {
+        if (currentCalMode === 'month') {
+            currentCalDate.setMonth(currentCalDate.getMonth() - 1);
+        } else {
+            currentCalDate.setFullYear(currentCalDate.getFullYear() - 1);
+        }
+        updateCalendarCard();
+    });
+
+    document.getElementById('cal-next').addEventListener('click', () => {
+        if (currentCalMode === 'month') {
+            currentCalDate.setMonth(currentCalDate.getMonth() + 1);
+        } else {
+            currentCalDate.setFullYear(currentCalDate.getFullYear() + 1);
+        }
+        updateCalendarCard();
+    });
+
+    // Filtering & Pagination Event Listeners
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -1226,6 +947,7 @@ function renderMap(runsOrRun) {
         if (currentPage < totalPages) { currentPage++; renderTable(); }
     });
     
+    // Start sequence
     fetchData();
 </script>
 </body>
