@@ -195,7 +195,8 @@
         pointer-events: none; /* 重要：允许事件穿透到下层地图，实现自由交互 */
     }
     .poster-header { position: absolute; top: 40px; left: 30px; z-index: 3; pointer-events: none; }
-    .poster-date { color: #fff; font-size: 15px; font-weight: 800; font-family: monospace; letter-spacing: 1px; margin-bottom: 12px; }
+    .poster-date { color: #fff; font-size: 5px; font-weight: 800; font-family: monospace; letter-spacing: 1px; margin-bottom: 12px; }
+	.poster-weather { color: #fff; font-size: 15px; font-family: monospace; letter-spacing: 1px; margin-bottom: 12px; }
     .poster-name { color: #fff; font-size: 26px; font-weight: 600; margin-bottom: 24px; letter-spacing: 1px; }
     .poster-stats-sm { color: #999; font-size: 11px; line-height: 2; font-weight: 500; }
     .poster-stats-sm span { color: #d1d1d1; margin-left: 6px; }
@@ -433,8 +434,9 @@
         
         <div class="poster-header">
             <div id="poster-date">2026/05/07 18:55:00</div>
-            <div id="poster-name">傍晚跑步</div>
-            <div class="poster-stats-sm">
+			<div id="poster-weather"></div>
+            <div id="poster-name" style="display:none;">傍晚跑步</div>
+            <div class="poster-stats-sm" style="display:none;">
                 <div id="poster-year-stat">全年 219 km <span>较去年同期 ↘ 280 km</span></div>
                 <div id="poster-month-stat">本月 51 km <span>较上月同期 ↗ 27 km</span></div>
             </div>
@@ -488,6 +490,7 @@
 
     // 追踪当前展示的单条跑步记录，用于生成海报
     let currentActiveRunId = null;
+	let currentActiveRunWeatherStr = null;
     let currentSingleRun = null; 
     let posterMap = null; // 海报专用的独立交互地图
 
@@ -622,9 +625,9 @@
             const name = data.name || getNameByTime(date);
             let weatherStr = '';
             if (weather) {
-                weatherStr = ` &middot; <span style="color:#d1d1d1;">${weather.temperature_c}°C ${weather.condition}</span>`;
+                currentActiveRunWeatherStr = weatherStr = `  <span style="color:#d1d1d1;"> 🌡️ ${weather.temperature_c}°C ${weather.condition}</span>`;
             }
-            box.innerHTML = `<strong style="color:var(--accent-red);">${name}</strong> (${date.substring(0,10)}) &middot; ${dist} km / 配速 ${calculatePace(data.average_speed)}${weatherStr}`;
+            box.innerHTML = `<strong style="color:var(--accent-red);">${name} </strong> (${date.substring(0,10)}) &middot; ${dist} km / 配速 ${calculatePace(data.average_speed)}${weatherStr}`;
         }
     }
 
@@ -702,7 +705,7 @@
         const yearlyVs = yearlyDist - lastYearSamePeriodDist;
         const yearlyVsContainer = document.getElementById('yearly-vs-container');
         yearlyVsContainer.className = "stat-row left-aligned compare-info " + (yearlyVs >= 0 ? "trend-up" : "trend-down");
-        yearlyVsContainer.innerHTML = `${yearlyVs >= 0 ? '↗' : '↘'} ${Math.abs(yearlyVs).toFixed(0)} km vs 去年同期`;
+        yearlyVsContainer.innerHTML = `${yearlyVs >= 0 ? '↗' : '↘'} ${Math.abs(yearlyVs).toFixed(0)} km`;
 
         document.getElementById('monthly-dist').innerHTML = `${monthlyDist.toFixed(2)} <span>/ ${GOAL_MONTHLY} km</span>`;
         document.getElementById('monthly-progress').style.width = `${Math.min(100, (monthlyDist / GOAL_MONTHLY) * 100)}%`;
@@ -712,7 +715,7 @@
         const monthlyVs = monthlyDist - lastMonthSamePeriodDist;
         const monthlyVsContainer = document.getElementById('monthly-vs-container');
         monthlyVsContainer.className = "stat-row left-aligned compare-info " + (monthlyVs >= 0 ? "trend-up" : "trend-down");
-        monthlyVsContainer.innerHTML = `${monthlyVs >= 0 ? '↗' : '↘'} ${Math.abs(monthlyVs).toFixed(0)} km vs 上月同期`;
+        monthlyVsContainer.innerHTML = `${monthlyVs >= 0 ? '↗' : '↘'} ${Math.abs(monthlyVs).toFixed(0)} km`;
     }
 
     function processAndRenderRuns(data) {
@@ -1141,6 +1144,7 @@
         // 修复1：不再使用容易导致截断的 substring，直接替换连字符为斜杠展示全时段
         document.getElementById('poster-date').innerText = dateStr.replace(/-/g, '/');
         document.getElementById('poster-name').innerText = currentSingleRun.name || getNameByTime(dateStr);
+		document.getElementById('poster-weather').innerHTML = currentActiveRunWeatherStr || '';
 
         const yrDist = document.getElementById('yearly-dist').childNodes[0].nodeValue.trim();
         const yrVs = document.getElementById('yearly-vs-container').innerText;
