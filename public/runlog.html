@@ -122,7 +122,6 @@
     .chart-card { background-color: var(--card-bg); border-radius: 16px; border: 1px solid var(--border-color); flex: 1.2; display: flex; flex-direction: column; min-height: 0; position: relative; }
     .cal-card-inner { display: flex; flex-direction: column; height: 100%; padding: 20px 24px; }
     
-    /* Top Row Layout: Left(Controls) - Center(Stats) - Right(Tabs) */
     .cal-header-row {
         display: flex;
         justify-content: space-between;
@@ -134,7 +133,7 @@
     .cal-controls { display: flex; align-items: center; background-color: var(--progress-bg); border-radius: 20px; padding: 4px 12px; }
     .cal-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 14px; padding: 0 6px; }
     .cal-btn:hover { color: var(--text-main); }
-    .cal-current-date { font-size: 14px; font-weight: 600; margin: 0 10px; color: var(--text-main); }
+    .cal-current-date { font-size: 14px; font-weight: 600; margin: 0 10px; color: var(--text-main); white-space: nowrap;}
     
     .cal-center-stat {
         flex: 1;
@@ -152,8 +151,29 @@
     .cal-tab.active { background-color: #3F3F46; color: var(--text-main); }
 
     .cal-view { flex: 1; display: flex; flex-direction: column; min-height: 0; }
-    .cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 12px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; }
-    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; flex: 1; align-content: start; }
+    
+    /* 缩放日历尺寸至原先的 4/5 宽度，确保能完美容纳 6 行格子并完美居中 */
+    .cal-weekdays { 
+        display: grid; 
+        grid-template-columns: repeat(7, 1fr); 
+        text-align: center; 
+        font-size: 11px; 
+        font-weight: 600; 
+        color: var(--text-dark); 
+        margin-bottom: 8px; 
+        width: 80%; 
+        margin-left: auto; 
+        margin-right: auto;
+    }
+    .cal-grid { 
+        display: grid; 
+        grid-template-columns: repeat(7, 1fr); 
+        gap: 6px; 
+        flex: 1; 
+        align-content: start; 
+        width: 80%; 
+        margin: 0 auto; 
+    }
     
     .cal-day {
         aspect-ratio: 1;
@@ -162,21 +182,19 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        font-size: 16px;
+        font-size: 13px;
         font-weight: 600;
         transition: transform 0.1s, border 0.2s;
     }
     
-    /* 0跑量应体现出0的样子 */
     .cal-day.empty {
         background-color: transparent;
         color: var(--border-color);
         border: 1px dashed rgba(255,255,255,0.05);
         cursor: default;
     }
-    .cal-day.empty .dist { color: transparent; } /* 不显示距离文字 */
+    .cal-day.empty .dist { color: transparent; }
     
-    /* 有跑量的样式基础 */
     .cal-day.has-data {
         color: #d9d9d9;
         border: 1px solid rgba(255,255,255,0.1);
@@ -187,7 +205,21 @@
         border-color: #fff;
     }
     
-    .cal-day .dist { font-size: 10px; margin-top: 2px; font-weight: 500; opacity: 0.8; }
+    .cal-day .dist { font-size: 9px; margin-top: 2px; font-weight: 500; opacity: 0.8; }
+
+    /* 年视图容器与图表高度强制拉伸撑满 */
+    .cal-view-year-wrap {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        height: 100%;
+        position: relative;
+    }
+    #cal-year-chart {
+        width: 100% !important;
+        height: 100% !important;
+    }
 
     .mobile-bottom-menu { display: none; }
 
@@ -228,12 +260,12 @@
 		.page-btn { font-size: 16px; }
 		#page-info { font-size: 12px; }
         
-        /* 移动端日历头部微调 */
         .cal-header-row { padding: 0; }
         .cal-center-stat { font-size: 18px; }
         .cal-controls { padding: 4px 8px; }
         .cal-current-date { margin: 0 6px; font-size: 13px; }
         .cal-tab { padding: 4px 12px; }
+        .cal-weekdays, .cal-grid { width: 100%; }
     }
 </style>
 
@@ -365,7 +397,7 @@
                         <div class="cal-grid" id="cal-grid"></div>
                     </div>
 
-                    <div class="cal-view" id="cal-view-year" style="display:none; position: relative;">
+                    <div class="cal-view cal-view-year-wrap" id="cal-view-year" style="display:none; position: relative;">
                         <canvas id="cal-year-chart"></canvas>
                     </div>
                 </div>
@@ -408,9 +440,12 @@
     const itemsPerPage = 10;
     let currentYearFilter = 'all';
 
+    // 天气异步联动专属锁
+    let currentActiveRunId = null;
+
     // Calendar state
     let currentCalMode = 'month';
-    let currentCalDate = new Date(); // 根据你要求，默认为当前时间
+    let currentCalDate = new Date(); 
     let calChartInstance = null;
 
     const GOAL_TOTAL = 40000;
@@ -531,6 +566,25 @@
             }
             box.innerHTML = `<strong style="color:var(--accent-red);">${name}</strong> (${date.substring(0,10)}) &middot; ${dist} km / 配速 ${calculatePace(data.average_speed)}${weatherStr}`;
         }
+    }
+
+    // 异步拉取单条跑步的详情数据并渲染天气
+    function fetchWeatherForRun(run) {
+        if (!run || !run.run_id) return;
+        currentActiveRunId = run.run_id;
+        
+        fetch(`https://run.linwn.net/data/details/${run.run_id}.json`)
+            .then(res => {
+                if (!res.ok) throw new Error('Weather details response failed.');
+                return res.json();
+            })
+            .then(detail => {
+                // 确保异步回调返回时，当前处于激活高亮的仍然是这条记录
+                if (currentActiveRunId === run.run_id && detail && detail.weather) {
+                    updateMapInfoBox('single', run, detail.weather);
+                }
+            })
+            .catch(err => console.error('Fetch weather failed:', err));
     }
 
     function calculateSummaries() {
@@ -660,12 +714,10 @@
         return timeStr.split('.')[0];
     }
 
-    // 根据跑量生成热力颜色
     function getCellColor(dist) {
         if (dist === 0) return 'transparent';
-        if (dist >= HALF_MARATHON) return '#e93342'; // 超过半马：纯正主题红
+        if (dist >= HALF_MARATHON) return '#e93342'; 
         
-        // < 半马：利用透明度区分，距离越近越红 (0.2 ~ 0.85 之间过渡)
         const minOpacity = 0;
         const maxOpacity = 0.5;
         const opacity = minOpacity + (dist / HALF_MARATHON) * (maxOpacity - minOpacity);
@@ -680,7 +732,6 @@
         const month = currentCalDate.getMonth(); 
         const isMonth = currentCalMode === 'month';
 
-        // Update Toggle UI
         document.querySelectorAll('.cal-tab').forEach(t => t.classList.remove('active'));
         document.querySelector(`.cal-tab[data-mode="${currentCalMode}"]`).classList.add('active');
 
@@ -691,7 +742,6 @@
             ? `${year}/${(month + 1).toString().padStart(2, '0')}`
             : `${year}年`;
 
-        // Calculate Data
         let distSum = 0;
         const dayMap = {}; 
         const monthMap = Array(12).fill(0); 
@@ -731,14 +781,12 @@
         const firstDay = new Date(year, month, 1).getDay(); 
         const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-        // 填充空白前导格子
         for (let i = 0; i < firstDay; i++) {
             const cell = document.createElement('div');
             cell.className = 'cal-day empty';
             grid.appendChild(cell);
         }
 
-        // 填充实际天数格子
         for (let i = 1; i <= daysInMonth; i++) {
             const cell = document.createElement('div');
             cell.className = 'cal-day';
@@ -752,14 +800,13 @@
                 const distStr = `${cellData.dist.toFixed(2)}`;
                 cell.innerHTML = `<div>${i}</div><div class="dist">${distStr}</div>`;
                 
-                // 点击具有数据的格子联动地图和列表
                 cell.onclick = () => {
                     renderMap(cellData.runs);
                     updateMapInfoBox('single', cellData.runs[0]);
+                    fetchWeatherForRun(cellData.runs[0]); 
                     highlightRunInTable(cellData.runs[0].run_id);
                 };
             } else {
-                // 0跑量应体现出0的样子: 不可点击，不显示距离
                 cell.classList.add('empty');
                 cell.innerHTML = `<div>${i}</div><div class="dist">0 km</div>`;
             }
@@ -798,26 +845,21 @@
         });
     }
 
-    // 同步高亮 Activity Log 中的记录（支持翻页）
     function highlightRunInTable(runId) {
         const index = filteredRuns.findIndex(r => r.run_id === runId);
         if (index !== -1) {
             const targetPage = Math.floor(index / itemsPerPage) + 1;
             
-            // 如果记录不在当前页，则先翻页并重新渲染表格
             if (currentPage !== targetPage) {
                 currentPage = targetPage;
                 renderTable(false); 
             } else {
-                // 如果在当前页，只需移除旧的高亮
                 document.querySelectorAll('#table-body tr').forEach(r => r.classList.remove('active-row'));
             }
             
-            // 添加新高亮并滚动到可视区域
             const row = document.querySelector(`#table-body tr[data-run-id="${runId}"]`);
             if (row) {
                 row.classList.add('active-row');
-                row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
         }
     }
@@ -849,17 +891,15 @@
             `;
             tr.style.cursor = 'pointer';
 
+            // 彻底修复 Bug：点击行时总是移除先前的所有高亮类，切断不受控的闭包影响
             tr.addEventListener('click', () => {
-                if(resetHighlights) {
-                    document.querySelectorAll('#table-body tr').forEach(r => r.classList.remove('active-row'));
-                }
+                document.querySelectorAll('#table-body tr').forEach(r => r.classList.remove('active-row'));
                 tr.classList.add('active-row');
                 
-                // 1. 同步更新地图
                 renderMap(run);
                 updateMapInfoBox('single', run); 
+                fetchWeatherForRun(run);
 
-                // 2. 根据点击的记录，切换日历到对应年月
                 if (run.start_date_local) {
                     const [yyyy, mm, dd] = run.start_date_local.split(' ')[0].split('-');
                     currentCalDate = new Date(parseInt(yyyy), parseInt(mm) - 1, 1);
@@ -897,7 +937,39 @@
 
         currentPage = 1;
         renderTable();
-        updateCalendarCard(); // 替代原先的 renderGlobalOrYearCharts
+        updateCalendarCard(); 
+    }
+
+    // 日历单向同步至 Activity Log 的纯净处理，防止无限回溯循环
+    function syncActivityLogToYear(targetYear) {
+        currentYearFilter = targetYear;
+        document.querySelectorAll('.filter-btn').forEach(b => {
+            if (b.getAttribute('data-year') === targetYear) {
+                b.classList.add('active');
+            } else {
+                b.classList.remove('active');
+            }
+        });
+
+        if (currentYearFilter === 'all') {
+            filteredRuns = [...allRuns];
+        } else {
+            filteredRuns = allRuns.filter(run => run.start_date_local && run.start_date_local.startsWith(currentYearFilter));
+        }
+
+        renderMap(filteredRuns);
+        
+        let filterDist = 0;
+        let filterSecs = 0;
+        filteredRuns.forEach(r => {
+            filterDist += (r.distance || 0) / 1000;
+            filterSecs += parseMovingTime(r.moving_time);
+        });
+        updateMapInfoBox('summary', { dist: filterDist, runs: filteredRuns.length, seconds: filterSecs });
+
+        currentPage = 1;
+        renderTable();
+        updateCalendarCard();
     }
 
     // --- Events binding ---
@@ -913,19 +985,25 @@
     document.getElementById('cal-prev').addEventListener('click', () => {
         if (currentCalMode === 'month') {
             currentCalDate.setMonth(currentCalDate.getMonth() - 1);
+            const targetYear = currentCalDate.getFullYear().toString();
+            syncActivityLogToYear(targetYear);
         } else {
             currentCalDate.setFullYear(currentCalDate.getFullYear() - 1);
+            const targetYear = currentCalDate.getFullYear().toString();
+            syncActivityLogToYear(targetYear);
         }
-        updateCalendarCard();
     });
 
     document.getElementById('cal-next').addEventListener('click', () => {
         if (currentCalMode === 'month') {
             currentCalDate.setMonth(currentCalDate.getMonth() + 1);
+            const targetYear = currentCalDate.getFullYear().toString();
+            syncActivityLogToYear(targetYear);
         } else {
             currentCalDate.setFullYear(currentCalDate.getFullYear() + 1);
+            const targetYear = currentCalDate.getFullYear().toString();
+            syncActivityLogToYear(targetYear);
         }
-        updateCalendarCard();
     });
 
     // Filtering & Pagination Event Listeners
@@ -934,6 +1012,24 @@
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             e.target.classList.add('active');
             currentYearFilter = e.target.getAttribute('data-year');
+            
+            if (currentYearFilter === 'all') {
+                // 点 all 时右边日历返回当前年当前月
+                currentCalDate = new Date();
+            } else {
+                // 点任意年份时，日历跳转到对应年份
+                currentCalDate.setFullYear(parseInt(currentYearFilter));
+                // 如果是月视图，需要跳到该年份 Activity log 显示的第一个（最新）记录所在年月
+                if (currentCalMode === 'month') {
+                    const runsForYear = allRuns.filter(run => run.start_date_local && run.start_date_local.startsWith(currentYearFilter));
+                    if (runsForYear.length > 0 && runsForYear[0].start_date_local) {
+                        const parts = runsForYear[0].start_date_local.split(' ')[0].split('-');
+                        currentCalDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, 1);
+                    } else {
+                        currentCalDate = new Date(parseInt(currentYearFilter), 0, 1);
+                    }
+                }
+            }
             applyFilters();
         });
     });
