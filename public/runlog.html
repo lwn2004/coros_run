@@ -9,6 +9,8 @@
 <link rel="preconnect" href="https://unpkg.com">
 <link rel="preconnect" href="https://tiles.openfreemap.org">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
 <style>
     :root {
         --bg-color: #000000;
@@ -84,9 +86,28 @@
     .trend-up { color: var(--accent-red); }
 
     /* Map and Info Box */
-    .map-card { background-color: var(--card-bg); border-radius: 16px; overflow: hidden; border: 1px solid var(--border-color); flex: 1; display: flex; flex-direction: column; min-height: 0; height: 250px;}
+    .map-card { background-color: var(--card-bg); border-radius: 16px; overflow: hidden; border: 1px solid var(--border-color); flex: 1; display: flex; flex-direction: column; min-height: 0; height: 250px; position: relative;}
     #map { width: 100%; flex: 1; min-height: 0; }
-    .map-info-box { flex-shrink: 0; height: 44px; padding: 0 16px; display: flex; align-items: center; border-top: 1px solid var(--border-color); font-size: 12px; color: var(--text-muted); background-color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .map-info-box { flex-shrink: 0; height: 44px; padding: 0 16px; display: flex; align-items: center; border-top: 1px solid var(--border-color); font-size: 12px; color: var(--text-muted); background-color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 10;}
+
+    /* Export Button (Top Left of Map) */
+    .export-btn {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        z-index: 10;
+        background: rgba(30, 30, 30, 0.8);
+        border: 1px solid var(--border-color);
+        color: #fff;
+        padding: 6px 8px;
+        border-radius: 6px;
+        cursor: pointer;
+        display: none;
+        backdrop-filter: blur(4px);
+        transition: background 0.2s;
+    }
+    .export-btn:hover { background: rgba(60, 60, 60, 0.9); }
+    .export-btn svg { vertical-align: middle; }
 
     /* Activity Log Area */
     .activity-section { background-color: var(--card-bg); border-radius: 12px; padding: 16px; border: 1px solid var(--border-color); flex: 1; display: flex; flex-direction: column; min-height: 0; }
@@ -116,33 +137,18 @@
     .pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; color: var(--text-muted); font-size: 16px; padding-top: 10px; border-top: 1px solid var(--border-color); flex-shrink: 0; }
     .page-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 30px; }
 
-    /* ==========================================================================
-       Calendar Card Styles
-       ========================================================================== */
+    /* Calendar Card Styles */
     .chart-card { background-color: var(--card-bg); border-radius: 16px; border: 1px solid var(--border-color); flex: 1.2; display: flex; flex-direction: column; min-height: 0; position: relative; }
     .cal-card-inner { display: flex; flex-direction: column; height: 100%; padding: 20px 24px; }
     
-    .cal-header-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 24px;
-    }
-    
+    .cal-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
     .cal-controls-wrap { flex: 1; display: flex; justify-content: flex-start; }
     .cal-controls { display: flex; align-items: center; background-color: var(--progress-bg); border-radius: 20px; padding: 4px 12px; }
     .cal-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 14px; padding: 0 6px; }
     .cal-btn:hover { color: var(--text-main); }
     .cal-current-date { font-size: 14px; font-weight: 600; margin: 0 10px; color: var(--text-main); white-space: nowrap;}
     
-    .cal-center-stat {
-        flex: 1;
-        text-align: center;
-        font-size: 26px;
-        font-weight: 700;
-        color: var(--text-main);
-        white-space: nowrap;
-    }
+    .cal-center-stat { flex: 1; text-align: center; font-size: 26px; font-weight: 700; color: var(--text-main); white-space: nowrap; }
     .cal-center-stat small { font-size: 12px; color: var(--text-muted); font-weight: normal; margin-left: 4px; }
     
     .cal-toggle-wrap { flex: 1; display: flex; justify-content: flex-end; }
@@ -152,76 +158,66 @@
 
     .cal-view { flex: 1; display: flex; flex-direction: column; min-height: 0; }
     
-    /* 缩放日历尺寸至原先的 4/5 宽度，确保能完美容纳 6 行格子并完美居中 */
-    .cal-weekdays { 
-        display: grid; 
-        grid-template-columns: repeat(7, 1fr); 
-        text-align: center; 
-        font-size: 11px; 
-        font-weight: 600; 
-        color: var(--text-dark); 
-        margin-bottom: 8px; 
-        width: 80%; 
-        margin-left: auto; 
-        margin-right: auto;
-    }
-    .cal-grid { 
-        display: grid; 
-        grid-template-columns: repeat(7, 1fr); 
-        gap: 6px; 
-        flex: 1; 
-        align-content: start; 
-        width: 80%; 
-        margin: 0 auto; 
-    }
+    .cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 11px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; width: 80%; margin-left: auto; margin-right: auto; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; flex: 1; align-content: start; width: 80%; margin: 0 auto; }
     
-    .cal-day {
-        aspect-ratio: 1;
-        border-radius: 8px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        font-size: 13px;
-        font-weight: 600;
-        transition: transform 0.1s, border 0.2s;
-    }
-    
-    .cal-day.empty {
-        background-color: transparent;
-        color: var(--border-color);
-        border: 1px dashed rgba(255,255,255,0.05);
-        cursor: default;
-    }
+    .cal-day { aspect-ratio: 1; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; transition: transform 0.1s, border 0.2s; }
+    .cal-day.empty { background-color: transparent; color: var(--border-color); border: 1px dashed rgba(255,255,255,0.05); cursor: default; }
     .cal-day.empty .dist { color: transparent; }
-    
-    .cal-day.has-data {
-        color: #d9d9d9;
-        border: 1px solid rgba(255,255,255,0.1);
-        cursor: pointer;
-    }
-    .cal-day.has-data:hover {
-        transform: scale(1.05);
-        border-color: #fff;
-    }
-    
+    .cal-day.has-data { color: #d9d9d9; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; }
+    .cal-day.has-data:hover { transform: scale(1.05); border-color: #fff; }
     .cal-day .dist { font-size: 9px; margin-top: 2px; font-weight: 500; opacity: 0.8; }
 
-    /* 年视图容器与图表高度强制拉伸撑满 */
-    .cal-view-year-wrap {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
-        height: 100%;
-        position: relative;
-    }
-    #cal-year-chart {
-        width: 100% !important;
-        height: 100% !important;
-    }
+    .cal-view-year-wrap { flex: 1; display: flex; flex-direction: column; min-height: 0; height: 100%; position: relative; }
+    #cal-year-chart { width: 100% !important; height: 100% !important; }
 
     .mobile-bottom-menu { display: none; }
+
+    /* ==========================================================================
+       Poster Generation Styles (For Share Card)
+       ========================================================================== */
+    .poster-modal {
+        display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        z-index: 9999; align-items: center; justify-content: center; flex-direction: column; gap: 24px;
+        background: rgba(0,0,0,0.85); backdrop-filter: blur(5px);
+    }
+    .poster-content {
+        width: 375px; height: 667px; background: #000; position: relative; overflow: hidden;
+        border-radius: 0; 
+        box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    }
+    .poster-bg {
+        width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1;
+    }
+    .poster-gradient {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.1) 35%, rgba(0,0,0,0.8) 65%, rgba(0,0,0,0.98) 100%);
+        pointer-events: none; /* 重要：允许事件穿透到下层地图，实现自由交互 */
+    }
+    .poster-header { position: absolute; top: 40px; left: 30px; z-index: 3; pointer-events: none; }
+    .poster-date { color: #fff; font-size: 15px; font-weight: 800; font-family: monospace; letter-spacing: 1px; margin-bottom: 12px; }
+    .poster-name { color: #fff; font-size: 26px; font-weight: 600; margin-bottom: 24px; letter-spacing: 1px; }
+    .poster-stats-sm { color: #999; font-size: 11px; line-height: 2; font-weight: 500; }
+    .poster-stats-sm span { color: #d1d1d1; margin-left: 6px; }
+
+    .poster-body { position: absolute; bottom: 40px; left: 0; width: 100%; z-index: 3; padding: 0 30px; pointer-events: none; }
+    .poster-distance { font-size: 100px; font-weight: 900; color: #fff; display: flex; align-items: baseline; line-height: 1; letter-spacing: -2px; }
+    .poster-distance .dot { display: inline-block; width: 22px; height: 22px; background: #e93342; margin: 0 6px; }
+    .poster-distance .unit { font-size: 24px; color: #e93342; margin-left: 6px; font-weight: 700; letter-spacing: 0;}
+    
+    .poster-footer-stats {
+        display: flex; justify-content: space-between; margin-top: 30px;
+        background: rgba(255,255,255,0.02); padding: 16px 20px; border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.06); box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .p-stat { text-align: center; }
+    .p-stat-label { color: #888; font-size: 11px; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 4px; font-weight: 600; letter-spacing: 1px;}
+    .p-stat-val { color: #fff; font-size: 20px; font-weight: 700; font-family: monospace;}
+
+    .poster-actions { display: flex; gap: 16px; }
+    .poster-actions button { padding: 12px 28px; border: none; border-radius: 24px; cursor: pointer; font-weight: 600; font-size: 15px; }
+    .poster-actions .btn-cancel { background: #333; color: #fff; }
+    .poster-actions .btn-save { background: #e93342; color: #fff; box-shadow: 0 4px 12px rgba(233,51,66,0.3); }
 
     /* ==========================================================================
        Mobile Responsive Adaptations
@@ -248,12 +244,7 @@
         th { position: sticky; z-index: 99; }
         .chart-card { height: auto; flex: none; min-height: 400px; order: 3;}
         
-        .mobile-bottom-menu {
-            display: flex; position: fixed; bottom: 0; left: 0; right: 0;
-            background-color: #0d0d0d; border-top: 1px solid var(--border-color);
-            justify-content: space-around; padding: 10px 0;
-            padding-bottom: env(safe-area-inset-bottom, 10px); z-index: 1000;
-        }
+        .mobile-bottom-menu { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background-color: #0d0d0d; border-top: 1px solid var(--border-color); justify-content: space-around; padding: 10px 0; padding-bottom: env(safe-area-inset-bottom, 10px); z-index: 1000; }
         .mobile-menu-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); text-decoration: none; font-size: 10px; }
         .mobile-menu-item.active { color: var(--accent-red); }
         .mobile-menu-item svg { width: 22px; height: 22px; fill: currentColor; }
@@ -266,6 +257,9 @@
         .cal-current-date { margin: 0 6px; font-size: 13px; }
         .cal-tab { padding: 4px 12px; }
         .cal-weekdays, .cal-grid { width: 100%; }
+        
+        /* 适应手机屏幕缩放预览 */
+        .poster-content { transform: scale(0.85); margin-top: -30px; }
     }
 </style>
 
@@ -362,6 +356,9 @@
 
         <div class="column-right">
             <div class="map-card">
+                <button id="export-btn" class="export-btn" title="导出长图">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                </button>
                 <div id="map"></div>
                 <div class="map-info-box" id="map-info-text">Loading map data...</div>
             </div>
@@ -429,6 +426,55 @@
     </a>
 </nav>
 
+<div id="poster-modal" class="poster-modal">
+    <div id="poster-content" class="poster-content">
+        <div id="poster-map" class="poster-bg"></div>
+        <div class="poster-gradient"></div>
+        
+        <div class="poster-header">
+            <div id="poster-date">2026/05/07 18:55:00</div>
+            <div id="poster-name">傍晚跑步</div>
+            <div class="poster-stats-sm">
+                <div id="poster-year-stat">全年 219 km <span>较去年同期 ↘ 280 km</span></div>
+                <div id="poster-month-stat">本月 51 km <span>较上月同期 ↗ 27 km</span></div>
+            </div>
+        </div>
+        
+        <div class="poster-body">
+            <div id="poster-distance" class="poster-distance">
+                <span class="int">18</span><span class="dot"></span><span class="dec">20</span><span class="unit">km</span>
+            </div>
+            
+            <div class="poster-footer-stats">
+                <div class="p-stat">
+                    <div class="p-stat-label">
+                        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> TIME
+                    </div>
+                    <div class="p-stat-val" id="poster-time">1:51:03</div>
+                </div>
+                <div class="p-stat">
+                    <div class="p-stat-label">
+                        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg> PACE
+                    </div>
+                    <div class="p-stat-val" id="poster-pace">6'06"</div>
+                </div>
+                <div class="p-stat">
+                    <div class="p-stat-label">
+                        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg> HR
+                    </div>
+                    <div class="p-stat-val" id="poster-hr">135</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="poster-actions">
+        <button id="poster-close" class="btn-cancel">取消</button>
+        <button id="poster-download" class="btn-save">保存图片</button>
+    </div>
+</div>
+
+
 <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
 <script src="https://unpkg.com/@mapbox/polyline"></script>
 
@@ -440,8 +486,10 @@
     const itemsPerPage = 10;
     let currentYearFilter = 'all';
 
-    // 天气异步联动专属锁
+    // 追踪当前展示的单条跑步记录，用于生成海报
     let currentActiveRunId = null;
+    let currentSingleRun = null; 
+    let posterMap = null; // 海报专用的独立交互地图
 
     // Calendar state
     let currentCalMode = 'month';
@@ -459,8 +507,11 @@
             style: 'https://tiles.openfreemap.org/styles/dark',
             center: [113.3, 23.1], 
             zoom: 11,
+            preserveDrawingBuffer: true, 
             attributionControl: false
         });
+
+        map.addControl(new maplibregl.FullscreenControl(), 'top-right');
     }
 
     function renderMap(runsOrRun) {
@@ -471,6 +522,15 @@
 
         let runs = Array.isArray(runsOrRun) ? runsOrRun : (runsOrRun ? [runsOrRun] : []);
         let features = [];
+        
+        // 判断是否为单条记录，决定导出按钮是否显示
+        if (runs.length === 1) {
+            currentSingleRun = runs[0];
+            document.getElementById('export-btn').style.display = 'block';
+        } else {
+            currentSingleRun = null;
+            document.getElementById('export-btn').style.display = 'none';
+        }
 
         runs.forEach(run => {
             if (run && run._cachedLatlngs && run._cachedLatlngs.length > 0) {
@@ -568,7 +628,6 @@
         }
     }
 
-    // 异步拉取单条跑步的详情数据并渲染天气
     function fetchWeatherForRun(run) {
         if (!run || !run.run_id) return;
         currentActiveRunId = run.run_id;
@@ -579,7 +638,6 @@
                 return res.json();
             })
             .then(detail => {
-                // 确保异步回调返回时，当前处于激活高亮的仍然是这条记录
                 if (currentActiveRunId === run.run_id && detail && detail.weather) {
                     updateMapInfoBox('single', run, detail.weather);
                 }
@@ -724,9 +782,6 @@
         return `rgba(255, 255, 255, ${opacity})`;
     }
 
-    // ==========================================================================
-    // Calendar Card Logic
-    // ==========================================================================
     function updateCalendarCard() {
         const year = currentCalDate.getFullYear();
         const month = currentCalDate.getMonth(); 
@@ -891,7 +946,6 @@
             `;
             tr.style.cursor = 'pointer';
 
-            // 彻底修复 Bug：点击行时总是移除先前的所有高亮类，切断不受控的闭包影响
             tr.addEventListener('click', () => {
                 document.querySelectorAll('#table-body tr').forEach(r => r.classList.remove('active-row'));
                 tr.classList.add('active-row');
@@ -940,7 +994,6 @@
         updateCalendarCard(); 
     }
 
-    // 日历单向同步至 Activity Log 的纯净处理，防止无限回溯循环
     function syncActivityLogToYear(targetYear) {
         currentYearFilter = targetYear;
         document.querySelectorAll('.filter-btn').forEach(b => {
@@ -974,7 +1027,6 @@
 
     // --- Events binding ---
     
-    // Calendar Event Listeners
     document.querySelectorAll('.cal-tab').forEach(tab => {
         tab.addEventListener('click', (e) => {
             currentCalMode = e.target.getAttribute('data-mode');
@@ -1006,7 +1058,6 @@
         }
     });
 
-    // Filtering & Pagination Event Listeners
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -1014,12 +1065,9 @@
             currentYearFilter = e.target.getAttribute('data-year');
             
             if (currentYearFilter === 'all') {
-                // 点 all 时右边日历返回当前年当前月
                 currentCalDate = new Date();
             } else {
-                // 点任意年份时，日历跳转到对应年份
                 currentCalDate.setFullYear(parseInt(currentYearFilter));
-                // 如果是月视图，需要跳到该年份 Activity log 显示的第一个（最新）记录所在年月
                 if (currentCalMode === 'month') {
                     const runsForYear = allRuns.filter(run => run.start_date_local && run.start_date_local.startsWith(currentYearFilter));
                     if (runsForYear.length > 0 && runsForYear[0].start_date_local) {
@@ -1043,6 +1091,158 @@
         if (currentPage < totalPages) { currentPage++; renderTable(); }
     });
     
+    // ==========================================================================
+    // Poster (Share Card) Logic
+    // ==========================================================================
+    const posterModal = document.getElementById('poster-modal');
+    const posterContent = document.getElementById('poster-content');
+    
+    // 为预览海报渲染专属路线地图
+    function renderPosterRoute(run) {
+        if (!run || !run._cachedLatlngs) return;
+        let geojsonCoords = run._cachedLatlngs.map(coord => [coord[1], coord[0]]);
+        const geojsonData = { 'type': 'FeatureCollection', 'features': [{
+            'type': 'Feature',
+            'geometry': { 'type': 'LineString', 'coordinates': geojsonCoords }
+        }]};
+
+        const sourceId = 'poster-route-source';
+        const layerId = 'poster-route-layer';
+
+        if (posterMap.getSource(sourceId)) {
+            posterMap.getSource(sourceId).setData(geojsonData);
+        } else {
+            posterMap.addSource(sourceId, { 'type': 'geojson', 'data': geojsonData });
+            posterMap.addLayer({
+                'id': layerId,
+                'type': 'line',
+                'source': sourceId,
+                'layout': { 'line-join': 'round', 'line-cap': 'round' },
+                // 海报上的线适当加粗以凸显效果
+                'paint': { 'line-color': '#e93342', 'line-width': 3, 'line-opacity': 0.9 }
+            });
+        }
+
+        const pointsLong = geojsonCoords.map(p => p[0]);
+        const pointsLat = geojsonCoords.map(p => p[1]);
+        const bounds = [
+            [Math.min(...pointsLong), Math.min(...pointsLat)],
+            [Math.max(...pointsLong), Math.max(...pointsLat)]
+        ];
+        posterMap.fitBounds(bounds, { padding: 40, animate: false });
+    }
+    
+    // 打开海报弹窗
+    document.getElementById('export-btn').addEventListener('click', () => {
+        if (!currentSingleRun) return;
+
+        // 1. 填充动态数据 
+        const dateStr = currentSingleRun.start_date_local || '';
+        // 修复1：不再使用容易导致截断的 substring，直接替换连字符为斜杠展示全时段
+        document.getElementById('poster-date').innerText = dateStr.replace(/-/g, '/');
+        document.getElementById('poster-name').innerText = currentSingleRun.name || getNameByTime(dateStr);
+
+        const yrDist = document.getElementById('yearly-dist').childNodes[0].nodeValue.trim();
+        const yrVs = document.getElementById('yearly-vs-container').innerText;
+        document.getElementById('poster-year-stat').innerHTML = `全年 ${yrDist} km <span>较去年同期 ${yrVs}</span>`;
+
+        const moDist = document.getElementById('monthly-dist').childNodes[0].nodeValue.trim();
+        const moVs = document.getElementById('monthly-vs-container').innerText;
+        document.getElementById('poster-month-stat').innerHTML = `本月 ${moDist} km <span>较上月同期 ${moVs}</span>`;
+
+        // 距离切分
+        const distKm = (currentSingleRun.distance / 1000).toFixed(2);
+        const distParts = distKm.split('.');
+        document.querySelector('#poster-distance .int').innerText = distParts[0];
+        document.querySelector('#poster-distance .dec').innerText = distParts[1];
+
+        // 底部数据
+        document.getElementById('poster-time').innerText = formatDuration(currentSingleRun.moving_time);
+        document.getElementById('poster-pace').innerText = calculatePace(currentSingleRun.average_speed);
+        document.getElementById('poster-hr').innerText = currentSingleRun.average_heartrate ? Math.round(currentSingleRun.average_heartrate) : '-';
+
+        // 显示弹窗
+        posterModal.style.display = 'flex';
+
+        // 修复3：构建并展示海报专属的可交互 MapLibre 实例
+        if (!posterMap) {
+            posterMap = new maplibregl.Map({
+                container: 'poster-map',
+                style: 'https://tiles.openfreemap.org/styles/dark',
+                preserveDrawingBuffer: true, // 重要：确保之后截图功能正常
+                attributionControl: false,
+                interactive: true 
+            });
+            posterMap.on('load', () => {
+                renderPosterRoute(currentSingleRun);
+            });
+        } else {
+            renderPosterRoute(currentSingleRun);
+        }
+        
+        // 确保地图能在新显示的容器尺寸中自我校正
+        setTimeout(() => posterMap.resize(), 100);
+    });
+
+    // 关闭弹窗
+    document.getElementById('poster-close').addEventListener('click', () => {
+        posterModal.style.display = 'none';
+    });
+
+    // 渲染及下载海报
+    document.getElementById('poster-download').addEventListener('click', () => {
+        const btn = document.getElementById('poster-download');
+        const originalText = btn.innerText;
+        btn.innerText = '生成中...';
+        btn.disabled = true;
+
+        // 修复4：严格的 WYSIWYG —— 先将底层 Map 的 WebGL Canvas 生成临时图片顶替，保证 html2canvas 百分百准确捕捉地图
+        const canvasEl = posterMap.getCanvas();
+        const mapDataUrl = canvasEl.toDataURL('image/png');
+        
+        const tempImg = document.createElement('img');
+        tempImg.src = mapDataUrl;
+        tempImg.style.position = 'absolute';
+        tempImg.style.top = '0';
+        tempImg.style.left = '0';
+        tempImg.style.width = '100%';
+        tempImg.style.height = '100%';
+        tempImg.style.objectFit = 'cover';
+        tempImg.style.zIndex = '1';
+        
+        const posterMapContainer = document.getElementById('poster-map');
+        posterMapContainer.appendChild(tempImg);
+        // 暂时隐藏原 canvas 以防干扰
+        canvasEl.style.display = 'none';
+
+        html2canvas(document.getElementById('poster-content'), {
+            useCORS: true, 
+            scale: 2, 
+            backgroundColor: '#111'
+        }).then(canvas => {
+            const link = document.createElement('a');
+            const dateFmt = currentSingleRun.start_date_local.substring(0,10);
+            link.download = `Run_Log_${dateFmt}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            
+            // 生成后进行清理工作
+            tempImg.remove();
+            canvasEl.style.display = '';
+            
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }).catch(err => {
+            console.error('Poster generation failed: ', err);
+            btn.innerText = '生成失败';
+            
+            tempImg.remove();
+            canvasEl.style.display = '';
+            
+            setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 2000);
+        });
+    });
+
     // Start sequence
     fetchData();
 </script>
