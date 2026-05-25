@@ -627,7 +627,7 @@
             if (weather) {
                 currentActiveRunWeatherStr = weatherStr = `  <span style="color:#d1d1d1;"> 🌡️ ${weather.temperature_c}°C ${weather.condition}</span>`;
             }
-            box.innerHTML = `<strong style="color:var(--accent-red);">${name} </strong> (${date.substring(0,10)}) &middot; ${dist} km / 配速 ${calculatePace(data.average_speed)}${weatherStr}`;
+            box.innerHTML = `<strong style="color:var(--accent-red);">${name} </strong> (${date.substring(0,10)}) &middot; ${dist} km / 配速 ${calculatePace(data.average_speed)} &middot;  ${weatherStr}`;
         }
     }
 
@@ -1141,8 +1141,12 @@
 
         // 1. 填充动态数据 
         const dateStr = currentSingleRun.start_date_local || '';
+		const [datePart, timePart] = dateStr.split(" ")
+		const date = new Date(datePart);
+		const shortWeekDay = new Intl.DateTimeFormat('zh-CN', { weekday: 'short' }).format(date);
+		const dateStrWeekday = `${datePart} ${shortWeekDay} ${timePart}`;
         // 修复1：不再使用容易导致截断的 substring，直接替换连字符为斜杠展示全时段
-        document.getElementById('poster-date').innerText = dateStr.replace(/-/g, '/');
+        document.getElementById('poster-date').innerText = dateStrWeekday.replace(/-/g, '/');
         document.getElementById('poster-name').innerText = currentSingleRun.name || getNameByTime(dateStr);
 		document.getElementById('poster-weather').innerHTML = currentActiveRunWeatherStr || '';
 
