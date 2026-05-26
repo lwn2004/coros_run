@@ -12,6 +12,9 @@
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <style>
+    /* ==========================================================================
+       Theme Variables (Dark Mode Default)
+       ========================================================================== */
     :root {
         --bg-color: #000000;
         --card-bg: #1a1a1a;
@@ -21,6 +24,46 @@
         --accent-red: #e93342;
         --border-color: #2a2a2a;
         --progress-bg: #2c2c2e;
+        --map-info-bg: #111111;
+        --nav-hover: #ffffff;
+        --table-text: #d1d1d1;
+        --cal-empty-border: rgba(255,255,255,0.05);
+        --cal-data-color: #d9d9d9;
+        --cal-data-border: rgba(255,255,255,0.1);
+        --cal-data-hover: #ffffff;
+        --mobile-menu-bg: #0d0d0d;
+        --cal-tab-active-bg: #3F3F46;
+        --btn-bg: #2c2c2e;
+        --active-row-bg: rgba(233, 51, 66, 0.12);
+        --active-row-text: #ffffff;
+        --input-bg: #000000;
+    }
+
+    /* ==========================================================================
+       Theme Variables (Light Mode)
+       ========================================================================== */
+    [data-theme="light"] {
+        --bg-color: #f0f2f5;
+        --card-bg: #ffffff;
+        --text-main: #111827;
+        --text-muted: #6b7280;
+        --text-dark: #9ca3af;
+        --accent-red: #e93342;
+        --border-color: #e5e7eb;
+        --progress-bg: #f3f4f6;
+        --map-info-bg: #f9fafb;
+        --nav-hover: #111827;
+        --table-text: #4b5563;
+        --cal-empty-border: rgba(0,0,0,0.1);
+        --cal-data-color: #374151;
+        --cal-data-border: rgba(0,0,0,0.1);
+        --cal-data-hover: #111827;
+        --mobile-menu-bg: #ffffff;
+        --cal-tab-active-bg: #e5e7eb;
+        --btn-bg: #f3f4f6;
+        --active-row-bg: rgba(233, 51, 66, 0.08);
+        --active-row-text: #e93342;
+        --input-bg: #ffffff;
     }
 
     * {
@@ -38,6 +81,7 @@
         overflow: hidden;
         display: flex;
         flex-direction: column;
+        transition: background-color 0.3s, color 0.3s;
     }
 
     /* --- Top Navigation (Desktop) --- */
@@ -57,7 +101,7 @@
 
     .desktop-menu { display: flex; gap: 28px; }
     .desktop-menu a { color: var(--text-muted); text-decoration: none; font-size: 14px; font-weight: 600; transition: color 0.2s; }
-    .desktop-menu a.active, .desktop-menu a:hover { color: #ffffff; }
+    .desktop-menu a.active, .desktop-menu a:hover { color: var(--nav-hover); }
 
     /* --- Main Layout --- */
     .container {
@@ -70,7 +114,7 @@
     .column-right { flex: 1; display: flex; flex-direction: column; gap: 16px; min-height: 0; padding-right: 1.5rem;}
 
     .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; flex-shrink: 0; }
-    .card { background-color: var(--card-bg); border-radius: 12px; padding: 14px 16px; border: 1px solid var(--border-color); }
+    .card { background-color: var(--card-bg); border-radius: 12px; padding: 14px 16px; border: 1px solid var(--border-color); transition: background-color 0.3s, border-color 0.3s; }
     .card-title { color: var(--text-muted); font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
     .card-value { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
     .card-value span { font-size: 13px; color: var(--text-muted); font-weight: normal; }
@@ -86,9 +130,12 @@
     .trend-up { color: var(--accent-red); }
 
     /* Map and Info Box */
-    .map-card { background-color: var(--card-bg); border-radius: 16px; overflow: hidden; border: 1px solid var(--border-color); flex: 1; display: flex; flex-direction: column; min-height: 0; height: 250px; position: relative;}
+    .map-card { background-color: var(--card-bg); border-radius: 16px; overflow: hidden; border: 1px solid var(--border-color); flex: 1; display: flex; flex-direction: column; min-height: 0; height: 250px; position: relative; transition: border-color 0.3s; }
     #map { width: 100%; flex: 1; min-height: 0; }
-    .map-info-box { flex-shrink: 0; height: 44px; padding: 0 16px; display: flex; align-items: center; border-top: 1px solid var(--border-color); font-size: 12px; color: var(--text-muted); background-color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 10;}
+    .map-info-box { flex-shrink: 0; height: 44px; padding: 0 16px; display: flex; align-items: center; border-top: 1px solid var(--border-color); font-size: 12px; color: var(--text-muted); background-color: var(--map-info-bg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 10; transition: background-color 0.3s, border-color 0.3s;}
+
+    .info-strong { color: var(--text-main); font-weight: bold; }
+    .info-strong-red { color: var(--accent-red); font-weight: bold; }
 
     /* Export Button (Top Left of Map) */
     .export-btn {
@@ -106,18 +153,20 @@
         backdrop-filter: blur(4px);
         transition: background 0.2s;
     }
+    [data-theme="light"] .export-btn { background: rgba(255, 255, 255, 0.9); color: var(--text-main); }
     .export-btn:hover { background: rgba(60, 60, 60, 0.9); }
+    [data-theme="light"] .export-btn:hover { background: #ffffff; }
     .export-btn svg { vertical-align: middle; }
 
     /* Activity Log Area */
-    .activity-section { background-color: var(--card-bg); border-radius: 12px; padding: 16px; border: 1px solid var(--border-color); flex: 1; display: flex; flex-direction: column; min-height: 0; }
+    .activity-section { background-color: var(--card-bg); border-radius: 12px; padding: 16px; border: 1px solid var(--border-color); flex: 1; display: flex; flex-direction: column; min-height: 0; transition: background-color 0.3s, border-color 0.3s; }
     .activity-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-shrink: 0; }
     .activity-title { font-size: 18px; font-weight: 700; }
     .activity-count { color: var(--text-dark); font-size: 12px; }
     
     .filters { display: flex; gap: 6px; margin-bottom: 14px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-shrink: 0; }
     .filters::-webkit-scrollbar { display: none; } 
-    .filter-btn { flex-shrink: 0; background-color: #2c2c2e; color: var(--text-muted); border: none; padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.2s; }
+    .filter-btn { flex-shrink: 0; background-color: var(--btn-bg); color: var(--text-muted); border: none; padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.2s; }
     .filter-btn.active { background-color: var(--accent-red); color: white; }
 
     .table-container { flex: 1; overflow-y: auto; min-height: 0; scroll-behavior: smooth; }
@@ -125,20 +174,20 @@
     .table-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
 
     table { width: 100%; border-collapse: collapse; font-size: 0.875rem; text-align: left; }
-    th { color: var(--text-dark); font-weight: 600; padding-bottom: 10px; font-size: 11px; letter-spacing: 0.5px; position: sticky; top: 0; background-color: var(--card-bg); z-index: 1; }
-    td { white-space: nowrap; padding: 10px 0; color: #d1d1d1; border-bottom: 1px solid rgba(255,255,255,0.02); }
+    th { color: var(--text-dark); font-weight: 600; padding-bottom: 10px; font-size: 11px; letter-spacing: 0.5px; position: sticky; top: 0; background-color: var(--card-bg); z-index: 1; transition: background-color 0.3s; }
+    td { white-space: nowrap; padding: 10px 0; color: var(--table-text); border-bottom: 1px solid var(--border-color); transition: border-color 0.3s; }
     tr { transition: background-color 0.2s; }
-    tr.active-row td { background-color: rgba(233, 51, 66, 0.12) !important; color: #ffffff !important; }
+    tr.active-row td { background-color: var(--active-row-bg) !important; color: var(--active-row-text) !important; }
     tr.active-row td.bold-white { color: var(--accent-red) !important; }
     
-    .bold-white { color: white; font-weight: 600; }
+    .bold-white { font-weight: 600; }
     .unit { color: var(--text-dark); font-size: 11px; font-weight: normal; }
     
     .pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; color: var(--text-muted); font-size: 16px; padding-top: 10px; border-top: 1px solid var(--border-color); flex-shrink: 0; }
     .page-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 30px; }
 
     /* Calendar Card Styles */
-    .chart-card { background-color: var(--card-bg); border-radius: 16px; border: 1px solid var(--border-color); flex: 1.2; display: flex; flex-direction: column; min-height: 0; position: relative; }
+    .chart-card { background-color: var(--card-bg); border-radius: 16px; border: 1px solid var(--border-color); flex: 1.2; display: flex; flex-direction: column; min-height: 0; position: relative; transition: background-color 0.3s, border-color 0.3s;}
     .cal-card-inner { display: flex; flex-direction: column; height: 100%; padding: 20px 24px; }
     
     .cal-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
@@ -154,7 +203,7 @@
     .cal-toggle-wrap { flex: 1; display: flex; justify-content: flex-end; }
     .cal-toggle { display: flex; background-color: var(--progress-bg); border-radius: 20px; padding: 3px; }
     .cal-tab { padding: 4px 18px; font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; border-radius: 18px; transition: all 0.2s; }
-    .cal-tab.active { background-color: #3F3F46; color: var(--text-main); }
+    .cal-tab.active { background-color: var(--cal-tab-active-bg); color: var(--text-main); }
 
     .cal-view { flex: 1; display: flex; flex-direction: column; min-height: 0; }
     
@@ -162,11 +211,15 @@
     .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; flex: 1; align-content: start; width: 80%; margin: 0 auto; }
     
     .cal-day { aspect-ratio: 1; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; transition: transform 0.1s, border 0.2s; }
-    .cal-day.empty { background-color: transparent; color: var(--border-color); border: 1px dashed rgba(255,255,255,0.05); cursor: default; }
+    .cal-day.empty { background-color: transparent; color: var(--border-color); border: 1px dashed var(--cal-empty-border); cursor: default; }
     .cal-day.empty .dist { color: transparent; }
-    .cal-day.has-data { color: #d9d9d9; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; }
-    .cal-day.has-data:hover { transform: scale(1.05); border-color: #fff; }
+    .cal-day.has-data { color: var(--cal-data-color); border: 1px solid var(--cal-data-border); cursor: pointer; }
+    .cal-day.has-data:hover { transform: scale(1.05); border-color: var(--cal-data-hover); }
     .cal-day .dist { font-size: 9px; margin-top: 2px; font-weight: 500; opacity: 0.8; }
+    
+    /* 强制半马以上颜色偏白，确保无论在深色浅色模式的深红背景下均能阅读 */
+    .cal-day.is-long-run { color: #ffffff !important; }
+    .cal-day.is-long-run .dist { color: rgba(255, 255, 255, 0.9) !important; }
 
     .cal-view-year-wrap { flex: 1; display: flex; flex-direction: column; min-height: 0; height: 100%; position: relative; }
     #cal-year-chart { width: 100% !important; height: 100% !important; }
@@ -174,29 +227,28 @@
     .mobile-bottom-menu { display: none; }
 
     /* ==========================================================================
-       Poster Generation Styles (For Share Card)
+       Poster Generation Styles (For Share Card) - Now supports both themes
        ========================================================================== */
     .poster-modal {
         display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         z-index: 9999; align-items: center; justify-content: center; flex-direction: column; gap: 24px;
-        background: rgba(0,0,0,0.85); backdrop-filter: blur(5px);
+        background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); transition: background 0.3s;
     }
     .poster-content {
         width: 375px; height: 667px; background: #000; position: relative; overflow: hidden;
-        border-radius: 0; 
-        box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        border-radius: 0; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
     }
-    .poster-bg {
-        width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1;
-    }
+    .poster-bg { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
     .poster-gradient {
         position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2;
         background: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.1) 35%, rgba(0,0,0,0.8) 65%, rgba(0,0,0,0.98) 100%);
-        pointer-events: none; /* 重要：允许事件穿透到下层地图，实现自由交互 */
+        pointer-events: none;
     }
+    
     .poster-header { position: absolute; top: 40px; left: 30px; z-index: 3; pointer-events: none; }
     .poster-date { color: #fff; font-size: 5px; font-weight: 800; font-family: monospace; letter-spacing: 1px; margin-bottom: 12px; }
 	.poster-weather { color: #fff; font-size: 15px; font-family: monospace; letter-spacing: 1px; margin-bottom: 12px; }
+    .poster-weather .weather-text { color: #d1d1d1 !important; } 
     .poster-name { color: #fff; font-size: 26px; font-weight: 600; margin-bottom: 24px; letter-spacing: 1px; }
     .poster-stats-sm { color: #999; font-size: 11px; line-height: 2; font-weight: 500; }
     .poster-stats-sm span { color: #d1d1d1; margin-left: 6px; }
@@ -217,8 +269,39 @@
 
     .poster-actions { display: flex; gap: 16px; }
     .poster-actions button { padding: 12px 28px; border: none; border-radius: 24px; cursor: pointer; font-weight: 600; font-size: 15px; }
-    .poster-actions .btn-cancel { background: #333; color: #fff; }
-    .poster-actions .btn-save { background: #e93342; color: #fff; box-shadow: 0 4px 12px rgba(233,51,66,0.3); }
+    .poster-actions .btn-cancel { background: #333; color: #fff; transition: background 0.2s;}
+    .poster-actions .btn-cancel:hover { background: #444; }
+    .poster-actions .btn-save { background: #e93342; color: #fff; box-shadow: 0 4px 12px rgba(233,51,66,0.3); transition: background 0.2s;}
+    .poster-actions .btn-save:hover { background: #d02c39; }
+
+    /* --- Light Mode Poster Overrides --- */
+    [data-theme="light"] .poster-modal { background: rgba(255, 255, 255, 0.85); }
+    [data-theme="light"] .poster-content { background: #f0f2f5; }
+    [data-theme="light"] .poster-gradient {
+        background: linear-gradient(to bottom, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.1) 35%, rgba(255,255,255,0.8) 65%, rgba(255,255,255,0.98) 100%);
+    }
+    [data-theme="light"] .poster-date,
+    [data-theme="light"] .poster-weather,
+    [data-theme="light"] .poster-name,
+    [data-theme="light"] .poster-distance { color: #111827; }
+    [data-theme="light"] .poster-weather .weather-text { color: #4b5563 !important; }
+    [data-theme="light"] .poster-stats-sm { color: #6b7280; }
+    [data-theme="light"] .poster-stats-sm span { color: #374151; }
+    [data-theme="light"] .poster-footer-stats {
+        background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+    [data-theme="light"] .p-stat-val { color: #111827; }
+    [data-theme="light"] .p-stat-label { color: #6b7280; }
+    [data-theme="light"] .poster-actions .btn-cancel { background: #e5e7eb; color: #374151; }
+    [data-theme="light"] .poster-actions .btn-cancel:hover { background: #d1d5db; }
+
+    /* Settings Modal Specific */
+    .settings-form-row { margin-bottom: 20px; }
+    .settings-radio-group { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; font-size: 14px; color: var(--text-main); }
+    .settings-radio-group label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .settings-input-group { display: flex; gap: 10px; padding-left: 24px; margin-top: 8px; }
+    .settings-input { background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 12px; border-radius: 6px; width: 120px; outline: none; transition: border-color 0.2s;}
+    .settings-input:focus { border-color: var(--accent-red); }
 
     /* ==========================================================================
        Mobile Responsive Adaptations
@@ -245,8 +328,8 @@
         th { position: sticky; z-index: 99; }
         .chart-card { height: auto; flex: none; min-height: 400px; order: 3;}
         
-        .mobile-bottom-menu { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background-color: #0d0d0d; border-top: 1px solid var(--border-color); justify-content: space-around; padding: 10px 0; padding-bottom: env(safe-area-inset-bottom, 10px); z-index: 1000; }
-        .mobile-menu-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); text-decoration: none; font-size: 10px; }
+        .mobile-bottom-menu { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background-color: var(--mobile-menu-bg); border-top: 1px solid var(--border-color); justify-content: space-around; padding: 10px 0; padding-bottom: env(safe-area-inset-bottom, 10px); z-index: 1000; transition: background-color 0.3s; }
+        .mobile-menu-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); text-decoration: none; font-size: 10px; transition: color 0.2s;}
         .mobile-menu-item.active { color: var(--accent-red); }
         .mobile-menu-item svg { width: 22px; height: 22px; fill: currentColor; }
 		.page-btn { font-size: 16px; }
@@ -259,13 +342,19 @@
         .cal-tab { padding: 4px 12px; }
         .cal-weekdays, .cal-grid { width: 100%; }
         
-        /* 适应手机屏幕缩放预览 */
         .poster-content { transform: scale(0.85); margin-top: -30px; }
     }
 </style>
 
 <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // 在页面渲染前第一时间注入主题设定，防止闪烁
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+</script>
+
 </head>
 <body>
 
@@ -275,8 +364,8 @@
         <a href="#" class="active">首页</a>
         <a href="#">轨迹墙</a>
         <a href="#">热力图</a>
-        <a href="#">奔跑人生</a>
         <a href="#">赛事记录</a>
+        <a href="#" id="menu-settings">系统设置</a>
     </nav>
 </div>
 
@@ -414,16 +503,16 @@
         <span>轨迹墙</span>
     </a>
     <a href="#" class="mobile-menu-item">
-        <svg viewBox="0 0 24 24"><path d="M4 4h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 10h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 16h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4z"/></svg>
-        <span>奔跑人生</span>
-    </a>
-    <a href="#" class="mobile-menu-item">
         <svg viewBox="0 0 24 24"><path d="M17.5 11c0-1.88-1.5-3.5-1.5-5.5 0-2.21 1.79-4 4-4-1.55 1.55-2.5 3.67-2.5 6 0 1.66 1.34 3 3 3s3-1.34 3-3c0-.98-.38-1.87-1-2.53C21.73 6.13 22 7.53 22 9c0 2.49-2.01 4.5-4.5 4.5S13 11.49 13 9c0-1.85.9-3.5 2.33-4.52C14.15 5.61 13.5 7.24 13.5 9c0 2.76 2.24 5 5 5z"/></svg>
         <span>热力图</span>
     </a>
     <a href="#" class="mobile-menu-item">
         <svg viewBox="0 0 24 24"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>
         <span>赛事记录</span>
+    </a>
+    <a href="#" class="mobile-menu-item" id="mobile-menu-settings">
+        <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.3-.06.62-.06.94s.02.64.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .43-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.49-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+        <span>系统设置</span>
     </a>
 </nav>
 
@@ -476,6 +565,38 @@
     </div>
 </div>
 
+<div id="settings-modal" class="poster-modal">
+    <div class="card" style="width: 420px; max-width: 90%; padding: 28px; z-index: 10001; position: relative;">
+        <div class="activity-title" style="margin-bottom: 24px;">系统设置</div>
+
+        <div class="settings-form-row">
+            <div class="card-title">主题外观 / THEME</div>
+            <div class="settings-radio-group" style="flex-direction: row; gap: 24px;">
+                <label><input type="radio" name="setting-theme" value="dark"> 深色模式 (Dark)</label>
+                <label><input type="radio" name="setting-theme" value="light"> 浅色模式 (Light)</label>
+            </div>
+        </div>
+
+        <div class="settings-form-row" style="margin-top: 32px;">
+            <div class="card-title">默认地图中心 / MAP CENTER</div>
+            <div class="settings-radio-group">
+                <label><input type="radio" name="setting-map-center" value="A"> 以最后一次轨迹为中心</label>
+                <label><input type="radio" name="setting-map-center" value="B"> 自定义经纬度</label>
+                <div id="settings-custom-coords" class="settings-input-group" style="display: none;">
+                    <input type="number" id="setting-lng" class="settings-input" placeholder="经度 (Lng)" step="0.0001">
+                    <input type="number" id="setting-lat" class="settings-input" placeholder="纬度 (Lat)" step="0.0001">
+                </div>
+                <label><input type="radio" name="setting-map-center" value="C"> 以当前展示的所有轨迹为中心</label>
+            </div>
+        </div>
+
+        <div class="poster-actions" style="margin-top: 36px; justify-content: flex-end;">
+            <button id="settings-close" class="btn-cancel">取消</button>
+            <button id="settings-save" class="btn-save">应用并保存</button>
+        </div>
+    </div>
+</div>
+
 
 <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
 <script src="https://unpkg.com/@mapbox/polyline"></script>
@@ -488,11 +609,10 @@
     const itemsPerPage = 10;
     let currentYearFilter = 'all';
 
-    // 追踪当前展示的单条跑步记录，用于生成海报
     let currentActiveRunId = null;
 	let currentActiveRunWeatherStr = null;
     let currentSingleRun = null; 
-    let posterMap = null; // 海报专用的独立交互地图
+    let posterMap = null; 
 
     // Calendar state
     let currentCalMode = 'month';
@@ -504,10 +624,23 @@
     const GOAL_MONTHLY = 200;
     const HALF_MARATHON = 21.0975;
 
+    // --- Settings & Theme Application ---
+    function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        const styleUrl = theme === 'light' ? 'https://tiles.openfreemap.org/styles/liberty' : 'https://tiles.openfreemap.org/styles/dark';
+        if (map && map.loaded()) {
+            map.setStyle(styleUrl);
+        }
+        updateCalendarCard(); // Re-render chart for correct bar colors
+    }
+
     function initMap() {
+        const theme = localStorage.getItem('theme') || 'dark';
+        const styleUrl = theme === 'light' ? 'https://tiles.openfreemap.org/styles/liberty' : 'https://tiles.openfreemap.org/styles/dark';
+        
         map = new maplibregl.Map({
             container: 'map',
-            style: 'https://tiles.openfreemap.org/styles/dark',
+            style: styleUrl,
             center: [113.3, 23.1], 
             zoom: 11,
             preserveDrawingBuffer: true, 
@@ -526,7 +659,6 @@
         let runs = Array.isArray(runsOrRun) ? runsOrRun : (runsOrRun ? [runsOrRun] : []);
         let features = [];
         
-        // 判断是否为单条记录，决定导出按钮是否显示
         if (runs.length === 1) {
             currentSingleRun = runs[0];
             document.getElementById('export-btn').style.display = 'block';
@@ -558,37 +690,62 @@
                 'type': 'line',
                 'source': sourceId,
                 'layout': { 'line-join': 'round', 'line-cap': 'round' },
-                'paint': { 'line-color': '#ff1744', 'line-width': 2, 'line-opacity': 0.4 }
+                'paint': { 'line-color': '#e93342', 'line-width': 2, 'line-opacity': 0.4 }
             });
         }
 
         if (map.getLayer(layerId)) {
-            map.setPaintProperty(layerId, 'line-width', 1);
+            map.setPaintProperty(layerId, 'line-width', 2);
             map.setPaintProperty(layerId, 'line-opacity', runs.length === 1 ? 0.9 : 0.4);
         }
 
         if (features.length > 0) {
-            let points = [];
-            for (const f of features) {
-                if (f.geometry.coordinates.length) {
-                    points = f.geometry.coordinates;
-                    break;
+            let pointsToFit = [];
+
+            if (runs.length === 1) {
+                pointsToFit = features[0].geometry.coordinates;
+            } else {
+                // Apply Settings Map Center Logic
+                const centerMode = localStorage.getItem('mapCenterMode') || 'A';
+                
+                if (centerMode === 'A') {
+                    // Logic Update: Custom zoom level (11) centering precisely on the last track bounding box midpoint
+                    const latestFeature = features.find(f => f.geometry.coordinates.length > 0);
+                    if (latestFeature) {
+                        const coords = latestFeature.geometry.coordinates;
+                        const pLng = coords.map(p => p[0]);
+                        const pLat = coords.map(p => p[1]);
+                        const cLng = (Math.min(...pLng) + Math.max(...pLng)) / 2;
+                        const cLat = (Math.min(...pLat) + Math.max(...pLat)) / 2;
+                        map.easeTo({ center: [cLng, cLat], zoom: 11 });
+                        return; // Successfully framed, exit function early
+                    }
+                } else if (centerMode === 'B') {
+                    // Custom Lat/Lng
+                    const lng = parseFloat(localStorage.getItem('mapCenterLng')) || 113.3;
+                    const lat = parseFloat(localStorage.getItem('mapCenterLat')) || 23.1;
+                    map.easeTo({ center: [lng, lat], zoom: 11 });
+                    return; // Skip fit bounds
+                } else if (centerMode === 'C') {
+                    // Center all tracks
+                    for (const f of features) {
+                        pointsToFit = pointsToFit.concat(f.geometry.coordinates);
+                    }
                 }
             }
 
-            if (points.length === 0) {
+            if (pointsToFit.length === 0) {
                 map.easeTo({ center: [20, 20], zoom: 3 });
-            } else if (points.length === 2 && String(points[0]) === String(points[1])) {
-                map.easeTo({ center: points[0], zoom: 9 });
+            } else if (pointsToFit.length === 2 && String(pointsToFit[0]) === String(pointsToFit[1])) {
+                map.easeTo({ center: pointsToFit[0], zoom: 9 });
             } else {
-                const pointsLong = points.map(point => point[0]);
-                const pointsLat = points.map(point => point[1]);
+                const pointsLong = pointsToFit.map(point => point[0]);
+                const pointsLat = pointsToFit.map(point => point[1]);
                 const bounds = [
                     [Math.min(...pointsLong), Math.min(...pointsLat)],
                     [Math.max(...pointsLong), Math.max(...pointsLat)]
                 ];
                 map.fitBounds(bounds, { padding: 40 });
-                if (features.length > 1) map.setZoom(11);
             }
         }
     }
@@ -618,16 +775,16 @@
         if (type === 'summary') {
             const yearText = currentYearFilter === 'all' ? '总计' : `${currentYearFilter}年`;
             const dist = data.dist.toFixed(2);
-            box.innerHTML = `<strong style="color:#fff;">${yearText}概览</strong> &middot; ${data.runs} 次活动 / ${dist} km / 耗时 ${formatHoursMins(data.seconds)}`;
+            box.innerHTML = `<strong class="info-strong">${yearText}概览</strong> &middot; ${data.runs} 次活动 / ${dist} km / 耗时 ${formatHoursMins(data.seconds)}`;
         } else if (type === 'single') {
             const date = data.start_date_local || '';
             const dist = ((data.distance || 0) / 1000).toFixed(2);
             const name = data.name || getNameByTime(date);
             let weatherStr = '';
             if (weather) {
-                currentActiveRunWeatherStr = weatherStr = `  <span style="color:#d1d1d1;"> 🌡️ ${weather.temperature_c}°C ${weather.condition}</span>`;
+                currentActiveRunWeatherStr = weatherStr = `  <span class="weather-text"> 🌡️ ${weather.temperature_c}°C ${weather.condition}</span>`;
             }
-            box.innerHTML = `<strong style="color:var(--accent-red);">${name} </strong> (${date.substring(0,10)}) &middot; ${dist} km / 配速 ${calculatePace(data.average_speed)} &middot;  ${weatherStr}`;
+            box.innerHTML = `<strong class="info-strong-red">${name} </strong> (${date.substring(0,10)}) &middot; ${dist} km / 配速 ${calculatePace(data.average_speed)} &middot;  ${weatherStr}`;
         }
     }
 
@@ -777,12 +934,13 @@
 
     function getCellColor(dist) {
         if (dist === 0) return 'transparent';
-        if (dist >= HALF_MARATHON) return '#e93342'; 
+        if (dist >= HALF_MARATHON) return 'var(--accent-red)'; 
         
-        const minOpacity = 0;
-        const maxOpacity = 0.5;
+        // Use a semi-transparent red format uniformly across light and dark modes
+        const minOpacity = 0.15;
+        const maxOpacity = 0.8;
         const opacity = minOpacity + (dist / HALF_MARATHON) * (maxOpacity - minOpacity);
-        return `rgba(255, 255, 255, ${opacity})`;
+        return `rgba(233, 51, 66, ${opacity})`;
     }
 
     function updateCalendarCard() {
@@ -855,6 +1013,11 @@
                 cell.classList.add('has-data');
                 cell.style.backgroundColor = getCellColor(cellData.dist);
                 
+                // Add specific class for > half marathon (for text color adjustment)
+                if (cellData.dist >= HALF_MARATHON) {
+                    cell.classList.add('is-long-run');
+                }
+                
                 const distStr = `${cellData.dist.toFixed(2)}`;
                 cell.innerHTML = `<div>${i}</div><div class="dist">${distStr}</div>`;
                 
@@ -876,14 +1039,19 @@
     function renderYearChart(monthMap) {
         if (calChartInstance) { calChartInstance.destroy(); }
         const ctx = document.getElementById('cal-year-chart').getContext('2d');
+        const theme = document.documentElement.getAttribute('data-theme') || 'dark';
         
+        const barColor = theme === 'light' ? '#d1d5db' : '#3F3F46';
+        const gridColor = theme === 'light' ? '#f3f4f6' : '#2a2a2a';
+        const tickColor = theme === 'light' ? '#6b7280' : '#888';
+
         calChartInstance = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
                 datasets: [{
                     data: monthMap.map(d => d === 0 ? null : d),
-                    backgroundColor: '#3F3F46',
+                    backgroundColor: barColor,
                     borderRadius: 4,
                     barPercentage: 0.4
                 }]
@@ -896,8 +1064,8 @@
                     tooltip: { callbacks: { label: (c) => ` ${c.raw.toFixed(2)} km` } }
                 },
                 scales: {
-                    x: { grid: { display: false }, ticks: { color: '#888' } },
-                    y: { grid: { color: '#2a2a2a' }, border: {display: false}, ticks: { color: '#888', beginAtZero: true } }
+                    x: { grid: { display: false }, ticks: { color: tickColor } },
+                    y: { grid: { color: gridColor }, border: {display: false}, ticks: { color: tickColor, beginAtZero: true } }
                 }
             }
         });
@@ -1007,25 +1175,7 @@
             }
         });
 
-        if (currentYearFilter === 'all') {
-            filteredRuns = [...allRuns];
-        } else {
-            filteredRuns = allRuns.filter(run => run.start_date_local && run.start_date_local.startsWith(currentYearFilter));
-        }
-
-        renderMap(filteredRuns);
-        
-        let filterDist = 0;
-        let filterSecs = 0;
-        filteredRuns.forEach(r => {
-            filterDist += (r.distance || 0) / 1000;
-            filterSecs += parseMovingTime(r.moving_time);
-        });
-        updateMapInfoBox('summary', { dist: filterDist, runs: filteredRuns.length, seconds: filterSecs });
-
-        currentPage = 1;
-        renderTable();
-        updateCalendarCard();
+        applyFilters();
     }
 
     // --- Events binding ---
@@ -1095,12 +1245,61 @@
     });
     
     // ==========================================================================
+    // System Settings Logic
+    // ==========================================================================
+    const settingsModal = document.getElementById('settings-modal');
+
+    function openSettings() {
+        const theme = localStorage.getItem('theme') || 'dark';
+        document.querySelector(`input[name="setting-theme"][value="${theme}"]`).checked = true;
+
+        const centerMode = localStorage.getItem('mapCenterMode') || 'A';
+        document.querySelector(`input[name="setting-map-center"][value="${centerMode}"]`).checked = true;
+
+        document.getElementById('setting-lng').value = localStorage.getItem('mapCenterLng') || '113.3';
+        document.getElementById('setting-lat').value = localStorage.getItem('mapCenterLat') || '23.1';
+
+        document.getElementById('settings-custom-coords').style.display = (centerMode === 'B') ? 'flex' : 'none';
+        
+        settingsModal.style.display = 'flex';
+    }
+
+    document.getElementById('menu-settings').addEventListener('click', (e) => { e.preventDefault(); openSettings(); });
+    document.getElementById('mobile-menu-settings').addEventListener('click', (e) => { e.preventDefault(); openSettings(); });
+
+    document.querySelectorAll('input[name="setting-map-center"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            document.getElementById('settings-custom-coords').style.display = (e.target.value === 'B') ? 'flex' : 'none';
+        });
+    });
+
+    document.getElementById('settings-close').addEventListener('click', () => {
+        settingsModal.style.display = 'none';
+    });
+
+    document.getElementById('settings-save').addEventListener('click', () => {
+        const theme = document.querySelector('input[name="setting-theme"]:checked').value;
+        const centerMode = document.querySelector('input[name="setting-map-center"]:checked').value;
+        const lng = document.getElementById('setting-lng').value;
+        const lat = document.getElementById('setting-lat').value;
+
+        localStorage.setItem('theme', theme);
+        localStorage.setItem('mapCenterMode', centerMode);
+        localStorage.setItem('mapCenterLng', lng);
+        localStorage.setItem('mapCenterLat', lat);
+
+        applyTheme(theme);
+        applyFilters(); 
+        
+        settingsModal.style.display = 'none';
+    });
+
+    // ==========================================================================
     // Poster (Share Card) Logic
     // ==========================================================================
     const posterModal = document.getElementById('poster-modal');
     const posterContent = document.getElementById('poster-content');
     
-    // 为预览海报渲染专属路线地图
     function renderPosterRoute(run) {
         if (!run || !run._cachedLatlngs) return;
         let geojsonCoords = run._cachedLatlngs.map(coord => [coord[1], coord[0]]);
@@ -1121,7 +1320,6 @@
                 'type': 'line',
                 'source': sourceId,
                 'layout': { 'line-join': 'round', 'line-cap': 'round' },
-                // 海报上的线适当加粗以凸显效果
                 'paint': { 'line-color': '#e93342', 'line-width': 3, 'line-opacity': 0.9 }
             });
         }
@@ -1135,17 +1333,14 @@
         posterMap.fitBounds(bounds, { padding: 40, animate: false });
     }
     
-    // 打开海报弹窗
     document.getElementById('export-btn').addEventListener('click', () => {
         if (!currentSingleRun) return;
 
-        // 1. 填充动态数据 
         const dateStr = currentSingleRun.start_date_local || '';
 		const [datePart, timePart] = dateStr.split(" ")
 		const date = new Date(datePart);
 		const shortWeekDay = new Intl.DateTimeFormat('zh-CN', { weekday: 'short' }).format(date);
 		const dateStrWeekday = `${datePart} ${shortWeekDay} ${timePart}`;
-        // 修复1：不再使用容易导致截断的 substring，直接替换连字符为斜杠展示全时段
         document.getElementById('poster-date').innerText = dateStrWeekday.replace(/-/g, '/');
         document.getElementById('poster-name').innerText = currentSingleRun.name || getNameByTime(dateStr);
 		document.getElementById('poster-weather').innerHTML = currentActiveRunWeatherStr || '';
@@ -1158,53 +1353,51 @@
         const moVs = document.getElementById('monthly-vs-container').innerText;
         document.getElementById('poster-month-stat').innerHTML = `本月 ${moDist} km <span>较上月同期 ${moVs}</span>`;
 
-        // 距离切分
         const distKm = (currentSingleRun.distance / 1000).toFixed(2);
         const distParts = distKm.split('.');
         document.querySelector('#poster-distance .int').innerText = distParts[0];
         document.querySelector('#poster-distance .dec').innerText = distParts[1];
 
-        // 底部数据
         document.getElementById('poster-time').innerText = formatDuration(currentSingleRun.moving_time);
         document.getElementById('poster-pace').innerText = calculatePace(currentSingleRun.average_speed);
         document.getElementById('poster-hr').innerText = currentSingleRun.average_heartrate ? Math.round(currentSingleRun.average_heartrate) : '-';
 
-        // 显示弹窗
         posterModal.style.display = 'flex';
 
-        // 修复3：构建并展示海报专属的可交互 MapLibre 实例
-        if (!posterMap) {
-            posterMap = new maplibregl.Map({
-                container: 'poster-map',
-                style: 'https://tiles.openfreemap.org/styles/dark',
-                preserveDrawingBuffer: true, // 重要：确保之后截图功能正常
-                attributionControl: false,
-                interactive: true 
-            });
-            posterMap.on('load', () => {
-                renderPosterRoute(currentSingleRun);
-            });
-        } else {
-            renderPosterRoute(currentSingleRun);
+        // Destroy and cleanly re-init the map to sync with the current active theme
+        const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+        const mapStyle = theme === 'light' ? 'https://tiles.openfreemap.org/styles/liberty' : 'https://tiles.openfreemap.org/styles/dark';
+
+        if (posterMap) {
+            posterMap.remove();
+            posterMap = null;
         }
+
+        posterMap = new maplibregl.Map({
+            container: 'poster-map',
+            style: mapStyle, 
+            preserveDrawingBuffer: true, 
+            attributionControl: false,
+            interactive: true 
+        });
         
-        // 确保地图能在新显示的容器尺寸中自我校正
+        posterMap.on('load', () => {
+            renderPosterRoute(currentSingleRun);
+        });
+        
         setTimeout(() => posterMap.resize(), 100);
     });
 
-    // 关闭弹窗
     document.getElementById('poster-close').addEventListener('click', () => {
         posterModal.style.display = 'none';
     });
 
-    // 渲染及下载海报
     document.getElementById('poster-download').addEventListener('click', () => {
         const btn = document.getElementById('poster-download');
         const originalText = btn.innerText;
         btn.innerText = '生成中...';
         btn.disabled = true;
 
-        // 修复4：严格的 WYSIWYG —— 先将底层 Map 的 WebGL Canvas 生成临时图片顶替，保证 html2canvas 百分百准确捕捉地图
         const canvasEl = posterMap.getCanvas();
         const mapDataUrl = canvasEl.toDataURL('image/png');
         
@@ -1220,13 +1413,14 @@
         
         const posterMapContainer = document.getElementById('poster-map');
         posterMapContainer.appendChild(tempImg);
-        // 暂时隐藏原 canvas 以防干扰
         canvasEl.style.display = 'none';
+
+        const theme = document.documentElement.getAttribute('data-theme') || 'dark';
 
         html2canvas(document.getElementById('poster-content'), {
             useCORS: true, 
             scale: 2, 
-            backgroundColor: '#111'
+            backgroundColor: theme === 'light' ? '#f0f2f5' : '#111'
         }).then(canvas => {
             const link = document.createElement('a');
             const dateFmt = currentSingleRun.start_date_local.substring(0,10);
@@ -1234,7 +1428,6 @@
             link.href = canvas.toDataURL('image/png');
             link.click();
             
-            // 生成后进行清理工作
             tempImg.remove();
             canvasEl.style.display = '';
             
