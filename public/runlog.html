@@ -158,7 +158,16 @@
     .filters::-webkit-scrollbar { display: none; } 
     .filter-btn { flex-shrink: 0; background-color: var(--btn-bg); color: var(--text-muted); border: none; padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.2s; }
     .filter-btn.active { background-color: var(--accent-color); color: white; }
-
+    .filter-wrapper { position: relative; display: inline-flex; align-items: center; flex-shrink: 0; margin-right: 4px; }
+    .filter-icon { position: absolute; left: 10px; pointer-events: none; color: var(--text-muted); width: 14px; height: 14px; z-index: 1; }
+    .filter-select {
+        flex-shrink: 0; background-color: var(--btn-bg); color: var(--text-muted);
+        border: 1px solid transparent; padding: 6px 12px 6px 28px; border-radius: 20px;
+        font-size: 12px; cursor: pointer; outline: none; appearance: auto; transition: all 0.2s;
+    }
+    .filter-select:hover { color: var(--text-main); }
+    .filter-select:focus { border-color: var(--accent-color); }
+    .filter-select option { background-color: var(--card-bg); color: var(--text-main); }
     .table-container { flex: 1; overflow-y: auto; min-height: 0; scroll-behavior: smooth; }
     .table-container::-webkit-scrollbar { width: 4px; }
     .table-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
@@ -424,6 +433,14 @@
                 </div>
 
                 <div class="filters" id="year-filters">
+                    <div class="filter-wrapper">
+                        <svg class="filter-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/></svg>
+                        <select id="type-filter" class="filter-select">
+                            <option value="all">全部类型</option>
+                            <option value="race">比赛</option>
+                            <option value="track">运动场</option>
+                        </select>
+                    </div>				
                     <button class="filter-btn active" data-year="all">All</button>
                     <button class="filter-btn" data-year="2026">2026</button>
                     <button class="filter-btn" data-year="2025">2025</button>
@@ -637,7 +654,8 @@
     
     let currentYearFilter = 'all';
     let currentMonthFilter = null; 
-
+	let currentTypeFilter = 'all';
+	
     let currentActiveRunId = null;
 	let currentActiveRunWeatherStr = null;
     let currentSingleRun = null; 
@@ -828,7 +846,7 @@
         } else if (type === 'single') {
             const date = data.start_date_local || '';
             const dist = ((data.distance || 0) / 1000).toFixed(2);
-            const name = data.name || getNameByTime(date);
+            const name = (data.race && data.race.race_name) ? data.race.race_name : (data.name || getNameByTime(date));
             let weatherHtml = '';
             
             if (weather) {
@@ -947,7 +965,7 @@
     }
 
     async function fetchData() {
-        const URL = 'https://run.linwn.net/data/activities.json';
+        const URL = 'https://run.linwn.net/data/activities_tagged.json';
         try {
             const cache = await caches.open('run-data-cache');
             const cachedResponse = await cache.match(URL);
@@ -1191,7 +1209,7 @@
             const distKm = (run.distance / 1000).toFixed(2);
             const pace = calculatePace(run.average_speed);
             const duration = formatDuration(run.moving_time);
-            const name = run.name || getNameByTime(run.start_date_local);
+            const name = (run.race && run.race.race_name) ? run.race.race_name : (run.name || getNameByTime(run.start_date_local));
             const hr = run.average_heartrate ? Math.round(run.average_heartrate) : '-';
 
             const tr = document.createElement('tr');
@@ -1237,20 +1255,33 @@
         document.getElementById('showing-text').innerText = `Showing ${showStart}-${showEnd} of ${filteredRuns.length}`;
     }
 
-    function applyFilters(skipMapRender = false) {
+	function applyFilters(skipMapRender = false) {
+        let tempRuns = [];
+        
+        // 1. 年月维度过滤
         if (currentMonthFilter) {
-            filteredRuns = allRuns.filter(run => run.start_date_local && run.start_date_local.startsWith(currentMonthFilter));
+            tempRuns = allRuns.filter(run => run.start_date_local && run.start_date_local.startsWith(currentMonthFilter));
         } else if (currentYearFilter === 'all') {
-            filteredRuns = [...allRuns];
+            tempRuns = [...allRuns];
         } else {
-            filteredRuns = allRuns.filter(run => run.start_date_local && run.start_date_local.startsWith(currentYearFilter));
+            tempRuns = allRuns.filter(run => run.start_date_local && run.start_date_local.startsWith(currentYearFilter));
         }
 
+        // 2. 类型维度过滤 (新增逻辑)
+        if (currentTypeFilter === 'race') {
+            filteredRuns = tempRuns.filter(run => run.race != null);
+        } else if (currentTypeFilter === 'track') {
+            filteredRuns = tempRuns.filter(run => run.subtype === 'track');
+        } else {
+            filteredRuns = tempRuns;
+        }
+
+        // --- 以下保持原代码不变 ---
         if (!skipMapRender) {
             renderMap(filteredRuns);
         }
         
-        isTodayMode = false; // 大范围过滤默认非单日模式
+        isTodayMode = false; 
         
         let filterDist = 0;
         let filterSecs = 0;
@@ -1412,7 +1443,10 @@
             applyFilters();
         });
     });
-
+    document.getElementById('type-filter').addEventListener('change', (e) => {
+        currentTypeFilter = e.target.value;
+        applyFilters();
+    });
     document.getElementById('prev-page').addEventListener('click', () => {
         if (currentPage > 1) { currentPage--; renderTable(); }
     });
@@ -1546,7 +1580,7 @@
 		const shortWeekDay = new Intl.DateTimeFormat('zh-CN', { weekday: 'short' }).format(date);
 		const dateStrWeekday = `${datePart} ${shortWeekDay} ${timePart}`;
         document.getElementById('poster-date').innerText = dateStrWeekday.replace(/-/g, '/');
-        document.getElementById('poster-name').innerText = currentSingleRun.name || getNameByTime(dateStr);
+        document.getElementById('poster-name').innerText = (currentSingleRun.race && currentSingleRun.race.race_name) ? currentSingleRun.race.race_name : (currentSingleRun.name || getNameByTime(dateStr));
 		
         document.getElementById('poster-weather').innerHTML = currentActiveRunWeatherStr || '';
 
