@@ -689,8 +689,6 @@ def main():
         }
         for race in races
     }
-    for race in races:
-        print(race)
     for activity in activities:
         run_id = activity.get("run_id")
 
