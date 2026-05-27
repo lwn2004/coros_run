@@ -339,7 +339,7 @@
         th { position: sticky; z-index: 99; }
         .chart-card { height: auto; flex: none; min-height: 400px; order: 3;}
         
-        .mobile-bottom-menu { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background-color: var(--mobile-menu-bg); border-top: 1px solid var(--border-color); justify-content: space-around; padding: 10px 0; padding-bottom: max(env(safe-area-inset-bottom, 10px)); z-index: 1000; transition: background-color 0.3s; }
+        .mobile-bottom-menu { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background-color: var(--mobile-menu-bg); border-top: 1px solid var(--border-color); justify-content: space-around; padding: 10px 0; padding-bottom: max(env(safe-area-inset-bottom), 10px); z-index: 1000; transition: background-color 0.3s; }
         .mobile-menu-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); text-decoration: none; font-size: 10px; transition: color 0.2s;}
         .mobile-menu-item.active { color: var(--accent-color); }
         .mobile-menu-item svg { width: 22px; height: 22px; fill: currentColor; }
