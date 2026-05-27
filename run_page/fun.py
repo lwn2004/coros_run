@@ -671,8 +671,33 @@ def main():
     output_file = os.path.join(parent, "public", "fun.html")
     bg_file = os.path.join(parent, "public", "images", "sharecardbg.bak.png")
     sharecard_file = os.path.join(parent, "public", "images", "card.png")
+    race_file = os.path.join(parent, "public", "data", "race.json")
+    activities_tagged_file = os.path.join(parent, "public", "data", "activities_tagged.json")
 
     setup_locale()
+    with open(activities_file, "r", encoding="utf-8") as f:
+        activities = json.load(f)
+
+    with open(race_file, "r", encoding="utf-8") as f:
+        races = json.load(f)
+
+    race_map = {
+        race["run_id"]: {
+            "race_name": race["race_name"],
+            "race_type": race["race_type"],
+            "official_time": race["official_time"]
+        }
+        for race in races
+    }
+
+    for activity in activities:
+        run_id = activity.get("run_id")
+
+        if run_id in race_map:
+            activity["race"] = race_map[run_id]
+
+    with open(activities_tagged_file, "w", encoding="utf-8") as f:
+        json.dump(activities, f, ensure_ascii=False, indent=2)
 
     all_runs, fastest_run = load_run_data(runs_file)
     if not all_runs:
