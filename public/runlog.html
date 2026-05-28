@@ -314,6 +314,17 @@
     .settings-input:focus { border-color: var(--accent-color); }
     .color-dot { display: inline-block; width: 16px; height: 16px; border-radius: 50%; vertical-align: middle; }
 
+    /* Prediction Page Specific */
+    .prediction-metric-card {
+        flex: 1; min-width: 120px; background: var(--btn-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--border-color);
+    }
+    .prediction-metric-highlight {
+        flex: 1; min-width: 180px; background: var(--active-row-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--accent-color);
+    }
+    .echarts-container {
+        position: relative; flex: 1; width: 100%; min-height: 350px;
+    }
+
     /* ==========================================================================
        Mobile Responsive Adaptations
        ========================================================================== */
@@ -355,11 +366,16 @@
         
         .poster-content { transform: scale(0.85); margin-top: -30px; }
         #btn-back-today { bottom: 16px; right: 16px; padding: 6px 12px; font-size: 12px; }
+
+        /* Prediction Mobile */
+        .prediction-metric-card, .prediction-metric-highlight { min-width: 100%; }
+        #prediction-page { padding: 0 !important; }
     }
 </style>
 
 <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
 
 <script>
     const savedTheme = localStorage.getItem('theme') || 'dark';
@@ -384,7 +400,7 @@
     <div class="logo">RUN<span>.LOG</span></div>
     <nav class="desktop-menu">
         <a href="#" class="active" id="menu-home">首页</a>
-        <a href="#">轨迹墙</a>
+        <a href="#" id="menu-prediction">成绩预测</a>
         <a href="#">热力图</a>
         <a href="#">赛事记录</a>
         <a href="#" id="menu-settings">系统设置</a>
@@ -524,6 +540,48 @@
         </div>
     </div>
 
+    <div class="main-layout" id="prediction-page" style="display: none; flex-direction: column; gap: 16px; padding: 0 1.5rem; overflow-y: auto;">
+        <div class="activity-section" style="flex: none; height: auto;">
+            <div class="activity-title" style="margin-bottom: 12px;">马拉松成绩预测 (Tanda 模型)</div>
+            <div id="prediction-loading" style="color: var(--text-muted); font-size: 14px; padding: 20px 0;">正在分析您过去 8 周的训练数据...</div>
+            
+            <div id="prediction-content" style="display: none;">
+                <div style="font-size: 14px; line-height: 1.6; color: var(--text-main);">
+                    基于 <a href="#" style="color: var(--accent-color); text-decoration: none;">Giovanni Tanda (2011)</a> 的实证研究算法，结合您最近 8 周的训练强度与跑量，为您预测全马成绩。
+                    
+                    <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-top: 16px; margin-bottom: 16px;">
+                        <div class="prediction-metric-card">
+                            <span style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 600; letter-spacing: 1px;">近 8 周均跑量</span>
+                            <div style="font-size: 24px; font-weight: 700; color: var(--text-main);"><span id="pred-weekly-dist">0.0</span> <span style="font-size: 14px; color: var(--text-muted); font-weight: normal;">km/周</span></div>
+                        </div>
+                        
+                        <div class="prediction-metric-card">
+                            <span style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 600; letter-spacing: 1px;">近 8 周均配速</span>
+                            <div style="font-size: 24px; font-weight: 700; color: var(--text-main);"><span id="pred-avg-pace">0'00"</span> <span style="font-size: 14px; color: var(--text-muted); font-weight: normal;">/km</span></div>
+                        </div>
+                        
+                        <div class="prediction-metric-highlight">
+                            <span style="font-size: 11px; color: var(--accent-color); display: block; margin-bottom: 6px; font-weight: 600; letter-spacing: 1px;">当前预测完赛时间</span>
+                            <div style="font-size: 28px; font-weight: 800; color: var(--accent-color); font-family: monospace; letter-spacing: -0.5px;" id="pred-marathon-time">00:00:00</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 16px; flex: none;">
+            <div class="chart-card" style="padding: 20px; flex: none;">
+                <div class="card-title">马拉松预测成绩趋势 (-180天)</div>
+                <div class="echarts-container" id="tandaTrendChart" style="height: 350px;"></div>
+            </div>
+
+            <div class="chart-card" style="padding: 20px; flex: none; margin-bottom: 20px;">
+                <div class="card-title">近8周训练进展与完赛等高线</div>
+                <div class="echarts-container" id="tandaProgressionChart" style="height: 450px;"></div>
+            </div>
+        </div>
+    </div>
+
     <div class="main-layout" id="settings-page" style="display: none; justify-content: center;">
         <div class="activity-section" style="max-width: 600px; flex: none; width: 100%; padding: 32px; height: fit-content; margin-top: 16px;">
             <div class="activity-title" style="margin-bottom: 32px;">系统设置</div>
@@ -573,9 +631,9 @@
         <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
         <span>跑步记录</span>
     </a>
-    <a href="#" class="mobile-menu-item">
+    <a href="#" class="mobile-menu-item" id="mobile-menu-prediction">
         <svg viewBox="0 0 24 24"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
-        <span>轨迹墙</span>
+        <span>成绩预测</span>
     </a>
     <a href="#" class="mobile-menu-item">
         <svg viewBox="0 0 24 24"><path d="M17.5 11c0-1.88-1.5-3.5-1.5-5.5 0-2.21 1.79-4 4-4-1.55 1.55-2.5 3.67-2.5 6 0 1.66 1.34 3 3 3s3-1.34 3-3c0-.98-.38-1.87-1-2.53C21.73 6.13 22 7.53 22 9c0 2.49-2.01 4.5-4.5 4.5S13 11.49 13 9c0-1.85.9-3.5 2.33-4.52C14.15 5.61 13.5 7.24 13.5 9c0 2.76 2.24 5 5 5z"/></svg>
@@ -666,7 +724,12 @@
     let currentCalDate = new Date(); 
     let calChartInstance = null;
     
-    let isTodayMode = false; // 全局判定标志，代表当前是否处于仅查看今日的状态
+    let isTodayMode = false;
+
+    // Tanda Prediction state
+    let isPredictionLoaded = false;
+    let tandaTrendChartInstance = null;
+    let tandaProgChartInstance = null;
 
     const GOAL_TOTAL = 40000;
     const GOAL_YEARLY = 2400;
@@ -696,7 +759,12 @@
                  }
             });
         }
-        updateCalendarCard(); 
+        updateCalendarCard();
+        
+        // Update ECharts Theme Colors
+        if (isPredictionLoaded) {
+            updatePredictionPage();
+        }
     }
 
     function initMap() {
@@ -980,6 +1048,10 @@
                 if (!cachedResponse || freshData.length !== allRuns.length) {
                     await cache.put(URL, responseToCache); 
                     processAndRenderRuns(freshData);
+                    
+                    if (isPredictionLoaded) {
+                        updatePredictionPage();
+                    }
                 }
             }
         } catch (error) { console.error('Data loading failed:', error); }
@@ -1094,7 +1166,7 @@
         
         const firstDay = new Date(year, month, 1).getDay(); 
         const daysInMonth = new Date(year, month + 1, 0).getDate();
-        const totalCellsTarget = 42; // 强制渲染 6 行 x 7 列，保证高度不跳动
+        const totalCellsTarget = 42; 
 
         for (let i = 0; i < firstDay; i++) {
             grid.appendChild(createEmptyCell());
@@ -1258,7 +1330,6 @@
 	function applyFilters(skipMapRender = false) {
         let tempRuns = [];
         
-        // 1. 年月维度过滤
         if (currentMonthFilter) {
             tempRuns = allRuns.filter(run => run.start_date_local && run.start_date_local.startsWith(currentMonthFilter));
         } else if (currentYearFilter === 'all') {
@@ -1267,7 +1338,6 @@
             tempRuns = allRuns.filter(run => run.start_date_local && run.start_date_local.startsWith(currentYearFilter));
         }
 
-        // 2. 类型维度过滤 (新增逻辑)
         if (currentTypeFilter === 'race') {
             filteredRuns = tempRuns.filter(run => run.race != null);
         } else if (currentTypeFilter === 'track') {
@@ -1276,7 +1346,6 @@
             filteredRuns = tempRuns;
         }
 
-        // --- 以下保持原代码不变 ---
         if (!skipMapRender) {
             renderMap(filteredRuns);
         }
@@ -1330,7 +1399,7 @@
     document.getElementById('cal-prev').addEventListener('click', () => {
         if (currentCalMode === 'month') {
             currentCalDate.setMonth(currentCalDate.getMonth() - 1);
-            syncActivityLogToMonth(); // 桌面端联动更新
+            syncActivityLogToMonth(); 
         } else {
             currentCalDate.setFullYear(currentCalDate.getFullYear() - 1);
             syncActivityLogToYear(currentCalDate.getFullYear().toString());
@@ -1340,7 +1409,7 @@
     document.getElementById('cal-next').addEventListener('click', () => {
         if (currentCalMode === 'month') {
             currentCalDate.setMonth(currentCalDate.getMonth() + 1);
-            syncActivityLogToMonth(); // 桌面端联动更新
+            syncActivityLogToMonth(); 
         } else {
             currentCalDate.setFullYear(currentCalDate.getFullYear() + 1);
             syncActivityLogToYear(currentCalDate.getFullYear().toString());
@@ -1362,8 +1431,8 @@
         const todayRuns = allRuns.filter(r => r.start_date_local && r.start_date_local.startsWith(todayStr));
 
         if (todayRuns.length > 0) {
-            applyFilters(true); // 跳过大范围渲染，防止地图闪跳
-            isTodayMode = true; // 锁定为单日今日模式
+            applyFilters(true); 
+            isTodayMode = true; 
             
             const todayRun = todayRuns[0];
             highlightRunInTable(todayRun.run_id);
@@ -1373,8 +1442,8 @@
             
             setTimeout(() => { selectCalendarDay(todayRun.start_date_local); }, 100);
         } else {
-            applyFilters(true); // 先重置表格
-            isTodayMode = true; // 确保“今”字隐藏
+            applyFilters(true); 
+            isTodayMode = true; 
             
             renderMap([]); 
             currentSingleRun = null;
@@ -1388,7 +1457,6 @@
         checkTodayButtonStatus();
     });
 
-    // 手机端在日历上左右滑动切换月份
     let touchStartX = 0;
     let touchEndX = 0;
     const calViewMonth = document.getElementById('cal-view-month');
@@ -1424,7 +1492,7 @@
             e.target.classList.add('active');
             
             currentYearFilter = e.target.getAttribute('data-year');
-            currentMonthFilter = null; // 取消单独的月份过滤
+            currentMonthFilter = null; 
             
             if (currentYearFilter === 'all') {
                 currentCalDate = new Date();
@@ -1463,6 +1531,7 @@
     function showPage(pageId) {
         document.getElementById('dashboard-page').style.display = pageId === 'dashboard' ? 'flex' : 'none';
         document.getElementById('settings-page').style.display = pageId === 'settings' ? 'flex' : 'none';
+        document.getElementById('prediction-page').style.display = pageId === 'prediction' ? 'flex' : 'none';
         
         document.querySelectorAll('.desktop-menu a').forEach(a => a.classList.remove('active'));
         document.querySelectorAll('.mobile-menu-item').forEach(a => a.classList.remove('active'));
@@ -1474,6 +1543,14 @@
         } else if (pageId === 'settings') {
             document.getElementById('menu-settings').classList.add('active');
             document.getElementById('mobile-menu-settings').classList.add('active');
+        } else if (pageId === 'prediction') {
+            document.getElementById('menu-prediction').classList.add('active');
+            document.getElementById('mobile-menu-prediction').classList.add('active');
+            if (allRuns.length > 0) {
+                updatePredictionPage();
+            }
+            if (tandaTrendChartInstance) setTimeout(() => tandaTrendChartInstance.resize(), 100);
+            if (tandaProgChartInstance) setTimeout(() => tandaProgChartInstance.resize(), 100);
         }
     }
 
@@ -1499,6 +1576,9 @@
     document.getElementById('menu-home').addEventListener('click', (e) => { e.preventDefault(); showPage('dashboard'); });
     document.getElementById('mobile-menu-home').addEventListener('click', (e) => { e.preventDefault(); showPage('dashboard'); });
     
+    document.getElementById('menu-prediction').addEventListener('click', (e) => { e.preventDefault(); showPage('prediction'); });
+    document.getElementById('mobile-menu-prediction').addEventListener('click', (e) => { e.preventDefault(); showPage('prediction'); });
+
     document.getElementById('menu-settings').addEventListener('click', (e) => { e.preventDefault(); openSettings(); });
     document.getElementById('mobile-menu-settings').addEventListener('click', (e) => { e.preventDefault(); openSettings(); });
 
@@ -1529,6 +1609,318 @@
         applyFilters(); 
         
         showPage('dashboard');
+    });
+
+    // ==========================================================================
+    // Tanda Prediction & ECharts Logic
+    // ==========================================================================
+    function calculateTandaTime(weeklyDist, avgPaceSec) {
+        if (!weeklyDist || !avgPaceSec || weeklyDist <= 0 || avgPaceSec <= 0) return null;
+        const pm = 17.1 + 140.0 * Math.exp(-0.0053 * weeklyDist) + 0.55 * avgPaceSec;
+        return 42.195 * pm; 
+    }
+
+    function formatPredictionTime(seconds) {
+        if (!seconds) return '-';
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+        const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+        return h > 0 ? `${h}:${m}:${s}` : `${m}:${s}`;
+    }
+
+    function formatPredictionPace(decimal) {
+        const m = Math.floor(decimal);
+        const s = Math.round((decimal - m) * 60).toString().padStart(2, '0');
+        return `${m}:${s}`;
+    }
+
+    function formatLocalYYYYMMDD(dateObj) {
+        const y = dateObj.getFullYear();
+        const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const d = String(dateObj.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }
+
+    function updatePredictionPage() {
+        if (allRuns.length === 0) return;
+
+        const rawRunData = allRuns.map(r => ({
+            date: r.start_date_local,
+            distance: (r.distance || 0) / 1000,
+            duration: parseMovingTime(r.moving_time)
+        })).filter(r => r.distance > 0 && r.duration > 0);
+
+        // -- Update Top Cards (Current 8 Weeks) --
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        const dayMs = 24 * 3600 * 1000;
+        
+        let rollDist = 0, rollTime = 0;
+        rawRunData.forEach(r => {
+            const dMs = new Date(r.date.replace(/-/g, '/')).getTime();
+            if (today.getTime() - dMs <= 56 * dayMs && today.getTime() - dMs >= 0) {
+                rollDist += r.distance;
+                rollTime += r.duration;
+            }
+        });
+
+        const avgWeeklyDistanceKm = (rollDist / 56) * 7;
+        const avgPaceSecKm = rollDist > 0 ? rollTime / rollDist : 0;
+        const predictedTimeSeconds = calculateTandaTime(avgWeeklyDistanceKm, avgPaceSecKm);
+
+        document.getElementById('prediction-loading').style.display = 'none';
+        document.getElementById('prediction-content').style.display = 'block';
+
+        document.getElementById('pred-weekly-dist').innerText = avgWeeklyDistanceKm.toFixed(1);
+
+        if (avgPaceSecKm > 0) {
+            const paceMin = Math.floor(avgPaceSecKm / 60);
+            const paceSec = Math.floor(avgPaceSecKm % 60).toString().padStart(2, '0');
+            document.getElementById('pred-avg-pace').innerText = `${paceMin}'${paceSec}"`;
+        } else {
+            document.getElementById('pred-avg-pace').innerText = `-`;
+        }
+
+        if (predictedTimeSeconds && predictedTimeSeconds > 0) {
+            document.getElementById('pred-marathon-time').innerText = formatPredictionTime(predictedTimeSeconds);
+            document.getElementById('pred-marathon-time').style.fontSize = "28px";
+        } else {
+            document.getElementById('pred-marathon-time').innerText = "数据不足";
+            document.getElementById('pred-marathon-time').style.fontSize = "20px";
+        }
+
+        // -- Render ECharts --
+        renderTandaCharts(rawRunData, today, dayMs);
+        isPredictionLoaded = true;
+    }
+
+    function renderTandaCharts(rawRunData, today, dayMs) {
+        const runsMap = new Map();
+        rawRunData.forEach(run => {
+            const dStr = run.date.substring(0, 10);
+            if(!runsMap.has(dStr)) runsMap.set(dStr, []);
+            runsMap.get(dStr).push(run);
+        });
+
+        // --- Chart 1 Data: 180 Days Trend ---
+        const trendScatterData = []; 
+        const trendLineData = [];    
+
+        for (let i = 180; i >= 0; i--) {
+            const targetDate = new Date(today.getTime() - i * dayMs);
+            const targetDateStr = formatLocalYYYYMMDD(targetDate);
+            
+            const dayRuns = runsMap.get(targetDateStr) || [];
+            if (dayRuns.length > 0) {
+                let dDist = 0, dTime = 0;
+                dayRuns.forEach(r => { dDist += r.distance; dTime += r.duration; });
+                const dPace = dTime / dDist;
+                const singleDayPred = calculateTandaTime(dDist * 7, dPace);
+                if (singleDayPred) {
+                    trendScatterData.push([targetDateStr, singleDayPred]);
+                }
+            }
+
+            let rollDist = 0, rollTime = 0;
+            for (let j = 0; j < 56; j++) {
+                const pastDateStr = formatLocalYYYYMMDD(new Date(targetDate.getTime() - j * dayMs));
+                const pastRuns = runsMap.get(pastDateStr) || [];
+                pastRuns.forEach(r => { rollDist += r.distance; rollTime += r.duration; });
+            }
+            
+            if (rollDist > 0) {
+                const rollPace = rollTime / rollDist;
+                const rollPred = calculateTandaTime((rollDist / 56) * 7, rollPace);
+                if (rollPred) {
+                    trendLineData.push([targetDateStr, rollPred]);
+                }
+            }
+        }
+
+        // --- Chart 2 Data: Progression Contours ---
+        const contourSeries = [];
+        const targetMarathonTimes = [
+            { label: '2:45', sec: 9900 }, { label: '3:00', sec: 10800 },
+            { label: '3:15', sec: 11700 }, { label: '3:30', sec: 12600 },
+            { label: '3:45', sec: 13500 }, { label: '4:00', sec: 14400 },
+            { label: '4:15', sec: 15300 }, { label: '4:30', sec: 16200 },
+            { label: '4:45', sec: 17100 }
+        ];
+
+        targetMarathonTimes.forEach(target => {
+            const pm = target.sec / 42.195;
+            const lineData = [];
+            for (let p = 3.5; p <= 7.5; p += 0.05) {
+                const paceSec = p * 60;
+                const val = (pm - 17.1 - 0.55 * paceSec) / 140.0;
+                if (val > 0 && val < 1) { 
+                    const dailyDist = -Math.log(val) / (0.0053 * 7);
+                    if (dailyDist > 0 && dailyDist <= 40) { 
+                        lineData.push([p, dailyDist]);
+                    }
+                }
+            }
+            if (lineData.length > 0) {
+                contourSeries.push({
+                    type: 'line',
+                    name: target.label,
+                    smooth: true,
+                    showSymbol: false,
+                    lineStyle: { type: 'dashed', color: '#555555', width: 1 },
+                    data: lineData,
+                    endLabel: { show: true, formatter: target.label, color: '#888' }
+                });
+            }
+        });
+
+        const recentScatterData = [];
+        const progressionLineData = [];
+        
+        const recentRunDates = [];
+        for (let i = 56; i >= 0; i--) {
+            const dStr = formatLocalYYYYMMDD(new Date(today.getTime() - i * dayMs));
+            if (runsMap.has(dStr)) recentRunDates.push({ date: dStr, daysAgo: i });
+        }
+
+        recentRunDates.forEach(runItem => {
+            const dayRuns = runsMap.get(runItem.date);
+            let dDist = 0, dTime = 0;
+            dayRuns.forEach(r => { dDist += r.distance; dTime += r.duration; });
+            const dPaceMin = (dTime / dDist) / 60;
+            
+            const opacity = Math.max(0.15, 1 - (runItem.daysAgo / 56));
+            recentScatterData.push({
+                value: [dPaceMin, dDist, runItem.date],
+                itemStyle: { color: `rgba(180, 180, 180, ${opacity})` }
+            });
+
+            let rollDist = 0, rollTime = 0;
+            const targetMs = new Date(runItem.date.replace(/-/g, '/')).getTime();
+            for (let j = 0; j < 56; j++) {
+                const pastDateStr = formatLocalYYYYMMDD(new Date(targetMs - j * dayMs));
+                const pastRuns = runsMap.get(pastDateStr) || [];
+                pastRuns.forEach(r => { rollDist += r.distance; rollTime += r.duration; });
+            }
+            if (rollDist > 0) {
+                const rollPaceMin = (rollTime / rollDist) / 60;
+                const rollDailyDist = rollDist / 56;
+                progressionLineData.push([rollPaceMin, rollDailyDist, runItem.date]);
+            }
+        });
+
+        // --- Init ECharts ---
+        if (!tandaTrendChartInstance) tandaTrendChartInstance = echarts.init(document.getElementById('tandaTrendChart'));
+        if (!tandaProgChartInstance) tandaProgChartInstance = echarts.init(document.getElementById('tandaProgressionChart'));
+
+        const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+        const accentHex = localStorage.getItem('accentColor') || '#e93342';
+        
+        const axisConfig = {
+            splitLine: { lineStyle: { color: theme === 'light' ? '#f3f4f6' : '#2a2a2a' } },
+            axisLine: { lineStyle: { color: theme === 'light' ? '#ccc' : '#666' } },
+            axisLabel: { color: theme === 'light' ? '#6b7280' : '#888' }
+        };
+
+        tandaTrendChartInstance.setOption({
+            grid: { top: 20, right: 30, bottom: 30, left: 60 },
+            tooltip: {
+                trigger: 'axis',
+                backgroundColor: theme === 'light' ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.8)',
+                textStyle: { color: theme === 'light' ? '#333' : '#fff' },
+                formatter: params => {
+                    let html = `${params[0].axisValue}<br/>`;
+                    params.forEach(p => {
+                        const seriesName = p.seriesName === '单日推演' ? '单日假设持续8周' : '实际近8周均值';
+                        html += `${p.marker} ${seriesName}: <b>${formatPredictionTime(p.value[1])}</b><br/>`;
+                    });
+                    return html;
+                }
+            },
+            xAxis: { type: 'time', ...axisConfig },
+            yAxis: {
+                type: 'value',
+                scale: true,
+                inverse: true, 
+                axisLabel: { formatter: val => formatPredictionTime(val), color: axisConfig.axisLabel.color },
+                splitLine: axisConfig.splitLine
+            },
+            series: [
+                {
+                    name: '单日推演',
+                    type: 'scatter',
+                    symbolSize: 4,
+                    itemStyle: { color: theme === 'light' ? '#aaa' : '#555' },
+                    data: trendScatterData
+                },
+                {
+                    name: '近8周滚动推演',
+                    type: 'line',
+                    smooth: true,
+                    showSymbol: false,
+                    lineStyle: { width: 3, color: accentHex },
+                    data: trendLineData
+                }
+            ]
+        }, true);
+
+        tandaProgChartInstance.setOption({
+            grid: { top: 30, right: 50, bottom: 40, left: 50 },
+            tooltip: {
+                backgroundColor: theme === 'light' ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.8)',
+                textStyle: { color: theme === 'light' ? '#333' : '#fff' },
+                formatter: params => {
+                    if(params.seriesName === '单日散点' || params.seriesName === '8周均值路径') {
+                        const dateStr = params.value[2];
+                        const pace = formatPredictionPace(params.value[0]);
+                        const dist = params.value[1].toFixed(2);
+                        return `<b>${dateStr}</b><br/>${params.seriesName}<br/>配速: ${pace} /km<br/>跑量: ${dist} km`;
+                    }
+                    return `${params.seriesName} 完赛等高线`;
+                }
+            },
+            xAxis: {
+                type: 'value',
+                name: '配速 (min/km)',
+                nameLocation: 'middle',
+                nameGap: 25,
+                min: 3.5,
+                max: 7.5,
+                axisLabel: { formatter: val => formatPredictionPace(val), color: axisConfig.axisLabel.color },
+                splitLine: { show: false },
+                axisLine: axisConfig.axisLine
+            },
+            yAxis: {
+                type: 'value',
+                name: '日均跑量 (km)',
+                scale: true,
+                axisLabel: { color: axisConfig.axisLabel.color },
+                splitLine: axisConfig.splitLine,
+                axisLine: axisConfig.axisLine
+            },
+            series: [
+                ...contourSeries,
+                {
+                    name: '单日散点',
+                    type: 'scatter',
+                    symbolSize: 6,
+                    data: recentScatterData
+                },
+                {
+                    name: '8周均值路径',
+                    type: 'line',
+                    symbol: 'circle',
+                    symbolSize: 6,
+                    itemStyle: { color: accentHex },
+                    lineStyle: { width: 2, color: accentHex },
+                    data: progressionLineData
+                }
+            ]
+        }, true);
+    }
+
+    window.addEventListener('resize', () => {
+        if (tandaTrendChartInstance) tandaTrendChartInstance.resize();
+        if (tandaProgChartInstance) tandaProgChartInstance.resize();
     });
 
     // ==========================================================================
@@ -1576,7 +1968,7 @@
 
         const dateStr = currentSingleRun.start_date_local || '';
 		const [datePart, timePart] = dateStr.split(" ")
-		const date = new Date(datePart);
+		const date = new Date(datePart.replace(/-/g, '/'));
 		const shortWeekDay = new Intl.DateTimeFormat('zh-CN', { weekday: 'short' }).format(date);
 		const dateStrWeekday = `${datePart} ${shortWeekDay} ${timePart}`;
         document.getElementById('poster-date').innerText = dateStrWeekday.replace(/-/g, '/');
