@@ -369,9 +369,14 @@
         #btn-back-today { bottom: 16px; right: 16px; padding: 6px 12px; font-size: 12px; }
 
         /* Prediction Mobile */
-        .prediction-metric-card, .prediction-metric-highlight { min-width: 100%; }
-        #prediction-page { padding: 0 !important; }
 		#tandaProgressionChart { touch-action: none; }
+        .prediction-metric-card, .prediction-metric-highlight { min-width: 100%; }
+        /* 手机端恢复纵向滚动 */
+        #prediction-page { padding: 0 !important; overflow-y: auto !important; height: auto; }
+        /* 手机端改回上下堆叠，不再伸缩填充高度 */
+        .prediction-charts-wrapper { flex-direction: column !important; flex: none !important; }
+        /* 手机端给图表重新分配固定高度，避免图表被压扁 */
+        .prediction-charts-wrapper .chart-card { flex: none !important; height: 400px !important; margin-bottom: 16px; }
     }
 </style>
 
@@ -542,14 +547,14 @@
         </div>
     </div>
 
-    <div class="main-layout" id="prediction-page" style="display: none; flex-direction: column; gap: 16px; padding: 0 1.5rem; overflow-y: auto;">
-        <div class="activity-section" id="prediction-description" style="flex: none; height: auto;">
+    <div class="main-layout" id="prediction-page" style="display: none; flex-direction: column; gap: 16px; padding: 0 1.5rem; min-height: 0;">
+        <div id="prediction-description" class="activity-section" style="flex: none; height: auto;">
             <div class="activity-title" style="margin-bottom: 12px;">马拉松成绩预测 (Tanda 模型)</div>
-            <div id="prediction-loading" style="color: var(--text-muted); font-size: 14px; padding: 20px 0;">正在分析您过去 8 周的训练数据...</div>
+            <div id="prediction-loading" style="color: var(--text-muted); font-size: 14px; padding: 20px 0;">正在分析过去 8 周的训练数据...</div>
             
             <div id="prediction-content" style="display: none;">
                 <div style="font-size: 14px; line-height: 1.6; color: var(--text-main);">
-                    基于 <a href="#" style="color: var(--accent-color); text-decoration: none;">Giovanni Tanda (2011)</a> 的实证研究算法，结合您最近 8 周的训练强度与跑量，为您预测全马成绩。
+                    基于 <a href="https://rua.ua.es/bitstream/10045/18930/1/jhse_Vol_VI_N_III_511-520.pdf" style="color: var(--accent-color); text-decoration: none;">Giovanni Tanda (2011)</a> 的实证研究算法，结合最近 8 周的训练强度与跑量，预测全马成绩。
                     
                     <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-top: 16px; margin-bottom: 16px;">
                         <div class="prediction-metric-card">
@@ -571,19 +576,19 @@
             </div>
         </div>
 
-        <div style="display: flex; flex-direction: column; gap: 16px; flex: none;">
-            <div class="chart-card" style="padding: 20px; flex: none;">
-                <div class="card-title">马拉松预测成绩趋势 (-180天)</div>
-                <div class="echarts-container" id="tandaTrendChart" style="height: 350px;"></div>
+        <div class="prediction-charts-wrapper" style="display: flex; flex-direction: row; gap: 16px; flex: 1; min-height: 0;">
+            <div class="chart-card" style="padding: 20px; flex: 1; display: flex; flex-direction: column; min-height: 0;">
+                <div class="card-title" style="flex: none;">马拉松预测成绩趋势 (-180天)</div>
+                <div class="echarts-container" id="tandaTrendChart" style="flex: 1; width: 100%; min-height: 0;"></div>
             </div>
 
-            <div class="chart-card" style="padding: 20px; flex: none; margin-bottom: 20px;">
-                <div class="card-title">近8周训练进展与完赛等高线</div>
-                <div class="echarts-container" id="tandaProgressionChart" style="height: 450px;"></div>
+            <div class="chart-card" style="padding: 20px; flex: 1; display: flex; flex-direction: column; min-height: 0;">
+                <div class="card-title" style="flex: none;">近8周训练进展与完赛等高线</div>
+                <div class="echarts-container" id="tandaProgressionChart" style="flex: 1; width: 100%; min-height: 0;"></div>
             </div>
         </div>
     </div>
-
+	
     <div class="main-layout" id="settings-page" style="display: none; justify-content: center;">
         <div class="activity-section" style="max-width: 600px; flex: none; width: 100%; padding: 32px; height: fit-content; margin-top: 16px;">
             <div class="activity-title" style="margin-bottom: 32px;">系统设置</div>
