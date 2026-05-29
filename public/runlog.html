@@ -2199,19 +2199,22 @@
         const mediaContainer = document.getElementById('detail-media-gallery');
         mediaContainer.innerHTML = '';
         if (race.medias && race.medias.length > 0) {
-            race.medias.forEach(mediaUrl => {
-                const isVideo = mediaUrl.match(/\.(mp4|webm|mov)$/i);
+            race.medias.forEach(item => {
+              const url = item.mediaUrl;
+              const isVideo = url.match(/\.(mp4|webm|mov)$/i);
+            //race.medias.forEach(mediaUrl => {
+                //const isVideo = mediaUrl.match(/\.(mp4|webm|mov)$/i);
                 if (isVideo) {
                     const video = document.createElement('video');
-                    video.src = mediaUrl;
+                    video.src = url;
                     video.controls = true;
                     video.className = 'media-item';
                     mediaContainer.appendChild(video);
                 } else {
                     const img = document.createElement('img');
-                    img.src = mediaUrl;
+                    img.src = url;
                     img.className = 'media-item';
-                    img.onclick = () => window.open(mediaUrl, '_blank');
+                    img.onclick = () => window.open(url, '_blank');
                     mediaContainer.appendChild(img);
                 }
             });
