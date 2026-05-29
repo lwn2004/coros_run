@@ -682,13 +682,10 @@ def main():
         races = json.load(f)
 
     race_map = {
-        race["run_id"]: {
-            "race_name": race["race_name"],
-            "race_type": race["race_type"],
-            "official_time": race["official_time"]
-        }
+        race["run_id"]: {k: v for k, v in race.items() if k != "run_id"}
         for race in races
     }
+  
     for activity in activities:
         run_id = activity.get("run_id")
 
