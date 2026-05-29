@@ -236,7 +236,55 @@
     #btn-back-today:active { transform: scale(0.95); }
     [data-theme="light"] #btn-back-today { box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
 
-    .mobile-bottom-menu { display: none; }
+    /* ==========================================================================
+       赛事纪录页面 & 个人最佳(PB) 样式
+       ========================================================================== */
+    .races-wrapper { display: flex; flex-direction: column; gap: 24px; width: 100%; max-width: 1000px; margin: 0 auto; }
+    
+    /* PB Section */
+    .pb-section { margin-bottom: 10px; padding-bottom: 24px; border-bottom: 1px dashed var(--border-color); }
+    .pb-title { margin-top: 0; margin-bottom: 16px; border-bottom: none; padding-bottom: 0; font-size: 1.25rem; display: flex; align-items: center; color: var(--text-main); }
+    .pb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px; }
+    .pb-card { background: linear-gradient(145deg, var(--card-bg) 0%, var(--progress-bg) 100%); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; position: relative; overflow: hidden; }
+    .pb-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: linear-gradient(90deg, #f1c40f, #e67e22); opacity: 0.8; }
+    .pb-distance { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 600; }
+    .pb-time { font-size: 1.6rem; font-weight: bold; color: var(--text-main); margin-bottom: 8px; font-variant-numeric: tabular-nums; }
+    .pb-meta { font-size: 0.8rem; color: var(--text-dark); display: flex; justify-content: space-between; align-items: center; }
+    .pb-pace { background-color: rgba(255, 255, 255, 0.1); padding: 2px 6px; border-radius: 4px; color: var(--text-muted); }
+    [data-theme="light"] .pb-pace { background-color: rgba(0,0,0,0.05); color: var(--text-dark); }
+
+    /* Races Grid */
+    .races-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+    .race-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; cursor: pointer; transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; }
+    .race-card:hover { transform: translateY(-4px); border-color: var(--accent-color); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+    [data-theme="light"] .race-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+    .race-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .race-card-title { font-size: 1.2rem; font-weight: 600; color: var(--text-main); margin: 0 0 4px 0; }
+    .race-badge { background-color: var(--active-row-bg); color: var(--accent-color); padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; display: inline-block; white-space: nowrap; }
+    .race-card-time { font-size: 2rem; font-weight: bold; color: var(--text-main); margin: 10px 0; font-variant-numeric: tabular-nums; }
+    .race-card-meta { font-size: 0.85rem; color: var(--text-muted); display: flex; justify-content: space-between; }
+
+    /* Race Detail View */
+    .back-btn { background: transparent; border: none; color: var(--accent-color); font-size: 1rem; cursor: pointer; display: flex; align-items: center; gap: 6px; padding: 0; margin-bottom: 24px; font-weight: 600; transition: opacity 0.2s; }
+    .back-btn:hover { opacity: 0.8; }
+    .detail-title { font-size: 2rem; margin: 0 0 10px 0; color: var(--text-main); }
+    .tags-container { display: flex; gap: 12px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+    .race-date { color: var(--text-muted); font-size: 0.95rem; }
+    .race-loc { color: var(--text-dark); font-size: 0.9rem; margin: 0 0 24px 0; }
+    
+    .stats-grid-detail { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; margin-bottom: 30px; }
+    .stat-card-detail { background-color: var(--card-bg); border-radius: 12px; padding: 16px; border: 1px solid var(--border-color); }
+    .stat-label-detail { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 600; letter-spacing: 0.5px; }
+    .stat-value-detail { font-size: 1.5rem; font-weight: bold; color: var(--text-main); font-variant-numeric: tabular-nums;}
+    .stat-value-detail.highlight { color: var(--accent-color); }
+    .stat-value-detail .unit { font-size: 0.9rem; font-weight: normal; color: var(--text-muted); }
+    
+    .section-title { font-size: 1.1rem; color: var(--text-main); margin: 30px 0 16px 0; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; font-weight: 600; }
+    .race-map-container { width: 100%; height: 350px; border-radius: 16px; background-color: var(--progress-bg); overflow: hidden; border: 1px solid var(--border-color); }
+    
+    .media-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px; margin-bottom: 40px; }
+    .media-item { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 12px; cursor: pointer; background-color: var(--progress-bg); border: 1px solid var(--border-color); transition: transform 0.2s ease; }
+    .media-item:hover { transform: scale(1.02); }
 
     /* ==========================================================================
        Poster Generation Styles
@@ -328,8 +376,9 @@
     /* ==========================================================================
        Mobile Responsive Adaptations
        ========================================================================== */
+    .mobile-bottom-menu { display: none; }
     @media (max-width: 1024px) {
-        body { height: auto; overflow: auto; padding: 12px; padding-bottom: 70px; }
+        body { height: auto; overflow: auto; padding: 12px; padding-bottom: 80px; }
         .top-nav-container { display: none; }
         .container { height: auto; overflow: visible; }
         .main-layout { flex-direction: column; height: auto; overflow: visible; gap: 16px; }
@@ -368,14 +417,12 @@
         .poster-content { transform: scale(0.85); margin-top: -30px; }
         #btn-back-today { bottom: 16px; right: 16px; padding: 6px 12px; font-size: 12px; }
 
-        /* Prediction Mobile */
+        /* Prediction & Races Mobile */
         .prediction-metric-card, .prediction-metric-highlight { min-width: 100%; }
-        /* 手机端恢复纵向滚动 */
-        #prediction-page { padding: 0 !important; overflow-y: auto !important; height: auto; }
-        /* 手机端改回上下堆叠，不再伸缩填充高度 */
+        #prediction-page, #races-page { padding: 0 !important; overflow-y: visible !important; height: auto !important; }
         .prediction-charts-wrapper { flex-direction: column !important; flex: none !important; }
-        /* 手机端给图表重新分配固定高度，避免图表被压扁 */
         .prediction-charts-wrapper .chart-card { flex: none !important; height: 400px !important; margin-bottom: 16px; }
+		
     }
 </style>
 
@@ -408,7 +455,7 @@
         <a href="#" class="active" id="menu-home">首页</a>
         <a href="#" id="menu-prediction">成绩预测</a>
         <a href="#">热力图</a>
-        <a href="#">赛事记录</a>
+        <a href="#" id="menu-races">赛事纪录</a>
         <a href="#" id="menu-settings">系统设置</a>
     </nav>
 </div>
@@ -546,7 +593,7 @@
         </div>
     </div>
 
-    <div class="main-layout" id="prediction-page" style="display: none; flex-direction: column; gap: 16px; padding: 0 1.5rem; min-height: 0;">
+    <div class="main-layout" id="prediction-page" style="display: none; flex-direction: column; gap: 16px; padding: 0 1.5rem; min-height: 0; overflow-y: auto; height: 100%;">
         <div id="prediction-description" class="activity-section" style="flex: none; height: auto;">
             <div class="activity-title" style="margin-bottom: 12px;">马拉松成绩预测 (Tanda 模型)</div>
             <div id="prediction-loading" style="color: var(--text-muted); font-size: 14px; padding: 20px 0;">正在分析过去 8 周的训练数据...</div>
@@ -584,6 +631,70 @@
             <div class="chart-card" style="padding: 20px; flex: 1; display: flex; flex-direction: column; min-height: 0;">
                 <div class="card-title" style="flex: none;">近8周训练进展与完赛等高线</div>
                 <div class="echarts-container" id="tandaProgressionChart" style="flex: 1; width: 100%; min-height: 0;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-layout" id="races-page" style="display: none; flex-direction: column; gap: 16px; padding: 0 1.5rem; overflow-y: auto; height: 100%;">
+        <div class="races-wrapper">
+            <div id="races-list-view">
+                
+                <div class="pb-section">
+                    <h3 class="section-title pb-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20" style="color: #f1c40f; margin-right: 6px; vertical-align: text-bottom;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                        个人最佳 (PB)
+                    </h3>
+                    <div id="pb-grid" class="pb-grid">
+                        <p style="color: var(--text-muted); font-size: 14px;">正在加载...</p>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px;">
+                    <h2 class="activity-title" style="margin: 0;">所有赛事</h2>
+                    <span id="races-summary" style="color: var(--text-muted); font-size: 13px;">共参赛 0 场</span>
+                </div>
+                <div id="races-grid" class="races-grid"></div>
+            </div>
+
+            <div id="race-detail-view" style="display: none;">
+                <button class="back-btn" onclick="closeRaceDetail()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                    返回列表
+                </button>
+
+                <div class="race-detail-header">
+                    <h2 id="detail-race-name" class="detail-title">赛事名称</h2>
+                    <div class="tags-container">
+                        <span id="detail-race-type" class="race-badge"></span>
+                        <span id="detail-race-date" class="race-date"></span>
+                    </div>
+                    <p id="detail-race-loc" class="race-loc"></p>
+                </div>
+
+                <div class="stats-grid-detail">
+                    <div class="stat-card-detail">
+                        <div class="stat-label-detail">官方成绩</div>
+                        <div class="stat-value-detail highlight" id="detail-official-time">--:--:--</div>
+                    </div>
+                    <div class="stat-card-detail">
+                        <div class="stat-label-detail">实际距离</div>
+                        <div class="stat-value-detail"><span id="detail-distance">0</span> <span class="unit">km</span></div>
+                    </div>
+                    <div class="stat-card-detail">
+                        <div class="stat-label-detail">平均配速</div>
+                        <div class="stat-value-detail"><span id="detail-pace">0'00"</span> <span class="unit">/km</span></div>
+                    </div>
+                    <div class="stat-card-detail">
+                        <div class="stat-label-detail">平均心率</div>
+                        <div class="stat-value-detail"><span id="detail-hr">0</span> <span class="unit">bpm</span></div>
+                    </div>
+                </div>
+
+                <h3 class="section-title" id="race-route">赛事路线</h3>
+                <div class="race-map-container" id="race-detail-map"></div>
+
+                <h3 class="section-title">精彩瞬间</h3>
+                <div class="media-gallery" id="detail-media-gallery"></div>
             </div>
         </div>
     </div>
@@ -645,9 +756,9 @@
         <svg viewBox="0 0 24 24"><path d="M17.5 11c0-1.88-1.5-3.5-1.5-5.5 0-2.21 1.79-4 4-4-1.55 1.55-2.5 3.67-2.5 6 0 1.66 1.34 3 3 3s3-1.34 3-3c0-.98-.38-1.87-1-2.53C21.73 6.13 22 7.53 22 9c0 2.49-2.01 4.5-4.5 4.5S13 11.49 13 9c0-1.85.9-3.5 2.33-4.52C14.15 5.61 13.5 7.24 13.5 9c0 2.76 2.24 5 5 5z"/></svg>
         <span>热力图</span>
     </a>
-    <a href="#" class="mobile-menu-item">
+    <a href="#" class="mobile-menu-item" id="mobile-menu-races">
         <svg viewBox="0 0 24 24"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>
-        <span>赛事记录</span>
+        <span>赛事纪录</span>
     </a>
     <a href="#" class="mobile-menu-item" id="mobile-menu-settings">
         <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.3-.06.62-.06.94s.02.64.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .43-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.49-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
@@ -729,13 +840,18 @@
     let currentCalMode = 'month';
     let currentCalDate = new Date(); 
     let calChartInstance = null;
-    
     let isTodayMode = false;
 
     // Tanda Prediction state
     let isPredictionLoaded = false;
     let tandaTrendChartInstance = null;
     let tandaProgChartInstance = null;
+
+    // Races / PB state
+    let pbLoaded = false;
+    let racesRendered = false;
+    let allRaceActivities = [];
+    let detailMapInstance = null;
 
     const GOAL_TOTAL = 40000;
     const GOAL_YEARLY = 2400;
@@ -755,19 +871,28 @@
         const bgOpacity = theme === 'light' ? 0.08 : 0.12;
         document.documentElement.style.setProperty('--active-row-bg', hexToRgbaFast(color, bgOpacity));
 
+        const styleUrl = theme === 'light' ? 'https://tiles.openfreemap.org/styles/liberty' : 'https://tiles.openfreemap.org/styles/dark';
+
         if (map && map.loaded()) {
-            const styleUrl = theme === 'light' ? 'https://tiles.openfreemap.org/styles/liberty' : 'https://tiles.openfreemap.org/styles/dark';
             map.setStyle(styleUrl);
-            
             map.once('styledata', () => {
                  if (map.getLayer('route-layer')) {
                      map.setPaintProperty('route-layer', 'line-color', color);
                  }
             });
         }
+
+        if (detailMapInstance && detailMapInstance.loaded()) {
+            detailMapInstance.setStyle(styleUrl);
+            detailMapInstance.once('styledata', () => {
+                 if (detailMapInstance.getLayer('detail-route-layer')) {
+                     detailMapInstance.setPaintProperty('detail-route-layer', 'line-color', color);
+                 }
+            });
+        }
+
         updateCalendarCard();
         
-        // Update ECharts Theme Colors
         if (isPredictionLoaded) {
             updatePredictionPage();
         }
@@ -1055,9 +1180,8 @@
                     await cache.put(URL, responseToCache); 
                     processAndRenderRuns(freshData);
                     
-                    if (isPredictionLoaded) {
-                        updatePredictionPage();
-                    }
+                    if (isPredictionLoaded) updatePredictionPage();
+                    if (racesRendered) renderRaceCards();
                 }
             }
         } catch (error) { console.error('Data loading failed:', error); }
@@ -1083,6 +1207,12 @@
 
     function formatDuration(timeStr) {
         if (!timeStr) return "0:00:00";
+        if (typeof timeStr === 'number') {
+            const h = Math.floor(timeStr / 3600);
+            const m = Math.floor((timeStr % 3600) / 60).toString().padStart(2, '0');
+            const s = Math.floor(timeStr % 60).toString().padStart(2, '0');
+            return h > 0 ? `${h}:${m}:${s}` : `${m}:${s}`;
+        }
         return timeStr.split('.')[0];
     }
 
@@ -1538,6 +1668,7 @@
         document.getElementById('dashboard-page').style.display = pageId === 'dashboard' ? 'flex' : 'none';
         document.getElementById('settings-page').style.display = pageId === 'settings' ? 'flex' : 'none';
         document.getElementById('prediction-page').style.display = pageId === 'prediction' ? 'flex' : 'none';
+        document.getElementById('races-page').style.display = pageId === 'races' ? 'flex' : 'none';
         
         document.querySelectorAll('.desktop-menu a').forEach(a => a.classList.remove('active'));
         document.querySelectorAll('.mobile-menu-item').forEach(a => a.classList.remove('active'));
@@ -1552,11 +1683,14 @@
         } else if (pageId === 'prediction') {
             document.getElementById('menu-prediction').classList.add('active');
             document.getElementById('mobile-menu-prediction').classList.add('active');
-            if (allRuns.length > 0) {
-                updatePredictionPage();
-            }
+            if (allRuns.length > 0) updatePredictionPage();
             if (tandaTrendChartInstance) setTimeout(() => tandaTrendChartInstance.resize(), 100);
             if (tandaProgChartInstance) setTimeout(() => tandaProgChartInstance.resize(), 100);
+        } else if (pageId === 'races') {
+            document.getElementById('menu-races').classList.add('active');
+            document.getElementById('mobile-menu-races').classList.add('active');
+            if (!pbLoaded) loadAndRenderPB();
+            if (!racesRendered && allRuns.length > 0) renderRaceCards();
         }
     }
 
@@ -1584,6 +1718,9 @@
     
     document.getElementById('menu-prediction').addEventListener('click', (e) => { e.preventDefault(); showPage('prediction'); });
     document.getElementById('mobile-menu-prediction').addEventListener('click', (e) => { e.preventDefault(); showPage('prediction'); });
+
+    document.getElementById('menu-races').addEventListener('click', (e) => { e.preventDefault(); showPage('races'); });
+    document.getElementById('mobile-menu-races').addEventListener('click', (e) => { e.preventDefault(); showPage('races'); });
 
     document.getElementById('menu-settings').addEventListener('click', (e) => { e.preventDefault(); openSettings(); });
     document.getElementById('mobile-menu-settings').addEventListener('click', (e) => { e.preventDefault(); openSettings(); });
@@ -1656,7 +1793,6 @@
             duration: parseMovingTime(r.moving_time)
         })).filter(r => r.distance > 0 && r.duration > 0);
 
-        // -- Update Top Cards (Current 8 Weeks) --
         const today = new Date();
         today.setHours(0,0,0,0);
         const dayMs = 24 * 3600 * 1000;
@@ -1695,7 +1831,6 @@
             document.getElementById('pred-marathon-time').style.fontSize = "20px";
         }
 
-        // -- Render ECharts --
         renderTandaCharts(rawRunData, today, dayMs);
         isPredictionLoaded = true;
     }
@@ -1708,7 +1843,6 @@
             runsMap.get(dStr).push(run);
         });
 
-        // --- Chart 1 Data: 180 Days Trend ---
         const trendScatterData = []; 
         const trendLineData = [];    
 
@@ -1743,7 +1877,6 @@
             }
         }
 
-        // --- Chart 2 Data: Progression Contours ---
         const contourSeries = [];
         const targetMarathonTimes = [
             { label: '2:45', sec: 9900 }, { label: '3:00', sec: 10800 },
@@ -1811,24 +1944,17 @@
                 const rollPaceMin = (rollTime / rollDist) / 60;
                 const rollDailyDist = rollDist / 56;
                 
-                // 1. 将单纯的数组改为对象格式，默认所有点透明度为 0.8
                 progressionLineData.push({
                     value: [rollPaceMin, rollDailyDist, runItem.date],
-                    itemStyle: { /*opacity: 0.5*/ }
+                    itemStyle: {}
                 });
             }
         });
 
-        // 2. 循环结束后，提取数组中最后一个点（即最新的一天）
         if (progressionLineData.length > 0) {
-            // 将最新节点的透明度设为完全不透明
-            //progressionLineData[progressionLineData.length - 1].itemStyle.opacity = 1;
-            
-            // （可选体验优化）稍微放大最新的这个点，让“当前水平”在等高线图上更醒目
             progressionLineData[progressionLineData.length - 1].symbolSize = 6; 
         }
 
-        // --- Init ECharts ---
         if (!tandaTrendChartInstance) tandaTrendChartInstance = echarts.init(document.getElementById('tandaTrendChart'));
         if (!tandaProgChartInstance) tandaProgChartInstance = echarts.init(document.getElementById('tandaProgressionChart'));
 
@@ -1918,16 +2044,8 @@
                 axisLine: axisConfig.axisLine
             },
 			dataZoom: [
-				{
-					type: 'inside',
-					xAxisIndex: [0],
-					filterMode: 'none',
-				},
-				{
-					type: 'inside',
-					yAxisIndex: [0],
-					filterMode: 'none',
-				},				
+				{ type: 'inside', xAxisIndex: [0], filterMode: 'none' },
+				{ type: 'inside', yAxisIndex: [0], filterMode: 'none' },				
 			],
             series: [
                 ...contourSeries,
@@ -1953,7 +2071,223 @@
     window.addEventListener('resize', () => {
         if (tandaTrendChartInstance) tandaTrendChartInstance.resize();
         if (tandaProgChartInstance) tandaProgChartInstance.resize();
+        if (detailMapInstance && document.getElementById('race-detail-view').style.display === 'block') detailMapInstance.resize();
     });
+
+    // ==========================================================================
+    // Races Records & Personal Best Logic
+    // ==========================================================================
+    
+    // PB Logic
+    const TARGET_DISTANCES = {
+        1000: "1公里",
+        3000: "3公里",
+        5000: "5公里",
+        10000: "10公里",
+        21097.5: "半程马拉松",
+        42195: "全程马拉松"
+    };
+
+    function formatPace(seconds) {
+        const m = Math.floor(seconds / 60);
+        const s = Math.floor(seconds % 60);
+        return `${m}'${s.toString().padStart(2, '0')}"`;
+    }
+
+    function formatDateStr(dateNum) {
+        const dStr = dateNum.toString();
+        if (dStr.length !== 8) return dStr;
+        return `${dStr.substring(0,4)}-${dStr.substring(4,6)}-${dStr.substring(6,8)}`;
+    }
+
+    async function loadAndRenderPB() {
+        if (pbLoaded) return;
+        try {
+            const response = await fetch('https://run.linwn.net/data/pb.json');
+            if (!response.ok) throw new Error('Network response failed');
+            const pbData = await response.json();
+            
+            const pbGrid = document.getElementById('pb-grid');
+            pbGrid.innerHTML = ''; 
+            
+            const filteredPBs = pbData
+                .filter(item => TARGET_DISTANCES[item.distance])
+                .sort((a, b) => a.distance - b.distance);
+
+            if (filteredPBs.length === 0) {
+                pbGrid.innerHTML = '<p style="color: var(--text-muted);">暂无个人最佳数据</p>';
+                return;
+            }
+
+            filteredPBs.forEach(pb => {
+                const card = document.createElement('div');
+                card.className = 'pb-card';
+                
+                const distanceName = TARGET_DISTANCES[pb.distance];
+                const timeStr = formatDuration(pb.record);
+                const paceStr = formatPace(pb.avgPace);
+                const dateStr = formatDateStr(pb.happenDay);
+
+                card.innerHTML = `
+                    <div class="pb-distance">${distanceName}</div>
+                    <div class="pb-time">${timeStr}</div>
+                    <div class="pb-meta">
+                        <span class="pb-pace">${paceStr} /km</span>
+                        <span>${dateStr}</span>
+                    </div>
+                `;
+                pbGrid.appendChild(card);
+            });
+            pbLoaded = true;
+        } catch (error) {
+            console.error('Failed to load PB data:', error);
+            document.getElementById('pb-grid').innerHTML = '<p style="color: var(--text-muted);">无法加载个人最佳数据</p>';
+        }
+    }
+
+    // Race List & Details Logic
+    function renderRaceCards() {
+        allRaceActivities = allRuns
+            .filter(a => a.race && a.race.race_name)
+            .sort((a, b) => new Date(b.start_date_local.replace(/-/g,'/')) - new Date(a.start_date_local.replace(/-/g,'/')));
+
+        document.getElementById('races-summary').innerText = `共参赛 ${allRaceActivities.length} 场`;
+        const grid = document.getElementById('races-grid');
+        grid.innerHTML = '';
+
+        allRaceActivities.forEach(activity => {
+            const race = activity.race;
+            const dateStr = activity.start_date_local.substring(0, 10);
+            
+            const card = document.createElement('div');
+            card.className = 'race-card';
+            card.onclick = () => openRaceDetail(activity.run_id);
+            
+            card.innerHTML = `
+                <div class="race-card-header">
+                    <h3 class="race-card-title">${race.race_name}</h3>
+                    <span class="race-badge">${race.race_type}</span>
+                </div>
+                <div class="race-card-time">${race.official_time || '--:--:--'}</div>
+                <div class="race-card-meta">
+                    <span>${dateStr}</span>
+                    <span>${(activity.distance / 1000).toFixed(2)} km</span>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+        racesRendered = true;
+    }
+
+    function openRaceDetail(runId) {
+        const activity = allRaceActivities.find(a => a.run_id === runId);
+        if (!activity) return;
+
+        const race = activity.race;
+
+        document.getElementById('detail-race-name').innerText = race.race_name;
+        document.getElementById('detail-race-type').innerText = race.race_type;
+        document.getElementById('detail-race-date').innerText = activity.start_date_local.substring(0, 16);
+        document.getElementById('detail-race-loc').innerText = activity.location_country || '未知地点';
+        
+        document.getElementById('detail-official-time').innerText = race.official_time || '--:--:--';
+        document.getElementById('detail-distance').innerText = (activity.distance / 1000).toFixed(2);
+        
+        document.getElementById('detail-pace').innerText = calculatePace(activity.average_speed);
+        document.getElementById('detail-hr').innerText = activity.average_heartrate ? Math.round(activity.average_heartrate) : '-';
+
+        const mediaContainer = document.getElementById('detail-media-gallery');
+        mediaContainer.innerHTML = '';
+        if (race.medias && race.medias.length > 0) {
+            race.medias.forEach(mediaUrl => {
+                const isVideo = mediaUrl.match(/\.(mp4|webm|mov)$/i);
+                if (isVideo) {
+                    const video = document.createElement('video');
+                    video.src = mediaUrl;
+                    video.controls = true;
+                    video.className = 'media-item';
+                    mediaContainer.appendChild(video);
+                } else {
+                    const img = document.createElement('img');
+                    img.src = mediaUrl;
+                    img.className = 'media-item';
+                    img.onclick = () => window.open(mediaUrl, '_blank');
+                    mediaContainer.appendChild(img);
+                }
+            });
+        } else {
+            mediaContainer.innerHTML = '<p style="color: var(--text-muted); font-size: 14px;">暂无多媒体资料</p>';
+        }
+
+        document.getElementById('races-list-view').style.display = 'none';
+        document.getElementById('race-detail-view').style.display = 'block';
+
+        renderDetailMap(activity);
+    }
+
+    function closeRaceDetail() {
+        document.getElementById('race-detail-view').style.display = 'none';
+        document.getElementById('races-list-view').style.display = 'block';
+    }
+
+    function renderDetailMap(run) {
+        if (!run || !run._cachedLatlngs || run._cachedLatlngs.length === 0) {
+            document.getElementById('race-detail-map').innerHTML = '<div style="padding: 20px; color: var(--text-muted);">暂无路线数据</div>';
+            return;
+        }
+
+        const geojsonCoords = run._cachedLatlngs.map(coord => [coord[1], coord[0]]);
+        const geojsonData = { 'type': 'FeatureCollection', 'features': [{
+            'type': 'Feature',
+            'geometry': { 'type': 'LineString', 'coordinates': geojsonCoords }
+        }]};
+
+        const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+        const mapStyle = theme === 'light' ? 'https://tiles.openfreemap.org/styles/liberty' : 'https://tiles.openfreemap.org/styles/dark';
+        const accentColor = localStorage.getItem('accentColor') || '#e93342';
+
+        if (!detailMapInstance) {
+            detailMapInstance = new maplibregl.Map({
+                container: 'race-detail-map',
+                style: mapStyle,
+                attributionControl: false,
+                interactive: true
+            });
+            
+            detailMapInstance.on('load', () => {
+                detailMapInstance.addSource('detail-route-source', { 'type': 'geojson', 'data': geojsonData });
+                detailMapInstance.addLayer({
+                    'id': 'detail-route-layer',
+                    'type': 'line',
+                    'source': 'detail-route-source',
+                    'layout': { 'line-join': 'round', 'line-cap': 'round' },
+                    'paint': { 'line-color': accentColor, 'line-width': 4 }
+                });
+                fitDetailMapBounds(geojsonCoords);
+            });
+        } else {
+            if (detailMapInstance.getSource('detail-route-source')) {
+                detailMapInstance.getSource('detail-route-source').setData(geojsonData);
+            }
+            if (detailMapInstance.getLayer('detail-route-layer')) {
+                detailMapInstance.setPaintProperty('detail-route-layer', 'line-color', accentColor);
+            }
+            detailMapInstance.resize(); 
+            fitDetailMapBounds(geojsonCoords);
+        }
+    }
+
+    function fitDetailMapBounds(coords) {
+        if (coords.length > 0) {
+            const pointsLong = coords.map(p => p[0]);
+            const pointsLat = coords.map(p => p[1]);
+            const bounds = [
+                [Math.min(...pointsLong), Math.min(...pointsLat)],
+                [Math.max(...pointsLong), Math.max(...pointsLat)]
+            ];
+            detailMapInstance.fitBounds(bounds, { padding: 40, animate: false });
+        }
+    }
 
     // ==========================================================================
     // Poster (Share Card) Logic
