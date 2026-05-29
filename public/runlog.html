@@ -250,7 +250,7 @@
     .pb-distance { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 600; }
     .pb-time { font-size: 1.6rem; font-weight: bold; color: var(--text-main); margin-bottom: 8px; font-variant-numeric: tabular-nums; }
     .pb-meta { font-size: 0.8rem; color: var(--text-dark); display: flex; justify-content: space-between; align-items: center; }
-    .pb-pace { background-color: rgba(255, 255, 255, 0.1); padding: 2px 6px; border-radius: 4px; color: var(--text-muted); }
+    .pb-pace { background-color: rgba(255, 255, 255, 0.1); padding: 2px 6px; border-radius: 4px; color: var(--text-muted); white-space: nowrap;}
     [data-theme="light"] .pb-pace { background-color: rgba(0,0,0,0.05); color: var(--text-dark); }
 
     /* Races Grid */
@@ -422,7 +422,8 @@
         #prediction-page, #races-page { padding: 0 !important; overflow-y: visible !important; height: auto !important; }
         .prediction-charts-wrapper { flex-direction: column !important; flex: none !important; }
         .prediction-charts-wrapper .chart-card { flex: none !important; height: 400px !important; margin-bottom: 16px; }
-		
+		.race-map-container { height: 250px; }
+		#stats-grid-detail-mobile { display: block !important; }
     }
 </style>
 
@@ -670,7 +671,6 @@
                     </div>
                     <p id="detail-race-loc" class="race-loc"></p>
                 </div>
-
                 <div class="stats-grid-detail">
                     <div class="stat-card-detail">
                         <div class="stat-label-detail">官方成绩</div>
@@ -689,9 +689,9 @@
                         <div class="stat-value-detail"><span id="detail-hr">0</span> <span class="unit">bpm</span></div>
                     </div>
                 </div>
-
-                <h3 class="section-title" id="race-route">赛事路线</h3>
+                <h3 class="section-title hide-mobile-stats" id="race-route">赛事路线</h3>
                 <div class="race-map-container" id="race-detail-map"></div>
+
 
                 <h3 class="section-title">精彩瞬间</h3>
                 <div class="media-gallery" id="detail-media-gallery"></div>
@@ -2251,7 +2251,7 @@
                 container: 'race-detail-map',
                 style: mapStyle,
                 attributionControl: false,
-                interactive: true
+                cooperativeGestures: true,
             });
             
             detailMapInstance.on('load', () => {
