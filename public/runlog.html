@@ -1811,9 +1811,23 @@
             if (rollDist > 0) {
                 const rollPaceMin = (rollTime / rollDist) / 60;
                 const rollDailyDist = rollDist / 56;
-                progressionLineData.push([rollPaceMin, rollDailyDist, runItem.date]);
+                
+                // 1. 将单纯的数组改为对象格式，默认所有点透明度为 0.8
+                progressionLineData.push({
+                    value: [rollPaceMin, rollDailyDist, runItem.date],
+                    itemStyle: { /*opacity: 0.5*/ }
+                });
             }
         });
+
+        // 2. 循环结束后，提取数组中最后一个点（即最新的一天）
+        if (progressionLineData.length > 0) {
+            // 将最新节点的透明度设为完全不透明
+            //progressionLineData[progressionLineData.length - 1].itemStyle.opacity = 1;
+            
+            // （可选体验优化）稍微放大最新的这个点，让“当前水平”在等高线图上更醒目
+            progressionLineData[progressionLineData.length - 1].symbolSize = 6; 
+        }
 
         // --- Init ECharts ---
         if (!tandaTrendChartInstance) tandaTrendChartInstance = echarts.init(document.getElementById('tandaTrendChart'));
@@ -1908,10 +1922,12 @@
 				{
 					type: 'inside',
 					xAxisIndex: [0],
+					filterMode: 'none',
 				},
 				{
 					type: 'inside',
 					yAxisIndex: [0],
+					filterMode: 'none',
 				},				
 			],
             series: [
@@ -1926,9 +1942,9 @@
                     name: '8周均值路径',
                     type: 'line',
                     symbol: 'circle',
-                    symbolSize: 6,
+                    symbolSize: 1,
                     itemStyle: { color: accentHex },
-                    lineStyle: { width: 2, color: accentHex },
+                    lineStyle: { width: 1, color: accentHex },
                     data: progressionLineData
                 }
             ]
