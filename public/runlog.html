@@ -341,6 +341,7 @@
         .stat-row { white-space: nowrap; font-size: 11px; }
         .map-card { order: 2; position: -webkit-sticky; position: sticky; top: 0; height: 250px; flex: none; z-index: 100; }
         .activity-section { order: 4; }
+		#prediction-description { order: 0; }
         .activity-header, .filters, .pagination { padding: 0 12px; }
         .table-container { overflow-x: auto; max-height: none; -webkit-overflow-scrolling: touch; }
         th, td { padding: 10px 6px; }
@@ -541,7 +542,7 @@
     </div>
 
     <div class="main-layout" id="prediction-page" style="display: none; flex-direction: column; gap: 16px; padding: 0 1.5rem; overflow-y: auto;">
-        <div class="activity-section" style="flex: none; height: auto;">
+        <div class="activity-section" id="prediction-description" style="flex: none; height: auto;">
             <div class="activity-title" style="margin-bottom: 12px;">马拉松成绩预测 (Tanda 模型)</div>
             <div id="prediction-loading" style="color: var(--text-muted); font-size: 14px; padding: 20px 0;">正在分析您过去 8 周的训练数据...</div>
             
@@ -1897,6 +1898,16 @@
                 splitLine: axisConfig.splitLine,
                 axisLine: axisConfig.axisLine
             },
+			dataZoom: [
+				{
+					type: 'inside',
+					xAxisIndex: [0],
+				},
+				{
+					type: 'inside',
+					yAxisIndex: [0],
+				},				
+			],
             series: [
                 ...contourSeries,
                 {
