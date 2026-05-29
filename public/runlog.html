@@ -1835,7 +1835,7 @@
                 backgroundColor: theme === 'light' ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.8)',
                 textStyle: { color: theme === 'light' ? '#333' : '#fff' },
                 formatter: params => {
-                    let html = `${params[0].axisValue}<br/>`;
+                    let html = `${params[0].value[0]}<br/>`;
                     params.forEach(p => {
                         const seriesName = p.seriesName === '单日推演' ? '单日假设持续8周' : '实际近8周均值';
                         html += `${p.marker} ${seriesName}: <b>${formatPredictionTime(p.value[1])}</b><br/>`;
