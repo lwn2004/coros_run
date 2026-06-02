@@ -11,6 +11,11 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.2/css/lightgallery.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.2/css/lg-video.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.2/lightgallery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.2/plugins/video/lg-video.min.js"></script>
+
 <style>
     /* ==========================================================================
        Theme Variables (Dark Mode Default)
@@ -283,8 +288,21 @@
     .race-map-container { width: 100%; height: 350px; border-radius: 16px; background-color: var(--progress-bg); overflow: hidden; border: 1px solid var(--border-color); }
     
     .media-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px; margin-bottom: 40px; }
-    .media-item { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 12px; cursor: pointer; background-color: var(--progress-bg); border: 1px solid var(--border-color); transition: transform 0.2s ease; }
-    .media-item:hover { transform: scale(1.02); }
+    
+	/* Lightgallery Wrapper Style */
+    .media-gallery-link { 
+        display: block; width: 100%; aspect-ratio: 1 / 1; border-radius: 12px; overflow: hidden; cursor: pointer;
+        /* 以下两行用于修复 Webkit 浏览器下圆角溢出隐藏的 3D 渲染 BUG */
+        transform: translateZ(0); 
+        -webkit-mask-image: -webkit-radial-gradient(white, black);
+    }
+    .media-gallery-link .media-item { 
+        width: 100%; height: 100%; border-radius: 0; border: none; object-fit: cover; 
+        transition: transform 0.2s ease; cursor: pointer; background-color: var(--progress-bg);
+        /* 强制 GPU 渲染层，防止 hover 放大时图片闪烁或消失 */
+        backface-visibility: hidden; 
+    }
+    .media-gallery-link:hover .media-item { transform: scale(1.02); }
 
     /* ==========================================================================
        Poster Generation Styles
@@ -453,11 +471,11 @@
 <div class="top-nav-container">
     <div class="logo">RUN<span>.LOG</span></div>
     <nav class="desktop-menu">
-        <a href="#" class="active" id="menu-home">首页</a>
-        <a href="#" id="menu-prediction">成绩预测</a>
-        <a href="#">热力图</a>
-        <a href="#" id="menu-races">赛事纪录</a>
-        <a href="#" id="menu-settings">系统设置</a>
+        <a href="#dashboard" class="active" id="menu-home">首页</a>
+        <a href="#prediction" id="menu-prediction">成绩预测</a>
+        <a href="#heatmap">热力图</a>
+        <a href="#races" id="menu-races">赛事纪录</a>
+        <a href="#settings" id="menu-settings">系统设置</a>
     </nav>
 </div>
 
@@ -744,23 +762,23 @@
 </div>
 
 <nav class="mobile-bottom-menu">
-    <a href="#" class="mobile-menu-item active" id="mobile-menu-home">
+    <a href="#dashboard" class="mobile-menu-item active" id="mobile-menu-home">
         <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
         <span>跑步记录</span>
     </a>
-    <a href="#" class="mobile-menu-item" id="mobile-menu-prediction">
+    <a href="#prediction" class="mobile-menu-item" id="mobile-menu-prediction">
         <svg viewBox="0 0 24 24"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
         <span>成绩预测</span>
     </a>
-    <a href="#" class="mobile-menu-item">
+    <a href="#heatmap" class="mobile-menu-item">
         <svg viewBox="0 0 24 24"><path d="M17.5 11c0-1.88-1.5-3.5-1.5-5.5 0-2.21 1.79-4 4-4-1.55 1.55-2.5 3.67-2.5 6 0 1.66 1.34 3 3 3s3-1.34 3-3c0-.98-.38-1.87-1-2.53C21.73 6.13 22 7.53 22 9c0 2.49-2.01 4.5-4.5 4.5S13 11.49 13 9c0-1.85.9-3.5 2.33-4.52C14.15 5.61 13.5 7.24 13.5 9c0 2.76 2.24 5 5 5z"/></svg>
         <span>热力图</span>
     </a>
-    <a href="#" class="mobile-menu-item" id="mobile-menu-races">
+    <a href="#races" class="mobile-menu-item" id="mobile-menu-races">
         <svg viewBox="0 0 24 24"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>
         <span>赛事纪录</span>
     </a>
-    <a href="#" class="mobile-menu-item" id="mobile-menu-settings">
+    <a href="#settings" class="mobile-menu-item" id="mobile-menu-settings">
         <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.3-.06.62-.06.94s.02.64.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .43-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.49-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
         <span>系统设置</span>
     </a>
@@ -1171,6 +1189,7 @@
             if (cachedResponse) {
                 const cachedData = await cachedResponse.json();
                 processAndRenderRuns(cachedData);
+                handleHashRoute(); 
             }
             const response = await fetch(URL);
             if (response.ok) {
@@ -1179,6 +1198,7 @@
                 if (!cachedResponse || freshData.length !== allRuns.length) {
                     await cache.put(URL, responseToCache); 
                     processAndRenderRuns(freshData);
+                    handleHashRoute(); 
                     
                     if (isPredictionLoaded) updatePredictionPage();
                     if (racesRendered) renderRaceCards();
@@ -1661,10 +1681,26 @@
     });
     
     // ==========================================================================
-    // Page Navigation & System Settings Logic
+    // Hash Routing, Page Navigation & Media Gallery
     // ==========================================================================
-    
-    function showPage(pageId) {
+    let lgInstance = null; 
+
+    function handleHashRoute() {
+        const hash = window.location.hash || '#dashboard';
+        const rawPath = hash.replace('#', '');
+        const pathParts = rawPath.split('/');
+        const pageId = pathParts[0] === '' ? 'dashboard' : pathParts[0];
+        const subId = pathParts[1] || null;
+
+        if (allRuns.length === 0 && pageId !== 'dashboard' && pageId !== 'settings') {
+            return; 
+        }
+
+        window.scrollTo(0, 0); 
+        document.querySelectorAll('.main-layout, .table-container, .column-right, #prediction-page, #races-page, .activity-section').forEach(el => {
+            el.scrollTop = 0; 
+        });
+
         document.getElementById('dashboard-page').style.display = pageId === 'dashboard' ? 'flex' : 'none';
         document.getElementById('settings-page').style.display = pageId === 'settings' ? 'flex' : 'none';
         document.getElementById('prediction-page').style.display = pageId === 'prediction' ? 'flex' : 'none';
@@ -1680,6 +1716,18 @@
         } else if (pageId === 'settings') {
             document.getElementById('menu-settings').classList.add('active');
             document.getElementById('mobile-menu-settings').classList.add('active');
+            
+            const theme = localStorage.getItem('theme') || 'dark';
+            document.querySelector(`input[name="setting-theme"][value="${theme}"]`).checked = true;
+            const color = localStorage.getItem('accentColor') || '#e93342';
+            const colorRadio = document.querySelector(`input[name="setting-color"][value="${color}"]`);
+            if (colorRadio) colorRadio.checked = true;
+            const centerMode = localStorage.getItem('mapCenterMode') || 'A';
+            document.querySelector(`input[name="setting-map-center"][value="${centerMode}"]`).checked = true;
+            document.getElementById('setting-lng').value = localStorage.getItem('mapCenterLng') || '113.3';
+            document.getElementById('setting-lat').value = localStorage.getItem('mapCenterLat') || '23.1';
+            document.getElementById('settings-custom-coords').style.display = (centerMode === 'B') ? 'flex' : 'none';
+
         } else if (pageId === 'prediction') {
             document.getElementById('menu-prediction').classList.add('active');
             document.getElementById('mobile-menu-prediction').classList.add('active');
@@ -1691,39 +1739,18 @@
             document.getElementById('mobile-menu-races').classList.add('active');
             if (!pbLoaded) loadAndRenderPB();
             if (!racesRendered && allRuns.length > 0) renderRaceCards();
+            
+            if (subId) {
+                openRaceDetail(subId);
+            } else {
+                document.getElementById('race-detail-view').style.display = 'none';
+                document.getElementById('races-list-view').style.display = 'block';
+                if (lgInstance) { lgInstance.destroy(true); lgInstance = null; }
+            }
         }
     }
 
-    function openSettings() {
-        const theme = localStorage.getItem('theme') || 'dark';
-        document.querySelector(`input[name="setting-theme"][value="${theme}"]`).checked = true;
-
-        const color = localStorage.getItem('accentColor') || '#e93342';
-        const colorRadio = document.querySelector(`input[name="setting-color"][value="${color}"]`);
-        if (colorRadio) colorRadio.checked = true;
-
-        const centerMode = localStorage.getItem('mapCenterMode') || 'A';
-        document.querySelector(`input[name="setting-map-center"][value="${centerMode}"]`).checked = true;
-
-        document.getElementById('setting-lng').value = localStorage.getItem('mapCenterLng') || '113.3';
-        document.getElementById('setting-lat').value = localStorage.getItem('mapCenterLat') || '23.1';
-
-        document.getElementById('settings-custom-coords').style.display = (centerMode === 'B') ? 'flex' : 'none';
-        
-        showPage('settings');
-    }
-
-    document.getElementById('menu-home').addEventListener('click', (e) => { e.preventDefault(); showPage('dashboard'); });
-    document.getElementById('mobile-menu-home').addEventListener('click', (e) => { e.preventDefault(); showPage('dashboard'); });
-    
-    document.getElementById('menu-prediction').addEventListener('click', (e) => { e.preventDefault(); showPage('prediction'); });
-    document.getElementById('mobile-menu-prediction').addEventListener('click', (e) => { e.preventDefault(); showPage('prediction'); });
-
-    document.getElementById('menu-races').addEventListener('click', (e) => { e.preventDefault(); showPage('races'); });
-    document.getElementById('mobile-menu-races').addEventListener('click', (e) => { e.preventDefault(); showPage('races'); });
-
-    document.getElementById('menu-settings').addEventListener('click', (e) => { e.preventDefault(); openSettings(); });
-    document.getElementById('mobile-menu-settings').addEventListener('click', (e) => { e.preventDefault(); openSettings(); });
+    window.addEventListener('hashchange', handleHashRoute);
 
     document.querySelectorAll('input[name="setting-map-center"]').forEach(radio => {
         radio.addEventListener('change', (e) => {
@@ -1732,7 +1759,7 @@
     });
 
     document.getElementById('settings-close').addEventListener('click', () => {
-        showPage('dashboard');
+        window.location.hash = '#dashboard';
     });
 
     document.getElementById('settings-save').addEventListener('click', () => {
@@ -1751,8 +1778,9 @@
         applyThemeAndColor(theme, color);
         applyFilters(); 
         
-        showPage('dashboard');
+        window.location.hash = '#dashboard';
     });
+
 
     // ==========================================================================
     // Tanda Prediction & ECharts Logic
@@ -2161,7 +2189,7 @@
             
             const card = document.createElement('div');
             card.className = 'race-card';
-            card.onclick = () => openRaceDetail(activity.run_id);
+            card.onclick = () => { window.location.hash = `#races/${activity.run_id}`; };
             
             card.innerHTML = `
                 <div class="race-card-header">
@@ -2180,7 +2208,7 @@
     }
 
     function openRaceDetail(runId) {
-        const activity = allRaceActivities.find(a => a.run_id === runId);
+        const activity = allRaceActivities.find(a => String(a.run_id) === String(runId));
         if (!activity) return;
 
         const race = activity.race;
@@ -2198,25 +2226,41 @@
 
         const mediaContainer = document.getElementById('detail-media-gallery');
         mediaContainer.innerHTML = '';
+        
+        if (lgInstance) {
+            lgInstance.destroy(true);
+            lgInstance = null;
+        }
+
         if (race.medias && race.medias.length > 0) {
             race.medias.forEach(item => {
-              const url = item.mediaUrl;
-              const isVideo = url.match(/\.(mp4|webm|mov)$/i);
-            //race.medias.forEach(mediaUrl => {
-                //const isVideo = mediaUrl.match(/\.(mp4|webm|mov)$/i);
+                const url = item.mediaUrl;
+                const isVideo = url.match(/\.(mp4|webm|mov)$/i);
+                
+                const wrapper = document.createElement('a');
+                wrapper.className = 'media-gallery-link';
+                
                 if (isVideo) {
+                    wrapper.setAttribute('data-video', `{"source": [{"src":"${url}", "type":"video/mp4"}]}`);
                     const video = document.createElement('video');
                     video.src = url;
-                    video.controls = true;
                     video.className = 'media-item';
-                    mediaContainer.appendChild(video);
+                    wrapper.appendChild(video);
                 } else {
+                    wrapper.setAttribute('data-src', url);
                     const img = document.createElement('img');
                     img.src = url;
                     img.className = 'media-item';
-                    img.onclick = () => window.open(url, '_blank');
-                    mediaContainer.appendChild(img);
+                    wrapper.appendChild(img);
                 }
+                mediaContainer.appendChild(wrapper);
+            });
+            
+            lgInstance = lightGallery(mediaContainer, {
+                plugins: [lgVideo],
+                speed: 500,
+                selector: '.media-gallery-link',
+                download: false 
             });
         } else {
             mediaContainer.innerHTML = '<p style="color: var(--text-muted); font-size: 14px;">暂无多媒体资料</p>';
@@ -2229,8 +2273,7 @@
     }
 
     function closeRaceDetail() {
-        document.getElementById('race-detail-view').style.display = 'none';
-        document.getElementById('races-list-view').style.display = 'block';
+        window.location.hash = '#races';
     }
 
     function renderDetailMap(run) {
