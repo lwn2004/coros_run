@@ -244,12 +244,12 @@
     /* ==========================================================================
        赛事纪录页面 & 个人最佳(PB) 样式
        ========================================================================== */
-    .races-wrapper { display: flex; flex-direction: column; gap: 24px; width: 100%; max-width: 1000px; margin: 0 auto; }
+    .races-wrapper { display: flex; flex-direction: column; gap: 24px; width: 100%; /*max-width: 1000px;*/ margin: 0 auto; }
     
     /* PB Section */
     .pb-section { margin-bottom: 10px; padding-bottom: 24px; border-bottom: 1px dashed var(--border-color); }
     .pb-title { margin-top: 0; margin-bottom: 16px; border-bottom: none; padding-bottom: 0; font-size: 1.25rem; display: flex; align-items: center; color: var(--text-main); }
-    .pb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px; }
+    .pb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 16px; }
     .pb-card { background: linear-gradient(145deg, var(--card-bg) 0%, var(--progress-bg) 100%); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; position: relative; overflow: hidden; }
     .pb-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: linear-gradient(90deg, #f1c40f, #e67e22); opacity: 0.8; }
     .pb-distance { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 600; }
@@ -523,10 +523,13 @@
                 <div class="filters" id="year-filters">
                     <div class="filter-wrapper">
                         <svg class="filter-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/></svg>
-                        <select id="type-filter" class="filter-select">
+                        <select id="type-filter" class="filter-select" autocomplete="off">
                             <option value="all">全部类型</option>
                             <option value="race">比赛</option>
                             <option value="track">运动场</option>
+							<option value="locgz">在广州</option>
+							<option value="locmm">在茂名</option>
+							<option value="locother">在外地</option>
                         </select>
                     </div>				
                     <button class="filter-btn active" data-year="all">All</button>
@@ -619,7 +622,7 @@
             
             <div id="prediction-content" style="display: none;">
                 <div style="font-size: 14px; line-height: 1.6; color: var(--text-main);">
-                    基于 <a href="https://rua.ua.es/bitstream/10045/18930/1/jhse_Vol_VI_N_III_511-520.pdf" style="color: var(--accent-color); text-decoration: none;">Giovanni Tanda (2011)</a> 的实证研究算法，结合最近 8 周的训练强度与跑量，预测全马成绩。
+                    基于 <a href="https://scholar.google.co.uk/citations?view_op=view_citation&hl=en&user=C__krSUAAAAJ&cstart=20&pagesize=80&citation_for_view=C__krSUAAAAJ:j3f4tGmQtD8C" style="color: var(--accent-color); text-decoration: none;">Giovanni Tanda (2011)</a> 的实证研究算法，结合最近 8 周的训练强度与跑量，预测全马成绩。
                     
                     <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-top: 16px; margin-bottom: 16px;">
                         <div class="prediction-metric-card">
@@ -658,12 +661,13 @@
         <div class="races-wrapper">
             <div id="races-list-view">
                 
-                <div class="pb-section">
+				<div class="pb-section">
                     <h3 class="section-title pb-title">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20" style="color: #f1c40f; margin-right: 6px; vertical-align: text-bottom;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                         个人最佳 (PB)
+                        <button id="pb-toggle-btn" class="filter-btn" style="margin-left: auto; padding: 4px 12px; font-size: 12px;">展开</button>
                     </h3>
-                    <div id="pb-grid" class="pb-grid">
+                    <div id="pb-grid" class="pb-grid" style="display: none;">
                         <p style="color: var(--text-muted); font-size: 14px;">正在加载...</p>
                     </div>
                 </div>
@@ -707,7 +711,7 @@
                         <div class="stat-value-detail"><span id="detail-hr">0</span> <span class="unit">bpm</span></div>
                     </div>
                 </div>
-                <h3 class="section-title hide-mobile-stats" id="race-route">赛事路线</h3>
+                <h3 class="section-title" id="race-route">赛事路线</h3>
                 <div class="race-map-container" id="race-detail-map"></div>
 
 
@@ -1498,6 +1502,12 @@
             filteredRuns = tempRuns.filter(run => run.race != null);
         } else if (currentTypeFilter === 'track') {
             filteredRuns = tempRuns.filter(run => run.subtype === 'track');
+        } else if (currentTypeFilter === 'locgz') {
+            filteredRuns = tempRuns.filter(run => run.location_country && run.location_country.includes('广州'));
+        } else if (currentTypeFilter === 'locmm') {
+            filteredRuns = tempRuns.filter(run => run.location_country && run.location_country.includes('茂名'));
+        } else if (currentTypeFilter === 'locother') {
+            filteredRuns = tempRuns.filter(run => (!run.location_country || !run.location_country.includes('广州') && !run.location_country.includes('茂名')));
         } else {
             filteredRuns = tempRuns;
         }
@@ -1613,32 +1623,6 @@
         checkTodayButtonStatus();
     });
 
-    let touchStartX = 0;
-    let touchEndX = 0;
-    const calViewMonth = document.getElementById('cal-view-month');
-    
-    calViewMonth.addEventListener('touchstart', e => {
-        touchStartX = e.changedTouches[0].screenX;
-    }, {passive: true});
-    
-    calViewMonth.addEventListener('touchend', e => {
-        touchEndX = e.changedTouches[0].screenX;
-        handleSwipe();
-    }, {passive: true});
-    
-    function handleSwipe() {
-        if (window.innerWidth > 1024) return; 
-        const diff = touchEndX - touchStartX;
-        
-        if (Math.abs(diff) < 50) return; 
-        
-        if (diff < 0) {
-            currentCalDate.setMonth(currentCalDate.getMonth() + 1); 
-        } else {
-            currentCalDate.setMonth(currentCalDate.getMonth() - 1); 
-        }
-        syncActivityLogToMonth();
-    }
 
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -2485,7 +2469,20 @@
             setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 2000);
         });
     });
-
+	document.getElementById('pb-toggle-btn').addEventListener('click', function() {
+        const pbGrid = document.getElementById('pb-grid');
+        
+        if (pbGrid.style.display === 'none') {
+            pbGrid.style.display = 'grid';
+            this.innerText = '收起';
+            this.classList.add('active'); 
+        } else {
+            // 如果是展开状态 -> 隐藏
+            pbGrid.style.display = 'none';
+            this.innerText = '展开';
+            this.classList.remove('active');
+        }
+    });
     fetchData();
 </script>
 </body>
