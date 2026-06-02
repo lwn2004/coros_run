@@ -183,7 +183,19 @@
     tr { transition: background-color 0.2s; }
     tr.active-row td { background-color: var(--active-row-bg) !important; color: var(--active-row-text) !important; }
     tr.active-row td.bold-white { color: var(--accent-color) !important; }
-    
+	#table-body tr {
+		opacity: 0;
+		transform: translateY(10px) scaleY(0.9);
+		transform-origin: top;
+		animation: revealRow 0.35s cubic-bezier(.2,.8,.2,1) forwards;
+	}
+
+	@keyframes revealRow {
+		to {
+			opacity: 1;
+			transform: translateY(0) scaleY(1);
+		}
+	}    
     .bold-white { font-weight: 600; }
     .unit { color: var(--text-dark); font-size: 11px; font-weight: normal; }
     
@@ -255,7 +267,7 @@
     .pb-distance { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 600; }
     .pb-time { font-size: 1.6rem; font-weight: bold; color: var(--text-main); margin-bottom: 8px; font-variant-numeric: tabular-nums; }
     .pb-meta { font-size: 0.8rem; color: var(--text-dark); display: flex; justify-content: space-between; align-items: center; }
-    .pb-pace { background-color: rgba(255, 255, 255, 0.1); padding: 2px 6px; border-radius: 4px; color: var(--text-muted); white-space: nowrap;}
+    .pb-pace { background-color: rgba(255, 255, 255, 0.1); padding: 2px 6px; border-radius: 4px; color: var(--text-muted); white-space: nowrap; margin-right: 5px;}
     [data-theme="light"] .pb-pace { background-color: rgba(0,0,0,0.05); color: var(--text-dark); }
 
     /* Races Grid */
@@ -480,7 +492,7 @@
 </div>
 
 <div class="container" id="main-container">
-    <div class="main-layout" id="dashboard-page">
+    <div class="main-layout" id="dashboard-page" style="display: none;">
         <div class="column-left">
             <div class="summary-grid">
                 <div class="card" id="card-total-distance">
@@ -530,6 +542,8 @@
 							<option value="locgz">在广州</option>
 							<option value="locmm">在茂名</option>
 							<option value="locother">在外地</option>
+							<option value="fastest10Runs">最快10次</option>
+							<option value="longest10Runs">最远10次</option>
                         </select>
                     </div>				
                     <button class="filter-btn active" data-year="all">All</button>
@@ -1437,7 +1451,7 @@
         const endIdx = startIdx + itemsPerPage;
         const pageData = filteredRuns.slice(startIdx, endIdx);
 
-        pageData.forEach(run => {
+        pageData.forEach((run, index) => {
             const distKm = (run.distance / 1000).toFixed(2);
             const pace = calculatePace(run.average_speed);
             const duration = formatDuration(run.moving_time);
@@ -1455,6 +1469,7 @@
                 <td>${hr}</td>
             `;
             tr.style.cursor = 'pointer';
+			tr.style.animationDelay = `${index * 40}ms`;
 
             tr.addEventListener('click', () => {
                 document.querySelectorAll('#table-body tr').forEach(r => r.classList.remove('active-row'));
@@ -1508,6 +1523,10 @@
             filteredRuns = tempRuns.filter(run => run.location_country && run.location_country.includes('茂名'));
         } else if (currentTypeFilter === 'locother') {
             filteredRuns = tempRuns.filter(run => (!run.location_country || !run.location_country.includes('广州') && !run.location_country.includes('茂名')));
+        } else if (currentTypeFilter === 'fastest10Runs') {
+            filteredRuns = tempRuns.filter(run => run.distance > 100).sort((a, b) => b.average_speed - a.average_speed).slice(0, 10);
+        } else if (currentTypeFilter === 'longest10Runs') {
+            filteredRuns = tempRuns.filter(run => run.distance > 100).sort((a, b) => b.distance - a.distance).slice(0, 10);
         } else {
             filteredRuns = tempRuns;
         }
@@ -1626,7 +1645,7 @@
 
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
-            if(e.target.id === 'settings-close' || e.target.id === 'settings-save') return;
+            if(e.target.id === 'settings-close' || e.target.id === 'settings-save' || e.target.id === 'pb-toggle-btn') return;
 
             document.querySelectorAll('#year-filters .filter-btn').forEach(b => b.classList.remove('active'));
             e.target.classList.add('active');
@@ -2144,7 +2163,7 @@
                     <div class="pb-distance">${distanceName}</div>
                     <div class="pb-time">${timeStr}</div>
                     <div class="pb-meta">
-                        <span class="pb-pace">${paceStr} /km</span>
+                        <span class="pb-pace">${paceStr}</span>
                         <span>${dateStr}</span>
                     </div>
                 `;
