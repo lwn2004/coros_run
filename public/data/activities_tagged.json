@@ -5346,7 +5346,21 @@
     "race": {
       "race_name": "清远马拉松",
       "race_type": "半程马拉松",
-      "official_time": "1:44:34"
+      "official_time": "1:44:34",
+      "medias": [
+        {
+          "mediaUrl": "https://r2os.linwn.net/s3/20260602165412_277_38.jpg"
+        },
+        {
+          "mediaUrl": "https://r2os.linwn.net/s3/20260602165411_276_38.jpg"
+        },
+        {
+          "mediaUrl": "https://r2os.linwn.net/s3/20260602165412_278_38.jpg"
+        },
+        {
+          "mediaUrl": "https://r2os.linwn.net/s3/2026-06-02_165559_390.mp4"
+        }
+      ]
     }
   },
   {
