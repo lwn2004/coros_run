@@ -159,7 +159,7 @@ def get_downloaded_ids(folder):
     return [i.split(".")[0] for i in os.listdir(folder) if not i.startswith(".")]
 
 
-async def download_and_generate(account, password):
+async def download_and_generate_org(account, password):
     folder = FIT_FOLDER
     downloaded_ids = get_downloaded_ids(folder)
     coros = Coros(account, password)
@@ -193,7 +193,84 @@ async def download_and_generate(account, password):
             json.dump(run_data, f, indent=4, ensure_ascii=False)
         print(f"Successfully processed run data. Saved to {output_filename}")
 
+async def download_and_generate(account, password):
+    folder = FIT_FOLDER
+    downloaded_ids = get_downloaded_ids(folder)
+    coros = Coros(account, password)
+    await coros.init()
 
+    activity_ids = await coros.fetch_activity_ids()
+    print("activity_ids: ", len(activity_ids))
+    print("downloaded_ids: ", len(downloaded_ids))
+    to_generate_coros_ids = list(set(activity_ids) - set(downloaded_ids))
+    print("to_generate_activity_ids: ", len(to_generate_coros_ids))
+
+    # ================= 新增功能 1：获取 Dashboard 数据并提取 type=4 的 PB 记录 =================
+    try:
+        data_folder = os.path.join(parent, "public", "data")
+        os.makedirs(data_folder, exist_ok=True)  # 确保目录存在
+        
+        dashboard_url = COROS_URL_DICT.get("DASHBOARD")
+        dashboard_resp = await coros.req.get(dashboard_url)
+        dashboard_data = dashboard_resp.json()
+        
+        pb_list = []
+        record_detail_list = dashboard_data.get("data", {}).get("recordDetailList", [])
+        for record in record_detail_list:
+            if record.get("type") == 4:
+                pb_list = record.get("recordList", [])
+                break
+        
+        pb_file_path = os.path.join(data_folder, "pb.json")
+        with open(pb_file_path, "w", encoding="utf-8") as f:
+            json.dump(pb_list, f, indent=4, ensure_ascii=False)
+        print(f"Successfully saved PB data to {pb_file_path}")
+    except Exception as e:
+        print(f"Error fetching/saving dashboard pb data: {e}")
+    # ====================================================================================
+
+    start_time = time.time()
+    await gather_with_concurrency(
+        10,
+        [coros.download_activity(label_d) for label_d in to_generate_coros_ids],
+    )
+    print(f"Download finished. Elapsed {time.time()-start_time} seconds")
+
+    # ================= 新增功能 2：遍历 to_generate_coros_ids 获取并保存 detail JSON =================
+    try:
+        coros_details_folder = os.path.join(parent, "public", "data", "coros_details")
+        os.makedirs(coros_details_folder, exist_ok=True)  # 确保目录存在
+        
+        for label_d in to_generate_coros_ids:
+            detail_url = f"https://teamcnapi.coros.com/activity/detail/query?screenW=1344&screenH=1050&labelId={label_d}&sportType=100"
+            detail_resp = await coros.req.get(detail_url)
+            detail_data = detail_resp.json()
+            
+            detail_file_path = os.path.join(coros_details_folder, f"{label_d}.json")
+            with open(detail_file_path, "w", encoding="utf-8") as f:
+                json.dump(detail_data, f, indent=4, ensure_ascii=False)
+            print(f"Successfully saved coros detail to {detail_file_path}")
+    except Exception as e:
+        print(f"Error fetching/saving coros detail data: {e}")
+    # ===============================================================================================
+
+    # 注意：将关闭请求客户端的操作移动到所有新增的网络请求完成之后
+    await coros.req.aclose()
+
+    make_activities_file(SQL_FILE, FIT_FOLDER, JSON_FILE, "fit", json_file2 = JSON_FILE2)
+    fitids_need_reprocess = find_non_archive_weather_fit_ids(details_folder)
+    for label_id in to_generate_coros_ids + fitids_need_reprocess:
+        fit_path = os.path.join(folder, f"{label_id}.fit")
+        print(f"Parsing fit file: {label_id}")
+        run_data = parse_fit_file_garmin_sdk(fit_path)
+  
+        if run_data:
+            json_id = run_data['run_id']
+            run_data['fit_id'] = label_id
+            output_filename = os.path.join(details_folder, f"{json_id}.json")
+            with open(output_filename, 'w', encoding='utf-8') as f:
+                json.dump(run_data, f, indent=4, ensure_ascii=False)
+            print(f"Successfully processed run data. Saved to {output_filename}")
 async def gather_with_concurrency(n, tasks):
     semaphore = asyncio.Semaphore(n)
 
