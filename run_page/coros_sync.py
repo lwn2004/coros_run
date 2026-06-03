@@ -208,10 +208,10 @@ async def download_and_generate(account, password):
     # ================= 新增功能 1：获取 Dashboard 数据并提取 type=4 的 PB 记录 =================
     try:
         data_folder = os.path.join(parent, "public", "data")
-        os.makedirs(data_folder, exist_ok=True)  # 确保目录存在
+        os.makedirs(data_folder, exist_ok=True)
         
         dashboard_url = COROS_URL_DICT.get("DASHBOARD")
-        dashboard_resp = await coros.req.get(dashboard_url)
+        dashboard_resp = await coros.req.post(dashboard_url, json={})
         dashboard_data = dashboard_resp.json()
         
         pb_list = []
@@ -239,12 +239,15 @@ async def download_and_generate(account, password):
     # ================= 新增功能 2：遍历 to_generate_coros_ids 获取并保存 detail JSON =================
     try:
         coros_details_folder = os.path.join(parent, "public", "data", "coros_details")
-        os.makedirs(coros_details_folder, exist_ok=True)  # 确保目录存在
+        os.makedirs(coros_details_folder, exist_ok=True)
         
         for label_d in to_generate_coros_ids:
             detail_url = f"https://teamcnapi.coros.com/activity/detail/query?screenW=1344&screenH=1050&labelId={label_d}&sportType=100"
-            detail_resp = await coros.req.get(detail_url)
+            detail_resp = await coros.req.post(detail_url, json={})
             detail_data = detail_resp.json()
+            
+            if detail_data.get("result") == "1001":
+                print(f"Server exception for {label_d}, maybe rate limited.")
             
             detail_file_path = os.path.join(coros_details_folder, f"{label_d}.json")
             with open(detail_file_path, "w", encoding="utf-8") as f:
@@ -254,7 +257,6 @@ async def download_and_generate(account, password):
         print(f"Error fetching/saving coros detail data: {e}")
     # ===============================================================================================
 
-    # 注意：将关闭请求客户端的操作移动到所有新增的网络请求完成之后
     await coros.req.aclose()
 
     make_activities_file(SQL_FILE, FIT_FOLDER, JSON_FILE, "fit", json_file2 = JSON_FILE2)
@@ -271,6 +273,7 @@ async def download_and_generate(account, password):
             with open(output_filename, 'w', encoding='utf-8') as f:
                 json.dump(run_data, f, indent=4, ensure_ascii=False)
             print(f"Successfully processed run data. Saved to {output_filename}")
+          
 async def gather_with_concurrency(n, tasks):
     semaphore = asyncio.Semaphore(n)
 
