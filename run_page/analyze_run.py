@@ -1,7 +1,7 @@
 import os
 import json
 import re
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 import google.generativeai as genai
 
 # ==========================================
@@ -13,7 +13,7 @@ parent = os.path.dirname(current)
 runs_file = os.path.join(parent, "src", "static", "all.json")
 data_dir = os.path.join(parent, "public", "data")
 details_dir = os.path.join(data_dir, "details")
-summary_file = os.path.join(data_dir, "recent_run_summary.txt")
+summary_file = os.path.join(data_dir, "recent_run_summary.md")
 
 # ==========================================
 # 2. Gemini API 配置
@@ -24,7 +24,7 @@ if not API_KEY:
     raise ValueError("未找到 GEMINI_API_KEY，请设置环境变量。")
 
 genai.configure(api_key=API_KEY)
-model = genai.GenerativeModel('gemini-3.5-flash')
+model = genai.GenerativeModel('gemini-3.1-pro')
 
 # ==========================================
 # 3. 辅助计算函数
@@ -76,10 +76,33 @@ def main():
         if os.path.exists(detail_path):
             with open(detail_path, 'r', encoding='utf-8') as df:
                 detail_data = json.load(df)
-                # 仅提取需要的 key
+                # 1. 仅提取需要的 key
                 extracted = {k: detail_data.get(k) for k in keys_to_extract if k in detail_data}
-                data_1_latest_details.append(extracted)
+                
+                # 2. 针对 start_time 进行加 8 小时兼容处理
+                if "start_time" in extracted and extracted["start_time"]:
+                    try:
+                        # fromisoformat 可以无缝解析 "2026-05-26T21:54:04" 或 "2026-05-26 21:54:04"
+                        dt = datetime.fromisoformat(extracted["start_time"])
+                        
+                        if dt.tzinfo is None:
+                            # 【场景 A】如果没有时区信息，说明是 naive time
+                            # 默认把它当作 UTC 时间，先补上 UTC 时区，再转成东八区（此时末尾会自动带上 +08:00）
+                            dt_utc = dt.replace(tzinfo=timezone.utc)
+                            dt_local = dt_utc.astimezone(timezone(timedelta(hours=8)))
+                            
+                            # 如果你【不想要】末尾带上 "+08:00" 后缀，只要干净的 local 时间字符串，请取消注释下面这行：
+                            # dt_local = dt + timedelta(hours=8)
+                        else:
+                            # 【场景 B】如果原本就带有群组时区（如 +00:00）
+                            dt_local = dt.astimezone(timezone(timedelta(hours=8)))
+                        
+                        extracted["start_time"] = dt_local.isoformat()
+                        
+                    except Exception as e:
+                        print(f"解析或转换 start_time 失败 (run_id: {run_id}): {e}")
 
+                data_1_latest_details.append(extracted)
     # --- C. 获取【数据2】：周/月/年的周期性统计 ---
     stats = {
         "week": {"dist_km": 0, "time_sec": 0, "hr_x_time": 0},
@@ -157,7 +180,7 @@ def main():
             mtime = os.path.getmtime(summary_file)
             old_date_str = datetime.fromtimestamp(mtime).strftime("%Y-%m-%d")
 
-        new_filename = f"recent_run_summary_{old_date_str}.txt"
+        new_filename = f"recent_run_summary_{old_date_str}.md"
         os.rename(summary_file, os.path.join(data_dir, new_filename))
         print(f"📦 已将旧报告归档为: {new_filename}")
 
@@ -174,11 +197,11 @@ def main():
 
 请按以下结构输出总结（请直接使用 Markdown 格式，不要加多余的客套话）：
 
-### 1. 最近一次表现分析
-评估最近一天跑步的质量，点评步频与心率的匹配度，是否有亮点或不足。需写出当天的日期。
+### 1. 最近一次表现分析(需写出对应的日期)
+评估最近一天跑步的质量，点评步频与心率的匹配度，是否有亮点或不足。
 
 ### 2. 周期跑量复盘 (周/月/年)
-结合我本周、本月和今年的累计跑量，评估我的训练连贯性和跑量积累情况。指出当前的月跑量/年跑量是否处于合理的马拉松训练节奏中。
+结合我本周、本月和今年的累计跑量，评估我的训练连贯性和跑量积累情况。指出当前的月跑量/年跑量是否处于合理的马拉松训练节奏中。计划在12月份参加马拉松比赛。
 
 ### 3. 教练建议与加强方向
 给出具体的改进建议。例如：是否需要增加基础有氧（LSD）、是否需要针对心率漂移进行专项训练，或者是否要注意避免过度训练。
