@@ -29,6 +29,10 @@ jobs:
       - name: Have Fun
         run: |
           python run_page/fun.py
+          
+      - name: Generate Summary
+        run: python run_page/analyze_run.py 
+        
       - name: Push new runs
         run: |
           git config --local user.email "action@github.com"
