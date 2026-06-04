@@ -24,7 +24,7 @@ if not API_KEY:
     raise ValueError("未找到 GEMINI_API_KEY，请设置环境变量。")
 
 genai.configure(api_key=API_KEY)
-model = genai.GenerativeModel('gemini-3.1-pro-preview')
+model = genai.GenerativeModel('gemini-3.5-flash')
 
 # ==========================================
 # 3. 辅助计算函数
