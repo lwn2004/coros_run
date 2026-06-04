@@ -215,7 +215,7 @@ async def download_and_generate(account, password):
         dashboard_data = dashboard_resp.json()
         
         pb_list = []
-        record_detail_list = dashboard_data.get("data", {}).get("recordDetailList", [])
+        record_detail_list = dashboard_data.get("data", {}).get("summaryInfo", {}).get("recordDetailList", [])
         for record in record_detail_list:
             if record.get("type") == 4:
                 pb_list = record.get("recordList", [])
