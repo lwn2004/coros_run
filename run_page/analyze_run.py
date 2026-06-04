@@ -16,9 +16,8 @@ def parse_runs_and_aggregate():
             if not runs:
                 return None, None
             
-            # 假设数据按时间倒序排列，第一个为最近一次跑步
             latest_run = runs[-1]
-            latest_run_details_file =  os.path.join(parent, "public", "data", "coros_details", f"{latest_run.run_id}.json")
+            latest_run_details_file =  os.path.join(parent, "public", "data", "coros_details", f"{latest_run['run_id']}.json")
             now = datetime.now()
             # 计算时间边界
             # 假设周一为一周的开始
