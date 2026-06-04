@@ -211,7 +211,7 @@ async def download_and_generate(account, password):
         os.makedirs(data_folder, exist_ok=True)
         
         dashboard_url = COROS_URL_DICT.get("DASHBOARD")
-        dashboard_resp = await coros.req.post(dashboard_url, json={})
+        dashboard_resp = await coros.req.get(dashboard_url, json={})
         dashboard_data = dashboard_resp.json()
         
         pb_list = []
