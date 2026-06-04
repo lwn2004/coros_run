@@ -4,6 +4,8 @@ import requests
 from datetime import datetime, timedelta
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+current = os.path.dirname(os.path.realpath(__file__))
+parent = os.path.dirname(current)
 
 def parse_runs_and_aggregate():
     """读取 all.json 并计算本周、本月、今年的统计数据"""
@@ -143,5 +145,4 @@ def main():
     print("全部流程执行完毕！")
 
 if __name__ == "__main__":
-    parent = os.path.dirname(current) 
     main()
