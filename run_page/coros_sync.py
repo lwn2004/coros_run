@@ -211,7 +211,7 @@ async def download_and_generate(account, password):
         os.makedirs(data_folder, exist_ok=True)
         
         dashboard_url = COROS_URL_DICT.get("DASHBOARD")
-        dashboard_resp = await coros.req.get(dashboard_url, json={})
+        dashboard_resp = await coros.req.get(dashboard_url)
         dashboard_data = dashboard_resp.json()
         
         pb_list = []
@@ -223,7 +223,7 @@ async def download_and_generate(account, password):
         
         pb_file_path = os.path.join(data_folder, "pb.json")
         with open(pb_file_path, "w", encoding="utf-8") as f:
-            json.dump(dashboard_data, f, indent=4, ensure_ascii=False)
+            json.dump(pb_list, f, indent=4, ensure_ascii=False)
         print(f"Successfully saved PB data to {pb_file_path}")
     except Exception as e:
         print(f"Error fetching/saving dashboard pb data: {e}")
