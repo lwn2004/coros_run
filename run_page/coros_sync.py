@@ -213,6 +213,8 @@ async def download_and_generate(account, password):
         dashboard_url = COROS_URL_DICT.get("DASHBOARD")
         dashboard_resp = await coros.req.get(dashboard_url)
         dashboard_data = dashboard_resp.json()
+        print("got pb content:")
+        print(json.dumps(dashboard_data, indent=2))
         
         pb_list = []
         record_detail_list = dashboard_data.get("data", {}).get("summaryInfo", {}).get("recordDetailList", [])
