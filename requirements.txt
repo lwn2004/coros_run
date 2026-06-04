@@ -31,4 +31,4 @@ opencc-python-reimplemented
 jinja2
 fitparse
 pillow
-google-generativeai
+google-genai
