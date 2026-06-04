@@ -665,7 +665,7 @@ def main():
     activities_file = os.path.join(parent, "src", "static", "activities.json")
     shutil.copyfile(activities_file, os.path.join(parent, "public", "data", "activities.json"))
     pb_file = os.path.join(parent, "src", "static", "pb.json")
-    shutil.copyfile(pb_file, os.path.join(parent, "public", "data", "pb.json"))
+    #shutil.copyfile(pb_file, os.path.join(parent, "public", "data", "pb.json"))
     events_file = os.path.join(parent, "src", "static", "events.json")
     template_file = "template.html"
     output_file = os.path.join(parent, "public", "fun.html")
