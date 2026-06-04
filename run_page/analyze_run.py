@@ -77,7 +77,7 @@ def check_if_analyzed(run_id):
 
 def analyze_with_gemini(latest_run, stats):
     """调用 Gemini 分析全面数据"""
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key={GEMINI_API_KEY}"
     
     prompt = f"""
     你现在是一位严谨且专业的马拉松长跑教练。我将提供我最近一次的跑步数据以及本周、本月、今年的累计跑步统计。
