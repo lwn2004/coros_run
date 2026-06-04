@@ -129,13 +129,12 @@ def save_to_json(run_id, summary_text):
         "data",
         "recent_run_summary.json"
     )
-    with open(summaryfile, "r", encoding="utf-8") as f:
-        data = json.load(f)
-
-    data[str(run_id)] = summary_text
+    data = {
+      str(run_id): summary_text
+    }
     with open(summaryfile, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
-
+      
 def main():
     latest_run, stats = parse_runs_and_aggregate()
     if not latest_run:
