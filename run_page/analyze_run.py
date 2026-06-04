@@ -17,7 +17,12 @@ def parse_runs_and_aggregate():
                 return None, None
             
             latest_run = runs[-1]
-            latest_run_details_file =  os.path.join(parent, "public", "data", "coros_details", f"{latest_run['run_id']}.json")
+            latest_run_details_file =  os.path.join(parent, "public", "data", "details", f"{latest_run['run_id']}.json")
+            latest_run_details = {}
+            keys = ["run_id", "start_time", "weather", "summary", "laps"]
+            with open(latest_run_details_file, "r", encoding="utf-8") as f:
+              run_details = json.load(f)
+              latest_run_details = {k: run_details[k] for k in keys}
             now = datetime.now()
             # 计算时间边界
             # 假设周一为一周的开始
@@ -58,23 +63,26 @@ def parse_runs_and_aggregate():
             stats["monthly"]["distance"] = round(stats["monthly"]["distance"], 2)
             stats["weekly"]["distance"] = round(stats["weekly"]["distance"], 2)
 
-            return latest_run, stats
+            return latest_run_details, stats
 
     except Exception as e:
         print(f"读取或处理数据失败: {e}")
         return None, None
 
 def check_if_analyzed(run_id):
-    runfile = os.path.join(parent, "public", "data", "coros_details", f"{run_id}.json")
-    with open(runfile, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    if "ai_summary" not in data:
-        return False
-    elif data["ai_summary"] == "":
-        return False
-    else:
-        return True
+    summaryfile = os.path.join(
+        parent,
+        "public",
+        "data",
+        "recent_run_summary.json"
+    )
 
+    if not os.path.exists(summaryfile):
+        return False
+
+    with open(summaryfile, "r", encoding="utf-8") as f:
+        return str(run_id) in json.load(f)
+      
 def analyze_with_gemini(latest_run, stats):
     """调用 Gemini 分析全面数据"""
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key={GEMINI_API_KEY}"
@@ -115,13 +123,17 @@ def analyze_with_gemini(latest_run, stats):
     return result['candidates'][0]['content']['parts'][0]['text']
 
 def save_to_json(run_id, summary_text):
-    runfile = os.path.join(parent, "public", "data", "coros_details", f"{run_id}.json")
-    with open(runfile, "r", encoding="utf-8") as f:
+    summaryfile = os.path.join(
+        parent,
+        "public",
+        "data",
+        "recent_run_summary.json"
+    )
+    with open(summaryfile, "r", encoding="utf-8") as f:
         data = json.load(f)
 
-    data["ai_summary"] = summary_text
-
-    with open(runfile, "w", encoding="utf-8") as f:
+    data[str(run_id)] = summary_text
+    with open(summaryfile, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
 def main():
