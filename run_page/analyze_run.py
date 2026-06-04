@@ -13,7 +13,8 @@ parent = os.path.dirname(current)
 runs_file = os.path.join(parent, "src", "static", "all.json")
 data_dir = os.path.join(parent, "public", "data")
 details_dir = os.path.join(data_dir, "details")
-summary_file = os.path.join(data_dir, "recent_run_summary.md")
+summary_dir = os.path.join(data_dir, "ai_summary")
+summary_file = os.path.join(summary_dir, "last_run_summary.md")
 
 # ==========================================
 # 2. Gemini API 配置
@@ -162,7 +163,7 @@ def main():
         f"- 本月统计 ({ref_month}月): {format_stat(stats['month'])}\n"
         f"- 本年统计 ({ref_date.year}年): {format_stat(stats['year'])}"
     )
-
+    os.makedirs(os.path.dirname(summary_file), exist_ok=True)
     # --- D. 处理旧的 recent_run_summary.txt ---
     if os.path.exists(summary_file):
         with open(summary_file, 'r', encoding='utf-8') as f:
@@ -180,8 +181,8 @@ def main():
             mtime = os.path.getmtime(summary_file)
             old_date_str = datetime.fromtimestamp(mtime).strftime("%Y-%m-%d")
 
-        new_filename = f"recent_run_summary_{old_date_str}.md"
-        os.rename(summary_file, os.path.join(data_dir, new_filename))
+        new_filename = f"last_run_summary_{old_date_str}.md"
+        os.rename(summary_file, os.path.join(summary_dir, new_filename))
         print(f"📦 已将旧报告归档为: {new_filename}")
 
     # --- E. 组装 Prompt 并调用 Gemini ---
