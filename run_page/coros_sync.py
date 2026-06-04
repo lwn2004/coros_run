@@ -272,19 +272,19 @@ async def download_and_generate(account, password):
     await coros.req.aclose()
 
     make_activities_file(SQL_FILE, FIT_FOLDER, JSON_FILE, "fit", json_file2 = JSON_FILE2)
-#    fitids_need_reprocess = find_non_archive_weather_fit_ids(details_folder)
-#    for label_id in to_generate_coros_ids + fitids_need_reprocess:
-#        fit_path = os.path.join(folder, f"{label_id}.fit")
-#        print(f"Parsing fit file: {label_id}")
-#        run_data = parse_fit_file_garmin_sdk(fit_path)
-#  
-#        if run_data:
-#            json_id = run_data['run_id']
-#            run_data['fit_id'] = label_id
-#            output_filename = os.path.join(details_folder, f"{json_id}.json")
-#            with open(output_filename, 'w', encoding='utf-8') as f:
-#                json.dump(run_data, f, indent=4, ensure_ascii=False)
-#            print(f"Successfully processed run data. Saved to {output_filename}")
+    fitids_need_reprocess = find_non_archive_weather_fit_ids(details_folder)
+    for label_id in to_generate_coros_ids + fitids_need_reprocess:
+        fit_path = os.path.join(folder, f"{label_id}.fit")
+        print(f"Parsing fit file: {label_id}")
+        run_data = parse_fit_file_garmin_sdk(fit_path)
+  
+        if run_data:
+            json_id = run_data['run_id']
+            run_data['fit_id'] = label_id
+            output_filename = os.path.join(details_folder, f"{json_id}.json")
+            with open(output_filename, 'w', encoding='utf-8') as f:
+                json.dump(run_data, f, indent=4, ensure_ascii=False)
+            print(f"Successfully processed run data. Saved to {output_filename}")
           
 async def gather_with_concurrency(n, tasks):
     semaphore = asyncio.Semaphore(n)
