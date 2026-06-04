@@ -31,6 +31,8 @@ jobs:
           python run_page/fun.py
           
       - name: Generate Summary
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python run_page/analyze_run.py 
         
       - name: Push new runs
