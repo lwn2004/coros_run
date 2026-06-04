@@ -85,6 +85,7 @@ def analyze_with_gemini(latest_run, stats):
     
     【最新一次跑步数据】
     {json.dumps(latest_run, ensure_ascii=False, indent=2)}
+    (avgCadence为平均步频)
     
     【周期性统计数据】
     - 本周累计：{stats['weekly']['distance']} 公里 ({stats['weekly']['count']} 次)
