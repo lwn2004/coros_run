@@ -8,7 +8,7 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 def parse_runs_and_aggregate():
     """读取 all.json 并计算本周、本月、今年的统计数据"""
     try:
-	    runs_file = os.path.join(parent, "src", "static", "all.json")
+        runs_file = os.path.join(parent, "src", "static", "all.json")
         with open(runs_file, "r", encoding="utf-8") as f:
             runs = json.load(f)
             if not runs:
@@ -65,15 +65,15 @@ def parse_runs_and_aggregate():
 
 def check_if_analyzed(run_id):
     runfile = os.path.join(parent, "public", "data", "coros_details", f"{run_id}.json")
-	with open(runfile, "r", encoding="utf-8") as f:
-	    data = json.load(f)
-	if "ai_summary" not in data:
-	    return False
-	elif data["ai_summary"] == "":
-	    return False
-	else:
-	    return True
-		
+    with open(runfile, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    if "ai_summary" not in data:
+        return False
+    elif data["ai_summary"] == "":
+        return False
+    else:
+        return True
+
 def analyze_with_gemini(latest_run, stats):
     """调用 Gemini 分析全面数据"""
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
