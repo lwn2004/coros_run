@@ -2,7 +2,7 @@ import os
 import json
 import re
 from datetime import datetime, timedelta, timezone
-import google.generativeai as genai
+import google.genai as genai
 
 # ==========================================
 # 1. 初始化路径
@@ -25,7 +25,7 @@ if not API_KEY:
     raise ValueError("未找到 GEMINI_API_KEY，请设置环境变量。")
 
 genai.configure(api_key=API_KEY)
-model = genai.GenerativeModel('gemini-3.1-pro')
+model = genai.GenerativeModel('gemini-3.1-pro-preview')
 
 # ==========================================
 # 3. 辅助计算函数
