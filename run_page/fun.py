@@ -664,7 +664,7 @@ def main():
     shutil.copyfile(runs_file, os.path.join(parent, "public", "data", "all.json"))
     activities_file = os.path.join(parent, "src", "static", "activities.json")
     shutil.copyfile(activities_file, os.path.join(parent, "public", "data", "activities.json"))
-    pb_file = os.path.join(parent, "src", "static", "pb.json")
+    pb_file = os.path.join(parent, "public", "data", "pb.json")
     #shutil.copyfile(pb_file, os.path.join(parent, "public", "data", "pb.json"))
     events_file = os.path.join(parent, "src", "static", "events.json")
     template_file = "template.html"
@@ -706,7 +706,7 @@ def main():
         with open(recent_run_json, 'r', encoding='utf-8') as f:
             recent_run_data = json.load(f)
     except FileNotFoundError:
-        print(f"Error: failed to find run file {path}")
+        print(f"Error: failed to find run file {recent_run_json}")
         recent_run_data = {}
     if(recent_run_data):
       generate_share_card(bg_file, recent_run_data, sharecard_file)
