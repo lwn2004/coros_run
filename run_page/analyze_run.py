@@ -127,7 +127,7 @@ def generate_ai_report(ai_context_json):
         # 【改动 3】新版调用结构：由原来的 model.generate_content 变更为 client.models.generate_content
         # 【改动 4】新版更推荐使用简明模型名称，例如 'gemini-1.5-pro'
         response = client.models.generate_content(
-            model='gemini-1.5-pro',
+            model='gemini-3.5-flash',
             contents=prompt
         )
         return response.text
