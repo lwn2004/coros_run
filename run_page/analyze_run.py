@@ -6,9 +6,8 @@ from google import genai
 # ==========================================
 # 1. 配置与初始化
 # ==========================================
-
-client = genai.Client()
-
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+client = genai.Client(api_key=GEMINI_API_KEY)
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 data_dir = os.path.join(parent, "public", "data")
