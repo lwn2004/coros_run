@@ -253,7 +253,74 @@
     }
     #btn-back-today:active { transform: scale(0.95); }
     [data-theme="light"] #btn-back-today { box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+/* 容器整体基础样式 */
+.markdown-body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;          /* 舒适的行高 */
+    color: #1f2328;            /* GitHub 经典的深灰文本色 */
+    word-wrap: break-word;
+}
 
+/* 块级元素（段落、引用、列表、代码块）的下边距 */
+.markdown-body p,
+.markdown-body blockquote,
+.markdown-body ul,
+.markdown-body ol,
+.markdown-body dl,
+.markdown-body table,
+.markdown-body pre {
+    margin-top: 0;
+    margin-bottom: 16px;       /* 核心：确保段落之间有16px的留白 */
+}
+
+/* 标题样式与边距调整 */
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+    margin-top: 24px;          /* 标题上方的留白，拉开与上文的距离 */
+    margin-bottom: 16px;       /* 标题下方的留白 */
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+/* 一级和二级标题的特殊处理：放大并加上底部细线 */
+.markdown-body h1 {
+    font-size: 2em;
+    padding-bottom: 0.3em;
+    border-bottom: 1px solid #d0d7de;
+}
+
+.markdown-body h2 {
+    font-size: 1.5em;
+    padding-bottom: 0.3em;
+    border-bottom: 1px solid #d0d7de;
+}
+
+/* 列表缩进 */
+.markdown-body ul,
+.markdown-body ol {
+    padding-left: 2em;
+}
+
+/* 列表内列表项的紧凑调整 */
+.markdown-body li + li {
+    margin-top: 0.25em;
+}
+
+/* 代码块的背景与内边距 */
+.markdown-body pre {
+    padding: 16px;
+    background-color: #f6f8fa;
+    border-radius: 6px;
+    font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+    font-size: 85%;
+    line-height: 1.45;
+    overflow: auto;
+}
     /* ==========================================================================
        赛事纪录页面 & 个人最佳(PB) 样式
        ========================================================================== */
@@ -455,6 +522,7 @@
         .prediction-charts-wrapper .chart-card { flex: none !important; height: 400px !important; margin-bottom: 16px; }
 		.race-map-container { height: 250px; }
 		#stats-grid-detail-mobile { display: block !important; }
+		#ai-page { padding: 0 !important;}
     }
 </style>
 
@@ -672,7 +740,7 @@
         </div>
     </div>
     <div class="main-layout" id="ai-page" style="display: none; flex-direction: column; gap: 16px; padding: 0 1.5rem; overflow-y: auto; height: 100%;">
-        <div class="activity-section" style="max-width: 900px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; min-height: 500px;">
+        <div class="activity-section" style="margin: 0 auto; width: 100%; display: flex; flex-direction: column; min-height: 500px;">
             <div class="activity-header">
                 <div class="activity-title">
                     <svg viewBox="0 0 24 24" width="22" height="22" style="vertical-align: text-bottom; margin-right: 6px; fill: var(--accent-color);">
