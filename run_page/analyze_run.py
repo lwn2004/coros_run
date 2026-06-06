@@ -124,8 +124,6 @@ def generate_ai_report(ai_context_json):
     print("正在请求 Gemini API，请稍候...")
     
     try:
-        # 【改动 3】新版调用结构：由原来的 model.generate_content 变更为 client.models.generate_content
-        # 【改动 4】新版更推荐使用简明模型名称，例如 'gemini-1.5-pro'
         response = client.models.generate_content(
             model='gemini-3.5-flash',
             contents=prompt
@@ -135,11 +133,37 @@ def generate_ai_report(ai_context_json):
         print(f"调用 Gemini API 失败: {e}")
         return None
 
+def update_ai_index(target_dir):
+    """扫描报告目录并生成带有时间排序的 index.json，供前端读取"""
+    if not os.path.exists(target_dir):
+        return
+        
+    md_files = [f for f in os.listdir(target_dir) if f.endswith('_ai_summary.md')]
+    index_data = []
+    
+    for filename in md_files:
+        # 文件名格式约束为 "YYYY-MM-DD_ai_summary.md"
+        date_str = filename.split('_')[0]
+        index_data.append({
+            "date": date_str,
+            "filename": filename
+        })
+        
+    # 按时间降序排序（最新的在前面）
+    index_data.sort(key=lambda x: x['date'], reverse=True)
+    
+    index_path = os.path.join(target_dir, "index.json")
+    try:
+        with open(index_path, 'w', encoding='utf-8') as f:
+            json.dump(index_data, f, ensure_ascii=False, indent=2)
+        print(f"✅ AI 报告索引已更新，共 {len(index_data)} 份报告。")
+    except Exception as e:
+        print(f"❌ 更新 AI 索引失败: {e}")
+
 # ==========================================
-# 4. 主流程与文件保存 (保持不变)
+# 4. 主流程与文件保存
 # ==========================================
 def main():
-
     print("开始提取数据...")
     coros_summary = extract_coros_data(coros_data1, coros_data2)
     run_logs = extract_all_json(runs_file, days=28)
@@ -160,12 +184,16 @@ def main():
         date_str = datetime.now().strftime("%Y-%m-%d")
         filename = os.path.join(summary_dir, f"{date_str}_ai_summary.md")
         os.makedirs(os.path.dirname(filename), exist_ok=True)
+        
         # 写入 Markdown 文件
         with open(filename, 'w', encoding='utf-8') as f:
             f.write(f"# {date_str} 周期训练分析报告\n\n")
             f.write(report_content)
             
-        print(f"✅ 成功！报告已保存至当前目录: {filename}")
+        print(f"✅ 成功！报告已保存至: {filename}")
+        
+        # 更新供前端调用的索引文件
+        update_ai_index(summary_dir)
     else:
         print("❌ 报告生成失败。")
 
