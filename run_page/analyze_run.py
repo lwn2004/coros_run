@@ -29,17 +29,17 @@ def format_pace(speed_m_s):
     secs = int(seconds_per_km % 60)
     return f"{mins}:{secs:02d}"
 
-def extract_coros_data(data1_path, data3_path):
+def extract_coros_data(data1_path, data2_path):
     """提取 COROS EvoLab 生理基线和近期疲劳数据"""
     try:
         with open(data1_path, 'r', encoding='utf-8') as f:
             d1 = json.load(f).get('data', {}).get('dayList', [])
-        with open(data3_path, 'r', encoding='utf-8') as f:
-            d3 = json.load(f).get('data', {}).get('summaryInfo', {})
+        with open(data2_path, 'r', encoding='utf-8') as f:
+            d2 = json.load(f).get('data', {}).get('summaryInfo', {})
             
         latest_state = d1[-1] if d1 else {}
         
-        pbs = d3.get('recordDetailList', [])
+        pbs = d2.get('recordDetailList', [])
         pb_summary = {}
         if len(pbs) > 0 and 'recordList' in pbs[0]:
             for record in pbs[0]['recordList']:
@@ -52,9 +52,9 @@ def extract_coros_data(data1_path, data3_path):
 
         return {
             "physiological_baseline": {
-                "vo2max": latest_state.get('vo2max', d3.get('vo2max')),
-                "lthr_bpm": d3.get('lthr', latest_state.get('lthr')),
-                "ltsp_pace": format_pace(1000 / d3.get('ltsp')) if d3.get('ltsp') else "N/A",
+                "vo2max": latest_state.get('vo2max', d2.get('vo2max')),
+                "lthr_bpm": d2.get('lthr', latest_state.get('lthr')),
+                "ltsp_pace": format_pace(1000 / d2.get('ltsp')) if d2.get('ltsp') else "N/A",
                 "recent_rhr": latest_state.get('rhr'),
                 "recent_sleep_hrv": latest_state.get('avgSleepHrv')
             },
@@ -113,10 +113,11 @@ def generate_ai_report(ai_context_json):
     {json.dumps(ai_context_json, indent=2, ensure_ascii=False)}
 
     【请你执行以下分析与指导】
-    1. 体能状态评估：基于最大摄氧量 (VO2Max)、乳酸阈值心率 (LTHR) 和近期的疲劳/负荷指数，评估目前的有氧基础是否足以支撑广马 3:30-3:45 的目标？
-    2. 近期训练诊断：分析最近 4 周的日常跑步数据，轻松跑（有氧底盘）心率控制得合理吗？是否有垃圾跑量？
-    3. 训练配速建议：根据 LTHR 和历史表现，精确计算并给出接下来的：轻松跑 (E)、马拉松配速跑 (M)、乳酸阈值跑 (T) 和间歇跑 (I) 的推荐配速区间和心率区间。
-    4. 下一阶段重点：在接下来的 4 周基础期内，应该把训练重心放在增加周跑量，还是提升跑动经济性？请给出具体的每周训练结构建议。
+    1. 一句话（100字左右）总结本周期的跑步情况。
+    2. 体能状态评估：基于最大摄氧量 (VO2Max)、乳酸阈值心率 (LTHR) 和近期的疲劳/负荷指数，评估目前的有氧基础是否足以支撑广马 3:30-3:45 的目标？
+    3. 近期训练诊断：分析最近 4 周的日常跑步数据，轻松跑（有氧底盘）心率控制得合理吗？是否有垃圾跑量？
+    4. 训练配速建议：根据 LTHR 和历史表现，精确计算并给出接下来的：轻松跑 (E)、马拉松配速跑 (M)、乳酸阈值跑 (T) 和间歇跑 (I) 的推荐配速区间和心率区间。
+    5. 下一阶段重点：在接下来的 4 周基础期内，应该把训练重心放在增加周跑量，还是提升跑动经济性？请给出具体的每周训练结构建议。
 
     请用专业、中肯且直白的语言回答，直接指出训练短板，使用 Markdown 格式排版，不要加多余的客套话。
     """
@@ -169,7 +170,8 @@ def main():
     print("开始提取数据...")
     coros_summary = extract_coros_data(coros_data1, coros_data2)
     run_logs = extract_all_json(runs_file, days=28)
-    
+    print("提取到的coros信息如下:")
+    print(json.dumps(coros_summary, indent=4))
     if not coros_summary or not run_logs:
         print("警告：部分数据提取失败，请检查 JSON 文件路径和内容。")
 
