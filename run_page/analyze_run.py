@@ -126,7 +126,8 @@ def generate_ai_report(ai_context_json):
     
     try:
         response = client.models.generate_content(
-            model='gemini-3.5-flash',
+            #model='gemini-3.5-flash',
+            model='gemini-3.1-pro-preview',
             contents=prompt
         )
         return response.text
