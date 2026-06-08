@@ -575,6 +575,7 @@
 							<option value="locother">在外地</option>
 							<option value="fastest10Runs">最快10次</option>
 							<option value="longest10Runs">最远10次</option>
+							<option value="onThisDay">史上今日</option>
                         </select>
                     </div>				
                     <button class="filter-btn active" data-year="all">All</button>
@@ -1704,6 +1705,8 @@
             filteredRuns = tempRuns.filter(run => run.distance > 100).sort((a, b) => b.average_speed - a.average_speed).slice(0, 10);
         } else if (currentTypeFilter === 'longest10Runs') {
             filteredRuns = tempRuns.filter(run => run.distance > 100).sort((a, b) => b.distance - a.distance).slice(0, 10);
+        } else if (currentTypeFilter === 'onThisDay') {
+            filteredRuns = tempRuns.filter(run => run.start_date_local && run.start_date_local.includes(`${(new Date().getMonth() + 1).toString().padStart(2, '0')}-${new Date().getDate().toString().padStart(2, '0')}`));
         } else {
             filteredRuns = tempRuns;
         }
