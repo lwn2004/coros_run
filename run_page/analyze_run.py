@@ -164,7 +164,7 @@ def update_ai_index(target_dir):
 # 4. 主流程与文件保存
 # ==========================================
 def main():
-    if datetime.now().weekday() != 1:
+    if datetime.now().weekday() != 6:
         return
     print("开始提取数据...")
     coros_summary = extract_coros_data(coros_data1, coros_data2)
