@@ -41,14 +41,14 @@ def extract_coros_data(data1_path, data2_path):
         
         pbs = d2.get('recordDetailList', [])
         pb_summary = {}
-        if len(pbs) > 0 and 'recordList' in pbs[0]:
-            for record in pbs[0]['recordList']:
-                dist = record.get('distance', 0)
-                duration = record.get('duration', 0)
-                if dist == 42195: pb_summary['Full_Marathon'] = duration
-                elif dist == 21097.5: pb_summary['Half_Marathon'] = duration
-                elif dist == 10000: pb_summary['10km'] = duration
-                elif dist == 5000: pb_summary['5km'] = duration
+        #if len(pbs) > 0 and 'recordList' in pbs[0]:
+        #    for record in pbs[0]['recordList']:
+        #        dist = record.get('distance', 0)
+        #        duration = record.get('duration', 0)
+        #        if dist == 42195: pb_summary['Full_Marathon'] = duration
+        #        elif dist == 21097.5: pb_summary['Half_Marathon'] = duration
+        #        elif dist == 10000: pb_summary['10km'] = duration
+        #        elif dist == 5000: pb_summary['5km'] = duration
 
         return {
             "physiological_baseline": {
