@@ -1762,7 +1762,7 @@
         if (aiIndexLoaded) return;
         try {
             // 获取我们用 Python 脚本生成的索引 JSON
-            const res = await fetch('https://run.linwn.net/data/ai_summary/index.json');
+            const res = await fetch('https://run.linwn.net/data/summary/index.json');
             if (res.ok) {
                 aiIndexList = await res.json();
                 aiIndexLoaded = true;
@@ -1797,7 +1797,7 @@
         document.getElementById('ai-markdown-content').innerHTML = '<p style="color: var(--text-muted);">加载报告内容中...</p>';
         
         try {
-            const res = await fetch(`https://run.linwn.net/data/ai_summary/${fileInfo.filename}`);
+            const res = await fetch(`https://run.linwn.net/data/summary/${fileInfo.report}`);
             if (res.ok) {
                 const mdText = await res.text();
                 // 使用 marked.js 将 MD 转为 HTML 渲染
@@ -1819,11 +1819,11 @@
         const previewEl = document.getElementById('ai-summary-preview');
         if (!previewEl) return;
         try {
-            const res = await fetch('https://run.linwn.net/data/ai_summary/index.json');
+            const res = await fetch('https://run.linwn.net/data/summary/index.json');
             if (res.ok) {
                 const list = await res.json();
                 if (list.length > 0) {
-                    const mdRes = await fetch(`https://run.linwn.net/data/ai_summary/${list[0].filename}`);
+                    const mdRes = await fetch(`https://run.linwn.net/data/summary/${list[0].report}`);
                     if (mdRes.ok) {
                         const mdText = await mdRes.text();
                         // 移除标题、列表和特殊符号，提取出最核心的纯文本摘要段落
