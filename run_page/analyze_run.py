@@ -1,6 +1,6 @@
 import json
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from google import genai
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
@@ -13,6 +13,11 @@ runs_details_dir = os.path.join(data_dir, "details")
 coros_data_dir = os.path.join(data_dir, "coros_details")
 coros_data = os.path.join(coros_data_dir, "data.json")
 summary_dir = os.path.join(data_dir, "ai_summary")
+
+UTC8 = timezone(timedelta(hours=8))
+
+def now_utc8():
+    return datetime.now(UTC8)
 
 def format_pace(speed_m_s):
     if not speed_m_s or speed_m_s <= 0:
@@ -34,19 +39,14 @@ def parse_duration_to_seconds(duration_str):
     return h * 3600 + m * 60 + sec
 
 def get_4weeks_start_date():
-    """
-    获取包含本周在内，向前共4周的起始周一日期
-    """
 
-    today = datetime.now().date()
+    today = now_utc8().date()
 
-    # 本周周一
-    this_monday = today - timedelta(days=today.weekday())
+    this_monday = today - timedelta(
+        days=today.weekday()
+    )
 
-    # 往前共4周（包含本周）
-    start_monday = this_monday - timedelta(weeks=3)
-
-    return start_monday
+    return this_monday - timedelta(weeks=3)
     
 def load_recent_runs():
     start_date = get_4weeks_start_date()
@@ -76,8 +76,10 @@ def load_recent_runs():
         })
 
     result.sort(
-        key=lambda x: x["start_date_local"],
-        reverse=True
+        key=lambda x: datetime.strptime(
+            x["start_date_local"],
+            "%Y-%m-%d %H:%M:%S"
+        )
     )
 
     return result    
@@ -154,8 +156,7 @@ def build_weekly_summary(run_logs):
         })
 
     result.sort(
-        key=lambda x: x["week_start"],
-        reverse=True
+        key=lambda x: x["week_start"]
     )
 
     return result
@@ -241,8 +242,8 @@ def build_weekly_summary(run_logs):
 def load_current_week_run_details(run_logs):
 
     this_monday = (
-        datetime.now().date()
-        - timedelta(days=datetime.now().weekday())
+        now_utc8().date()
+        - timedelta(days=now_utc8().weekday())
     )
 
     run_ids = []
@@ -280,13 +281,35 @@ def load_current_week_run_details(run_logs):
         ) as f:
             data = json.load(f)
 
+        start_time = data.get("start_time")
+
+        weekday_name = None
+
+        if start_time:
+            dt = datetime.fromisoformat(
+                start_time.replace("Z", "+00:00")
+            )
+
+            weekday_name = [
+                "星期一",
+                "星期二",
+                "星期三",
+                "星期四",
+                "星期五",
+                "星期六",
+                "星期日"
+            ][dt.astimezone(UTC8).weekday()]
+
         details.append({
             "run_id": run_id,
-            "start_time": data.get("start_time"),
+            "start_time": start_time,
+            "weekday": weekday_name,
             "summary": data.get("summary"),
             "laps": data.get("laps", [])
         })
-
+    details.sort(
+        key=lambda x: x["start_time"]
+    )
     return details
     
 def load_last_summary_focus():
@@ -467,7 +490,7 @@ def update_ai_index(target_dir):
 # 4. 主流程与文件保存
 # ==========================================
 def main():
-    #if datetime.now().weekday() != 6:
+    #if now_utc8().weekday() != 6:
     #    return
     print("开始提取数据...")
 
@@ -501,7 +524,7 @@ def main():
 
     if report_content:
         # 以当天日期命名文件
-        date_str = datetime.now().strftime("%Y-%m-%d")
+        date_str = now_utc8().strftime("%Y-%m-%d")
         filename = os.path.join(summary_dir, f"{date_str}_ai_summary.md")
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         
