@@ -2,17 +2,25 @@ import json
 import os
 from datetime import datetime, timedelta, timezone
 from google import genai
+from google.genai import types
 
+# ==========================================
+# 1. 基础配置与路径设置
+# ==========================================
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 client = genai.Client(api_key=GEMINI_API_KEY)
+
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 data_dir = os.path.join(parent, "public", "data")
 runs_file = os.path.join(data_dir, "all.json")
 runs_details_dir = os.path.join(data_dir, "details")
-coros_data_dir = os.path.join(data_dir, "coros_details")
-coros_data = os.path.join(coros_data_dir, "data.json")
-summary_dir = os.path.join(data_dir, "ai_summary")
+
+# 新的目录结构规划
+summary_dir = os.path.join(data_dir, "summary")
+reports_dir = os.path.join(summary_dir, "reports")
+plans_dir = os.path.join(summary_dir, "plans")
+reviews_dir = os.path.join(summary_dir, "reviews")
 
 UTC8 = timezone(timedelta(hours=8))
 
@@ -26,43 +34,34 @@ def format_pace(speed_m_s):
     mins = int(seconds_per_km // 60)
     secs = int(seconds_per_km % 60)
     return f"{mins}:{secs:02d}"
+
 def parse_duration_to_seconds(duration_str):
-    """
-    0:57:16.730000
-    """
     parts = duration_str.split(":")
     h = int(parts[0])
     m = int(parts[1])
-
     sec = float(parts[2])
-
     return h * 3600 + m * 60 + sec
 
 def get_4weeks_start_date():
-
     today = now_utc8().date()
-
-    this_monday = today - timedelta(
-        days=today.weekday()
-    )
-
+    this_monday = today - timedelta(days=today.weekday())
     return this_monday - timedelta(weeks=3)
-    
+
+# ==========================================
+# 2. 数据处理与提取
+# ==========================================
 def load_recent_runs():
     start_date = get_4weeks_start_date()
+    
+    if not os.path.exists(runs_file):
+        return []
 
     with open(runs_file, "r", encoding="utf-8") as f:
         runs = json.load(f)
 
     result = []
-
     for run in runs:
-
-        run_date = datetime.strptime(
-            run["start_date_local"],
-            "%Y-%m-%d %H:%M:%S"
-        ).date()
-
+        run_date = datetime.strptime(run["start_date_local"], "%Y-%m-%d %H:%M:%S").date()
         if run_date < start_date:
             continue
 
@@ -75,39 +74,18 @@ def load_recent_runs():
             "average_speed": run.get("average_speed")
         })
 
-    result.sort(
-        key=lambda x: datetime.strptime(
-            x["start_date_local"],
-            "%Y-%m-%d %H:%M:%S"
-        )
-    )
-
+    result.sort(key=lambda x: datetime.strptime(x["start_date_local"], "%Y-%m-%d %H:%M:%S"))
     return result    
 
 def build_weekly_summary(run_logs):
-
     weekly = {}
-
     for run in run_logs:
-
-        dt = datetime.strptime(
-            run["start_date_local"],
-            "%Y-%m-%d %H:%M:%S"
-        )
-
-        week_start = (
-            dt.date() -
-            timedelta(days=dt.weekday())
-        )
-
+        dt = datetime.strptime(run["start_date_local"], "%Y-%m-%d %H:%M:%S")
+        week_start = (dt.date() - timedelta(days=dt.weekday()))
         key = week_start.strftime("%Y-%m-%d")
-
-        duration_sec = parse_duration_to_seconds(
-            run["moving_time"]
-        )
-
+        
+        duration_sec = parse_duration_to_seconds(run["moving_time"])
         distance = run["distance"]
-
         avg_hr = run.get("average_heartrate") or 0
 
         if key not in weekly:
@@ -119,197 +97,55 @@ def build_weekly_summary(run_logs):
             }
 
         weekly[key]["total_distance"] += distance
-
         weekly[key]["total_time"] += duration_sec
-
-        weekly[key]["total_heartbeats"] += (
-            avg_hr * duration_sec
-        )
+        weekly[key]["total_heartbeats"] += (avg_hr * duration_sec)
 
     result = []
-
     for item in weekly.values():
-
         total_time = item["total_time"]
-
-        avg_hr = (
-            item["total_heartbeats"] / total_time
-            if total_time
-            else 0
-        )
-
-        avg_speed = (
-            item["total_distance"] / total_time
-            if total_time
-            else 0
-        )
+        avg_hr = item["total_heartbeats"] / total_time if total_time else 0
+        avg_speed = item["total_distance"] / total_time if total_time else 0
 
         result.append({
             "week_start": item["week_start"],
-            "total_distance": round(
-                item["total_distance"] / 1000,
-                2
-            ),
+            "total_distance": round(item["total_distance"] / 1000, 2),
             "average_heartrate": round(avg_hr, 1),
             "average_speed": round(avg_speed, 3),
             "average_pace": format_pace(avg_speed)
         })
 
-    result.sort(
-        key=lambda x: x["week_start"]
-    )
-
+    result.sort(key=lambda x: x["week_start"], reverse=True)
     return result
-    
-def build_weekly_summary(run_logs):
 
-    weekly = {}
-
-    for run in run_logs:
-
-        dt = datetime.strptime(
-            run["start_date_local"],
-            "%Y-%m-%d %H:%M:%S"
-        )
-
-        week_start = (
-            dt.date() -
-            timedelta(days=dt.weekday())
-        )
-
-        key = week_start.strftime("%Y-%m-%d")
-
-        duration_sec = parse_duration_to_seconds(
-            run["moving_time"]
-        )
-
-        distance = run["distance"]
-
-        avg_hr = run.get("average_heartrate") or 0
-
-        if key not in weekly:
-            weekly[key] = {
-                "week_start": key,
-                "total_distance": 0,
-                "total_time": 0,
-                "total_heartbeats": 0
-            }
-
-        weekly[key]["total_distance"] += distance
-
-        weekly[key]["total_time"] += duration_sec
-
-        weekly[key]["total_heartbeats"] += (
-            avg_hr * duration_sec
-        )
-
-    result = []
-
-    for item in weekly.values():
-
-        total_time = item["total_time"]
-
-        avg_hr = (
-            item["total_heartbeats"] / total_time
-            if total_time
-            else 0
-        )
-
-        avg_speed = (
-            item["total_distance"] / total_time
-            if total_time
-            else 0
-        )
-
-        result.append({
-            "week_start": item["week_start"],
-            "total_distance": round(
-                item["total_distance"] / 1000,
-                2
-            ),
-            "average_heartrate": round(avg_hr, 1),
-            "average_speed": round(avg_speed, 3),
-            "average_pace": format_pace(avg_speed)
-        })
-
-    result.sort(
-        key=lambda x: x["week_start"],
-        reverse=True
-    )
-
-    return result
-    
 def load_current_week_run_details(run_logs):
-
-    this_monday = (
-        now_utc8().date()
-        - timedelta(days=now_utc8().weekday())
-    )
-
+    this_monday = (now_utc8().date() - timedelta(days=now_utc8().weekday()))
     run_ids = []
 
     for run in run_logs:
-
-        run_date = datetime.strptime(
-            run["start_date_local"],
-            "%Y-%m-%d %H:%M:%S"
-        ).date()
-
-        week_start = run_date - timedelta(
-            days=run_date.weekday()
-        )
-
+        run_date = datetime.strptime(run["start_date_local"], "%Y-%m-%d %H:%M:%S").date()
+        week_start = run_date - timedelta(days=run_date.weekday())
         if week_start == this_monday:
             run_ids.append(run["run_id"])
 
     details = []
-
     for run_id in run_ids:
-
-        detail_file = os.path.join(
-            runs_details_dir,
-            f"{run_id}.json"
-        )
-
+        detail_file = os.path.join(runs_details_dir, f"{run_id}.json")
         if not os.path.exists(detail_file):
             continue
 
-        with open(
-            detail_file,
-            "r",
-            encoding="utf-8"
-        ) as f:
+        with open(detail_file, "r", encoding="utf-8") as f:
             data = json.load(f)
 
         start_time = data.get("start_time")
-
         weekday_name = None
+        local_start_time = None
 
         if start_time:
-            dt = datetime.fromisoformat(
-                start_time.replace("Z", "+00:00")
-            )
+            dt = datetime.fromisoformat(start_time.replace("Z", "+00:00"))
+            weekday_name = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][dt.astimezone(UTC8).weekday()]
+            start_dt_utc8 = dt.astimezone(UTC8)
+            local_start_time = start_dt_utc8.strftime("%Y-%m-%d %H:%M:%S")
 
-            weekday_name = [
-                "Mon",
-                "Tue",
-                "Wed",
-                "Thu",
-                "Fri",
-                "Sat",
-                "Sun"
-            ][dt.astimezone(UTC8).weekday()]
-        start_dt = datetime.fromisoformat(
-            start_time.replace("Z", "+00:00")
-        )
-
-        start_dt_utc8 = start_dt.astimezone(
-            UTC8
-        )
-
-        local_start_time = start_dt_utc8.strftime(
-            "%Y-%m-%d %H:%M:%S"
-        )
         details.append({
             "run_id": run_id,
             "start_time": start_time,
@@ -318,236 +154,228 @@ def load_current_week_run_details(run_logs):
             "summary": data.get("summary"),
             "laps": data.get("laps", [])
         })
-    details.sort(
-        key=lambda x: x["start_time"]
-    )
+
+    details.sort(key=lambda x: x["start_time"])
     return details
+
+# ==========================================
+# 3. 闭环核心逻辑：计划抓取与执行率计算
+# ==========================================
+def load_last_week_plan():
+    """读取上周生成的 JSON 训练计划"""
+    if not os.path.exists(plans_dir):
+        return None
+        
+    plan_files = [f for f in os.listdir(plans_dir) if f.endswith('.json')]
+    if not plan_files:
+        return None
+        
+    # 按日期倒序，取最新的一份计划
+    plan_files.sort(reverse=True)
+    latest_plan_file = os.path.join(plans_dir, plan_files[0])
     
-def load_last_summary_focus():
+    with open(latest_plan_file, "r", encoding="utf-8") as f:
+        return json.load(f)
 
-    index_file = os.path.join(
-        summary_dir,
-        "index.json"
-    )
+def evaluate_plan_completion(plan, current_week_runs, weekly_summary):
+    """客观计算计划的完成度，直接投喂给 Gemini"""
+    if not plan:
+        return None
 
-    if not os.path.exists(index_file):
-        return ""
-
-    with open(
-        index_file,
-        "r",
-        encoding="utf-8"
-    ) as f:
-        index_data = json.load(f)
-
-    if not index_data:
-        return ""
-
-    filename = index_data[0]["filename"]
-
-    md_file = os.path.join(
-        summary_dir,
-        filename
-    )
-
-    if not os.path.exists(md_file):
-        return ""
-
-    with open(
-        md_file,
-        "r",
-        encoding="utf-8"
-    ) as f:
-        content = f.read()
-
-    start_tag = "### 四、 下一阶段"
-
-    pos = content.find(start_tag)
-
-    if pos == -1:
-        return ""
-
-    return content[pos:].strip()
+    planned_sessions = len(plan.get("sessions", []))
+    completed_sessions = len(current_week_runs)
+    distance_target = plan.get("target_distance_km", 0)
     
-def extract_coros_data(data_path):
-    """提取 COROS EvoLab 生理基线和近期疲劳数据"""
-    try:
-        with open(data_path, 'r', encoding='utf-8') as f:
-            d1 = json.load(f).get('data', {}).get('dayList', [])
-            
-        latest_state = d1[-1] if d1 else {}
+    # 从本周汇总数据中抓取本周实际总跑量
+    this_monday = (now_utc8().date() - timedelta(days=now_utc8().weekday())).strftime("%Y-%m-%d")
+    distance_actual = 0
+    for week in weekly_summary:
+        if week["week_start"] == this_monday:
+            distance_actual = week["total_distance"]
+            break
 
-        return {
-            "physiological_baseline": {
-                "vo2max": latest_state.get('vo2max', 53),
-                "lthr_bpm": latest_state.get('lthr', 161),
-                "ltsp_pace": "4:24",
-                "recent_rhr": latest_state.get('rhr'),
-                "recent_sleep_hrv": latest_state.get('avgSleepHrv')
+    completion_rate = round((completed_sessions / planned_sessions) * 100) if planned_sessions > 0 else 0
+    distance_completion = round((distance_actual / distance_target) * 100) if distance_target > 0 else 0
+
+    return {
+        "completion_rate": completion_rate,
+        "planned_sessions": planned_sessions,
+        "completed_sessions": completed_sessions,
+        "distance_target": distance_target,
+        "distance_actual": round(distance_actual, 2),
+        "distance_completion": distance_completion
+    }
+
+# ==========================================
+# 4. AI 报告生成与结构化处理
+# ==========================================
+def generate_ai_report(ai_context_dict):
+    """使用 Structured Outputs 强制 Gemini 返回指定 JSON 格式"""
+    
+    # 强制返回格式 Schema 定义
+    response_schema = {
+        "type": "OBJECT",
+        "properties": {
+            "human_report_md": {"type": "STRING"},
+            "execution_review": {
+                "type": "OBJECT",
+                "properties": {
+                    "completion_rate": {"type": "NUMBER"},
+                    "overall_score": {"type": "NUMBER"},
+                    "strength": {"type": "STRING"},
+                    "weakness": {"type": "STRING"},
+                    "next_focus": {"type": "STRING"}
+                }
             },
-            "current_load_status": {
-                "7d_training_load": latest_state.get('t7d'),
-                "28d_training_load": latest_state.get('t28d'),
-                "stamina_level": latest_state.get('staminaLevel'),
-                "fatigue_rate": latest_state.get('tiredRate')
+            "next_week_plan": {
+                "type": "OBJECT",
+                "properties": {
+                    "week_start": {"type": "STRING"},
+                    "phase": {"type": "STRING"},
+                    "goal": {"type": "STRING"},
+                    "target_distance_km": {"type": "NUMBER"},
+                    "target_training_load": {"type": "NUMBER"},
+                    "sessions": {
+                        "type": "ARRAY",
+                        "items": {
+                            "type": "OBJECT",
+                            "properties": {
+                                "id": {"type": "STRING"},
+                                "day": {"type": "STRING"},
+                                "type": {"type": "STRING"},
+                                "distance_km": {"type": "NUMBER"},
+                                "target_hr_max": {"type": "NUMBER"},
+                                "notes": {"type": "STRING"},
+                                "warmup_km": {"type": "NUMBER"},
+                                "main_set": {"type": "STRING"},
+                                "target_pace": {"type": "STRING"},
+                                "cooldown_km": {"type": "NUMBER"}
+                            }
+                        }
+                    }
+                }
             }
-        }
-    except Exception as e:
-        print(f"解析 COROS 数据失败: {e}")
-        return {}
+        },
+        "required": ["human_report_md", "execution_review", "next_week_plan"]
+    }
 
-def generate_ai_report(ai_context_json):
-    
     prompt = f"""
-    【角色设定】
-    你现在是一位具备运动生理学背景的精英马拉松教练，擅长通过数据分析进行科学的周期化训练安排。
+你是一名马拉松教练。
 
-    【背景与目标】
-    1. 当前水平：全马 PB 为 3:53:07。
-    2. 未来目标：参加 2026 年 12 月底的广州马拉松，目标成绩 3:30 至 3:45。
-    3. 训练设备：COROS 手表。
+你的任务：
+1. 对比上周计划与本周实际训练
+2. 分析下面提供的客观评估完成度指标（解释为什么是这个完成率，分析原因）
+3. 分析近4周趋势
+4. 输出人类可读报告 (human_report_md)
+5. 调整并输出下周训练计划 (next_week_plan)
 
-    【我的数据】
-    以下是我近期从 COROS EvoLab 导出的生理基线数据、疲劳负荷状态，以及最近 4 周的详细跑步流水记录：
-    {json.dumps(ai_context_json, indent=2, ensure_ascii=False)}
+以下是运行数据和评估环境上下文（JSON格式）：
+{json.dumps(ai_context_dict, ensure_ascii=False, indent=2)}
 
-    【请你执行以下分析与指导】
-    1. 结合上一次训练报告中的“下一阶段重点”（weekly_training_advice），评估本周训练执行情况。
-    2. 基于 VO2Max、LTHR、训练负荷、疲劳指数和近期跑量，评估目前是否具备在 2026 广州马拉松实现3:30~3:45 完赛目标的能力。
-    3. 近期训练诊断：
-        分析最近4周训练情况：
+严格按照要求的 JSON 格式返回，不要包含任何额外的 Markdown 标记（例如 ```json）和无关文本。
+"""
 
-        - 周跑量变化趋势
-        - 有氧跑占比是否合理
-        - 轻松跑心率控制是否合理
-        - 是否存在垃圾跑量
-        - 是否存在恢复不足
-    4. 本周训练复盘：
-        结合每次跑步的 laps 数据，
-        分析配速控制、心率漂移、
-        有氧效率和节奏跑执行质量。
-    5. 下一阶段重点：
-        未来4周基础期训练，
-        应该优先：
-
-        A. 增加周跑量
-
-        还是
-
-        B. 提升跑动经济性
-
-        请说明原因。
-
-        并给出：
-
-        - 每周目标跑量
-        - 每周训练结构
-        - 长距离安排
-        - 节奏跑安排
-        - 恢复跑安排
-
-        6. 最后输出：
-
-        【一句话总结】
-        【本周评分（100分）】
-        【最大优点】
-        【最大短板】
-        【下周最重要的一件事】
-
-    请用专业、中肯且直白的语言回答，直接指出训练短板，使用 Markdown 格式排版，不要加多余的客套话。
-    """
-    
     print("正在请求 Gemini API，请稍候...")
-    
     try:
-        #response = client.models.generate_content(
-        #    model='gemini-3.5-flash',
-        #    contents=prompt
-        #)
-        #return response.text
-        return None
+        config = types.GenerateContentConfig(
+            response_mime_type="application/json",
+            response_schema=response_schema,
+            temperature=0.7
+        )
+        
+        response = client.models.generate_content(
+            model='gemini-3.5-flash', # 请根据你实际的模型名称调整
+            contents=prompt,
+            config=config
+        )
+        
+        # 将大模型返回的 JSON 字符串解析为 Python 字典
+        return json.loads(response.text)
     except Exception as e:
-        print(f"调用 Gemini API 失败: {e}")
+        print(f"调用 Gemini API 失败或解析结果失败: {e}")
         return None
 
-def update_ai_index(target_dir):
-    """扫描报告目录并生成带有时间排序的 index.json，供前端读取"""
-    if not os.path.exists(target_dir):
+def update_ai_index():
+    """扫描 reports 目录并生成 index.json"""
+    if not os.path.exists(reports_dir):
         return
         
-    md_files = [f for f in os.listdir(target_dir) if f.endswith('_ai_summary.md')]
+    md_files = [f for f in os.listdir(reports_dir) if f.endswith('.md')]
     index_data = []
     
     for filename in md_files:
-        # 文件名格式约束为 "YYYY-MM-DD_ai_summary.md"
-        date_str = filename.split('_')[0]
+        date_str = filename.replace('.md', '')
         index_data.append({
             "date": date_str,
-            "filename": filename
+            "report": f"reports/{date_str}.md",
+            "plan": f"plans/{date_str}.json",
+            "review": f"reviews/{date_str}.json"
         })
         
-    # 按时间降序排序（最新的在前面）
     index_data.sort(key=lambda x: x['date'], reverse=True)
+    index_path = os.path.join(summary_dir, "index.json")
     
-    index_path = os.path.join(target_dir, "index.json")
     try:
         with open(index_path, 'w', encoding='utf-8') as f:
             json.dump(index_data, f, ensure_ascii=False, indent=2)
-        print(f"✅ AI 报告索引已更新，共 {len(index_data)} 份报告。")
+        print(f"✅ AI 报告索引已更新，共 {len(index_data)} 份记录。")
     except Exception as e:
         print(f"❌ 更新 AI 索引失败: {e}")
 
 # ==========================================
-# 4. 主流程与文件保存
+# 5. 主流程控制
 # ==========================================
 def main():
-    #if now_utc8().weekday() != 6:
-    #    return
+    print("创建所需目录体系...")
+    for directory in [reports_dir, plans_dir, reviews_dir]:
+        os.makedirs(directory, exist_ok=True)
+
     print("开始提取数据...")
-
     recent_runs = load_recent_runs()
-
-    weekly_summary = build_weekly_summary(
-        recent_runs
-    )
-
-    current_week_run_details = load_current_week_run_details(
-        recent_runs
-    )
-
-    coros_summary = extract_coros_data(
-        coros_data
-    )
-
-    last_summary_focus = load_last_summary_focus()
+    weekly_summary = build_weekly_summary(recent_runs)
+    current_week_run_details = load_current_week_run_details(recent_runs)
+    
+    last_week_plan = load_last_week_plan()
+    execution_stats = evaluate_plan_completion(last_week_plan, current_week_run_details, weekly_summary)
 
     ai_context = {
-        "weekly_training_advice": last_summary_focus,
-        "current_week_runs": current_week_run_details,
-        "recent_4_weeks_runs": recent_runs,
         "recent_4_weeks_summary": weekly_summary,
-        "athlete_profile": coros_summary
+        "recent_4_weeks_runs": recent_runs,
+        "current_week_runs": current_week_run_details,
+        "last_week_plan": last_week_plan,
+        "execution_stats": execution_stats
     }
-    print("提取到的信息如下:")
-    print(json.dumps(ai_context, indent=4))    
-    # 获取 AI 报告
-    report_content = generate_ai_report(ai_context)
+    
+    print("提取到的信息摘要:")
+    print(f"- 本周课时数: {len(current_week_run_details)}")
+    if execution_stats:
+        print(f"- 上周计划完成度: {execution_stats['completion_rate']}%")
 
-    if report_content:
-        # 以当天日期命名文件
+    ai_result_dict = generate_ai_report(ai_context)
+
+    if ai_result_dict:
         date_str = now_utc8().strftime("%Y-%m-%d")
-        filename = os.path.join(summary_dir, f"{date_str}_ai_summary.md")
-        os.makedirs(os.path.dirname(filename), exist_ok=True)
         
-        # 写入 Markdown 文件
-        with open(filename, 'w', encoding='utf-8') as f:
+        # 1. 保存供人看的 Markdown 报告
+        report_path = os.path.join(reports_dir, f"{date_str}.md")
+        with open(report_path, 'w', encoding='utf-8') as f:
             f.write(f"# {date_str} 周期训练分析报告\n\n")
-            f.write(report_content)
+            f.write(ai_result_dict.get("human_report_md", "报告内容为空。"))
             
-        print(f"✅ 成功！报告已保存至: {filename}")
+        # 2. 保存下周计划 JSON
+        plan_path = os.path.join(plans_dir, f"{date_str}.json")
+        with open(plan_path, 'w', encoding='utf-8') as f:
+            json.dump(ai_result_dict.get("next_week_plan", {}), f, ensure_ascii=False, indent=2)
+            
+        # 3. 保存本周执行度 Review JSON
+        review_path = os.path.join(reviews_dir, f"{date_str}.json")
+        with open(review_path, 'w', encoding='utf-8') as f:
+            json.dump(ai_result_dict.get("execution_review", {}), f, ensure_ascii=False, indent=2)
+            
+        print(f"✅ 成功！报告、计划和复盘均已保存（日期：{date_str}）。")
         
-        # 更新供前端调用的索引文件
-        update_ai_index(summary_dir)
+        # 更新总目录的 index.json
+        update_ai_index()
     else:
         print("❌ 报告生成失败。")
 
