@@ -489,7 +489,7 @@ def main():
 
     ai_context = {
         "weekly_training_advice": last_summary_focus,
-        "current_week_runs": current_week_runs,
+        "current_week_runs": current_week_run_details,
         "recent_4_weeks_runs": recent_runs,
         "recent_4_weeks_summary": weekly_summary,
         "athlete_profile": coros_summary
