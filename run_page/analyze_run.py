@@ -1,60 +1,353 @@
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from google import genai
 
-# ==========================================
-# 1. 配置与初始化
-# ==========================================
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 client = genai.Client(api_key=GEMINI_API_KEY)
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 data_dir = os.path.join(parent, "public", "data")
 runs_file = os.path.join(data_dir, "all.json")
+runs_details_dir = os.path.join(data_dir, "details")
 coros_data_dir = os.path.join(data_dir, "coros_details")
-coros_data1 = os.path.join(coros_data_dir, "data1.json")
-coros_data2 = os.path.join(coros_data_dir, "data2.json")
+coros_data = os.path.join(coros_data_dir, "data.json")
 summary_dir = os.path.join(data_dir, "ai_summary")
 
-# ==========================================
-# 2. 数据解析函数
-# ==========================================
 def format_pace(speed_m_s):
-    """将 m/s 转换为 分:秒/公里 的配速格式"""
     if not speed_m_s or speed_m_s <= 0:
         return "0:00"
     seconds_per_km = 1000 / speed_m_s
     mins = int(seconds_per_km // 60)
     secs = int(seconds_per_km % 60)
     return f"{mins}:{secs:02d}"
+def parse_duration_to_seconds(duration_str):
+    """
+    0:57:16.730000
+    """
+    parts = duration_str.split(":")
+    h = int(parts[0])
+    m = int(parts[1])
 
-def extract_coros_data(data1_path, data2_path):
+    sec = float(parts[2])
+
+    return h * 3600 + m * 60 + sec
+
+def get_4weeks_start_date():
+    """
+    获取包含本周在内，向前共4周的起始周一日期
+    """
+
+    today = datetime.now().date()
+
+    # 本周周一
+    this_monday = today - timedelta(days=today.weekday())
+
+    # 往前共4周（包含本周）
+    start_monday = this_monday - timedelta(weeks=3)
+
+    return start_monday
+    
+def load_recent_runs():
+    start_date = get_4weeks_start_date()
+
+    with open(runs_file, "r", encoding="utf-8") as f:
+        runs = json.load(f)
+
+    result = []
+
+    for run in runs:
+
+        run_date = datetime.strptime(
+            run["start_date_local"],
+            "%Y-%m-%d %H:%M:%S"
+        ).date()
+
+        if run_date < start_date:
+            continue
+
+        result.append({
+            "run_id": run["run_id"],
+            "distance": run["distance"],
+            "moving_time": run["moving_time"],
+            "start_date_local": run["start_date_local"],
+            "average_heartrate": run.get("average_heartrate"),
+            "average_speed": run.get("average_speed")
+        })
+
+    result.sort(
+        key=lambda x: x["start_date_local"],
+        reverse=True
+    )
+
+    return result    
+
+    def build_weekly_summary(run_logs):
+
+    weekly = {}
+
+    for run in run_logs:
+
+        dt = datetime.strptime(
+            run["start_date_local"],
+            "%Y-%m-%d %H:%M:%S"
+        )
+
+        week_start = (
+            dt.date() -
+            timedelta(days=dt.weekday())
+        )
+
+        key = week_start.strftime("%Y-%m-%d")
+
+        duration_sec = parse_duration_to_seconds(
+            run["moving_time"]
+        )
+
+        distance = run["distance"]
+
+        avg_hr = run.get("average_heartrate") or 0
+
+        if key not in weekly:
+            weekly[key] = {
+                "week_start": key,
+                "total_distance": 0,
+                "total_time": 0,
+                "total_heartbeats": 0
+            }
+
+        weekly[key]["total_distance"] += distance
+
+        weekly[key]["total_time"] += duration_sec
+
+        weekly[key]["total_heartbeats"] += (
+            avg_hr * duration_sec
+        )
+
+    result = []
+
+    for item in weekly.values():
+
+        total_time = item["total_time"]
+
+        avg_hr = (
+            item["total_heartbeats"] / total_time
+            if total_time
+            else 0
+        )
+
+        avg_speed = (
+            item["total_distance"] / total_time
+            if total_time
+            else 0
+        )
+
+        result.append({
+            "week_start": item["week_start"],
+            "total_distance": round(
+                item["total_distance"] / 1000,
+                2
+            ),
+            "average_heartrate": round(avg_hr, 1),
+            "average_speed": round(avg_speed, 3),
+            "average_pace": format_pace(avg_speed)
+        })
+
+    result.sort(
+        key=lambda x: x["week_start"],
+        reverse=True
+    )
+
+    return result
+    
+def build_weekly_summary(run_logs):
+
+    weekly = {}
+
+    for run in run_logs:
+
+        dt = datetime.strptime(
+            run["start_date_local"],
+            "%Y-%m-%d %H:%M:%S"
+        )
+
+        week_start = (
+            dt.date() -
+            timedelta(days=dt.weekday())
+        )
+
+        key = week_start.strftime("%Y-%m-%d")
+
+        duration_sec = parse_duration_to_seconds(
+            run["moving_time"]
+        )
+
+        distance = run["distance"]
+
+        avg_hr = run.get("average_heartrate") or 0
+
+        if key not in weekly:
+            weekly[key] = {
+                "week_start": key,
+                "total_distance": 0,
+                "total_time": 0,
+                "total_heartbeats": 0
+            }
+
+        weekly[key]["total_distance"] += distance
+
+        weekly[key]["total_time"] += duration_sec
+
+        weekly[key]["total_heartbeats"] += (
+            avg_hr * duration_sec
+        )
+
+    result = []
+
+    for item in weekly.values():
+
+        total_time = item["total_time"]
+
+        avg_hr = (
+            item["total_heartbeats"] / total_time
+            if total_time
+            else 0
+        )
+
+        avg_speed = (
+            item["total_distance"] / total_time
+            if total_time
+            else 0
+        )
+
+        result.append({
+            "week_start": item["week_start"],
+            "total_distance": round(
+                item["total_distance"] / 1000,
+                2
+            ),
+            "average_heartrate": round(avg_hr, 1),
+            "average_speed": round(avg_speed, 3),
+            "average_pace": format_pace(avg_speed)
+        })
+
+    result.sort(
+        key=lambda x: x["week_start"],
+        reverse=True
+    )
+
+    return result
+    
+def load_current_week_run_details(run_logs):
+
+    this_monday = (
+        datetime.now().date()
+        - timedelta(days=datetime.now().weekday())
+    )
+
+    run_ids = []
+
+    for run in run_logs:
+
+        run_date = datetime.strptime(
+            run["start_date_local"],
+            "%Y-%m-%d %H:%M:%S"
+        ).date()
+
+        week_start = run_date - timedelta(
+            days=run_date.weekday()
+        )
+
+        if week_start == this_monday:
+            run_ids.append(run["run_id"])
+
+    details = []
+
+    for run_id in run_ids:
+
+        detail_file = os.path.join(
+            runs_details_dir,
+            f"{run_id}.json"
+        )
+
+        if not os.path.exists(detail_file):
+            continue
+
+        with open(
+            detail_file,
+            "r",
+            encoding="utf-8"
+        ) as f:
+            data = json.load(f)
+
+        details.append({
+            "run_id": run_id,
+            "start_time": data.get("start_time"),
+            "summary": data.get("summary"),
+            "laps": data.get("laps", [])
+        })
+
+    return details
+    
+def load_last_summary_focus():
+
+    index_file = os.path.join(
+        summary_dir,
+        "index.json"
+    )
+
+    if not os.path.exists(index_file):
+        return ""
+
+    with open(
+        index_file,
+        "r",
+        encoding="utf-8"
+    ) as f:
+        index_data = json.load(f)
+
+    if not index_data:
+        return ""
+
+    filename = index_data[0]["filename"]
+
+    md_file = os.path.join(
+        summary_dir,
+        filename
+    )
+
+    if not os.path.exists(md_file):
+        return ""
+
+    with open(
+        md_file,
+        "r",
+        encoding="utf-8"
+    ) as f:
+        content = f.read()
+
+    start_tag = "### 四、 下一阶段"
+
+    pos = content.find(start_tag)
+
+    if pos == -1:
+        return ""
+
+    return content[pos:].strip()
+    
+def extract_coros_data(data_path):
     """提取 COROS EvoLab 生理基线和近期疲劳数据"""
     try:
-        with open(data1_path, 'r', encoding='utf-8') as f:
+        with open(data_path, 'r', encoding='utf-8') as f:
             d1 = json.load(f).get('data', {}).get('dayList', [])
-        with open(data2_path, 'r', encoding='utf-8') as f:
-            d2 = json.load(f).get('data', {}).get('summaryInfo', {})
             
         latest_state = d1[-1] if d1 else {}
-        
-        pbs = d2.get('recordDetailList', [])
-        pb_summary = {}
-        #if len(pbs) > 0 and 'recordList' in pbs[0]:
-        #    for record in pbs[0]['recordList']:
-        #        dist = record.get('distance', 0)
-        #        duration = record.get('duration', 0)
-        #        if dist == 42195: pb_summary['Full_Marathon'] = duration
-        #        elif dist == 21097.5: pb_summary['Half_Marathon'] = duration
-        #        elif dist == 10000: pb_summary['10km'] = duration
-        #        elif dist == 5000: pb_summary['5km'] = duration
 
         return {
             "physiological_baseline": {
-                "vo2max": latest_state.get('vo2max', d2.get('vo2max')),
-                "lthr_bpm": d2.get('lthr', latest_state.get('lthr')),
-                "ltsp_pace": format_pace(1000 / d2.get('ltsp')) if d2.get('ltsp') else "N/A",
+                "vo2max": latest_state.get('vo2max', 53),
+                "lthr_bpm": latest_state.get('lthr'), 161),
+                "ltsp_pace": "4:24",
                 "recent_rhr": latest_state.get('rhr'),
                 "recent_sleep_hrv": latest_state.get('avgSleepHrv')
             },
@@ -63,41 +356,13 @@ def extract_coros_data(data1_path, data2_path):
                 "28d_training_load": latest_state.get('t28d'),
                 "stamina_level": latest_state.get('staminaLevel'),
                 "fatigue_rate": latest_state.get('tiredRate')
-            },
-            "pb_records_seconds": pb_summary
+            }
         }
     except Exception as e:
         print(f"解析 COROS 数据失败: {e}")
         return {}
 
-def extract_all_json(all_json_path, days=28):
-    """从 all.json 中提取最近跑步流水"""
-    try:
-        with open(all_json_path, 'r', encoding='utf-8') as f:
-            runs = json.load(f)
-            
-        recent_runs = []
-        runs.sort(key=lambda x: x.get('start_date_local', ''), reverse=True)
-        
-        for run in runs[:days]:
-            if run.get('type') == 'Run':
-                recent_runs.append({
-                    "date": run.get('start_date_local', '').split(' ')[0],
-                    "distance_km": round(run.get('distance', 0) / 1000, 2),
-                    "moving_time": run.get('moving_time'),
-                    "avg_hr": run.get('average_heartrate'),
-                    "avg_pace": format_pace(run.get('average_speed', 0))
-                })
-        return recent_runs
-    except Exception as e:
-        print(f"解析 all.json 失败: {e}")
-        return []
-
-# ==========================================
-# 3. 生成 Prompt 并调用 Gemini API
-# ==========================================
 def generate_ai_report(ai_context_json):
-    """将数据发送给 Gemini 并获取报告"""
     
     prompt = f"""
     【角色设定】
@@ -113,11 +378,47 @@ def generate_ai_report(ai_context_json):
     {json.dumps(ai_context_json, indent=2, ensure_ascii=False)}
 
     【请你执行以下分析与指导】
-    1. 一句话（100字左右）总结本周期的跑步情况。
-    2. 体能状态评估：基于最大摄氧量 (VO2Max)、乳酸阈值心率 (LTHR) 和近期的疲劳/负荷指数，评估目前的有氧基础是否足以支撑广马 3:30-3:45 的目标？
-    3. 近期训练诊断：分析最近 4 周的日常跑步数据，轻松跑（有氧底盘）心率控制得合理吗？是否有垃圾跑量？
-    4. 训练配速建议：根据 LTHR 和历史表现，精确计算并给出接下来的：轻松跑 (E)、马拉松配速跑 (M)、乳酸阈值跑 (T) 和间歇跑 (I) 的推荐配速区间和心率区间。
-    5. 下一阶段重点：在接下来的 4 周基础期内，应该把训练重心放在增加周跑量，还是提升跑动经济性？请给出具体的每周训练结构建议。
+    1. 结合上一次训练报告中的“下一阶段重点”（weekly_training_advice），评估本周训练执行情况。
+    2. 基于 VO2Max、LTHR、训练负荷、疲劳指数和近期跑量，评估目前是否具备在 2026 广州马拉松实现3:30~3:45 完赛目标的能力。
+    3. 近期训练诊断：
+        分析最近4周训练情况：
+
+        - 周跑量变化趋势
+        - 有氧跑占比是否合理
+        - 轻松跑心率控制是否合理
+        - 是否存在垃圾跑量
+        - 是否存在恢复不足
+    4. 本周训练复盘：
+        结合每次跑步的 laps 数据，
+        分析配速控制、心率漂移、
+        有氧效率和节奏跑执行质量。
+    5. 下一阶段重点：
+        未来4周基础期训练，
+        应该优先：
+
+        A. 增加周跑量
+
+        还是
+
+        B. 提升跑动经济性
+
+        请说明原因。
+
+        并给出：
+
+        - 每周目标跑量
+        - 每周训练结构
+        - 长距离安排
+        - 节奏跑安排
+        - 恢复跑安排
+
+        6. 最后输出：
+
+        【一句话总结】
+        【本周评分（100分）】
+        【最大优点】
+        【最大短板】
+        【下周最重要的一件事】
 
     请用专业、中肯且直白的语言回答，直接指出训练短板，使用 Markdown 格式排版，不要加多余的客套话。
     """
@@ -125,12 +426,12 @@ def generate_ai_report(ai_context_json):
     print("正在请求 Gemini API，请稍候...")
     
     try:
-        response = client.models.generate_content(
-            model='gemini-3.5-flash',
-            #model='gemini-3.1-pro-preview',
-            contents=prompt
-        )
-        return response.text
+        #response = client.models.generate_content(
+        #    model='gemini-3.5-flash',
+        #    contents=prompt
+        #)
+        #return response.text
+        return None
     except Exception as e:
         print(f"调用 Gemini API 失败: {e}")
         return None
@@ -166,21 +467,35 @@ def update_ai_index(target_dir):
 # 4. 主流程与文件保存
 # ==========================================
 def main():
-    if datetime.now().weekday() != 6:
-        return
+    #if datetime.now().weekday() != 6:
+    #    return
     print("开始提取数据...")
-    coros_summary = extract_coros_data(coros_data1, coros_data2)
-    run_logs = extract_all_json(runs_file, days=28)
-    print("提取到的coros信息如下:")
-    print(json.dumps(coros_summary, indent=4))
-    if not coros_summary or not run_logs:
-        print("警告：部分数据提取失败，请检查 JSON 文件路径和内容。")
+
+    recent_runs = load_recent_runs()
+
+    weekly_summary = build_weekly_summary(
+        recent_runs
+    )
+
+    current_week_run_details = load_current_week_run_details(
+        recent_runs
+    )
+
+    coros_summary = extract_coros_data(
+        coros_data
+    )
+
+    last_summary_focus = load_last_summary_focus()
 
     ai_context = {
-        "athlete_profile": coros_summary,
-        "recent_4_weeks_runs": run_logs
+        "weekly_training_advice": last_summary_focus,
+        "current_week_runs": current_week_runs,
+        "recent_4_weeks_runs": recent_runs,
+        "recent_4_weeks_summary": weekly_summary,
+        "athlete_profile": coros_summary
     }
-
+    print("提取到的信息如下:")
+    print(json.dumps(ai_context, indent=4))    
     # 获取 AI 报告
     report_content = generate_ai_report(ai_context)
 
