@@ -291,18 +291,29 @@ def load_current_week_run_details(run_logs):
             )
 
             weekday_name = [
-                "星期一",
-                "星期二",
-                "星期三",
-                "星期四",
-                "星期五",
-                "星期六",
-                "星期日"
+                "Mon",
+                "Tue",
+                "Wed",
+                "Thu",
+                "Fri",
+                "Sat",
+                "Sun"
             ][dt.astimezone(UTC8).weekday()]
+        start_dt = datetime.fromisoformat(
+            start_time.replace("Z", "+00:00")
+        )
 
+        start_dt_utc8 = start_dt.astimezone(
+            UTC8
+        )
+
+        local_start_time = start_dt_utc8.strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
         details.append({
             "run_id": run_id,
             "start_time": start_time,
+            "start_time_local": local_start_time,
             "weekday": weekday_name,
             "summary": data.get("summary"),
             "laps": data.get("laps", [])
