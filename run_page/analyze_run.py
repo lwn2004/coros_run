@@ -346,7 +346,7 @@ def extract_coros_data(data_path):
         return {
             "physiological_baseline": {
                 "vo2max": latest_state.get('vo2max', 53),
-                "lthr_bpm": latest_state.get('lthr'), 161),
+                "lthr_bpm": latest_state.get('lthr', 161),
                 "ltsp_pace": "4:24",
                 "recent_rhr": latest_state.get('rhr'),
                 "recent_sleep_hrv": latest_state.get('avgSleepHrv')
