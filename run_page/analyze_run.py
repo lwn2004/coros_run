@@ -82,7 +82,7 @@ def load_recent_runs():
 
     return result    
 
-    def build_weekly_summary(run_logs):
+def build_weekly_summary(run_logs):
 
     weekly = {}
 
