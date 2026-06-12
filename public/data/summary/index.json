@@ -1,2 +1,8 @@
 [
+  {
+    "date": "2026-06-12",
+    "report": "reports/2026-06-12.md",
+    "plan": "plans/2026-06-12.json",
+    "review": "reviews/2026-06-12.json"
+  }
 ]

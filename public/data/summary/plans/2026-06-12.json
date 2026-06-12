@@ -1,57 +1,57 @@
 {
   "week_start": "2026-06-15",
   "phase": "有氧耐力提升期",
-  "goal": "稳步回升跑量，重建长距离耐力，平稳过渡到中高负荷周",
-  "target_distance_km": 42.0,
-  "target_training_load": 320.0,
+  "goal": "补足长距离耐力短板，平稳提升跑量至45公里，重点确保周末LSD的高质量执行",
+  "target_distance_km": 45,
+  "target_training_load": 350,
   "sessions": [
     {
       "id": "S1",
       "day": "Tue",
       "type": "Easy Run + Strides",
-      "distance_km": 10.0,
-      "target_hr_max": 140.0,
-      "notes": "有氧轻松跑，最后阶段加入5组100m轻快跑（跑姿专注，非全力冲刺），激活肌肉。",
-      "warmup_km": 0.0,
-      "main_set": "10km E跑 + 5x100m 轻快跑",
+      "distance_km": 10,
+      "target_hr_max": 140,
+      "notes": "有氧轻松跑，最后阶段加入3组100m轻快跑（专注跑姿，非全力冲刺），激活肌肉。",
+      "warmup_km": 0,
+      "main_set": "10km E跑 + 3x100m 轻快跑",
       "target_pace": "5:50-6:10",
-      "cooldown_km": 0.0
+      "cooldown_km": 0
     },
     {
       "id": "S2",
       "day": "Thu",
       "type": "Tempo Run",
-      "distance_km": 10.0,
-      "target_hr_max": 170.0,
-      "notes": "乳酸阈值节奏跑。热身与冷身必须充分。中间5km维持在乳酸阈值区间。",
-      "warmup_km": 2.0,
-      "main_set": "5km 节奏跑 (Tempo)",
+      "distance_km": 11,
+      "target_hr_max": 170,
+      "notes": "乳酸阈值节奏跑。2km热身，中间6km维持在乳酸阈值区间（4:35-4:40），最后3km冷身。保持配速平稳。",
+      "warmup_km": 2,
+      "main_set": "6km 节奏跑 (Tempo)",
       "target_pace": "4:35-4:40",
-      "cooldown_km": 3.0
+      "cooldown_km": 3
     },
     {
       "id": "S3",
       "day": "Fri",
       "type": "Recovery Run",
-      "distance_km": 6.0,
-      "target_hr_max": 130.0,
-      "notes": "超低心率主动恢复跑。不要在意配速，完全放松，心率严格控制在130以下。",
-      "warmup_km": 0.0,
+      "distance_km": 6,
+      "target_hr_max": 130,
+      "notes": "超低心率主动恢复跑。不要在意配速，完全放松，心率严格控制在130以下，帮助肌肉恢复。",
+      "warmup_km": 0,
       "main_set": "6km 恢复跑",
       "target_pace": "6:50-7:20",
-      "cooldown_km": 0.0
+      "cooldown_km": 0
     },
     {
       "id": "S4",
       "day": "Sun",
       "type": "LSD (Long Slow Distance)",
-      "distance_km": 16.0,
-      "target_hr_max": 145.0,
-      "notes": "周末长距离慢跑，专注于平稳的呼吸和节奏，中途注意补水，为下阶段备战奠定有氧基础。",
-      "warmup_km": 0.0,
-      "main_set": "16km 慢跑",
+      "distance_km": 18,
+      "target_hr_max": 145,
+      "notes": "周末长距离慢跑，专注于平稳的呼吸和节奏，中途注意补水，弥补上周缺失，夯实有氧底子。",
+      "warmup_km": 0,
+      "main_set": "18km 慢跑",
       "target_pace": "6:00-6:20",
-      "cooldown_km": 0.0
+      "cooldown_km": 0
     }
   ]
 }
