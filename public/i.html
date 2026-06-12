@@ -204,7 +204,19 @@
 			transform: translateY(0) scaleY(1);
 		}
 	}    
-    .bold-white { font-weight: 600; }
+
+  .table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.table-wrapper table {
+    min-width: max-content;
+    border-collapse: collapse;
+}
+  
+  .bold-white { font-weight: 600; }
     .unit { color: var(--text-dark); font-size: 11px; font-weight: normal; }
     
     .pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; color: var(--text-muted); font-size: 16px; padding-top: 10px; border-top: 1px solid var(--border-color); flex-shrink: 0; }
@@ -1802,6 +1814,13 @@
                 const mdText = await res.text();
                 // 使用 marked.js 将 MD 转为 HTML 渲染
                 document.getElementById('ai-markdown-content').innerHTML = marked.parse(mdText);
+                container.querySelectorAll('table').forEach(table => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'table-wrapper';
+                
+                    table.parentNode.insertBefore(wrapper, table);
+                    wrapper.appendChild(table);
+                });              
                 // 滚动回到顶部
                 window.scrollTo(0, 0);
             } else {
