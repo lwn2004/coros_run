@@ -326,8 +326,8 @@ def update_ai_index():
 # 5. 主流程控制
 # ==========================================
 def main():
-    #if now_utc8().weekday() != 6:
-    #    return
+    if now_utc8().weekday() != 6:
+        return
     print("创建所需目录体系...")
     for directory in [reports_dir, plans_dir, reviews_dir]:
         os.makedirs(directory, exist_ok=True)
@@ -352,8 +352,8 @@ def main():
     print(f"- 本周课时数: {len(current_week_run_details)}")
     if execution_stats:
         print(f"- 上周计划完成度: {execution_stats['completion_rate']}%")
-    print("所有信息:")
-    print(json.dumps(ai_context, indent=4))
+    #print("所有信息:")
+    #print(json.dumps(ai_context, indent=4))
     ai_result_dict = generate_ai_report(ai_context)
     ai_result_dict = None
     if ai_result_dict:
