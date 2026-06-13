@@ -355,7 +355,6 @@ def main():
     #print("所有信息:")
     #print(json.dumps(ai_context, indent=4))
     ai_result_dict = generate_ai_report(ai_context)
-    ai_result_dict = None
     if ai_result_dict:
         date_str = now_utc8().strftime("%Y-%m-%d")
         
