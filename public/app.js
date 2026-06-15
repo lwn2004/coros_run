@@ -12,6 +12,8 @@ let currentActiveRunId = null;
 let currentActiveRunWeatherStr = null;
 let currentSingleRun = null; 
 let posterMap = null; 
+let currentMediaMarkers = []; // 存放地图上的多媒体标记
+let currentMediaData = null;  // 存放当前运动的多媒体数据
 
 // Calendar state
 let currentCalMode = 'month'; // 'month' | 'year'
@@ -108,6 +110,7 @@ function renderMap(runsOrRun) {
     } else {
         currentSingleRun = null;
         document.getElementById('export-btn').style.display = 'none';
+		clearMediaMarkers();
     }
 
     runs.forEach(run => {
@@ -258,7 +261,100 @@ function fetchWeatherForRun(run) {
         })
         .catch(err => console.error('Fetch weather failed:', err));
 }
+// 清除现有的多媒体标记和按钮状态
+function clearMediaMarkers() {
+    if (currentMediaMarkers.length > 0) {
+        currentMediaMarkers.forEach(m => m.remove());
+        currentMediaMarkers = [];
+    }
+    const btn = document.getElementById('media-btn');
+    if (btn) btn.style.display = 'none';
+    currentMediaData = null;
+}
 
+// 异步请求多媒体数据并绘制 Marker
+async function fetchMediaForRun(run) {
+    if (!run || !run.run_id) return;
+    clearMediaMarkers(); // 每次请求前清空旧数据
+
+    try {
+        const res = await fetch(`https://workerrunapi.linwn.net/api/media/${run.run_id}`);
+        if (!res.ok) return;
+        const data = await res.json();
+
+        if (data && data.media && data.media.length > 0) {
+            currentMediaData = data.media;
+            document.getElementById('media-btn').style.display = 'block';
+
+            data.media.forEach((item, index) => {
+                if (item.location && item.location.lat && item.location.lng) {
+                    const el = document.createElement('div');
+                    el.className = 'media-marker-icon';
+
+                    // 根据类型设置相机/摄像机图标
+                    if (item.type === 'video') {
+                        el.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+                    } else {
+                        el.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="3.2"/><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>';
+                    }
+
+                    // 点击地图上的 Marker 直接打开该图片/视频
+                    el.onclick = (e) => {
+                        e.stopPropagation();
+                        openRunMediaGallery(index);
+                    };
+
+                    // 创建并添加 Marker 到地图（注意 maplibregl 是 [lng, lat]）
+                    const marker = new maplibregl.Marker({element: el})
+                        .setLngLat([item.location.lng, item.location.lat])
+                        .addTo(map);
+                    currentMediaMarkers.push(marker);
+                }
+            });
+        }
+    } catch (err) {
+        console.error('Fetch media failed:', err);
+    }
+}
+
+// 使用 lightGallery 动态打开画廊
+function openRunMediaGallery(startIndex = 0) {
+    if (!currentMediaData || currentMediaData.length === 0) return;
+
+    // 构造 lightGallery 所需的动态数据格式
+    const dynamicElements = currentMediaData.map(item => {
+        let mediaObj = {
+            src: item.url,
+            thumb: item.url
+        };
+        // 传入下方描述文字
+        if (item.description) {
+            mediaObj.subHtml = `<p style="font-size: 14px; text-align: center;">${item.description}</p>`;
+        }
+        // 视频特殊处理配置
+        if (item.type === 'video') {
+            mediaObj.video = {"source": [{"src": item.url, "type": "video/mp4"}]};
+            mediaObj.thumb = ""; 
+        }
+        return mediaObj;
+    });
+
+    const dummyContainer = document.createElement('div');
+    const gallery = lightGallery(dummyContainer, {
+        dynamic: true,
+        plugins: [lgVideo],
+        dynamicEl: dynamicElements,
+        speed: 500,
+        download: false
+    });
+
+    // 关闭时销毁实例释放内存
+    dummyContainer.addEventListener('lgAfterClose', () => {
+        gallery.destroy(true);
+    });
+
+    gallery.openGallery(startIndex);
+}
 function calculateSummaries() {
     const now = new Date();
     const currentYear = now.getFullYear().toString();
@@ -530,6 +626,7 @@ function renderMonthGrid(year, month, dayMap) {
                 renderMap(cellData.runs);
                 updateMapInfoBox('single', cellData.runs[0]);
                 fetchWeatherForRun(cellData.runs[0]); 
+				fetchMediaForRun(cellData.runs[0]);
                 highlightRunInTable(cellData.runs[0].run_id);
                 
                 selectCalendarDay(cellData.runs[0].start_date_local);
@@ -730,6 +827,7 @@ function renderTable(resetHighlights = true) {
             renderMap(run);
             updateMapInfoBox('single', run); 
             fetchWeatherForRun(run);
+			fetchMediaForRun(run);
 
             if (run.start_date_local) {
                 const [yyyy, mm, dd] = run.start_date_local.split(' ')[0].split('-');
@@ -994,6 +1092,7 @@ document.getElementById('btn-back-today').addEventListener('click', () => {
         renderMap(todayRun);
         updateMapInfoBox('single', todayRun);
         fetchWeatherForRun(todayRun);
+		fetchMediaForRun(todayRun);
         
         setTimeout(() => { selectCalendarDay(todayRun.start_date_local); }, 100);
     } else {
@@ -1874,6 +1973,8 @@ document.getElementById('pb-toggle-btn').addEventListener('click', function() {
         this.classList.remove('active');
     }
 });
-
+document.getElementById('media-btn').addEventListener('click', () => {
+    openRunMediaGallery(0);
+});
 fetchData();
 loadAiGuidePreview();
