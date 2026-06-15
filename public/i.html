@@ -438,7 +438,27 @@
     .echarts-container {
         position: relative; flex: 1; width: 100%; min-height: 350px;
     }
+/* 多媒体相册按钮 */
+.media-btn {
+    position: absolute; top: 12px; left: 56px; z-index: 10;
+    background: rgba(30, 30, 30, 0.8); border: 1px solid var(--border-color);
+    color: #fff; padding: 6px 8px; border-radius: 6px; cursor: pointer; display: none;
+    backdrop-filter: blur(4px); transition: background 0.2s;
+}
+[data-theme="light"] .media-btn { background: rgba(255, 255, 255, 0.9); color: var(--text-main); }
+.media-btn:hover { background: rgba(60, 60, 60, 0.9); }
+[data-theme="light"] .media-btn:hover { background: #ffffff; }
+.media-btn svg { vertical-align: middle; }
 
+/* 地图上的多媒体 Marker */
+.media-marker-icon {
+    width: 28px; height: 28px; background-color: var(--accent-color);
+    border-radius: 50%; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; cursor: pointer; transition: transform 0.2s;
+}
+.media-marker-icon:hover { transform: scale(1.15); z-index: 1000; }
+.media-marker-icon svg { width: 14px; height: 14px; }
     /* ==========================================================================
        Mobile Responsive Adaptations
        ========================================================================== */
@@ -629,13 +649,16 @@
                 <a href="#ai-summary" class="ai-guide-link">查看完整分析 &raquo;</a>
             </div>
 
-            <div class="map-card">
-                <button id="export-btn" class="export-btn" title="导出长图">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-                </button>
-                <div id="map"></div>
-                <div class="map-info-box" id="map-info-text">Loading map data...</div>
-            </div>
+			<div class="map-card">
+				<button id="export-btn" class="export-btn" title="导出长图">
+					<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+				</button>
+				<button id="media-btn" class="media-btn" title="查看关联影像">
+					<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M22 16V4c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2zm-11-4l2.03 2.71L16 11l4 5H8l3-4zM2 6v14c0 1.1.9 2 2 2h14v-2H4V6H2z"/></svg>
+				</button>
+				<div id="map"></div>
+				<div class="map-info-box" id="map-info-text">Loading map data...</div>
+			</div>
             
             <div class="chart-card" id="info-chart-card">
                 <div class="cal-card-inner" id="cal-card-inner">
