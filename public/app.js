@@ -571,9 +571,12 @@ function renderMonthChart(year, month, dayMap) {
     const option = {
         grid: { top: 10, right: 10, bottom: 20, left: 30 },
         tooltip: {
-            trigger: 'axis',
-            axisPointer: { type: 'shadow', shadowStyle: { color: theme === 'light' ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)' } },
-            formatter: (params) => `${params[0].name}<br/>${params[0].marker} <b>${params[0].value.toFixed(2)} km</b>`
+                trigger: 'axis',
+                axisPointer: { type: 'shadow', shadowStyle: { color: theme === 'light' ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)' } },
+                formatter: (params) => {
+                    const val = params[0].value || 0; // 容错处理：如果是 undefined 或 null，则视为 0
+                    return `${params[0].name}<br/>${params[0].marker} <b>${val.toFixed(2)} km</b>`;
+                }
         },
         xAxis: {
             type: 'category',
@@ -643,9 +646,12 @@ function renderYearChart(monthMap) {
     const option = {
         grid: { top: 10, right: 10, bottom: 20, left: 30 },
         tooltip: {
-            trigger: 'axis',
-            axisPointer: { type: 'shadow', shadowStyle: { color: theme === 'light' ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)' } },
-            formatter: (params) => `${params[0].name}月<br/>${params[0].marker} <b>${params[0].value.toFixed(2)} km</b>`
+                trigger: 'axis',
+                axisPointer: { type: 'shadow', shadowStyle: { color: theme === 'light' ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)' } },
+                formatter: (params) => {
+                    const val = params[0].value || 0; // 容错处理
+                    return `${params[0].name}月<br/>${params[0].marker} <b>${val.toFixed(2)} km</b>`;
+                }
         },
         xAxis: {
             type: 'category',
