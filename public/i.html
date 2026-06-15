@@ -1813,7 +1813,8 @@
             if (res.ok) {
                 const mdText = await res.text();
                 // 使用 marked.js 将 MD 转为 HTML 渲染
-                document.getElementById('ai-markdown-content').innerHTML = marked.parse(mdText);
+				let container = document.getElementById('ai-markdown-content');
+                container.innerHTML = marked.parse(mdText);
                 container.querySelectorAll('table').forEach(table => {
                     const wrapper = document.createElement('div');
                     wrapper.className = 'table-wrapper';
