@@ -550,12 +550,16 @@ function renderMonthGrid(year, month, dayMap) {
         grid.appendChild(createEmptyCell());
     }
 }
-
 function renderMonthChart(year, month, dayMap) {
-    if (calMonthChartInstance) { calMonthChartInstance.destroy(); }
-    const ctx = document.getElementById('cal-month-chart-canvas').getContext('2d');
+    const chartDom = document.getElementById('cal-month-chart-container');
+    if (!chartDom) return;
+
+    // ECharts 销毁实例的方法是 dispose()
+    if (calMonthChartInstance) { calMonthChartInstance.dispose(); }
+
+    calMonthChartInstance = echarts.init(chartDom);
     const theme = document.documentElement.getAttribute('data-theme') || 'dark';
-    
+
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const labels = Array.from({length: daysInMonth}, (_, i) => `${i + 1}日`);
     const data = Array.from({length: daysInMonth}, (_, i) => dayMap[i + 1] ? dayMap[i + 1].dist : 0);
@@ -564,30 +568,34 @@ function renderMonthChart(year, month, dayMap) {
     const gridColor = theme === 'light' ? '#f3f4f6' : '#2a2a2a';
     const tickColor = theme === 'light' ? '#6b7280' : '#888';
 
-    calMonthChartInstance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: data.map(d => d === 0 ? null : d),
-                backgroundColor: barColor,
-                borderRadius: 4,
-                barPercentage: 0.6
-            }]
+    const option = {
+        grid: { top: 10, right: 10, bottom: 20, left: 30 },
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: { type: 'shadow', shadowStyle: { color: theme === 'light' ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)' } },
+            formatter: (params) => `${params[0].name}<br/>${params[0].marker} <b>${params[0].value.toFixed(2)} km</b>`
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { 
-                legend: { display: false },
-                tooltip: { callbacks: { label: (c) => ` ${c.raw.toFixed(2)} km` } }
-            },
-            scales: {
-                x: { grid: { display: false }, ticks: { color: tickColor, maxRotation: 0 } },
-                y: { grid: { color: gridColor }, border: {display: false}, ticks: { color: tickColor, beginAtZero: true } }
-            }
-        }
-    });
+        xAxis: {
+            type: 'category',
+            data: labels,
+            axisLine: { show: false },
+            axisTick: { show: false },
+            axisLabel: { color: tickColor, interval: 'auto' }
+        },
+        yAxis: {
+            type: 'value',
+            splitLine: { lineStyle: { color: gridColor } },
+            axisLabel: { color: tickColor }
+        },
+        series: [{
+            type: 'bar',
+            data: data.map(d => d === 0 ? null : d), // 过滤0值，使其不显示极小的柱子
+            itemStyle: { color: barColor, borderRadius: [4, 4, 0, 0] },
+            barWidth: '60%'
+        }]
+    };
+
+    calMonthChartInstance.setOption(option);
 }
 
 function renderYearGrid(year, monthMap) {
@@ -620,38 +628,46 @@ function renderYearGrid(year, monthMap) {
 }
 
 function renderYearChart(monthMap) {
-    if (calYearChartInstance) { calYearChartInstance.destroy(); }
-    const ctx = document.getElementById('cal-year-chart-canvas').getContext('2d');
+    const chartDom = document.getElementById('cal-year-chart-container');
+    if (!chartDom) return;
+
+    if (calYearChartInstance) { calYearChartInstance.dispose(); }
+
+    calYearChartInstance = echarts.init(chartDom);
     const theme = document.documentElement.getAttribute('data-theme') || 'dark';
-    
+
     const barColor = theme === 'light' ? '#d1d5db' : '#3F3F46';
     const gridColor = theme === 'light' ? '#f3f4f6' : '#2a2a2a';
     const tickColor = theme === 'light' ? '#6b7280' : '#888';
 
-    calYearChartInstance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
-            datasets: [{
-                data: monthMap.map(d => d === 0 ? null : d),
-                backgroundColor: barColor,
-                borderRadius: 4,
-                barPercentage: 0.4
-            }]
+    const option = {
+        grid: { top: 10, right: 10, bottom: 20, left: 30 },
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: { type: 'shadow', shadowStyle: { color: theme === 'light' ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)' } },
+            formatter: (params) => `${params[0].name}月<br/>${params[0].marker} <b>${params[0].value.toFixed(2)} km</b>`
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { 
-                legend: { display: false },
-                tooltip: { callbacks: { label: (c) => ` ${c.raw.toFixed(2)} km` } }
-            },
-            scales: {
-                x: { grid: { display: false }, ticks: { color: tickColor } },
-                y: { grid: { color: gridColor }, border: {display: false}, ticks: { color: tickColor, beginAtZero: true } }
-            }
-        }
-    });
+        xAxis: {
+            type: 'category',
+            data: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
+            axisLine: { show: false },
+            axisTick: { show: false },
+            axisLabel: { color: tickColor }
+        },
+        yAxis: {
+            type: 'value',
+            splitLine: { lineStyle: { color: gridColor } },
+            axisLabel: { color: tickColor }
+        },
+        series: [{
+            type: 'bar',
+            data: monthMap.map(d => d === 0 ? null : d),
+            itemStyle: { color: barColor, borderRadius: [4, 4, 0, 0] },
+            barWidth: '40%'
+        }]
+    };
+
+    calYearChartInstance.setOption(option);
 }
 
 function highlightRunInTable(runId) {
@@ -1451,6 +1467,8 @@ function renderTandaCharts(rawRunData, today, dayMs) {
 window.addEventListener('resize', () => {
     if (tandaTrendChartInstance) tandaTrendChartInstance.resize();
     if (tandaProgChartInstance) tandaProgChartInstance.resize();
+    if (calMonthChartInstance) calMonthChartInstance.resize();
+    if (calYearChartInstance) calYearChartInstance.resize();
     if (detailMapInstance && document.getElementById('race-detail-view').style.display === 'block') detailMapInstance.resize();
 });
 
