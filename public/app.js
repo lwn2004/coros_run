@@ -7,6 +7,8 @@ const itemsPerPage = 16;
 let currentYearFilter = 'all';
 let currentMonthFilter = null; 
 let currentTypeFilter = 'all';
+let mediaRunIds = [];
+let isMediaRunIdsLoaded = false;
 
 let currentActiveRunId = null;
 let currentActiveRunWeatherStr = null;
@@ -38,7 +40,18 @@ const GOAL_TOTAL = 40000;
 const GOAL_YEARLY = 2400;
 const GOAL_MONTHLY = 200;
 const HALF_MARATHON = 21.0975;
-
+async function loadMediaRunIds() {
+    if (isMediaRunIdsLoaded) return;
+    try {
+        const res = await fetch('https://workerrunapi.linwn.net/api/media/list');
+        if (res.ok) {
+            mediaRunIds = await res.json();
+            isMediaRunIdsLoaded = true;
+        }
+    } catch (err) {
+        console.error("获取多媒体记录列表失败:", err);
+    }
+}
 function getTodayDateString() {
     const now = new Date();
     return `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-${now.getDate().toString().padStart(2,'0')}`;
@@ -879,6 +892,10 @@ function applyFilters(skipMapRender = false) {
         filteredRuns = tempRuns.filter(run => run.distance > 100).sort((a, b) => b.distance - a.distance).slice(0, 10);
     } else if (currentTypeFilter === 'onThisDay') {
         filteredRuns = tempRuns.filter(run => run.start_date_local && run.start_date_local.includes(`${(new Date().getMonth() + 1).toString().padStart(2, '0')}-${new Date().getDate().toString().padStart(2, '0')}`));
+    } else if (currentTypeFilter === 'media') {
+        // [新增] 过滤出存在于 mediaRunIds 列表中的记录
+        // 注意：API 返回的 ID 是字符串，这里统一转为 String 对比，避免类型不匹配
+        filteredRuns = tempRuns.filter(run => mediaRunIds.includes(String(run.run_id)));
     } else {
         filteredRuns = tempRuns;
     }
@@ -1139,8 +1156,18 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
         applyFilters();
     });
 });
-document.getElementById('type-filter').addEventListener('change', (e) => {
+
+document.getElementById('type-filter').addEventListener('change', async (e) => {
     currentTypeFilter = e.target.value;
+    
+    // 如果选中的是多媒体且尚未加载数据，则先请求数据
+    if (currentTypeFilter === 'media' && !isMediaRunIdsLoaded) {
+        // 将下拉框暂时禁用，避免网络慢时用户频繁切换
+        e.target.disabled = true; 
+        await loadMediaRunIds();
+        e.target.disabled = false;
+    }
+    
     applyFilters();
 });
 document.getElementById('prev-page').addEventListener('click', () => {
