@@ -11,6 +11,8 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.2/css/lightgallery.min.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.2/css/lg-video.min.css" />
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" />
+  
 <style>
     /* ==========================================================================
        Theme Variables (Dark Mode Default)
@@ -264,7 +266,7 @@
 
     /* "今" (Today) Button */
     #btn-back-today {
-        position: absolute bottom: 20px; right: 24px; background-color: var(--accent-color);
+        position: absolute; bottom: 20px; right: 24px; background-color: var(--accent-color);
         color: #ffffff; border: none; padding: 6px 14px; border-radius: 12px; font-size: 13px;
         font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px var(--active-row-bg);
         display: none; z-index: 20; transition: transform 0.1s;
@@ -493,11 +495,6 @@
 		#prediction-page, #ai-page, #races-page, #settings-page {padding: 0 !important;}
     }
 </style>
-
-<link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
-
 <script>
     const savedTheme = localStorage.getItem('theme') || 'dark';
     const savedColor = localStorage.getItem('accentColor') || '#e93342';
@@ -670,20 +667,18 @@
                         </div>
                         <div class="cal-grid" id="cal-grid"></div>
                     </div>
-
                     <div class="cal-view" id="cal-view-month-chart" style="display:none; overflow-x: auto; width: 100%;">
                         <div style="width: 100%; height: 100%; position: relative; padding-bottom: 20px;">
-                            <canvas id="cal-month-chart-canvas"></canvas>
+                            <div id="cal-month-chart-container" style="width: 100%; height: 100%;"></div>
                         </div>
                     </div>
-
                     <div class="cal-view" id="cal-view-year-cal" style="display:none;">
                         <div class="cal-year-grid" id="cal-year-grid"></div>
                     </div>
 
                     <div class="cal-view cal-view-year-wrap" id="cal-view-year-chart" style="display:none; position: relative;">
                         <div style="width: 100%; height: 100%; padding-bottom: 20px;">
-                            <canvas id="cal-year-chart-canvas"></canvas>
+                            <div id="cal-year-chart-container" style="width: 100%; height: 100%;"></div>
                         </div>
                     </div>
 
@@ -949,6 +944,7 @@
 </div>
 <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js" defer></script>
 <script src="https://unpkg.com/@mapbox/polyline" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js" defer></script>  
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.2/lightgallery.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.2/plugins/video/lg-video.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script>
