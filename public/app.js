@@ -447,7 +447,6 @@ async function fetchMediaForRun(run) {
                         openRunMediaGallery(index);
                     };
 
-                    // 创建并添加 Marker 到地图（注意 maplibregl 是 [lng, lat]）
                     const marker = new maplibregl.Marker({element: el})
                         .setLngLat([item.location.lng, item.location.lat])
                         .addTo(map);
@@ -464,17 +463,14 @@ async function fetchMediaForRun(run) {
 function openRunMediaGallery(startIndex = 0) {
     if (!currentMediaData || currentMediaData.length === 0) return;
 
-    // 构造 lightGallery 所需的动态数据格式
     const dynamicElements = currentMediaData.map(item => {
         let mediaObj = {
             src: item.url,
             thumb: item.url
         };
-        // 传入下方描述文字
         if (item.description) {
             mediaObj.subHtml = `<p style="font-size: 14px; text-align: center;">${item.description}</p>`;
         }
-        // 视频特殊处理配置
         if (item.type === 'video') {
             mediaObj.video = {"source": [{"src": item.url, "type": "video/mp4"}]};
             mediaObj.thumb = ""; 
@@ -491,7 +487,6 @@ function openRunMediaGallery(startIndex = 0) {
         download: false
     });
 
-    // 关闭时销毁实例释放内存
     dummyContainer.addEventListener('lgAfterClose', () => {
         gallery.destroy(true);
     });
