@@ -13,9 +13,13 @@ let isMediaRunIdsLoaded = false;
 let currentActiveRunId = null;
 let currentActiveRunWeatherStr = null;
 let currentSingleRun = null; 
-let posterMap = null; 
+
 let currentMediaMarkers = []; // 存放地图上的多媒体标记
 let currentMediaData = null;  // 存放当前运动的多媒体数据
+
+// Chart Instances
+let paceChartInstance = null;
+let hrChartInstance = null;
 
 // Calendar state
 let currentCalMode = 'month'; // 'month' | 'year'
@@ -119,10 +123,12 @@ function renderMap(runsOrRun) {
     
     if (runs.length === 1) {
         currentSingleRun = runs[0];
-        document.getElementById('export-btn').style.display = 'block';
+        document.getElementById('toggle-map-chart-btn').style.display = 'flex';
     } else {
         currentSingleRun = null;
-        document.getElementById('export-btn').style.display = 'none';
+        document.getElementById('toggle-map-chart-btn').style.display = 'none';
+        document.getElementById('run-charts-container').style.display = 'none';
+        document.getElementById('map').style.display = 'block';
 		clearMediaMarkers();
     }
 
@@ -227,9 +233,11 @@ function formatHoursMins(totalSeconds) {
 
 function updateMapInfoBox(type, data, weather = null) {
     const box = document.getElementById('map-info-text');
+    const flipBtn = document.getElementById('toggle-map-chart-btn');
     if (!box) return;
 
     if (type === 'summary') {
+        flipBtn.style.display = 'none';
         let yearText = currentYearFilter === 'all' ? '总计' : `${currentYearFilter}年`;
         if (currentMonthFilter) {
             const parts = currentMonthFilter.split('-');
@@ -238,42 +246,164 @@ function updateMapInfoBox(type, data, weather = null) {
         const dist = data.dist.toFixed(2);
         box.innerHTML = `<span style="flex:1; overflow:hidden; text-overflow:ellipsis;"><strong class="info-strong">${yearText}概览</strong> &middot; ${data.runs} 次活动 / ${dist} km / 耗时 ${formatHoursMins(data.seconds)}</span>`;
     } else if (type === 'single') {
-        const date = data.start_date_local || '';
+        flipBtn.style.display = 'flex';
+        const dateFull = data.start_date_local || '';
+        const dateShort = dateFull.substring(0, 10);
         const dist = ((data.distance || 0) / 1000).toFixed(2);
-        const name = (data.race && data.race.race_name) ? data.race.race_name : (data.name || getNameByTime(date));
-        let weatherHtml = '';
         
+        let weatherHtml = '';
         if (weather) {
             const condition = weather.condition || "";
             const emojiMatch = condition.match(/\p{Extended_Pictographic}/gu);
             const emoji = emojiMatch ? emojiMatch[emojiMatch.length - 1] : '';
             currentActiveRunWeatherStr = `${emoji} ${weather.temperature_c}°C`.trim();
-            
             weatherHtml = `<span class="weather-text" style="margin-left: auto; font-family: monospace; font-size: 13px;">${currentActiveRunWeatherStr}</span>`;
         } else {
             currentActiveRunWeatherStr = null;
         }
         
-        box.innerHTML = `<span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"><strong class="info-strong-red">${name} </strong> (${date.substring(0,10)}) &middot; ${dist} km / 配速 ${calculatePace(data.average_speed)}</span> ${weatherHtml}`;
+        box.innerHTML = `
+            <span class="info-date-desktop" style="color:var(--text-main); font-weight:bold;">${dateFull}</span>
+            <span class="info-date-mobile" style="display:none; color:var(--text-main); font-weight:bold;">${dateShort}</span>
+            <span class="info-distance-wrap">&nbsp;&nbsp;&middot;&nbsp;&nbsp;${dist} km</span>
+            ${weatherHtml}
+        `;
     }
 }
 
-function fetchWeatherForRun(run) {
+function renderRunCharts(run, chartsData) {
+    const totalSecs = parseMovingTime(run.moving_time);
+    if (!totalSecs || totalSecs <= 0) return;
+
+    const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+    const accentColor = localStorage.getItem('accentColor') || '#e93342';
+    const textColor = theme === 'light' ? '#6b7280' : '#888';
+    const gridColor = theme === 'light' ? '#f3f4f6' : '#2a2a2a';
+
+    let interval = 1800;
+    if (totalSecs <= 1800) interval = 300; 
+    else if (totalSecs <= 3600) interval = 900; 
+    else if (totalSecs <= 7200) interval = 1800; 
+    else interval = 3600; 
+
+    const xAxisConfig = {
+        type: 'value',
+        min: 0,
+        max: totalSecs,
+        interval: interval,
+        splitLine: { show: false },
+        axisLabel: {
+            color: textColor,
+            formatter: val => {
+                const m = Math.floor(val / 60);
+                const s = Math.floor(val % 60).toString().padStart(2, '0');
+                //return m > 59 ? `${Math.floor(m/60)}h${m%60}m` : `${m}:${s}`;
+				return m;
+            }
+        }
+    };
+
+    const gridConfig = { top: 10, right: 10, bottom: 20, left: 40 };
+
+    // Render Pace Chart
+    if (chartsData.pace && chartsData.pace.data) {
+        if (!paceChartInstance) paceChartInstance = echarts.init(document.getElementById('pace-chart'));
+        const pData = chartsData.pace.data;
+        const paceSeriesData = pData.map((val, i) => [ (i / (pData.length - 1)) * totalSecs, val ]);
+        
+        paceChartInstance.setOption({
+            grid: gridConfig,
+            tooltip: {
+                trigger: 'axis',
+                formatter: params => {
+                    const val = params[0].value[1];
+                    const m = Math.floor(val / 60);
+                    const s = Math.floor(val % 60).toString().padStart(2, '0');
+                    return `配速: ${m}'${s}" /km`;
+                }
+            },
+            xAxis: xAxisConfig,
+            yAxis: {
+                type: 'value',
+                inverse: true,
+                min: 'dataMin', 
+                max: function (value) {
+                    // value.max 是当前这批数据里的最慢配速
+                    // 如果最慢配速大于 600秒 (10分配)，强行把坐标轴底部截断在 600
+                    // 否则返回 null，让 ECharts 根据实际数据自动适应并留出好看的边界留白
+                    return value.max > 600 ? 600 : null;
+                }, 
+                splitLine: { lineStyle: { color: gridColor } },
+                axisLabel: {
+                    color: textColor,
+                    formatter: val => `${Math.floor(val/60)}'${Math.floor(val%60).toString().padStart(2,'0')}"`
+                }
+            },
+            series: [{
+                type: 'line',
+                showSymbol: false,
+                smooth: true,
+                lineStyle: { width: 2, color: accentColor },
+                itemStyle: { color: accentColor },
+                data: paceSeriesData
+            }]
+        }, true);
+    }
+
+    // Render HR Chart
+    if (chartsData.hr && chartsData.hr.data) {
+        if (!hrChartInstance) hrChartInstance = echarts.init(document.getElementById('hr-chart'));
+        const hData = chartsData.hr.data;
+        const hrSeriesData = hData.map((val, i) => [ (i / (hData.length - 1)) * totalSecs, val ]);
+        
+        hrChartInstance.setOption({
+            grid: gridConfig,
+            tooltip: {
+                trigger: 'axis',
+                formatter: params => `心率: ${Math.round(params[0].value[1])} bpm`
+            },
+            xAxis: xAxisConfig,
+            yAxis: {
+                type: 'value',
+                min: 30,
+                max: 210,
+                splitLine: { lineStyle: { color: gridColor } },
+                axisLabel: { color: textColor }
+            },
+            series: [{
+                type: 'line',
+                showSymbol: false,
+                smooth: true,
+                lineStyle: { width: 2, color: '#f87171' },
+                itemStyle: { color: '#f87171' },
+                data: hrSeriesData
+            }]
+        }, true);
+    }
+}
+
+function fetchRunDetails(run) {
     if (!run || !run.run_id) return;
     currentActiveRunId = run.run_id;
     
     fetch(`https://run.linwn.net/data/details/${run.run_id}.json`)
         .then(res => {
-            if (!res.ok) throw new Error('Weather details response failed.');
+            if (!res.ok) throw new Error('Run details response failed.');
             return res.json();
         })
         .then(detail => {
-            if (currentActiveRunId === run.run_id && detail && detail.weather) {
-                updateMapInfoBox('single', run, detail.weather);
+            if (currentActiveRunId === run.run_id && detail) {
+                if (detail.weather) {
+                    updateMapInfoBox('single', run, detail.weather);
+                }
+                if (detail.charts) {
+                    renderRunCharts(run, detail.charts);
+                }
             }
         })
-        .catch(err => console.error('Fetch weather failed:', err));
+        .catch(err => console.error('Fetch run details failed:', err));
 }
+
 // 清除现有的多媒体标记和按钮状态
 function clearMediaMarkers() {
     if (currentMediaMarkers.length > 0) {
@@ -368,6 +498,7 @@ function openRunMediaGallery(startIndex = 0) {
 
     gallery.openGallery(startIndex);
 }
+
 function calculateSummaries() {
     const now = new Date();
     const currentYear = now.getFullYear().toString();
@@ -638,7 +769,7 @@ function renderMonthGrid(year, month, dayMap) {
             cell.onclick = () => {
                 renderMap(cellData.runs);
                 updateMapInfoBox('single', cellData.runs[0]);
-                fetchWeatherForRun(cellData.runs[0]); 
+                fetchRunDetails(cellData.runs[0]); 
 				fetchMediaForRun(cellData.runs[0]);
                 highlightRunInTable(cellData.runs[0].run_id);
                 
@@ -660,11 +791,11 @@ function renderMonthGrid(year, month, dayMap) {
         grid.appendChild(createEmptyCell());
     }
 }
+
 function renderMonthChart(year, month, dayMap) {
     const chartDom = document.getElementById('cal-month-chart-container');
     if (!chartDom) return;
 
-    // ECharts 销毁实例的方法是 dispose()
     if (calMonthChartInstance) { calMonthChartInstance.dispose(); }
 
     calMonthChartInstance = echarts.init(chartDom);
@@ -684,7 +815,7 @@ function renderMonthChart(year, month, dayMap) {
                 trigger: 'axis',
                 axisPointer: { type: 'shadow', shadowStyle: { color: theme === 'light' ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)' } },
                 formatter: (params) => {
-                    const val = params[0].value || 0; // 容错处理：如果是 undefined 或 null，则视为 0
+                    const val = params[0].value || 0; 
                     return `${params[0].name}<br/>${params[0].marker} <b>${val.toFixed(2)} km</b>`;
                 }
         },
@@ -702,7 +833,7 @@ function renderMonthChart(year, month, dayMap) {
         },
         series: [{
             type: 'bar',
-            data: data.map(d => d === 0 ? null : d), // 过滤0值，使其不显示极小的柱子
+            data: data.map(d => d === 0 ? null : d), 
             itemStyle: { color: barColor, borderRadius: [4, 4, 0, 0] },
             barWidth: '60%'
         }]
@@ -759,7 +890,7 @@ function renderYearChart(monthMap) {
                 trigger: 'axis',
                 axisPointer: { type: 'shadow', shadowStyle: { color: theme === 'light' ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)' } },
                 formatter: (params) => {
-                    const val = params[0].value || 0; // 容错处理
+                    const val = params[0].value || 0; 
                     return `${params[0].name}月<br/>${params[0].marker} <b>${val.toFixed(2)} km</b>`;
                 }
         },
@@ -839,7 +970,7 @@ function renderTable(resetHighlights = true) {
             
             renderMap(run);
             updateMapInfoBox('single', run); 
-            fetchWeatherForRun(run);
+            fetchRunDetails(run);
 			fetchMediaForRun(run);
 
             if (run.start_date_local) {
@@ -893,8 +1024,6 @@ function applyFilters(skipMapRender = false) {
     } else if (currentTypeFilter === 'onThisDay') {
         filteredRuns = tempRuns.filter(run => run.start_date_local && run.start_date_local.includes(`${(new Date().getMonth() + 1).toString().padStart(2, '0')}-${new Date().getDate().toString().padStart(2, '0')}`));
     } else if (currentTypeFilter === 'media') {
-        // [新增] 过滤出存在于 mediaRunIds 列表中的记录
-        // 注意：API 返回的 ID 是字符串，这里统一转为 String 对比，避免类型不匹配
         filteredRuns = tempRuns.filter(run => mediaRunIds.includes(String(run.run_id)));
     } else {
         filteredRuns = tempRuns;
@@ -942,7 +1071,7 @@ function syncActivityLogToYear(targetYear) {
 }
 
 // ==========================================================================
-// AI Summary Logic (New addition)
+// AI Summary Logic 
 // ==========================================================================
 let aiIndexList = [];
 let currentAiIndex = 0; 
@@ -1108,7 +1237,7 @@ document.getElementById('btn-back-today').addEventListener('click', () => {
         highlightRunInTable(todayRun.run_id);
         renderMap(todayRun);
         updateMapInfoBox('single', todayRun);
-        fetchWeatherForRun(todayRun);
+        fetchRunDetails(todayRun);
 		fetchMediaForRun(todayRun);
         
         setTimeout(() => { selectCalendarDay(todayRun.start_date_local); }, 100);
@@ -1118,7 +1247,6 @@ document.getElementById('btn-back-today').addEventListener('click', () => {
         
         renderMap([]); 
         currentSingleRun = null;
-        document.getElementById('export-btn').style.display = 'none';
         document.getElementById('map-info-text').innerHTML = '<span style="flex:1; text-align:center;">今日暂无运动记录</span>';
         
         document.querySelectorAll('#table-body tr').forEach(r => r.classList.remove('active-row'));
@@ -1159,17 +1287,14 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
 
 document.getElementById('type-filter').addEventListener('change', async (e) => {
     currentTypeFilter = e.target.value;
-    
-    // 如果选中的是多媒体且尚未加载数据，则先请求数据
     if (currentTypeFilter === 'media' && !isMediaRunIdsLoaded) {
-        // 将下拉框暂时禁用，避免网络慢时用户频繁切换
         e.target.disabled = true; 
         await loadMediaRunIds();
         e.target.disabled = false;
     }
-    
     applyFilters();
 });
+
 document.getElementById('prev-page').addEventListener('click', () => {
     if (currentPage > 1) { currentPage--; renderTable(); }
 });
@@ -1178,6 +1303,24 @@ document.getElementById('next-page').addEventListener('click', () => {
     const totalPages = Math.ceil(filteredRuns.length / itemsPerPage);
     if (currentPage < totalPages) { currentPage++; renderTable(); }
 });
+
+// Map - Chart Toggle Event
+document.getElementById('toggle-map-chart-btn').addEventListener('click', () => {
+    const chartsContainer = document.getElementById('run-charts-container');
+    const mapContainer = document.getElementById('map');
+    
+    if (chartsContainer.style.display === 'none') {
+        chartsContainer.style.display = 'flex';
+        mapContainer.style.display = 'none';
+        if (paceChartInstance) paceChartInstance.resize();
+        if (hrChartInstance) hrChartInstance.resize();
+    } else {
+        chartsContainer.style.display = 'none';
+        mapContainer.style.display = 'block';
+        if (map) map.resize();
+    }
+});
+
 
 // ==========================================================================
 // Hash Routing, Page Navigation & Media Gallery
@@ -1602,6 +1745,8 @@ window.addEventListener('resize', () => {
     if (calMonthChartInstance) calMonthChartInstance.resize();
     if (calYearChartInstance) calYearChartInstance.resize();
     if (detailMapInstance && document.getElementById('race-detail-view').style.display === 'block') detailMapInstance.resize();
+    if (paceChartInstance && document.getElementById('run-charts-container').style.display === 'flex') paceChartInstance.resize();
+    if (hrChartInstance && document.getElementById('run-charts-container').style.display === 'flex') hrChartInstance.resize();
 });
 
 // ==========================================================================
@@ -1837,156 +1982,6 @@ function fitDetailMapBounds(coords) {
     }
 }
 
-// ==========================================================================
-// Poster (Share Card) Logic
-// ==========================================================================
-const posterModal = document.getElementById('poster-modal');
-const posterContent = document.getElementById('poster-content');
-
-function renderPosterRoute(run) {
-    if (!run || !run._cachedLatlngs) return;
-    let geojsonCoords = run._cachedLatlngs.map(coord => [coord[1], coord[0]]);
-    const geojsonData = { 'type': 'FeatureCollection', 'features': [{
-        'type': 'Feature',
-        'geometry': { 'type': 'LineString', 'coordinates': geojsonCoords }
-    }]};
-
-    const sourceId = 'poster-route-source';
-    const layerId = 'poster-route-layer';
-    const currentAccent = localStorage.getItem('accentColor') || '#e93342';
-
-    if (posterMap.getSource(sourceId)) {
-        posterMap.getSource(sourceId).setData(geojsonData);
-    } else {
-        posterMap.addSource(sourceId, { 'type': 'geojson', 'data': geojsonData });
-        posterMap.addLayer({
-            'id': layerId,
-            'type': 'line',
-            'source': sourceId,
-            'layout': { 'line-join': 'round', 'line-cap': 'round' },
-            'paint': { 'line-color': currentAccent, 'line-width': 3, 'line-opacity': 0.9 }
-        });
-    }
-
-    const pointsLong = geojsonCoords.map(p => p[0]);
-    const pointsLat = geojsonCoords.map(p => p[1]);
-    const bounds = [
-        [Math.min(...pointsLong), Math.min(...pointsLat)],
-        [Math.max(...pointsLong), Math.max(...pointsLat)]
-    ];
-    posterMap.fitBounds(bounds, { padding: 40, animate: false });
-}
-
-document.getElementById('export-btn').addEventListener('click', () => {
-    if (!currentSingleRun) return;
-
-    const dateStr = currentSingleRun.start_date_local || '';
-    const [datePart, timePart] = dateStr.split(" ")
-    const date = new Date(datePart.replace(/-/g, '/'));
-    const shortWeekDay = new Intl.DateTimeFormat('zh-CN', { weekday: 'short' }).format(date);
-    const dateStrWeekday = `${datePart} ${shortWeekDay} ${timePart}`;
-    document.getElementById('poster-date').innerText = dateStrWeekday.replace(/-/g, '/');
-    document.getElementById('poster-name').innerText = (currentSingleRun.race && currentSingleRun.race.race_name) ? currentSingleRun.race.race_name : (currentSingleRun.name || getNameByTime(dateStr));
-    
-    document.getElementById('poster-weather').innerHTML = currentActiveRunWeatherStr || '';
-
-    const yrDist = document.getElementById('yearly-dist').childNodes[0].nodeValue.trim();
-    const yrVs = document.getElementById('yearly-vs-container').innerText;
-    document.getElementById('poster-year-stat').innerHTML = `全年 ${yrDist} km <span>较去年同期 ${yrVs}</span>`;
-
-    const moDist = document.getElementById('monthly-dist').childNodes[0].nodeValue.trim();
-    const moVs = document.getElementById('monthly-vs-container').innerText;
-    document.getElementById('poster-month-stat').innerHTML = `本月 ${moDist} km <span>较上月同期 ${moVs}</span>`;
-
-    const distKm = (currentSingleRun.distance / 1000).toFixed(2);
-    const distParts = distKm.split('.');
-    document.querySelector('#poster-distance .int').innerText = distParts[0];
-    document.querySelector('#poster-distance .dec').innerText = distParts[1];
-
-    document.getElementById('poster-time').innerText = formatDuration(currentSingleRun.moving_time);
-    document.getElementById('poster-pace').innerText = calculatePace(currentSingleRun.average_speed);
-    document.getElementById('poster-hr').innerText = currentSingleRun.average_heartrate ? Math.round(currentSingleRun.average_heartrate) : '-';
-
-    posterModal.style.display = 'flex';
-
-    const theme = document.documentElement.getAttribute('data-theme') || 'dark';
-    const mapStyle = theme === 'light' ? 'https://tiles.openfreemap.org/styles/liberty' : 'https://tiles.openfreemap.org/styles/dark';
-
-    if (posterMap) {
-        posterMap.remove();
-        posterMap = null;
-    }
-
-    posterMap = new maplibregl.Map({
-        container: 'poster-map',
-        style: mapStyle, 
-        preserveDrawingBuffer: true, 
-        attributionControl: false,
-        interactive: true 
-    });
-    
-    posterMap.on('load', () => {
-        renderPosterRoute(currentSingleRun);
-    });
-    
-    setTimeout(() => posterMap.resize(), 100);
-});
-
-document.getElementById('poster-close').addEventListener('click', () => {
-    posterModal.style.display = 'none';
-});
-
-document.getElementById('poster-download').addEventListener('click', () => {
-    const btn = document.getElementById('poster-download');
-    const originalText = btn.innerText;
-    btn.innerText = '生成中...';
-    btn.disabled = true;
-
-    const canvasEl = posterMap.getCanvas();
-    const mapDataUrl = canvasEl.toDataURL('image/png');
-    
-    const tempImg = document.createElement('img');
-    tempImg.src = mapDataUrl;
-    tempImg.style.position = 'absolute';
-    tempImg.style.top = '0';
-    tempImg.style.left = '0';
-    tempImg.style.width = '100%';
-    tempImg.style.height = '100%';
-    tempImg.style.objectFit = 'cover';
-    tempImg.style.zIndex = '1';
-    
-    const posterMapContainer = document.getElementById('poster-map');
-    posterMapContainer.appendChild(tempImg);
-    canvasEl.style.display = 'none';
-
-    const theme = document.documentElement.getAttribute('data-theme') || 'dark';
-
-    html2canvas(document.getElementById('poster-content'), {
-        useCORS: true, 
-        scale: 2, 
-        backgroundColor: theme === 'light' ? '#f0f2f5' : '#111'
-    }).then(canvas => {
-        const link = document.createElement('a');
-        const dateFmt = currentSingleRun.start_date_local.substring(0,10);
-        link.download = `Run_Log_${dateFmt}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        
-        tempImg.remove();
-        canvasEl.style.display = '';
-        
-        btn.innerText = originalText;
-        btn.disabled = false;
-    }).catch(err => {
-        console.error('Poster generation failed: ', err);
-        btn.innerText = '生成失败';
-        
-        tempImg.remove();
-        canvasEl.style.display = '';
-        
-        setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 2000);
-    });
-});
 document.getElementById('pb-toggle-btn').addEventListener('click', function() {
     const pbGrid = document.getElementById('pb-grid');
     
