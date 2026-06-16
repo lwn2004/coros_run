@@ -141,23 +141,16 @@
 
     /* Map and Info Box */
     .map-card { background-color: var(--card-bg); border-radius: 16px; overflow: hidden; border: 1px solid var(--border-color); display: flex; flex-direction: column; height: 350px; flex: none; position: relative; transition: border-color 0.3s; }
-    #map { width: 100%; flex: 1; min-height: 0; }
     .map-info-box { flex-shrink: 0; height: 44px; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border-color); font-size: 12px; color: var(--text-muted); background-color: var(--map-info-bg); z-index: 10; transition: background-color 0.3s, border-color 0.3s;}
 
     .info-strong { color: var(--text-main); font-weight: bold; }
     .info-strong-red { color: var(--accent-color); font-weight: bold; }
-
-    /* Export Button */
-    .export-btn {
-        position: absolute; top: 12px; left: 12px; z-index: 10;
-        background: rgba(30, 30, 30, 0.8); border: 1px solid var(--border-color);
-        color: #fff; padding: 6px 8px; border-radius: 6px; cursor: pointer; display: none;
-        backdrop-filter: blur(4px); transition: background 0.2s;
+    
+    .flip-btn {
+        background: var(--btn-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 4px 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; margin-left: 10px;
     }
-    [data-theme="light"] .export-btn { background: rgba(255, 255, 255, 0.9); color: var(--text-main); }
-    .export-btn:hover { background: rgba(60, 60, 60, 0.9); }
-    [data-theme="light"] .export-btn:hover { background: #ffffff; }
-    .export-btn svg { vertical-align: middle; }
+    .flip-btn:hover { background: var(--border-color); }
+    .flip-btn svg { width: 16px; height: 16px; fill: currentColor; }
 
     /* Activity Log Area */
     .activity-section { background-color: var(--card-bg); border-radius: 12px; padding: 16px; border: 1px solid var(--border-color); display: flex; flex-direction: column; height: auto; flex: none; transition: background-color 0.3s, border-color 0.3s; }
@@ -352,73 +345,6 @@
     }
     .media-gallery-link:hover .media-item { transform: scale(1.02); }
 
-    /* ==========================================================================
-       Poster Generation Styles
-       ========================================================================== */
-    .poster-modal {
-        display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        z-index: 9999; align-items: center; justify-content: center; flex-direction: column; gap: 24px;
-        background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); transition: background 0.3s;
-    }
-    .poster-content {
-        width: 375px; height: 667px; background: #000; position: relative; overflow: hidden;
-        border-radius: 0; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-    }
-    .poster-bg { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
-    .poster-gradient {
-        position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2;
-        background: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.1) 35%, rgba(0,0,0,0.8) 65%, rgba(0,0,0,0.98) 100%);
-        pointer-events: none;
-    }
-    
-    .poster-header { position: absolute; top: 40px; left: 30px; right: 30px; z-index: 3; pointer-events: none; }
-    .poster-header-top { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 12px; }
-    .poster-date { color: #fff; font-size: 14px; font-weight: 800; font-family: monospace; letter-spacing: 1px; }
-	.poster-weather { color: #d1d1d1; font-size: 14px; font-family: monospace; letter-spacing: 1px; text-align: right; }
-    .poster-name { color: #fff; font-size: 26px; font-weight: 600; margin-bottom: 24px; letter-spacing: 1px; }
-    .poster-stats-sm { color: #999; font-size: 11px; line-height: 2; font-weight: 500; }
-    .poster-stats-sm span { color: #d1d1d1; margin-left: 6px; }
-
-    .poster-body { position: absolute; bottom: 40px; left: 0; width: 100%; z-index: 3; padding: 0 30px; pointer-events: none; }
-    .poster-distance { font-size: 100px; font-weight: 900; color: #fff; display: flex; align-items: baseline; line-height: 1; letter-spacing: -2px; }
-    .poster-distance .dot { display: inline-block; width: 22px; height: 22px; background: var(--accent-color); margin: 0 6px; }
-    .poster-distance .unit { font-size: 24px; color: var(--accent-color); margin-left: 6px; font-weight: 700; letter-spacing: 0;}
-    
-    .poster-footer-stats {
-        display: flex; justify-content: space-between; margin-top: 30px;
-        background: rgba(255,255,255,0.02); padding: 16px 20px; border-radius: 12px;
-        border: 1px solid rgba(255,255,255,0.06); box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    }
-    .p-stat { text-align: center; }
-    .p-stat-label { color: #888; font-size: 11px; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 4px; font-weight: 600; letter-spacing: 1px;}
-    .p-stat-val { color: #fff; font-size: 20px; font-weight: 700; font-family: monospace;}
-
-    .poster-actions { display: flex; gap: 16px; }
-    .poster-actions button { padding: 12px 28px; border: none; border-radius: 24px; cursor: pointer; font-weight: 600; font-size: 15px; }
-    .poster-actions .btn-cancel { background: #333; color: #fff; transition: background 0.2s;}
-    .poster-actions .btn-cancel:hover { background: #444; }
-    .poster-actions .btn-save { background: var(--accent-color); color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: filter 0.2s;}
-    .poster-actions .btn-save:hover { filter: brightness(0.9); }
-
-    [data-theme="light"] .poster-modal { background: rgba(255, 255, 255, 0.85); }
-    [data-theme="light"] .poster-content { background: #f0f2f5; }
-    [data-theme="light"] .poster-gradient {
-        background: linear-gradient(to bottom, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.1) 35%, rgba(255,255,255,0.8) 65%, rgba(255,255,255,0.98) 100%);
-    }
-    [data-theme="light"] .poster-date,
-    [data-theme="light"] .poster-weather,
-    [data-theme="light"] .poster-name,
-    [data-theme="light"] .poster-distance { color: #111827; }
-    [data-theme="light"] .poster-stats-sm { color: #6b7280; }
-    [data-theme="light"] .poster-stats-sm span { color: #374151; }
-    [data-theme="light"] .poster-footer-stats {
-        background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-    }
-    [data-theme="light"] .p-stat-val { color: #111827; }
-    [data-theme="light"] .p-stat-label { color: #6b7280; }
-    [data-theme="light"] .poster-actions .btn-cancel { background: #e5e7eb; color: #374151; }
-    [data-theme="light"] .poster-actions .btn-cancel:hover { background: #d1d5db; }
-
     /* Settings Page Specific */
     .settings-form-row { margin-bottom: 24px; }
     .settings-radio-group { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; font-size: 14px; color: var(--text-main); }
@@ -438,27 +364,28 @@
     .echarts-container {
         position: relative; flex: 1; width: 100%; min-height: 350px;
     }
-/* 多媒体相册按钮 */
-.media-btn {
-    position: absolute; top: 12px; left: 56px; z-index: 10;
-    background: rgba(30, 30, 30, 0.8); border: 1px solid var(--border-color);
-    color: #fff; padding: 6px 8px; border-radius: 6px; cursor: pointer; display: none;
-    backdrop-filter: blur(4px); transition: background 0.2s;
-}
-[data-theme="light"] .media-btn { background: rgba(255, 255, 255, 0.9); color: var(--text-main); }
-.media-btn:hover { background: rgba(60, 60, 60, 0.9); }
-[data-theme="light"] .media-btn:hover { background: #ffffff; }
-.media-btn svg { vertical-align: middle; }
+    /* 多媒体相册按钮 */
+    .media-btn {
+        position: absolute; top: 12px; left: 12px; z-index: 10;
+        background: rgba(30, 30, 30, 0.8); border: 1px solid var(--border-color);
+        color: #fff; padding: 6px 8px; border-radius: 6px; cursor: pointer; display: none;
+        backdrop-filter: blur(4px); transition: background 0.2s;
+    }
+    [data-theme="light"] .media-btn { background: rgba(255, 255, 255, 0.9); color: var(--text-main); }
+    .media-btn:hover { background: rgba(60, 60, 60, 0.9); }
+    [data-theme="light"] .media-btn:hover { background: #ffffff; }
+    .media-btn svg { vertical-align: middle; }
 
-/* 地图上的多媒体 Marker */
-.media-marker-icon {
-    width: 28px; height: 28px; background-color: var(--accent-color);
-    border-radius: 50%; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.4);
-    display: flex; align-items: center; justify-content: center;
-    color: #fff; cursor: pointer; transition: transform 0.2s;
-}
-.media-marker-icon:hover { transform: scale(1.15); z-index: 1000; }
-.media-marker-icon svg { width: 14px; height: 14px; }
+    /* 地图上的多媒体 Marker */
+    .media-marker-icon {
+        width: 28px; height: 28px; background-color: var(--accent-color);
+        border-radius: 50%; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+        display: flex; align-items: center; justify-content: center;
+        color: #fff; cursor: pointer; transition: transform 0.2s;
+    }
+    .media-marker-icon:hover { transform: scale(1.15); z-index: 1000; }
+    .media-marker-icon svg { width: 14px; height: 14px; }
+    
     /* ==========================================================================
        Mobile Responsive Adaptations
        ========================================================================== */
@@ -503,7 +430,6 @@
         .cal-weekdays, .cal-grid { width: 100%; }
         .cal-year-grid { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(4, 1fr); gap: 8px; padding: 0;}
         
-        .poster-content { transform: scale(0.85); margin-top: -30px; }
         #btn-back-today { bottom: 16px; right: 16px; padding: 6px 12px; font-size: 12px; }
 
         /* Prediction & Races Mobile */
@@ -513,6 +439,11 @@
 		.race-map-container { height: 250px; }
 		#stats-grid-detail-mobile { display: block !important; }
 		#prediction-page, #ai-page, #races-page, #settings-page {padding: 0 !important;}
+
+        /* Map Info mobile overrides */
+        .info-date-desktop { display: none !important; }
+        .info-date-mobile { display: inline !important; }
+        .info-distance-wrap { display: none !important; }
     }
 </style>
 <script>
@@ -651,14 +582,24 @@
             </div>
 
 			<div class="map-card">
-				<button id="export-btn" class="export-btn" title="导出长图">
-					<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-				</button>
 				<button id="media-btn" class="media-btn" title="查看关联影像">
 					<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M22 16V4c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2zm-11-4l2.03 2.71L16 11l4 5H8l3-4zM2 6v14c0 1.1.9 2 2 2h14v-2H4V6H2z"/></svg>
 				</button>
-				<div id="map"></div>
-				<div class="map-info-box" id="map-info-text">Loading map data...</div>
+                
+                <div style="flex: 1; position: relative; width: 100%; min-height: 0;">
+				    <div id="map" style="position: absolute; width: 100%; height: 100%;"></div>
+                    <div id="run-charts-container" style="display: none; position: absolute; width: 100%; height: 100%; top: 0; left: 0; flex-direction: column; background-color: var(--card-bg); z-index: 5;">
+                        <div id="pace-chart" style="flex: 1; width: 100%; min-height: 0;"></div>
+                        <div id="hr-chart" style="flex: 1; width: 100%; min-height: 0;"></div>
+                    </div>
+                </div>
+
+				<div class="map-info-box">
+                    <div id="map-info-text" style="flex:1; display:flex; align-items:center; overflow:hidden;">Loading map data...</div>
+                    <button id="toggle-map-chart-btn" class="flip-btn" style="display:none;" title="切换图表与地图">
+                        <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+                    </button>
+                </div>
 			</div>
             
             <div class="chart-card" id="info-chart-card">
@@ -916,63 +857,12 @@
     </a>
 </nav>
 
-<div id="poster-modal" class="poster-modal">
-    <div id="poster-content" class="poster-content">
-        <div id="poster-map" class="poster-bg"></div>
-        <div class="poster-gradient"></div>
-        
-        <div class="poster-header">
-            <div class="poster-header-top">
-                <div id="poster-date" class="poster-date">2026/05/07 18:55:00</div>
-                <div id="poster-weather" class="poster-weather"></div>
-            </div>
-            <div id="poster-name" class="poster-name" style="display:none;">傍晚跑步</div>
-            <div class="poster-stats-sm" style="display:none;">
-                <div id="poster-year-stat">全年 219 km <span>较去年同期 ↘ 280 km</span></div>
-                <div id="poster-month-stat">本月 51 km <span>较上月同期 ↗ 27 km</span></div>
-            </div>
-        </div>
-        
-        <div class="poster-body">
-            <div id="poster-distance" class="poster-distance">
-                <span class="int">18</span><span class="dot"></span><span class="dec">20</span><span class="unit">km</span>
-            </div>
-            
-            <div class="poster-footer-stats">
-                <div class="p-stat">
-                    <div class="p-stat-label">
-                        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> TIME
-                    </div>
-                    <div class="p-stat-val" id="poster-time">1:51:03</div>
-                </div>
-                <div class="p-stat">
-                    <div class="p-stat-label">
-                        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg> PACE
-                    </div>
-                    <div class="p-stat-val" id="poster-pace">6'06"</div>
-                </div>
-                <div class="p-stat">
-                    <div class="p-stat-label">
-                        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg> HR
-                    </div>
-                    <div class="p-stat-val" id="poster-hr">135</div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="poster-actions">
-        <button id="poster-close" class="btn-cancel">取消</button>
-        <button id="poster-download" class="btn-save">保存图片</button>
-    </div>
-</div>
 <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js" defer></script>
 <script src="https://unpkg.com/@mapbox/polyline" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js" defer></script>  
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.2/lightgallery.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.2/plugins/video/lg-video.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" defer></script>
 <script src="app.js" defer></script>
 </body>
 </html>
