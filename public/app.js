@@ -69,7 +69,7 @@ function applyThemeAndColor(theme, color) {
     const bgOpacity = theme === 'light' ? 0.08 : 0.12;
     document.documentElement.style.setProperty('--active-row-bg', hexToRgbaFast(color, bgOpacity));
 
-    const styleUrl = theme === 'light' ? 'https://tiles.openfreemap.org/styles/liberty' : 'https://tiles.openfreemap.org/styles/dark';
+    const styleUrl = theme === 'light' ? 'https://tiles.openfreemap.org/styles/positron' : 'https://tiles.openfreemap.org/styles/dark';
 
     if (map && map.loaded()) {
         map.setStyle(styleUrl);
@@ -98,7 +98,7 @@ function applyThemeAndColor(theme, color) {
 
 function initMap() {
     const theme = localStorage.getItem('theme') || 'dark';
-    const styleUrl = theme === 'light' ? 'https://tiles.openfreemap.org/styles/liberty' : 'https://tiles.openfreemap.org/styles/dark';
+    const styleUrl = theme === 'light' ? 'https://tiles.openfreemap.org/styles/positron' : 'https://tiles.openfreemap.org/styles/dark';
     
     map = new maplibregl.Map({
         container: 'map',
@@ -1931,7 +1931,7 @@ function renderDetailMap(run) {
     }]};
 
     const theme = document.documentElement.getAttribute('data-theme') || 'dark';
-    const mapStyle = theme === 'light' ? 'https://tiles.openfreemap.org/styles/liberty' : 'https://tiles.openfreemap.org/styles/dark';
+    const mapStyle = theme === 'light' ? 'https://tiles.openfreemap.org/styles/positron' : 'https://tiles.openfreemap.org/styles/dark';
     const accentColor = localStorage.getItem('accentColor') || '#e93342';
 
     if (!detailMapInstance) {
