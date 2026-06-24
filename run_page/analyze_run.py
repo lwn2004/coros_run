@@ -170,13 +170,24 @@ def load_last_week_plan():
     if not plan_files:
         return None
         
-    # 按日期倒序，取最新的一份计划
-    plan_files.sort(reverse=True)
-    latest_plan_file = os.path.join(plans_dir, plan_files[0])
+    # 1. 计算本周一的日期字符串
+    this_monday = now_utc8() - timedelta(days=now_utc8().weekday())
+    this_monday_str = this_monday.strftime("%Y-%m-%d") # 请确保这里的格式与你的文件名格式一致
+    
+    # 2. 利用字符串比较，直接过滤出日期小于本周一的文件
+    # 如果文件名为 '2023-10-22.json'，它在字符串比较时会严格小于 '2023-10-25'
+    past_plans = [f for f in plan_files if f < this_monday_str]
+    
+    if not past_plans:
+        return None
+        
+    # 3. 按文件名倒序，取最新的一份
+    past_plans.sort(reverse=True)
+    latest_plan_file = os.path.join(plans_dir, past_plans[0])
     
     with open(latest_plan_file, "r", encoding="utf-8") as f:
         return json.load(f)
-
+      
 def evaluate_plan_completion(plan, current_week_runs, weekly_summary):
     """客观计算计划的完成度，直接投喂给 Gemini"""
     if not plan:
