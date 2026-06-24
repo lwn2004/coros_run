@@ -171,12 +171,12 @@ def load_last_week_plan():
         return None
         
     # 1. 计算本周一的日期字符串
-    this_monday = now_utc8() - timedelta(days=now_utc8().weekday())
-    this_monday_str = this_monday.strftime("%Y-%m-%d") # 请确保这里的格式与你的文件名格式一致
+    now_utf8 = now_utc8()
+    now_utf8_str = now_utf8.strftime("%Y-%m-%d")
     
     # 2. 利用字符串比较，直接过滤出日期小于本周一的文件
     # 如果文件名为 '2023-10-22.json'，它在字符串比较时会严格小于 '2023-10-25'
-    past_plans = [f for f in plan_files if f < this_monday_str]
+    past_plans = [f for f in plan_files if f < now_utf8_str]
     
     if not past_plans:
         return None
