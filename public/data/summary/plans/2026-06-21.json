@@ -1,57 +1,57 @@
 {
   "week_start": "2026-06-22",
   "phase": "有氧耐力巩固期",
-  "goal": "稳定56公里周跑量，再次挑战24km LSD，优化乳酸阈值间歇表现，做好跑后恢复",
-  "target_distance_km": 56,
-  "target_training_load": 390,
+  "goal": "稳定56公里周跑量，微增LSD至24km，巩固乳酸阈值能力，优化LSD后的恢复流程",
+  "target_distance_km": 56.0,
+  "target_training_load": 400.0,
   "sessions": [
     {
       "id": "S1",
       "day": "Tue",
       "type": "Easy Run + Strides",
-      "distance_km": 12,
-      "target_hr_max": 140,
+      "distance_km": 12.0,
+      "target_hr_max": 140.0,
       "notes": "10km有氧轻松跑（目标配速5:50-6:10）+ 5组100m轻快跑（步频180+，激活神经肌肉），最后1km慢跑放松。",
-      "warmup_km": 0,
+      "warmup_km": 0.0,
       "main_set": "10km E跑 + 5x100m 轻快跑",
       "target_pace": "5:50-6:10",
-      "cooldown_km": 1
+      "cooldown_km": 1.0
     },
     {
       "id": "S2",
       "day": "Thu",
-      "type": "Threshold Intervals",
-      "distance_km": 12,
-      "target_hr_max": 170,
-      "notes": "乳酸阈值间歇跑。2km热身，3组2km乳酸阈值跑（目标配速4:25-4:30，组间慢跑恢复2分钟），最后4km（含恢复时间）慢跑冷身。通过间歇形式降低单次连续受压时间，稳步提升阈值能力。",
-      "warmup_km": 2,
-      "main_set": "3x2km 阈值间歇跑 (恢复2分)",
+      "type": "Tempo Run",
+      "distance_km": 12.0,
+      "target_hr_max": 170.0,
+      "notes": "乳酸阈值节奏跑。2km热身，中间6km维持在乳酸阈值配速（4:25-4:30），最后4km慢跑冷身。本周尝试向4:25/km配速靠拢。",
+      "warmup_km": 2.0,
+      "main_set": "6km 节奏跑 (Tempo)",
       "target_pace": "4:25-4:30",
-      "cooldown_km": 4
+      "cooldown_km": 4.0
     },
     {
       "id": "S3",
       "day": "Sat",
-      "type": "LSD",
-      "distance_km": 24,
-      "target_hr_max": 145,
-      "notes": "周六长距离慢跑，目标跑满24km。前5km慢速切入，维持175+稳定步频，后半程注意心率漂移，控制心率在145以内。",
-      "warmup_km": 0,
+      "type": "LSD (Long Slow Distance)",
+      "distance_km": 24.0,
+      "target_hr_max": 145.0,
+      "notes": "周六长距离慢跑，微增至24km。前5km慢速切入，中途注意每5km补水/电解质，维持175+稳定步频，后半程注意心率漂移。",
+      "warmup_km": 0.0,
       "main_set": "24km LSD 慢跑",
       "target_pace": "6:00-6:20",
-      "cooldown_km": 0
+      "cooldown_km": 0.0
     },
     {
       "id": "S4",
       "day": "Sun",
       "type": "Recovery Run",
-      "distance_km": 8,
-      "target_hr_max": 125,
-      "notes": "LSD次日主动恢复。严格控制心率在125以下，不看配速，放松身心，促进血液循环与肌肉排酸。",
-      "warmup_km": 0,
+      "distance_km": 8.0,
+      "target_hr_max": 125.0,
+      "notes": "LSD次日的主动恢复跑。不要在意配速，心率严格控制在125以下，确保身体完全放松，帮助肌肉排酸。",
+      "warmup_km": 0.0,
       "main_set": "8km 恢复跑",
       "target_pace": "6:50-7:20",
-      "cooldown_km": 0
+      "cooldown_km": 0.0
     }
   ]
 }
