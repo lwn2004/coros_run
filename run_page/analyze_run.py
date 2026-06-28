@@ -295,7 +295,7 @@ def generate_ai_report(ai_context_dict):
         )
         
         response = client.models.generate_content(
-            model='gemini-3.5-flash-lite', # 请根据你实际的模型名称调整
+            model='gemini-3.1-flash-lite', # 请根据你实际的模型名称调整
             contents=prompt,
             config=config
         )
