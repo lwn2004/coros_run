@@ -1,0 +1,57 @@
+{
+  "week_start": "2026-06-29",
+  "phase": "有氧耐力巩固期",
+  "goal": "维持57km周跑量，提升节奏跑强度执行力，巩固25km LSD耐力基础。",
+  "target_distance_km": 57.0,
+  "target_training_load": 420.0,
+  "sessions": [
+    {
+      "id": "S1",
+      "day": "Tue",
+      "type": "Easy Run + Strides",
+      "distance_km": 12.0,
+      "target_hr_max": 142.0,
+      "notes": "10km有氧轻松跑+5组100m轻快跑，注重步频维持在180spm。",
+      "warmup_km": 0.0,
+      "main_set": "10km E跑 + 5x100m 轻快跑",
+      "target_pace": "5:50-6:05",
+      "cooldown_km": 2.0
+    },
+    {
+      "id": "S2",
+      "day": "Thu",
+      "type": "Tempo Run",
+      "distance_km": 12.0,
+      "target_hr_max": 172.0,
+      "notes": "2km热身，7km目标节奏跑(4:25-4:30/km)，3km冷身。重点在于保持全程配速稳定。",
+      "warmup_km": 2.0,
+      "main_set": "7km 节奏跑 (Tempo)",
+      "target_pace": "4:25-4:30",
+      "cooldown_km": 3.0
+    },
+    {
+      "id": "S3",
+      "day": "Sat",
+      "type": "LSD",
+      "distance_km": 25.0,
+      "target_hr_max": 148.0,
+      "notes": "增加至25km，维持步频175+，注意补给策略。",
+      "warmup_km": 0.0,
+      "main_set": "25km LSD 慢跑",
+      "target_pace": "6:00-6:15",
+      "cooldown_km": 0.0
+    },
+    {
+      "id": "S4",
+      "day": "Sun",
+      "type": "Recovery Run",
+      "distance_km": 8.0,
+      "target_hr_max": 125.0,
+      "notes": "严格控制心率，主动恢复。",
+      "warmup_km": 0.0,
+      "main_set": "8km 恢复跑",
+      "target_pace": "6:50-7:20",
+      "cooldown_km": 0.0
+    }
+  ]
+}
