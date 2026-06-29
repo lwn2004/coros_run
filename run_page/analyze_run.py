@@ -280,6 +280,8 @@ def generate_ai_report(ai_context_dict):
 4. 调整并输出下周训练计划，如有长距离LSD训练，安排在星期六 (next_week_plan)
 5. 输出人类可读报告，且报告最后加入人类可读的下周训练计划 (human_report_md)
 
+以下是个人乳酸阈心率区间：
+{"lthr":161,"lthrZone":[{"hr":129,"index":0,"ratio":80.0},{"hr":145,"index":1,"ratio":90.0},{"hr":153,"index":2,"ratio":95.0},{"hr":164,"index":3,"ratio":102.0},{"hr":171,"index":4,"ratio":106.0}}
 以下是运行数据和评估环境上下文（JSON格式）：
 {json.dumps(ai_context_dict, ensure_ascii=False, indent=2)}
 
@@ -337,8 +339,8 @@ def update_ai_index():
 # 5. 主流程控制
 # ==========================================
 def main():
-    if now_utc8().weekday() != 6:
-        return
+    #if now_utc8().weekday() != 6:
+    #    return
     print("创建所需目录体系...")
     for directory in [reports_dir, plans_dir, reviews_dir]:
         os.makedirs(directory, exist_ok=True)
