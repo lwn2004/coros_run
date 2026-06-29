@@ -1,0 +1,57 @@
+{
+  "week_start": "2026-07-06",
+  "phase": "过渡期",
+  "goal": "在保持节奏跑刺激的基础上，通过严控跑量实现身体疲劳的进一步消解与适应。",
+  "target_distance_km": 48.0,
+  "target_training_load": 300.0,
+  "sessions": [
+    {
+      "id": "S1",
+      "day": "Tue",
+      "type": "Easy Run",
+      "distance_km": 10.0,
+      "target_hr_max": 145.0,
+      "notes": "轻松跑，维持步频175以上，注重跑姿放松。",
+      "warmup_km": 0.0,
+      "main_set": "10km E跑",
+      "target_pace": "6:05-6:15",
+      "cooldown_km": 0.0
+    },
+    {
+      "id": "S2",
+      "day": "Thu",
+      "type": "Tempo Run",
+      "distance_km": 12.0,
+      "target_hr_max": 164.0,
+      "notes": "乳酸阈值训练。热身2km，主课表6km节奏跑（4:30-4:40），冷身4km。",
+      "warmup_km": 2.0,
+      "main_set": "6km Tempo",
+      "target_pace": "4:30-4:40",
+      "cooldown_km": 4.0
+    },
+    {
+      "id": "S3",
+      "day": "Sat",
+      "type": "LSD",
+      "distance_km": 20.0,
+      "target_hr_max": 145.0,
+      "notes": "长距离慢跑，严格控制距离，不宜过快。",
+      "warmup_km": 0.0,
+      "main_set": "20km LSD",
+      "target_pace": "6:15-6:30",
+      "cooldown_km": 0.0
+    },
+    {
+      "id": "S4",
+      "day": "Sun",
+      "type": "Recovery Run",
+      "distance_km": 6.0,
+      "target_hr_max": 129.0,
+      "notes": "排酸跑，心率严格控制在Zone 1。",
+      "warmup_km": 0.0,
+      "main_set": "6km Recovery",
+      "target_pace": "7:00-7:30",
+      "cooldown_km": 0.0
+    }
+  ]
+}
