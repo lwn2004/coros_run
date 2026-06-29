@@ -365,8 +365,8 @@ def main():
     print(f"- 本周课时数: {len(current_week_run_details)}")
     if execution_stats:
         print(f"- 上周计划完成度: {execution_stats['completion_rate']}%")
-    #print("所有信息:")
-    #print(json.dumps(ai_context, indent=4))
+    print("所有信息:")
+    print(json.dumps(ai_context, indent=4))
     ai_result_dict = generate_ai_report(ai_context)
     if ai_result_dict:
         date_str = now_utc8().strftime("%Y-%m-%d")
