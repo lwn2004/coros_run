@@ -45,7 +45,7 @@ def parse_duration_to_seconds(duration_str):
 def get_4weeks_start_date():
     today = now_utc8().date()
     this_monday = today - timedelta(days=today.weekday())
-    return this_monday - timedelta(weeks=4)
+    return this_monday - timedelta(weeks=3)
 
 # ==========================================
 # 2. 数据处理与提取
@@ -118,7 +118,7 @@ def build_weekly_summary(run_logs):
     return result
 
 def load_current_week_run_details(run_logs):
-    this_monday = (now_utc8().date() - timedelta(days=now_utc8().weekday()+7))
+    this_monday = (now_utc8().date() - timedelta(days=now_utc8().weekday()))
     run_ids = []
 
     for run in run_logs:
@@ -198,7 +198,7 @@ def evaluate_plan_completion(plan, current_week_runs, weekly_summary):
     distance_target = plan.get("target_distance_km", 0)
     
     # 从本周汇总数据中抓取本周实际总跑量
-    this_monday = (now_utc8().date() - timedelta(days=now_utc8().weekday()+7)).strftime("%Y-%m-%d")
+    this_monday = (now_utc8().date() - timedelta(days=now_utc8().weekday())).strftime("%Y-%m-%d")
     distance_actual = 0
     for week in weekly_summary:
         if week["week_start"] == this_monday:
@@ -339,8 +339,8 @@ def update_ai_index():
 # 5. 主流程控制
 # ==========================================
 def main():
-    #if now_utc8().weekday() != 6:
-    #    return
+    if now_utc8().weekday() != 6:
+        return
     print("创建所需目录体系...")
     for directory in [reports_dir, plans_dir, reviews_dir]:
         os.makedirs(directory, exist_ok=True)
