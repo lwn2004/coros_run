@@ -21,7 +21,7 @@ summary_dir = os.path.join(data_dir, "summary")
 reports_dir = os.path.join(summary_dir, "reports")
 plans_dir = os.path.join(summary_dir, "plans")
 reviews_dir = os.path.join(summary_dir, "reviews")
-
+lthr_str = '{"lthr":161,"lthrZone":[{"hr":129,"index":0,"ratio":80.0},{"hr":145,"index":1,"ratio":90.0},{"hr":153,"index":2,"ratio":95.0},{"hr":164,"index":3,"ratio":102.0},{"hr":171,"index":4,"ratio":106.0}}'
 UTC8 = timezone(timedelta(hours=8))
 
 def now_utc8():
@@ -45,7 +45,7 @@ def parse_duration_to_seconds(duration_str):
 def get_4weeks_start_date():
     today = now_utc8().date()
     this_monday = today - timedelta(days=today.weekday())
-    return this_monday - timedelta(weeks=3)
+    return this_monday - timedelta(weeks=4)
 
 # ==========================================
 # 2. 数据处理与提取
@@ -118,7 +118,7 @@ def build_weekly_summary(run_logs):
     return result
 
 def load_current_week_run_details(run_logs):
-    this_monday = (now_utc8().date() - timedelta(days=now_utc8().weekday()))
+    this_monday = (now_utc8().date() - timedelta(days=now_utc8().weekday()+7))
     run_ids = []
 
     for run in run_logs:
@@ -198,7 +198,7 @@ def evaluate_plan_completion(plan, current_week_runs, weekly_summary):
     distance_target = plan.get("target_distance_km", 0)
     
     # 从本周汇总数据中抓取本周实际总跑量
-    this_monday = (now_utc8().date() - timedelta(days=now_utc8().weekday())).strftime("%Y-%m-%d")
+    this_monday = (now_utc8().date() - timedelta(days=now_utc8().weekday()+7)).strftime("%Y-%m-%d")
     distance_actual = 0
     for week in weekly_summary:
         if week["week_start"] == this_monday:
@@ -278,10 +278,10 @@ def generate_ai_report(ai_context_dict):
 2. 分析下面提供的客观评估完成度指标（解释为什么是这个完成率，分析原因）
 3. 分析近4周趋势
 4. 调整并输出下周训练计划，如有长距离LSD训练，安排在星期六 (next_week_plan)
-5. 输出人类可读报告，且报告最后加入人类可读的下周训练计划 (human_report_md)
+5. 输出人类可读报告，且报告最后加入人类可读的，方便加入高驰训练计划的下周训练计划 (human_report_md)
 
 以下是个人乳酸阈心率区间：
-{"lthr":161,"lthrZone":[{"hr":129,"index":0,"ratio":80.0},{"hr":145,"index":1,"ratio":90.0},{"hr":153,"index":2,"ratio":95.0},{"hr":164,"index":3,"ratio":102.0},{"hr":171,"index":4,"ratio":106.0}}
+{lthr_str}
 以下是运行数据和评估环境上下文（JSON格式）：
 {json.dumps(ai_context_dict, ensure_ascii=False, indent=2)}
 
