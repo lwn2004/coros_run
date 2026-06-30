@@ -236,7 +236,7 @@
     .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; flex: 1; align-content: start; width: 80%; margin: 0 auto; }
     
     .cal-day { aspect-ratio: 1; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; transition: transform 0.2s, border 0.2s, box-shadow 0.2s; }
-    .cal-day.empty { background-color: transparent; color: var(--border-color); border: 1px dashed var(--cal-empty-border) transparent; cursor: default; }
+    .cal-day.empty { background-color: transparent; color: var(--text-muted); border: 1px dashed var(--cal-empty-border) transparent; cursor: default; }
     .cal-day.empty .dist { color: transparent; }
     .cal-day.has-data { color: var(--cal-data-color); border: 1px solid var(--cal-data-border); cursor: pointer; }
     .cal-day.has-data:hover { transform: scale(1.05); border-color: var(--cal-data-hover); }
@@ -628,7 +628,7 @@
 
                     <div class="cal-view" id="cal-view-month-cal">
                         <div class="cal-weekdays">
-                            <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+                            <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
                         </div>
                         <div class="cal-grid" id="cal-grid"></div>
                     </div>
