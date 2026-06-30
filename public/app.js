@@ -635,12 +635,20 @@ function formatDuration(timeStr) {
 function getCellColor(dist) {
     if (dist === 0) return 'transparent';
     const accentHex = localStorage.getItem('accentColor') || '#e93342';
-    if (dist >= HALF_MARATHON) return accentHex; 
+    if (dist >= 21) return accentHex; 
     
-    const minOpacity = 0.15;
-    const maxOpacity = 0.8;
-    const opacity = minOpacity + (dist / HALF_MARATHON) * (maxOpacity - minOpacity);
-    return hexToRgbaFast(accentHex, opacity);
+    const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+    const ratio = dist / 21; // 0 to 1
+    
+    if (theme === 'light') {
+        // 浅色模式：跑量小颜色浅，跑量大颜色深。最大不透明度控制在 0.35 保证文字清晰
+        const opacity = 0.05 + ratio * 0.3;
+        return `rgba(0, 0, 0, ${opacity})`;
+    } else {
+        // 深色模式：跑量小颜色深，跑量大颜色浅。最大不透明度控制在 0.38 保证文字清晰
+        const opacity = 0.08 + ratio * 0.3;
+        return `rgba(255, 255, 255, ${opacity})`;
+    }
 }
 
 function getMonthCellColor(dist) {
@@ -735,7 +743,10 @@ function renderMonthGrid(year, month, dayMap) {
     const grid = document.getElementById('cal-grid');
     grid.innerHTML = '';
     
-    const firstDay = new Date(year, month, 1).getDay(); 
+    // 将默认的 (0:周日, 1-6:周一至六) 转换为 (0:周一, ..., 6:周日)
+    let firstDay = new Date(year, month, 1).getDay(); 
+    firstDay = firstDay === 0 ? 6 : firstDay - 1;
+    
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const totalCellsTarget = 42; 
 
@@ -754,7 +765,7 @@ function renderMonthGrid(year, month, dayMap) {
             cell.classList.add('has-data');
             cell.style.backgroundColor = getCellColor(cellData.dist);
             
-            if (cellData.dist >= HALF_MARATHON) {
+            if (cellData.dist >= 21) {
                 cell.classList.add('is-long-run');
             }
             
