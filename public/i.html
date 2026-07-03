@@ -23,18 +23,13 @@
         --text-main: #ffffff;
         --text-muted: #888888;
         --text-dark: #666666;
-        --accent-color: #e93342; 
+        --accent-color: #e31937; 
         --border-color: #2a2a2a;
         --progress-bg: #2c2c2e;
         --map-info-bg: #111111;
         --nav-hover: #ffffff;
         --table-text: #d1d1d1;
-        --cal-empty-border: rgba(255,255,255,0.05);
-        --cal-data-color: #d9d9d9;
-        --cal-data-border: rgba(255,255,255,0.1);
-        --cal-data-hover: #ffffff;
         --mobile-menu-bg: #0d0d0d;
-        --cal-tab-active-bg: #3F3F46;
         --btn-bg: #2c2c2e;
         --active-row-bg: rgba(233, 51, 66, 0.12); 
         --active-row-text: #ffffff;
@@ -55,12 +50,7 @@
         --map-info-bg: #f9fafb;
         --nav-hover: #111827;
         --table-text: #4b5563;
-        --cal-empty-border: rgba(0,0,0,0.1);
-        --cal-data-color: #374151;
-        --cal-data-border: rgba(0,0,0,0.1);
-        --cal-data-hover: #111827;
         --mobile-menu-bg: #ffffff;
-        --cal-tab-active-bg: #e5e7eb;
         --btn-bg: #f3f4f6;
         --active-row-bg: rgba(233, 51, 66, 0.08);
         --active-row-text: var(--accent-color);
@@ -116,7 +106,7 @@
     .column-right { flex: 1; display: flex; flex-direction: column; gap: 16px; padding-right: 1.5rem;}
 
     .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; flex-shrink: 0; }
-    .card { background-color: var(--card-bg); border-radius: 12px; padding: 14px 16px; border: 1px solid var(--border-color); transition: background-color 0.3s, border-color 0.3s; }
+    .card { background-color: var(--card-bg); border-radius: 12px; padding: 1.25rem; border: 1px solid var(--border-color); transition: background-color 0.3s, border-color 0.3s; }
     .card-title { color: var(--text-muted); font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
     .card-value { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
     .card-value span { font-size: 13px; color: var(--text-muted); font-weight: normal; }
@@ -131,20 +121,11 @@
     .trend-down { color: var(--text-muted); }
     .trend-up { color: var(--accent-color); }
 
-    /* AI Guide Card */
-    .ai-guide-card { background-color: var(--card-bg); border-radius: 12px; padding: 14px 16px; border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between; height: 145px; box-sizing: border-box; flex-shrink: 0; transition: background-color 0.3s, border-color 0.3s; }
-    .ai-guide-header { font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 6px; display: flex; align-items: center; }
-    .ai-guide-content { flex: 1; overflow: hidden; margin-bottom: 4px; }
-    .ai-guide-content p { margin: 0; font-size: 12px; line-height: 1.5; color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; word-break: break-all; }
-    .ai-guide-link { font-size: 12px; color: var(--accent-color); text-decoration: none; text-align: right; font-weight: 600; align-self: flex-end;}
-    .ai-guide-link:hover { text-decoration: underline; }
-
     /* Map and Info Box */
     .map-card { background-color: var(--card-bg); border-radius: 16px; overflow: hidden; border: 1px solid var(--border-color); display: flex; flex-direction: column; height: 350px; flex: none; position: relative; transition: border-color 0.3s; }
     .map-info-box { flex-shrink: 0; height: 44px; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border-color); font-size: 12px; color: var(--text-muted); background-color: var(--map-info-bg); z-index: 10; transition: background-color 0.3s, border-color 0.3s;}
 
     .info-strong { color: var(--text-main); font-weight: bold; }
-    .info-strong-red { color: var(--accent-color); font-weight: bold; }
     
     .flip-btn {
         background: var(--btn-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 4px 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; margin-left: 10px;
@@ -152,8 +133,21 @@
     .flip-btn:hover { background: var(--border-color); }
     .flip-btn svg { width: 16px; height: 16px; fill: currentColor; }
 
+    /* Recent 4 Weeks Card */
+    .recent-4w-card { background-color: var(--card-bg); border-radius: 12px; padding: 14px 16px; border: 1px solid var(--border-color); flex-shrink: 0; transition: background-color 0.3s, border-color 0.3s;}
+    .recent-4w-header { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 11px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; }
+    .recent-4w-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+    .recent-4w-cell { aspect-ratio: 1; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; cursor: pointer; transition: transform 0.1s; margin: 4px; border-radius:1rem;}
+    .recent-4w-cell.empty { background-color: var(--progress-bg); color: transparent; cursor: default; }
+    .recent-4w-cell:not(.empty):hover { transform: scale(1.1); box-shadow: 0 2px 6px rgba(0,0,0,0.3); z-index: 2; position: relative;}
+    .recent-4w-cell.today { border: 2px solid var(--accent-color); }
+    [data-theme="light"] .recent-4w-cell:not(.empty):hover { box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+
+    /* Monthly Mileage Bar Chart Card */
+    .monthly-chart-card { background-color: var(--card-bg); border-radius: 12px; padding: 14px 16px; border: 1px solid var(--border-color); height: 260px; flex: none; display: flex; flex-direction: column; transition: background-color 0.3s, border-color 0.3s;}
+
     /* Activity Log Area */
-    .activity-section { background-color: var(--card-bg); border-radius: 12px; padding: 16px; border: 1px solid var(--border-color); display: flex; flex-direction: column; height: auto; flex: none; transition: background-color 0.3s, border-color 0.3s; }
+    .activity-section { background-color: var(--card-bg); border-radius: 12px; padding: 1.25rem; border: 1px solid var(--border-color); display: flex; flex-direction: column; height: auto; flex: none; transition: background-color 0.3s, border-color 0.3s; }
     .activity-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-shrink: 0; }
     .activity-title { font-size: 18px; font-weight: 700; }
     .activity-count { color: var(--text-dark); font-size: 12px; }
@@ -211,61 +205,8 @@
     .pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; color: var(--text-muted); font-size: 16px; padding-top: 10px; border-top: 1px solid var(--border-color); flex-shrink: 0; }
     .page-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 30px; }
 
-    /* Calendar Card Styles */
-    .chart-card { background-color: var(--card-bg); border-radius: 16px; border: 1px solid var(--border-color); height: 420px; flex: none; display: flex; flex-direction: column; position: relative; transition: background-color 0.3s, border-color 0.3s;}
-    .cal-card-inner { display: flex; flex-direction: column; height: 100%; padding: 20px 24px; position: relative; }
-    
-    .cal-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-    .cal-controls-wrap { flex: 1; display: flex; justify-content: flex-start; }
-    .cal-controls { display: flex; align-items: center; background-color: var(--progress-bg); border-radius: 20px; padding: 4px 12px; }
-    .cal-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 14px; padding: 0 6px; }
-    .cal-btn:hover { color: var(--text-main); }
-    .cal-current-date { font-size: 14px; font-weight: 600; margin: 0 10px; color: var(--text-main); white-space: nowrap;}
-    
-    .cal-center-stat { flex: 1; text-align: center; font-size: 26px; font-weight: 700; color: var(--text-main); white-space: nowrap; }
-    .cal-center-stat small { font-size: 12px; color: var(--text-muted); font-weight: normal; margin-left: 4px; }
-    
-    .cal-toggle-wrap { flex: 1; display: flex; justify-content: flex-end; }
-    .cal-toggle { display: flex; background-color: var(--progress-bg); border-radius: 20px; padding: 3px; }
-    .cal-tab { padding: 4px 18px; font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; border-radius: 18px; transition: all 0.2s; }
-    .cal-tab.active { background-color: var(--cal-tab-active-bg); color: var(--text-main); }
-
-    .cal-view { flex: 1; display: flex; flex-direction: column; min-height: 0; }
-    
-    .cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 11px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; width: 80%; margin-left: auto; margin-right: auto; }
-    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; flex: 1; align-content: start; width: 80%; margin: 0 auto; }
-    
-    .cal-day { aspect-ratio: 1; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; transition: transform 0.2s, border 0.2s, box-shadow 0.2s; }
-    .cal-day.empty { background-color: transparent; color: var(--text-muted); border: 1px dashed var(--cal-empty-border) transparent; cursor: default; }
-    .cal-day.empty .dist { color: transparent; }
-    .cal-day.has-data { color: var(--cal-data-color); border: 1px solid var(--cal-data-border); cursor: pointer; }
-    .cal-day.has-data:hover { transform: scale(1.05); border-color: var(--cal-data-hover); }
-    .cal-day .dist { font-size: 9px; margin-top: 2px; font-weight: 500; opacity: 0.8; }
-    
-    .cal-day.is-long-run { color: #ffffff !important; }
-    .cal-day.is-long-run .dist { color: rgba(255, 255, 255, 0.9) !important; }
-    
-    /* Calendar Selected Style */
-    .cal-day.selected { border: 2px solid var(--accent-color) !important; transform: scale(1.08); box-shadow: 0 0 8px rgba(0,0,0,0.3); z-index: 2; }
-    [data-theme="light"] .cal-day.selected { box-shadow: 0 0 8px rgba(0,0,0,0.15); }
-
-    /* New Year Grid Style */
-    .cal-year-grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(3, 1fr); gap: 12px; width: 100%; padding: 0 8px; flex: 1; min-height: 0;}
-    .cal-month-cell { border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: all 0.2s; min-height: 0;}
-    .cal-month-cell.has-data { color: var(--cal-data-color); border-color: var(--cal-data-border); }
-    .cal-month-cell.has-data:hover { transform: scale(1.05); border-color: var(--cal-data-hover); }
-    .cal-month-cell.empty { border: 1px dashed var(--cal-empty-border); color: var(--border-color); cursor: default;}
-    .cal-month-cell .dist { font-size: 10px; margin-top: 4px; font-weight: 500; opacity: 0.8; }
-
-    /* "今" (Today) Button */
-    #btn-back-today {
-        position: absolute; bottom: 20px; right: 24px; background-color: var(--accent-color);
-        color: #ffffff; border: none; padding: 6px 14px; border-radius: 12px; font-size: 13px;
-        font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px var(--active-row-bg);
-        display: none; z-index: 20; transition: transform 0.1s;
-    }
-    #btn-back-today:active { transform: scale(0.95); }
-    [data-theme="light"] #btn-back-today { box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+    /* For Prediction & Echarts Specific */
+    .chart-card { background-color: var(--card-bg); border-radius: 16px; border: 1px solid var(--border-color); transition: background-color 0.3s, border-color 0.3s;}
 
     /* ==========================================================================
        AI Markdown Styling
@@ -397,14 +338,15 @@
         .column-left, .column-right { flex: none; width: 100%; height: auto; display: contents; }
         #card-total-distance { display: none; }
         .summary-grid { order: 1; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .hide-mobile-stats { display: none !important; }
+        .hide-for-mobile { display: none !important; }
         .card-value { font-size: 20px; white-space: nowrap; }
         .stat-row { white-space: nowrap; font-size: 11px; }
         
-        #ai-guide-card { display: none !important; }
-
         .map-card { order: 2; position: -webkit-sticky; position: sticky; top: 0; height: 250px; flex: none; z-index: 100; }
+        #recent-4weeks-card { order: 3; }
         .activity-section { order: 4; }
+        #monthly-mileage-card { display: none !important; }
+
 		#prediction-description { order: 0; }
         .activity-header, .filters, .pagination { padding: 0 12px; }
         .table-container { overflow-x: auto; }
@@ -413,7 +355,6 @@
         th:nth-child(2), td:nth-child(2) { width: 34vw; min-width: 120px; }
         th:nth-child(3), td:nth-child(3) { width: 33vw; min-width: 100px; }
         th { position: sticky; z-index: 99; }
-        .chart-card { height: 420px; flex: none; order: 3;}
         
         .mobile-bottom-menu { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background-color: var(--mobile-menu-bg); border-top: 1px solid var(--border-color); justify-content: space-around; padding: 10px 0; padding-bottom: max(env(safe-area-inset-bottom), 10px); z-index: 1000; transition: background-color 0.3s; }
         .mobile-menu-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); text-decoration: none; font-size: 10px; transition: color 0.2s;}
@@ -421,16 +362,6 @@
         .mobile-menu-item svg { width: 22px; height: 22px; fill: currentColor; }
 		.page-btn { font-size: 16px; }
 		#page-info { font-size: 12px; }
-        
-        .cal-header-row { padding: 0; }
-        .cal-center-stat { font-size: 18px; }
-        .cal-controls { padding: 4px 8px; }
-        .cal-current-date { margin: 0 6px; font-size: 13px; }
-        .cal-tab { padding: 4px 12px; }
-        .cal-weekdays, .cal-grid { width: 100%; }
-        .cal-year-grid { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(4, 1fr); gap: 8px; padding: 0;}
-        
-        #btn-back-today { bottom: 16px; right: 16px; padding: 6px 12px; font-size: 12px; }
 
         /* Prediction & Races Mobile */
         .prediction-metric-card, .prediction-metric-highlight { min-width: 100%; }
@@ -485,8 +416,8 @@
                     <div class="card-value" id="total-distance">0.00 <span>/ 40000km</span></div>
                     <div class="progress-container"><div class="progress-bar" id="total-progress"></div></div>
                     <div class="sub-stats">
-                        <div class="stat-row left-aligned hide-mobile-stats"><span class="icon">⚡</span> <span id="total-runs">0</span> runs</div>
-                        <div class="stat-row left-aligned hide-mobile-stats"><span class="icon">⏱</span> <span id="total-duration">0h 0m</span></div>
+                        <div class="stat-row left-aligned hide-for-mobile"><span class="icon">⚡</span> <span id="total-runs">0</span> runs</div>
+                        <div class="stat-row left-aligned hide-for-mobile"><span class="icon">⏱</span> <span id="total-duration">0h 0m</span></div>
                     </div>
                 </div>
 
@@ -495,7 +426,7 @@
                     <div class="card-value" id="yearly-dist">0.00 <span>/ 2400 km</span></div>
                     <div class="progress-container"><div class="progress-bar" id="yearly-progress"></div></div>
                     <div class="sub-stats">
-                        <div class="stat-row hide-mobile-stats"><span><span id="yearly-runs">0</span> runs</span><span id="yearly-duration">0h 0m</span></div>
+                        <div class="stat-row hide-for-mobile"><span><span id="yearly-runs">0</span> runs</span><span id="yearly-duration">0h 0m</span></div>
                         <div class="stat-row left-aligned compare-info" id="yearly-vs-container"></div>
                     </div>
                 </div>
@@ -505,7 +436,7 @@
                     <div class="card-value" id="monthly-dist">0.00 <span>/ 200 km</span></div>
                     <div class="progress-container"><div class="progress-bar" id="monthly-progress"></div></div>
                     <div class="sub-stats">
-                        <div class="stat-row hide-mobile-stats"><span><span id="monthly-runs">0</span> runs</span><span id="monthly-duration">0h 0m</span></div>
+                        <div class="stat-row hide-for-mobile"><span><span id="monthly-runs">0</span> runs</span><span id="monthly-duration">0h 0m</span></div>
                         <div class="stat-row left-aligned compare-info" id="monthly-vs-container"></div>
                     </div>
                 </div>
@@ -567,20 +498,18 @@
         </div>
 
         <div class="column-right">
-            
-            <div class="ai-guide-card" id="ai-guide-card">
-                <div class="ai-guide-header">
-                    <svg viewBox="0 0 24 24" width="16" height="16" style="vertical-align: text-bottom; margin-right: 6px; fill: var(--accent-color);">
-                        <path d="M19 3l-1.5 3.5L14 8l3.5 1.5L19 13l1.5-3.5L24 8l-3.5-1.5L19 3zm-6 3.5L11 2 9 6.5 4.5 8.5 9 10.5 11 15l2-4.5 4.5-2-4.5-2z"/>
-                    </svg>
-                    AI 周期训练导读
-                </div>
-                <div class="ai-guide-content">
-                    <p id="ai-summary-preview">正在加载最新分析数据...</p>
-                </div>
-                <a href="#ai-summary" class="ai-guide-link">查看完整分析 &raquo;</a>
-            </div>
+             <div class="monthly-chart-card" id="monthly-mileage-card">
+                <div class="card-title">Monthly Mileage</div>
+                <div id="monthly-mileage-chart" style="flex: 1; width: 100%; min-height: 0;"></div>
+            </div>           
 
+            <div class="recent-4w-card" id="recent-4weeks-card">
+                <div class="card-title" style="margin-bottom: 12px; color: var(--text-main); font-size: 14px;">Recent 4 Weeks</div>
+                <div class="recent-4w-header">
+                    <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+                </div>
+                <div class="recent-4w-grid" id="recent-4weeks-grid"></div>
+            </div>
 			<div class="map-card">
 				<button id="media-btn" class="media-btn" title="查看关联影像">
 					<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M22 16V4c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2zm-11-4l2.03 2.71L16 11l4 5H8l3-4zM2 6v14c0 1.1.9 2 2 2h14v-2H4V6H2z"/></svg>
@@ -602,59 +531,8 @@
                 </div>
 			</div>
             
-            <div class="chart-card" id="info-chart-card">
-                <div class="cal-card-inner" id="cal-card-inner">
-                    
-                    <div class="cal-header-row">
-                        <div class="cal-controls-wrap">
-                            <div class="cal-controls">
-                                <button class="cal-btn" id="cal-prev">&lt;</button>
-                                <span class="cal-current-date" id="cal-current-label">2026/05</span>
-                                <button class="cal-btn" id="cal-next">&gt;</button>
-                            </div>
-                        </div>
-                        
-                        <div class="cal-center-stat">
-                            <span id="cal-dist-val">0.00</span><small>km</small>
-                        </div>
-                        
-                        <div class="cal-toggle-wrap">
-                            <div class="cal-toggle">
-                                <div class="cal-tab active" data-mode="month">月</div>
-                                <div class="cal-tab" data-mode="year">年</div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="cal-view" id="cal-view-month-cal">
-                        <div class="cal-weekdays">
-                            <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
-                        </div>
-                        <div class="cal-grid" id="cal-grid"></div>
-                    </div>
-                    <div class="cal-view" id="cal-view-month-chart" style="display:none; overflow-x: auto; width: 100%;">
-                        <div style="width: 100%; height: 100%; position: relative; padding-bottom: 20px;">
-                            <div id="cal-month-chart-container" style="width: 100%; height: 100%;"></div>
-                        </div>
-                    </div>
-                    <div class="cal-view" id="cal-view-year-cal" style="display:none;">
-                        <div class="cal-year-grid" id="cal-year-grid"></div>
-                    </div>
-
-                    <div class="cal-view cal-view-year-wrap" id="cal-view-year-chart" style="display:none; position: relative;">
-                        <div style="width: 100%; height: 100%; padding-bottom: 20px;">
-                            <div id="cal-year-chart-container" style="width: 100%; height: 100%;"></div>
-                        </div>
-                    </div>
-
-                    <div style="position: absolute; bottom: 20px; left: 24px; display: flex; gap: 8px; z-index: 10;">
-                        <button class="filter-btn active" id="btn-view-cal" style="padding: 4px 12px; font-size: 11px;">日历</button>
-                        <button class="filter-btn" id="btn-view-chart" style="padding: 4px 12px; font-size: 11px;">图表</button>
-                    </div>
-
-                    <button id="btn-back-today">今</button>
-                </div>
-            </div>
+            
         </div>
     </div>
 
@@ -805,7 +683,7 @@
             <div class="settings-form-row">
                 <div class="card-title">主色调 / ACCENT COLOR</div>
                 <div class="settings-radio-group" style="flex-direction: row; gap: 20px; flex-wrap: wrap;">
-                    <label><input type="radio" name="setting-color" value="#e93342"> <span class="color-dot" style="background:#e93342"></span> 经典红</label>
+                    <label><input type="radio" name="setting-color" value="#E31937"> <span class="color-dot" style="background:#e93342"></span> 经典红</label>
                     <label><input type="radio" name="setting-color" value="#f97316"> <span class="color-dot" style="background:#f97316"></span> 活力橙</label>
                     <label><input type="radio" name="setting-color" value="#10b981"> <span class="color-dot" style="background:#10b981"></span> 薄荷绿</label>
                     <label><input type="radio" name="setting-color" value="#3b82f6"> <span class="color-dot" style="background:#3b82f6"></span> 海岸蓝</label>
@@ -863,6 +741,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.2/lightgallery.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.2/plugins/video/lg-video.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script>
-<script src="app.js" defer></script>
+<script src="app.js?v=20260703" defer></script>
 </body>
 </html>
