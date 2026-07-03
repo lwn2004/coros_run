@@ -45,7 +45,7 @@
         ["!=", "brunnel", "tunnel"]
       ],
       "layout": {"visibility": "visible"},
-      "paint": {"fill-antialias": false, "fill-color": "rgba(31, 31, 31, 1)"}
+      "paint": {"fill-antialias": false, "fill-color": "rgba(32, 32, 32, 1)"}
     },
     {
       "id": "landcover_ice_shelf",
@@ -123,7 +123,7 @@
       "source-layer": "waterway",
       "filter": ["==", "$type", "LineString"],
       "layout": {"visibility": "visible"},
-      "paint": {"line-color": "rgba(63, 63, 63, 1)"}
+      "paint": {"line-color": "rgba(27, 27, 27, 1)"}
     },
     {
       "id": "water_name",
@@ -151,6 +151,7 @@
       "source-layer": "building",
       "minzoom": 12,
       "filter": ["==", "$type", "Polygon"],
+      "layout": {"visibility": "none"},
       "paint": {
         "fill-antialias": true,
         "fill-color": "rgba(31, 31, 31, 1)",
@@ -381,7 +382,7 @@
       "layout": {
         "line-cap": "butt",
         "line-join": "miter",
-        "visibility": "none"
+        "visibility": "visible"
       },
       "paint": {
         "line-color": "rgba(60,60,60,0.8)",
@@ -599,12 +600,12 @@
         "text-max-angle": 30,
         "text-pitch-alignment": "viewport",
         "text-rotation-alignment": "map",
-        "text-size": 10,
+        "text-size": 12,
         "text-transform": "uppercase",
         "visibility": "visible"
       },
       "paint": {
-        "text-color": "rgba(98, 98, 98, 1)",
+        "text-color": "rgba(167, 167, 167, 1)",
         "text-halo-blur": 0,
         "text-halo-color": "rgba(0, 0, 0, 1)",
         "text-halo-width": 1,
@@ -632,7 +633,10 @@
         "text-size": 10,
         "visibility": "visible"
       },
-      "paint": {"text-color": "hsl(0, 0%, 37%)", "text-translate": [0, 2]}
+      "paint": {
+        "text-color": "rgba(132, 132, 132, 1)",
+        "text-translate": [0, 2]
+      }
     },
     {
       "id": "boundary_state",
@@ -706,10 +710,10 @@
         "text-offset": [0.5, 0],
         "text-size": 10,
         "text-transform": "uppercase",
-        "visibility": "none"
+        "visibility": "visible"
       },
       "paint": {
-        "text-color": "rgb(101,101,101)",
+        "text-color": "rgba(149, 149, 149, 1)",
         "text-halo-blur": 1,
         "text-halo-color": "rgba(0,0,0,0.7)",
         "text-halo-width": 1
@@ -731,10 +735,10 @@
         "text-offset": [0.5, 0],
         "text-size": 10,
         "text-transform": "uppercase",
-        "visibility": "none"
+        "visibility": "visible"
       },
       "paint": {
-        "text-color": "rgb(101,101,101)",
+        "text-color": "rgba(145, 145, 145, 1)",
         "text-halo-blur": 1,
         "text-halo-color": "rgba(0,0,0,0.7)",
         "text-halo-width": 1
@@ -761,7 +765,7 @@
       },
       "paint": {
         "icon-opacity": 0.7,
-        "text-color": "rgb(101,101,101)",
+        "text-color": "rgba(192, 192, 192, 1)",
         "text-halo-blur": 1,
         "text-halo-color": "rgba(0,0,0,0.7)",
         "text-halo-width": 1
@@ -816,13 +820,13 @@
         "text-font": ["Metropolis Regular", "Noto Sans Regular"],
         "text-justify": "left",
         "text-offset": [0.5, 0.2],
-        "text-size": 10,
+        "text-size": 14,
         "text-transform": "uppercase",
         "visibility": "visible"
       },
       "paint": {
         "icon-opacity": 0.7,
-        "text-color": "rgb(101,101,101)",
+        "text-color": "rgba(189, 189, 189, 1)",
         "text-halo-blur": 1,
         "text-halo-color": "rgba(0,0,0,0.7)",
         "text-halo-width": 1
