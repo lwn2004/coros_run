@@ -870,12 +870,12 @@ function renderTable(resetHighlights = true) {
         const tr = document.createElement('tr');
         tr.setAttribute('data-run-id', run.run_id || '');
         tr.innerHTML = `
-            <td style="color: var(--text-muted);">${run.start_date_local || ''}</td>
+            <td style="width: 160px; white-space: nowrap;color: var(--text-muted);">${run.start_date_local || ''}</td>
             <td>${name}</td>
-            <td><span>${distKm}</span> <span class="unit">km</span></td>
-            <td>${duration}</td>
-            <td>${pace}</td>
-            <td>${hr}</td>
+            <td class="font-mono"><span class="font-mono">${distKm}</span> <span class="unit font-mono">km</span></td>
+            <td class="font-mono">${duration}</td>
+            <td class="font-mono">${pace}</td>
+            <td class="font-mono">${hr}</td>
         `;
         tr.style.cursor = 'pointer';
         tr.style.animationDelay = `${index * 40}ms`;
@@ -1759,5 +1759,11 @@ document.getElementById('pb-toggle-btn').addEventListener('click', function() {
 document.getElementById('media-btn').addEventListener('click', () => {
     openRunMediaGallery(0);
 });
+const toggleBtn = document.getElementById('activity-toggle');
+const section = document.querySelector('.activity-section');
+const btnText = toggleBtn.querySelector('span');
 
+toggleBtn.addEventListener('click', function() {
+    section.classList.toggle('expanded');
+});
 fetchData();
