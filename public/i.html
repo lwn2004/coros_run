@@ -19,16 +19,16 @@
        ========================================================================== */
     :root {
         --bg-color: #000000;
-        --card-bg: #1a1a1a;
+        --card-bg: #18181b;
         --text-main: #ffffff;
         --text-muted: #888888;
-        --text-dark: #666666;
+        --text-dark: rgb(113 113 112);
         --accent-color: #e31937; 
-        --border-color: #2a2a2a;
+        --border-color: #27272a80;
         --progress-bg: #2c2c2e;
         --map-info-bg: #111111;
         --nav-hover: #ffffff;
-        --table-text: #d1d1d1;
+        --table-text: #ffffff;
         --mobile-menu-bg: #0d0d0d;
         --btn-bg: #2c2c2e;
         --active-row-bg: rgba(233, 51, 66, 0.12); 
@@ -85,7 +85,8 @@
         flex-shrink: 0;
         width: 100%;
         max-width: 80rem;
-        margin: 0 auto;
+        margin: 0 auto 1.5rem;
+		border-bottom: 1px solid var(--border-color);
     }
 
     .logo { font-size: 22px; font-weight: 900; letter-spacing: -0.5px; }
@@ -101,11 +102,11 @@
         flex: 1; display: flex; flex-direction: column; padding-bottom: 40px;
     }
 
-    .main-layout { display: flex; gap: 16px; flex: 1; height: auto; overflow: visible; }
-    .column-left { flex: 1.5; display: flex; flex-direction: column; gap: 16px; padding-left: 1.5rem;}
-    .column-right { flex: 1; display: flex; flex-direction: column; gap: 16px; padding-right: 1.5rem;}
+    .main-layout { display: flex; gap: 2rem; flex: 1; height: auto; overflow: visible; }
+    .column-left { flex: 1.5; display: flex; flex-direction: column; gap: 2rem; padding-left: 1.5rem;}
+    .column-right { flex: 1; display: flex; flex-direction: column; gap: 2rem; padding-right: 1.5rem;}
 
-    .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; flex-shrink: 0; }
+    .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; flex-shrink: 0; }
     .card { background-color: var(--card-bg); border-radius: 12px; padding: 1.25rem; border: 1px solid var(--border-color); transition: background-color 0.3s, border-color 0.3s; }
     .card-title { color: var(--text-muted); font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
     .card-value { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
@@ -120,7 +121,17 @@
     .icon { color: var(--accent-color); font-style: normal; }
     .trend-down { color: var(--text-muted); }
     .trend-up { color: var(--accent-color); }
-
+.toggle-btn {
+    display: none;
+    background: transparent;
+    border: none;
+    color: var(--text-dark);
+    cursor: pointer;
+    font-size: 18px;
+    padding: 5px;
+	padding: 10px;
+    margin: 2px auto -10px 1px;
+}
     /* Map and Info Box */
     .map-card { background-color: var(--card-bg); border-radius: 16px; overflow: hidden; border: 1px solid var(--border-color); display: flex; flex-direction: column; height: 350px; flex: none; position: relative; transition: border-color 0.3s; }
     .map-info-box { flex-shrink: 0; height: 44px; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border-color); font-size: 12px; color: var(--text-muted); background-color: var(--map-info-bg); z-index: 10; transition: background-color 0.3s, border-color 0.3s;}
@@ -152,10 +163,12 @@
     .activity-title { font-size: 18px; font-weight: 700; }
     .activity-count { color: var(--text-dark); font-size: 12px; }
     
-    .filters { display: flex; gap: 6px; margin-bottom: 14px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-shrink: 0; }
+    .filters { display: flex; gap: 6px; margin-bottom: 14px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-shrink: 0; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);
+}
     .filters::-webkit-scrollbar { display: none; } 
-    .filter-btn { flex-shrink: 0; background-color: var(--btn-bg); color: var(--text-muted); border: none; padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.2s; }
+    .filter-btn { flex-shrink: 0; background-color: var(--btn-bg); color: var(--text-muted); border: none; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.2s; }
     .filter-btn.active { background-color: var(--accent-color); color: white; }
+	.filter-btn:not(.active):hover {background-color:rgb(63,63,70);}
     .filter-wrapper { position: relative; display: inline-flex; align-items: center; flex-shrink: 0; margin-right: 4px; }
     .filter-icon { position: absolute; left: 10px; pointer-events: none; color: var(--text-muted); width: 14px; height: 14px; z-index: 1; }
     .filter-select {
@@ -170,7 +183,7 @@
 
     table { width: 100%; border-collapse: collapse; font-size: 0.875rem; text-align: left; }
     th { color: var(--text-dark); font-weight: 600; padding-bottom: 10px; font-size: 11px; letter-spacing: 0.5px; position: sticky; top: 0; background-color: var(--card-bg); z-index: 1; transition: background-color 0.3s; }
-    td { white-space: nowrap; padding: 10px 0; color: var(--table-text); border-bottom: 1px solid var(--border-color); transition: border-color 0.3s; }
+    td { white-space: nowrap; padding: 1rem 0; color: var(--table-text); border-bottom: 1px solid var(--border-color); transition: border-color 0.3s; }
     tr { transition: background-color 0.2s; }
     tr.active-row td { background-color: var(--active-row-bg) !important; color: var(--active-row-text) !important; }
     tr.active-row td.bold-white { color: var(--accent-color) !important; }
@@ -198,11 +211,13 @@
     min-width: max-content;
     border-collapse: collapse;
 }
-  
+  .font-mono {
+	font-family: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;
+}
   .bold-white { font-weight: 600; }
     .unit { color: var(--text-dark); font-size: 11px; font-weight: normal; }
     
-    .pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; color: var(--text-muted); font-size: 16px; padding-top: 10px; border-top: 1px solid var(--border-color); flex-shrink: 0; }
+    .pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 0px; color: var(--text-muted); font-size: 16px; padding-top: 10px; border-top: 1px solid var(--border-color); flex-shrink: 0; }
     .page-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 30px; }
 
     /* For Prediction & Echarts Specific */
@@ -341,14 +356,47 @@
         .hide-for-mobile { display: none !important; }
         .card-value { font-size: 20px; white-space: nowrap; }
         .stat-row { white-space: nowrap; font-size: 11px; }
-        
+		.activity-content {
+			display: none;
+		}
+        /* 让按钮内的文字和 SVG 垂直居中对齐 */
+		.toggle-btn {
+			display: block;
+		}
+
+		/* 限制 SVG 图标的大小和颜色（会自动继承文字颜色） */
+		.toggle-btn svg {
+			width: 18px;
+			height: 18px;
+		}
+
+		/* 默认状态下：隐藏向上箭头 */
+		.toggle-btn .icon-up {
+			display: none;
+		}
+		.toggle-btn .icon-down {
+			display: inline-block;
+		}
+
+		/* 当父级容器展开时（假设给 activity-section 增加了 .expanded 类）：切换图标和文字 */
+		.activity-section.expanded .toggle-btn .icon-up {
+			display: inline-block;
+		}
+		.activity-section.expanded .activity-content {
+			display: inline-block;
+		}		
+		.activity-section.expanded .toggle-btn .icon-down {
+			display: none;
+		}
+		
         .map-card { order: 2; position: -webkit-sticky; position: sticky; top: 0; height: 250px; flex: none; z-index: 100; }
         #recent-4weeks-card { order: 3; }
         .activity-section { order: 4; }
         #monthly-mileage-card { display: none !important; }
 
 		#prediction-description { order: 0; }
-        .activity-header, .filters, .pagination { padding: 0 12px; }
+        .activity-header,  .pagination { padding: 0 12px; }
+		.filters {padding-bottom: 1rem;}
         .table-container { overflow-x: auto; }
         th, td { padding: 10px 6px; }
         th:nth-child(1), td:nth-child(1) { width: 33vw; min-width: 110px; }
@@ -445,55 +493,60 @@
             <div class="activity-section">
                 <div class="activity-header">
                     <div class="activity-title">Activity Log</div>
-                    <div class="activity-count" id="showing-text">Showing 1-10 of 0</div>
+					<button class="toggle-btn" id="activity-toggle">
+						<svg class="icon-down" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
+						<svg class="icon-up" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"></path></svg>
+					</button>
+                    <div class="activity-count" id="showing-text">Showing 1-10 of 0</div>					
                 </div>
+				<div class="activity-content" id="activity-content">
+					<div class="filters" id="year-filters">
+						<div class="filter-wrapper">
+							<svg class="filter-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/></svg>
+							<select id="type-filter" class="filter-select" autocomplete="off">
+								<option value="all">全部类型</option>
+								<option value="race">比赛</option>
+								<option value="track">运动场</option>
+								<option value="locgz">在广州</option>
+								<option value="locmm">在茂名</option>
+								<option value="locother">在外地</option>
+								<option value="fastest10Runs">最快10次</option>
+								<option value="longest10Runs">最远10次</option>
+								<option value="onThisDay">史上今日</option>
+							  <option value="media">含多媒体</option>
+							</select>
+						</div>				
+						<button class="filter-btn active" data-year="all">All</button>
+						<button class="filter-btn" data-year="2026">2026</button>
+						<button class="filter-btn" data-year="2025">2025</button>
+						<button class="filter-btn" data-year="2024">2024</button>
+						<button class="filter-btn" data-year="2023">2023</button>
+						<button class="filter-btn" data-year="2022">2022</button>
+						<button class="filter-btn" data-year="2021">2021</button>
+					</div>
+					
+					<div class="table-container">
+						<table>
+							<thead>
+								<tr>
+									<th>DATE</th>
+									<th>NAME</th>
+									<th>DISTANCE</th>
+									<th>DURATION</th>
+									<th>PACE</th>
+									<th>HR</th>
+								</tr>
+							</thead>
+							<tbody id="table-body"></tbody>
+						</table>
+					</div>
 
-                <div class="filters" id="year-filters">
-                    <div class="filter-wrapper">
-                        <svg class="filter-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/></svg>
-                        <select id="type-filter" class="filter-select" autocomplete="off">
-                            <option value="all">全部类型</option>
-                            <option value="race">比赛</option>
-                            <option value="track">运动场</option>
-							<option value="locgz">在广州</option>
-							<option value="locmm">在茂名</option>
-							<option value="locother">在外地</option>
-							<option value="fastest10Runs">最快10次</option>
-							<option value="longest10Runs">最远10次</option>
-							<option value="onThisDay">史上今日</option>
-                          <option value="media">含多媒体</option>
-                        </select>
-                    </div>				
-                    <button class="filter-btn active" data-year="all">All</button>
-                    <button class="filter-btn" data-year="2026">2026</button>
-                    <button class="filter-btn" data-year="2025">2025</button>
-                    <button class="filter-btn" data-year="2024">2024</button>
-                    <button class="filter-btn" data-year="2023">2023</button>
-                    <button class="filter-btn" data-year="2022">2022</button>
-                    <button class="filter-btn" data-year="2021">2021</button>
-                </div>
-                
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>DATE</th>
-                                <th>NAME</th>
-                                <th>DISTANCE</th>
-                                <th>DURATION</th>
-                                <th>PACE</th>
-                                <th>HR</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table-body"></tbody>
-                    </table>
-                </div>
-
-                <div class="pagination">
-                    <button class="page-btn" id="prev-page">&lt;</button>
-                    <span id="page-info">Page 1 of 1</span>
-                    <button class="page-btn" id="next-page">&gt;</button>
-                </div>
+					<div class="pagination">
+						<button class="page-btn" id="prev-page">&lt;</button>
+						<span id="page-info">Page 1 of 1</span>
+						<button class="page-btn" id="next-page">&gt;</button>
+					</div>
+				</div>
             </div>
         </div>
 
