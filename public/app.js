@@ -16,7 +16,7 @@ let currentSingleRun = null;
 
 let currentMediaMarkers = []; // 存放地图上的多媒体标记
 let currentMediaData = null;  // 存放当前运动的多媒体数据
-
+let targetHeatmapYear = new Date().getFullYear();
 // Chart Instances
 let paceChartInstance = null;
 let hrChartInstance = null;
@@ -590,6 +590,7 @@ async function fetchData() {
             const cachedData = await cachedResponse.json();
             processAndRenderRuns(cachedData);
             handleHashRoute(); 
+			//if (pageId === 'heatmap') renderHeatmapView();
         }
         const response = await fetch(URL);
         if (response.ok) {
@@ -602,6 +603,7 @@ async function fetchData() {
                 
                 if (isPredictionLoaded) updatePredictionPage();
                 if (racesRendered) renderRaceCards();
+				if (pageId === 'heatmap') renderHeatmapView();
             }
         }
     } catch (error) { console.error('Data loading failed:', error); }
@@ -726,7 +728,156 @@ function renderRecent4Weeks() {
         grid.appendChild(cell);
     }
 }
+// ==========================================================================
+// 3. 新增: 历史长条跑量热力图 (Heatmap)
+// ==========================================================================
+function renderHeatmapView() {
+    const container = document.getElementById('heatmap-container');
+    if (!container) return;
+    container.innerHTML = '';
 
+    // 【新增】判断是否为手机移动端（通常屏幕宽度小于等于 768px）
+    const isMobile = window.innerWidth <= 768;
+
+    if (isMobile) {
+        // 手机端：一屏只渲染当前选中的那一年
+        const block = createYearlyHeatmapBlock(targetHeatmapYear);
+        container.appendChild(block);
+    } else {
+        // 电脑端：保持原样，并排渲染最近 4 年
+        for (let i = 3; i >= 0; i--) {
+            const yearToRender = targetHeatmapYear - i;
+            const block = createYearlyHeatmapBlock(yearToRender);
+            container.appendChild(block);
+        }
+    }
+    
+    // 更新“下一个”按钮状态（阻止切入未来没有数据的年份）
+    const nextBtn = document.getElementById('heatmap-next');
+    const currentYear = new Date().getFullYear();
+    nextBtn.disabled = targetHeatmapYear >= currentYear;
+    nextBtn.style.opacity = targetHeatmapYear >= currentYear ? "0.3" : "1";
+}
+
+function createYearlyHeatmapBlock(year) {
+    const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+
+    // 找出这一年的所有跑步数据并按日期聚合
+    const dailyData = {};
+    let yearlyDist = 0;
+    let yearlyRunsCount = 0;
+
+    allRuns.forEach(run => {
+        if (!run.start_date_local) return;
+        if (run.start_date_local.startsWith(year.toString())) {
+            const dateStr = run.start_date_local.substring(0, 10);
+            if (!dailyData[dateStr]) {
+                dailyData[dateStr] = { dist: 0, runs: [] };
+            }
+            dailyData[dateStr].dist += (run.distance || 0) / 1000;
+            dailyData[dateStr].runs.push(run);
+            yearlyDist += (run.distance || 0) / 1000;
+            yearlyRunsCount++;
+        }
+    });
+
+    // 计算日历起止范围：包含当年 1 月 1 日所在周的周一，到 12 月 31 日所在周的周日
+    const startDate = new Date(year, 0, 1);
+    const dayOfWeekStart = startDate.getDay();
+    const offsetStart = dayOfWeekStart === 0 ? 6 : dayOfWeekStart - 1; // 转换为：周一=0, 周日=6
+    startDate.setDate(startDate.getDate() - offsetStart);
+
+    const endDate = new Date(year, 11, 31);
+    const dayOfWeekEnd = endDate.getDay();
+    const offsetEnd = dayOfWeekEnd === 0 ? 0 : 7 - dayOfWeekEnd; // 周日结束
+    endDate.setDate(endDate.getDate() + offsetEnd);
+
+    const totalDays = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24));
+
+    // 创建区块 DOM
+    const block = document.createElement('div');
+    block.className = 'heatmap-year-block';
+
+    block.innerHTML = `
+        <div class="heatmap-year-title">${year}</div>
+        <div class="heatmap-body">
+            <div class="heatmap-month-labels"></div>
+            <div class="heatmap-grid"></div>
+        </div>
+        <div class="heatmap-footer">
+            <span style="font-weight:bold; color:var(--text-main);">${yearlyRunsCount}</span> 次活动<br/>
+            <span style="font-weight:bold; color:var(--text-main);">${yearlyDist.toFixed(1)}</span> km
+        </div>
+    `;
+
+    const grid = block.querySelector('.heatmap-grid');
+    const labelsContainer = block.querySelector('.heatmap-month-labels');
+
+    let currentMonth = -1;
+    const cellHeight = 24; 
+    const cellGap = 3;     
+    const rowHeight = cellHeight + cellGap;
+
+    for (let i = 0; i < totalDays; i++) {
+        const cellDate = new Date(startDate);
+        cellDate.setDate(startDate.getDate() + i);
+
+        const m = cellDate.getMonth();
+        const dateStr = `${cellDate.getFullYear()}-${String(m + 1).padStart(2, '0')}-${String(cellDate.getDate()).padStart(2, '0')}`;
+
+        const cell = document.createElement('div');
+        cell.className = 'heatmap-cell';
+
+        // 左侧月份标签逻辑：只要该周的第一天或者遇到新的月份
+        const weekIndex = Math.floor(i / 7);
+        if (cellDate.getFullYear() === year && m !== currentMonth) {
+            currentMonth = m;
+            const label = document.createElement('div');
+            label.className = 'heatmap-month-label';
+            label.innerText = `${m + 1}月`;
+            // 根据所在的行（周）计算 top 偏移量
+            label.style.top = `${weekIndex * rowHeight}px`;
+            labelsContainer.appendChild(label);
+        }
+
+        // 数据填充与颜色渲染
+        if (cellDate.getFullYear() !== year) {
+            cell.classList.add('empty'); // 不属于当年的补齐天数，不可见
+        } else {
+            const data = dailyData[dateStr];
+            if (data && data.dist > 0) {
+                const dist = data.dist;
+                cell.title = `${dateStr} : ${dist.toFixed(1)} km`; // 原生提示框
+
+                if (dist > 0 && dist < 10) {
+                    cell.style.backgroundColor = 'rgb(7 89 133)';
+                } else if (dist >= 10 && dist < 20) {
+                    cell.style.backgroundColor = 'rgb(202 138 4)';
+                } else {
+                    cell.style.backgroundColor = 'rgb(227 25 55)';
+                }
+
+                cell.addEventListener('dblclick', () => {
+                    const mainRun = data.runs[0];
+                    window.location.hash = '#dashboard';
+                    setTimeout(() => {
+                        highlightRunInTable(mainRun.run_id);
+                        renderMap(data.runs);
+                        updateMapInfoBox('single', mainRun);
+                        fetchRunDetails(mainRun);
+                        fetchMediaForRun(mainRun);
+                    }, 100);
+                });
+            } else {
+                // 无跑步记录的灰色底格
+                cell.style.backgroundColor = 'var(--progress-bg)';
+            }
+        }
+        grid.appendChild(cell);
+    }
+
+    return block;
+}
 // ==========================================================================
 // 2. 新增: 按月跑量 Bar 图 (Monthly Mileage)
 // ==========================================================================
@@ -1063,7 +1214,15 @@ document.getElementById('next-page').addEventListener('click', () => {
     const totalPages = Math.ceil(filteredRuns.length / itemsPerPage);
     if (currentPage < totalPages) { currentPage++; renderTable(); }
 });
+document.getElementById('heatmap-prev').addEventListener('click', () => {
+    targetHeatmapYear--;
+    renderHeatmapView();
+});
 
+document.getElementById('heatmap-next').addEventListener('click', () => {
+    targetHeatmapYear++;
+    renderHeatmapView();
+});
 // Map - Chart Toggle Event
 document.getElementById('toggle-map-chart-btn').addEventListener('click', () => {
     const chartsContainer = document.getElementById('run-charts-container');
@@ -1105,6 +1264,7 @@ function handleHashRoute() {
     document.getElementById('prediction-page').style.display = pageId === 'prediction' ? 'flex' : 'none';
     document.getElementById('ai-page').style.display = pageId === 'ai-summary' ? 'flex' : 'none';
     document.getElementById('races-page').style.display = pageId === 'races' ? 'flex' : 'none';
+	document.getElementById('heatmap-page').style.display = pageId === 'heatmap' ? 'flex' : 'none';
     
     document.querySelectorAll('.desktop-menu a').forEach(a => a.classList.remove('active'));
     document.querySelectorAll('.mobile-menu-item').forEach(a => a.classList.remove('active'));
@@ -1114,7 +1274,11 @@ function handleHashRoute() {
         document.getElementById('mobile-menu-home').classList.add('active');
         if (map) setTimeout(() => map.resize(), 100); 
 		if (monthlyMileageChartInstance) setTimeout(() => monthlyMileageChartInstance.resize(), 100);
-    } else if (pageId === 'ai-summary') {
+    } else if (pageId === 'heatmap') {
+		document.getElementById('menu-heatmap').classList.add('active');
+		document.getElementById('mobile-menu-heatmap').classList.add('active');
+		if (allRuns.length > 0) renderHeatmapView();
+	} else if (pageId === 'ai-summary') {
         document.getElementById('menu-ai').classList.add('active');
         document.getElementById('mobile-menu-ai').classList.add('active');
         loadAiIndex(); 
@@ -1766,4 +1930,11 @@ const btnText = toggleBtn.querySelector('span');
 toggleBtn.addEventListener('click', function() {
     section.classList.toggle('expanded');
 });
+// 监听屏幕尺寸变化，保证横竖屏切换时自动调整单年/多年视图
+window.addEventListener('resize', () => {
+    if (window.location.hash === '#heatmap' && allRuns.length > 0) {
+        renderHeatmapView();
+    }
+});
+
 fetchData();
