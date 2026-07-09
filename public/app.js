@@ -4,6 +4,8 @@ let filteredRuns = [];
 let currentPage = 1;
 const itemsPerPage = 16;
 
+const firstRunDate = new Date("3/24/2021");
+
 let currentYearFilter = 'all';
 let currentMonthFilter = null; 
 let currentTypeFilter = 'all';
@@ -738,11 +740,14 @@ function renderHeatmapView() {
 
     // 【新增】判断是否为手机移动端（通常屏幕宽度小于等于 768px）
     const isMobile = window.innerWidth <= 768;
+    const prevBtn = document.getElementById('heatmap-prev');
 
     if (isMobile) {
         // 手机端：一屏只渲染当前选中的那一年
         const block = createYearlyHeatmapBlock(targetHeatmapYear);
         container.appendChild(block);
+		prevBtn.disabled = targetHeatmapYear <= firstRunDate.getFullYear();
+		prevBtn.style.opacity = targetHeatmapYear <= firstRunDate.getFullYear() ? "0.3" : "1"; 
     } else {
         // 电脑端：保持原样，并排渲染最近 4 年
         for (let i = 3; i >= 0; i--) {
@@ -750,8 +755,10 @@ function renderHeatmapView() {
             const block = createYearlyHeatmapBlock(yearToRender);
             container.appendChild(block);
         }
+		prevBtn.disabled = targetHeatmapYear <= firstRunDate.getFullYear()+3;
+		prevBtn.style.opacity = targetHeatmapYear <= firstRunDate.getFullYear()+3 ? "0.3" : "1"; 
     }
-    
+   
     // 更新“下一个”按钮状态（阻止切入未来没有数据的年份）
     const nextBtn = document.getElementById('heatmap-next');
     const currentYear = new Date().getFullYear();
@@ -766,6 +773,9 @@ function createYearlyHeatmapBlock(year) {
     const dailyData = {};
     let yearlyDist = 0;
     let yearlyRunsCount = 0;
+	let runs_below10k = 0;
+	let runs_below20k = 0;
+	let runs_above20k = 0;
 
     allRuns.forEach(run => {
         if (!run.start_date_local) return;
@@ -778,6 +788,9 @@ function createYearlyHeatmapBlock(year) {
             dailyData[dateStr].runs.push(run);
             yearlyDist += (run.distance || 0) / 1000;
             yearlyRunsCount++;
+			if (run.distance > 20000) {runs_above20k ++;}
+			else if (run.distance > 10000) { runs_below20k ++;}
+			else {runs_below10k ++;}
         }
     });
 
@@ -799,7 +812,17 @@ function createYearlyHeatmapBlock(year) {
     block.className = 'heatmap-year-block';
 
     block.innerHTML = `
-        <div class="heatmap-year-title">${year}</div>
+		<div class="heatmap-year-header">
+			<div class="heatmap-year-title">${year}</div>
+			<div>
+				<div><span style="font-weight:bold; color:var(--text-main);">${yearlyDist.toFixed(1)}</span> km</div>
+				<div class="heatmap-legend">
+					<div class="item"><span class="dot blue"></span>< 10k: ${runs_below10k} 次</div>
+					<div class="item"><span class="dot yellow"></span>< 20k: ${runs_below20k} 次</div>
+					<div class="item"><span class="dot red"></span>≥ 20k: ${runs_above20k} 次</div>
+				</div>
+			</div>
+		</div>
         <div class="heatmap-body">
             <div class="heatmap-month-labels"></div>
             <div class="heatmap-grid"></div>
@@ -848,7 +871,7 @@ function createYearlyHeatmapBlock(year) {
             if (data && data.dist > 0) {
                 const dist = data.dist;
                 cell.title = `${dateStr} : ${dist.toFixed(1)} km`; // 原生提示框
-
+				cell.innerHTML = `${dist.toFixed(1)} <small>km</small>`;
                 if (dist > 0 && dist < 10) {
                     cell.style.backgroundColor = 'rgb(7 89 133)';
                 } else if (dist >= 10 && dist < 20) {
@@ -871,6 +894,7 @@ function createYearlyHeatmapBlock(year) {
             } else {
                 // 无跑步记录的灰色底格
                 cell.style.backgroundColor = 'var(--progress-bg)';
+				cell.className += " empty";
             }
         }
         grid.appendChild(cell);
