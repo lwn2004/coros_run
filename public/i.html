@@ -223,15 +223,16 @@
     /* For Prediction & Echarts Specific */
     .chart-card { background-color: var(--card-bg); border-radius: 16px; border: 1px solid var(--border-color); transition: background-color 0.3s, border-color 0.3s;}
 /* Heatmap Specific Styles */
-.heatmap-year-block { display: flex; flex-direction: column; align-items: center; min-width: 140px; }
-.heatmap-year-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--text-main); }
-.heatmap-body { display: flex; position: relative; margin-bottom: 16px; }
+.heatmap-year-block { display: flex; flex-direction: column; min-width: 140px; }
+.heatmap-year-header { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0px 12px; color: var(--text-muted); }
+.heatmap-year-title { font-size: 32px; font-weight: 700; margin-bottom: 16px; color: var(--text-muted); transform: rotate(270deg); }
+.heatmap-body { display: flex; position: relative; margin-bottom: 16px; padding-top: 16px; border-top: 1px solid var(--border-color);}
 .heatmap-month-labels { display: flex; flex-direction: column; width: 30px; position: relative; font-size: 10px; color: var(--text-muted); }
 .heatmap-month-label { position: absolute; right: 8px; line-height: 12px; }
 .heatmap-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
-.heatmap-cell { width: 24px; height: 24px; border-radius: 0.5rem; cursor: pointer; transition: transform 0.1s; }
+.heatmap-cell { width: 24px; height: 24px; font-size: 0px; border-radius: 0.5rem; cursor: pointer; transition: transform 0.1s; }
 .heatmap-cell.empty { background-color: transparent; cursor: default; }
-.heatmap-cell:not(.empty):hover { transform: scale(1.3); z-index: 2; position: relative; box-shadow: 0 2px 4px rgba(0,0,0,0.4); }
+.heatmap-cell:not(.empty):hover { transform: scale(1.5); z-index: 2; position: relative; box-shadow: 0 2px 4px rgba(0,0,0,0.4); font-size: 8px; color:rgb(212, 212, 216); display: flex; justify-content: center; align-items: center; text-align: center;}
 .heatmap-footer { font-size: 14px; color: var(--text-muted); text-align: center; border-top: 1px solid var(--border-color); padding-top: 8px; width: 100%; line-height: 1.5; }
 /* 热力图两侧粘性圆形按钮样式 */
 .heatmap-btn {
@@ -265,7 +266,38 @@
     /* 过渡动画：让变色和缩放更加平滑 */
     transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.1s ease, opacity 0.2s ease;
 }
+.heatmap-legend{
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+	margin-bottom: 1rem;
+}
 
+.item{
+    display: flex;
+    align-items: center;
+	font-size: 14px;
+}
+
+.dot{
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    margin-right: 2px;
+    flex-shrink: 0;
+}
+
+.blue{
+    background: rgb(7 89 133);
+}
+
+.yellow{
+    background: rgb(202 138 4);
+}
+
+.red{
+    background: rgb(227 25 55);
+}
 /* 电脑端鼠标悬停 (Hover) 状态 */
 @media (hover: hover) {
     .heatmap-btn:hover:not(:disabled) {
@@ -854,27 +886,27 @@
 <nav class="mobile-bottom-menu">
     <a href="#dashboard" class="mobile-menu-item active" id="mobile-menu-home">
         <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
-        <span>跑步记录</span>
+        <span>动态</span>
     </a>
 	<a href="#heatmap" class="mobile-menu-item" id="mobile-menu-heatmap">
 		<svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-5h2v5zm4 0h-2v-3h2v3zm0-5h-2v-2h2v2zm4 5h-2V7h2v10z"/></svg>
-		<span>热力图</span>
+		<span>热图</span>
 	</a>
     <a href="#prediction" class="mobile-menu-item" id="mobile-menu-prediction">
         <svg viewBox="0 0 24 24"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
-        <span>成绩预测</span>
+        <span>预测</span>
     </a>
     <a href="#ai-summary" class="mobile-menu-item" id="mobile-menu-ai">
         <svg viewBox="0 0 24 24"><path d="M19 3l-1.5 3.5L14 8l3.5 1.5L19 13l1.5-3.5L24 8l-3.5-1.5L19 3zm-6 3.5L11 2 9 6.5 4.5 8.5 9 10.5 11 15l2-4.5 4.5-2-4.5-2z"/></svg>
-        <span>AI 分析</span>
+        <span>AI</span>
     </a>
     <a href="#races" class="mobile-menu-item" id="mobile-menu-races">
         <svg viewBox="0 0 24 24"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>
-        <span>赛事纪录</span>
+        <span>纪录</span>
     </a>
     <a href="#settings" class="mobile-menu-item" id="mobile-menu-settings">
         <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.3-.06.62-.06.94s.02.64.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .43-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.49-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
-        <span>系统设置</span>
+        <span>设置</span>
     </a>
 </nav>
 
