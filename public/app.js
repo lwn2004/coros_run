@@ -67,7 +67,7 @@ function applyThemeAndColor(theme, color) {
     const bgOpacity = theme === 'light' ? 0.08 : 0.12;
     document.documentElement.style.setProperty('--active-row-bg', hexToRgbaFast(color, bgOpacity));
 
-    const styleUrl = theme === 'light' ? 'https://tiles.openfreemap.org/styles/positron' : 'https://run.linwn.net/dark_matter.json';
+    const styleUrl = theme === 'light' ? 'https://tiles.openfreemap.org/styles/positron' : 'https://run.linwn.net/dark.json';
 
     if (map && map.loaded()) {
         map.setStyle(styleUrl);
@@ -104,7 +104,7 @@ function applyThemeAndColor(theme, color) {
 
 function initMap() {
     const theme = localStorage.getItem('theme') || 'dark';
-    const styleUrl = theme === 'light' ? 'https://tiles.openfreemap.org/styles/positron' : 'https://run.linwn.net/dark_matter.json';
+    const styleUrl = theme === 'light' ? 'https://tiles.openfreemap.org/styles/positron' : 'https://run.linwn.net/dark.json';
     
     map = new maplibregl.Map({
         container: 'map',
@@ -113,14 +113,6 @@ function initMap() {
         zoom: 11,
         preserveDrawingBuffer: true, 
         attributionControl: false,
-		transformRequest: (url, resourceType) => {
-			if (url.includes('{key}')) {
-				return {
-					url: url.replace('{key}', MY_MAPTILER_KEY)
-				};
-			}
-			return { url: url };
-		}
     });
 
     map.addControl(new maplibregl.FullscreenControl(), 'top-right');
@@ -750,13 +742,13 @@ function renderHeatmapView() {
 		prevBtn.style.opacity = targetHeatmapYear <= firstRunDate.getFullYear() ? "0.3" : "1"; 
     } else {
         // 电脑端：保持原样，并排渲染最近 4 年
-        for (let i = 3; i >= 0; i--) {
+        for (let i = 2; i >= 0; i--) {
             const yearToRender = targetHeatmapYear - i;
             const block = createYearlyHeatmapBlock(yearToRender);
             container.appendChild(block);
         }
-		prevBtn.disabled = targetHeatmapYear <= firstRunDate.getFullYear()+3;
-		prevBtn.style.opacity = targetHeatmapYear <= firstRunDate.getFullYear()+3 ? "0.3" : "1"; 
+		prevBtn.disabled = targetHeatmapYear <= firstRunDate.getFullYear()+2;
+		prevBtn.style.opacity = targetHeatmapYear <= firstRunDate.getFullYear()+2 ? "0.3" : "1"; 
     }
    
     // 更新“下一个”按钮状态（阻止切入未来没有数据的年份）
@@ -815,11 +807,11 @@ function createYearlyHeatmapBlock(year) {
 		<div class="heatmap-year-header">
 			<div class="heatmap-year-title">${year}</div>
 			<div>
-				<div><span style="font-weight:bold; color:var(--text-main);">${yearlyDist.toFixed(1)}</span> km</div>
+				<div><span style="font-weight:bold; color:var(--text-main); font-size:24px;">${yearlyDist.toFixed(1)}</span> km</div>
 				<div class="heatmap-legend">
-					<div class="item"><span class="dot blue"></span>< 10k: ${runs_below10k} 次</div>
-					<div class="item"><span class="dot yellow"></span>< 20k: ${runs_below20k} 次</div>
-					<div class="item"><span class="dot red"></span>≥ 20k: ${runs_above20k} 次</div>
+					<div class="item"><span class="dot blue"></span> 10k-: ${runs_below10k} 次</div>
+					<div class="item"><span class="dot yellow"></span> 10k+: ${runs_below20k} 次</div>
+					<div class="item"><span class="dot red"></span> 20k+: ${runs_above20k} 次</div>
 				</div>
 			</div>
 		</div>
@@ -1884,7 +1876,7 @@ function renderDetailMap(run) {
     }]};
 
     const theme = document.documentElement.getAttribute('data-theme') || 'dark';
-    const mapStyle = theme === 'light' ? 'https://tiles.openfreemap.org/styles/positron' : 'https://run.linwn.net/dark_matter.json';
+    const mapStyle = theme === 'light' ? 'https://tiles.openfreemap.org/styles/positron' : 'https://run.linwn.net/dark.json';
     const accentColor = localStorage.getItem('accentColor') || '#e93342';
 
     if (!detailMapInstance) {
