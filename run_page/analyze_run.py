@@ -276,7 +276,7 @@ def generate_ai_report(ai_context_dict):
 你的任务：
 1. 对比上周计划与本周实际训练
 2. 分析下面提供的客观评估完成度指标（解释为什么是这个完成率，分析原因）
-3. 分析近4周跑步情况和趋势，心率控制如何，是否存在垃圾跑量，有没有过度训练风险
+3. 分析近4周跑步情况和趋势
 4. 调整并输出下周训练计划，如有长距离LSD训练，安排在星期六 (next_week_plan)
 5. 输出人类可读报告，且报告最后加入人类可读的，方便加入高驰训练计划的下周训练计划 (human_report_md)
 
@@ -297,7 +297,7 @@ def generate_ai_report(ai_context_dict):
         )
         
         response = client.models.generate_content(
-            model='gemini-3.5-flash', # 请根据你实际的模型名称调整
+            model='gemini-3.6-flash', # 请根据你实际的模型名称调整
             contents=prompt,
             config=config
         )
