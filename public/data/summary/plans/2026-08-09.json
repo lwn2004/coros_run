@@ -1,0 +1,57 @@
+{
+  "week_start": "2026-08-10",
+  "phase": "减量吸收与巩固期",
+  "goal": "通过微幅减量（目标52km）消化近期高强度Tempo与28km LSD训练成果，消除累积疲劳，提升心率控制力。",
+  "target_distance_km": 52,
+  "target_training_load": 390,
+  "sessions": [
+    {
+      "id": "S1",
+      "day": "Tue",
+      "type": "Easy Run",
+      "distance_km": 10,
+      "target_hr_max": 145,
+      "notes": "10km轻松有氧跑。心率控制在Zone 1 (129-145bpm)，维持175+高步频。",
+      "warmup_km": 0,
+      "main_set": "10km E慢跑",
+      "target_pace": "5:50-6:05",
+      "cooldown_km": 0
+    },
+    {
+      "id": "S2",
+      "day": "Thu",
+      "type": "Tempo Run",
+      "distance_km": 10,
+      "target_hr_max": 164,
+      "notes": "10km节奏跑。2km热身，6km主段T跑（配速4:30-4:38/km，心率Zone 3 153-164bpm），2km冷身。",
+      "warmup_km": 2,
+      "main_set": "6km 节奏跑 (Tempo)",
+      "target_pace": "4:30-4:38",
+      "cooldown_km": 2
+    },
+    {
+      "id": "S3",
+      "day": "Sat",
+      "type": "LSD (Long Slow Distance)",
+      "distance_km": 24,
+      "target_hr_max": 148,
+      "notes": "24km长距离慢跑。安排在周六，心率控制在148bpm以下，注意中后程补糖补水。",
+      "warmup_km": 0,
+      "main_set": "24km LSD慢跑",
+      "target_pace": "6:00-6:20",
+      "cooldown_km": 0
+    },
+    {
+      "id": "S4",
+      "day": "Sun",
+      "type": "Recovery Run",
+      "distance_km": 8,
+      "target_hr_max": 129,
+      "notes": "8km排酸恢复跑。心率控制在Zone 0 (<129bpm)，放松跑，帮助周六LSD后身体排酸。",
+      "warmup_km": 0,
+      "main_set": "8km 恢复慢跑",
+      "target_pace": "6:40-7:10",
+      "cooldown_km": 0
+    }
+  ]
+}
