@@ -2,7 +2,7 @@
     "run_id": 1787608059000,
     "start_time": "2026-08-24T21:47:39+00:00",
     "weather": {
-        "type": "forecast_api",
+        "type": "archive_api",
         "temperature_c": 27.1,
         "condition": "阴天 ☁️",
         "wind_speed_kmh": 3.6
