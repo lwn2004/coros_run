@@ -3,7 +3,8 @@ name: Run Data Sync
 on:
   workflow_dispatch: 
   schedule:
-    - cron: '18 4 * * *'
+    - cron: '18 12 * * *'
+      timezone: 'Asia/Shanghai'
   push:
     branches:
       - master
