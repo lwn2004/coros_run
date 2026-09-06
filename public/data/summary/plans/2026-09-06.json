@@ -1,0 +1,57 @@
+{
+  "week_start": "2026-09-07",
+  "phase": "高峰耐力巩固与阈值提升期",
+  "goal": "周跑量提升至65km，巩固阈值跑配速(4:45-4:55)，顺利完成周六32km LSD长距离训练。",
+  "target_distance_km": 65,
+  "target_training_load": 490,
+  "sessions": [
+    {
+      "id": "S1",
+      "day": "Tue",
+      "type": "Easy Run",
+      "distance_km": 10,
+      "target_hr_max": 145,
+      "notes": "10km基础有氧跑，控制心率在Zone 1 (129-145bpm)，维持178左右高步频。",
+      "warmup_km": 0,
+      "main_set": "10km E慢跑",
+      "target_pace": "5:45-6:00",
+      "cooldown_km": 0
+    },
+    {
+      "id": "S2",
+      "day": "Thu",
+      "type": "Tempo Run",
+      "distance_km": 13,
+      "target_hr_max": 164,
+      "notes": "13km阈值节奏跑。2km热身，9km T段配速4:45-4:55(心率控制在Zone 3 153-164bpm)，2km冷身。",
+      "warmup_km": 2,
+      "main_set": "9km 阈值节奏跑 (Tempo)",
+      "target_pace": "4:45-4:55",
+      "cooldown_km": 2
+    },
+    {
+      "id": "S3",
+      "day": "Sat",
+      "type": "LSD (Long Slow Distance)",
+      "distance_km": 32,
+      "target_hr_max": 150,
+      "notes": "32km长距离慢跑（严格安排在周六）。心率控制在Zone 1-2 (<150bpm)，按时补水补给，保持匀速。",
+      "warmup_km": 0,
+      "main_set": "32km LSD慢跑",
+      "target_pace": "6:00-6:20",
+      "cooldown_km": 0
+    },
+    {
+      "id": "S4",
+      "day": "Sun",
+      "type": "Recovery Run",
+      "distance_km": 10,
+      "target_hr_max": 135,
+      "notes": "10km排酸恢复跑。心率严格控制在Zone 0-1 (<135bpm)，放松跑，促进血液循环帮助恢复。",
+      "warmup_km": 0,
+      "main_set": "10km 排酸慢跑",
+      "target_pace": "6:20-6:40",
+      "cooldown_km": 0
+    }
+  ]
+}
