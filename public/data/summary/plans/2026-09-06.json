@@ -1,8 +1,8 @@
 {
   "week_start": "2026-09-07",
   "phase": "同化吸收与恢复减量期",
-  "goal": "跑量适当回调至54km，巩固近4周的耐力与速度提升成果，促进身体吸收与超量恢复。",
-  "target_distance_km": 54,
+  "goal": "跑量适当回调至56km，巩固近4周的耐力与速度提升成果，促进身体吸收与超量恢复。",
+  "target_distance_km": 56,
   "target_training_load": 400,
   "sessions": [
     {
@@ -35,9 +35,9 @@
       "type": "LSD (Long Slow Distance)",
       "distance_km": 24,
       "target_hr_max": 150,
-      "notes": "24km长距离慢跑（严格安排在周六）。心率控制在Zone 1-2 (135-150bpm)，配速6:00-6:20，注意途中能量补给。",
+      "notes": "26km长距离慢跑（严格安排在周六）。心率控制在Zone 1-2 (135-150bpm)，配速6:00-6:20，注意途中能量补给。",
       "warmup_km": 0,
-      "main_set": "24km LSD慢跑",
+      "main_set": "26km LSD慢跑",
       "target_pace": "6:00-6:20",
       "cooldown_km": 0
     },
