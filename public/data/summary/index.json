@@ -1,5 +1,11 @@
 [
   {
+    "date": "2026-09-13",
+    "report": "reports/2026-09-13.md",
+    "plan": "plans/2026-09-13.json",
+    "review": "reviews/2026-09-13.json"
+  },
+  {
     "date": "2026-09-06",
     "report": "reports/2026-09-06.md",
     "plan": "plans/2026-09-06.json",
