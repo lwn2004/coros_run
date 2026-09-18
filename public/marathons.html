@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>马拉松赛事</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        padding: 40px 20px;
+        background: #f5f7fa;
+        color: #303133;
+        font-family:
+            -apple-system,
+            BlinkMacSystemFont,
+            "Segoe UI",
+            "Microsoft YaHei",
+            Arial,
+            sans-serif;
+    }
+
+    .container {
+        max-width: 760px;
+        margin: 0 auto;
+    }
+
+    h1 {
+        margin: 0 0 24px;
+        font-size: 24px;
+        font-weight: 600;
+    }
+
+    .card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th {
+        background: #fafafa;
+        color: #909399;
+        font-size: 13px;
+        font-weight: 500;
+        text-align: left;
+        padding: 13px 20px;
+        border-bottom: 1px solid #ebeef5;
+    }
+
+    td {
+        padding: 14px 20px;
+        border-bottom: 1px solid #f0f2f5;
+        font-size: 14px;
+    }
+
+    tr:last-child td {
+        border-bottom: none;
+    }
+
+    tr:hover td {
+        background: #fafcff;
+    }
+
+    .event-name {
+        font-weight: 500;
+        color: #303133;
+    }
+
+    .date {
+        color: #606266;
+        white-space: nowrap;
+    }
+
+    .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+        cursor: default;
+    }
+
+    .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    /* 已中签 */
+    .status-success {
+        color: #16a34a;
+    }
+
+    .status-success .dot {
+        background: #22c55e;
+    }
+
+    /* 报名中 */
+    .status-registering {
+        color: #2563eb;
+    }
+
+    .status-registering .dot {
+        background: #3b82f6;
+    }
+
+    /* 待抽签 */
+    .status-lottery {
+        color: #d97706;
+    }
+
+    .status-lottery .dot {
+        background: #f59e0b;
+    }
+
+    /* 未中签 */
+    .status-failed {
+        color: #dc2626;
+    }
+
+    .status-failed .dot {
+        background: #ef4444;
+    }
+
+    /* 未启动 */
+    .status-pending {
+        color: #909399;
+    }
+
+    .status-pending .dot {
+        background: #c0c4cc;
+    }
+
+    /* 自定义 Tooltip */
+    .status[data-tooltip] {
+        position: relative;
+    }
+
+    .status[data-tooltip]::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        left: 50%;
+        bottom: calc(100% + 8px);
+        transform: translateX(-50%);
+
+        background: #303133;
+        color: #fff;
+        padding: 7px 10px;
+        border-radius: 6px;
+        font-size: 12px;
+        line-height: 1.4;
+        white-space: nowrap;
+
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.15s ease;
+        pointer-events: none;
+        z-index: 10;
+    }
+
+    .status[data-tooltip]::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        bottom: calc(100% + 3px);
+        transform: translateX(-50%);
+
+        border: 5px solid transparent;
+        border-top-color: #303133;
+
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.15s ease;
+        z-index: 10;
+    }
+
+    .status[data-tooltip]:hover::after,
+    .status[data-tooltip]:hover::before {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .legend {
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+        padding: 16px 20px;
+        border-top: 1px solid #ebeef5;
+        font-size: 12px;
+        color: #606266;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .loading,
+    .error {
+        padding: 40px;
+        text-align: center;
+        color: #909399;
+    }
+
+    .error {
+        color: #dc2626;
+    }
+
+    @media (max-width: 600px) {
+        body {
+            padding: 20px 10px;
+        }
+
+        th,
+        td {
+            padding: 12px 10px;
+        }
+
+        th:first-child,
+        td:first-child {
+            width: 45%;
+        }
+
+        .legend {
+            gap: 12px;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>我的马拉松赛事</h1>
+
+    <div class="card">
+
+        <div id="table-container">
+            <div class="loading">正在加载赛事数据...</div>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <span class="dot" style="background:#22c55e"></span>
+                已中签
+            </div>
+
+            <div class="legend-item">
+                <span class="dot" style="background:#3b82f6"></span>
+                报名中
+            </div>
+
+            <div class="legend-item">
+                <span class="dot" style="background:#f59e0b"></span>
+                待抽签
+            </div>
+
+            <div class="legend-item">
+                <span class="dot" style="background:#ef4444"></span>
+                未中签
+            </div>
+
+            <div class="legend-item">
+                <span class="dot" style="background:#c0c4cc"></span>
+                未启动
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+const API_URL = "https://workerrunapi.linwn.net/marathon-events";
+
+/*
+ * API 状态 → 页面显示状态
+ */
+function normalizeStatus(status) {
+
+    if (status.includes("已中签")) {
+        return {
+            text: "已中签",
+            className: "status-success"
+        };
+    }
+
+    if (status.includes("报名中")) {
+        return {
+            text: "报名中",
+            className: "status-registering"
+        };
+    }
+
+    if (status.includes("待抽签")) {
+        return {
+            text: "待抽签",
+            className: "status-lottery"
+        };
+    }
+
+    if (status.includes("未中签")) {
+        return {
+            text: "未中签",
+            className: "status-failed"
+        };
+    }
+
+    return {
+        text: "未启动",
+        className: "status-pending"
+    };
+}
+
+
+/*
+ * 格式化日期
+ *
+ * 2026-11-29
+ * ↓
+ * 2026-11-29
+ */
+function formatDate(date) {
+
+    if (!date) {
+        return "-";
+    }
+
+    return date;
+}
+
+
+/*
+ * 生成 Tooltip
+ */
+function getTooltip(event, status) {
+
+    if (status.text === "报名中" && event.registration_end) {
+        return `报名截止：${event.registration_end}`;
+    }
+
+    if (status.text === "待抽签" && event.lottery_date) {
+        return `出签日期：${event.lottery_date}`;
+    }
+
+    return "";
+}
+
+
+/*
+ * 创建表格
+ */
+function renderTable(events) {
+
+    // 按比赛日期排序
+    events.sort((a, b) => {
+        return new Date(a.date) - new Date(b.date);
+    });
+
+    let html = `
+        <table>
+            <thead>
+                <tr>
+                    <th>比赛</th>
+                    <th>状态</th>
+                    <th>比赛日期</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    for (const event of events) {
+
+        const status = normalizeStatus(event.status);
+        const tooltip = getTooltip(event, status);
+
+        const tooltipAttr = tooltip
+            ? `data-tooltip="${escapeHtml(tooltip)}"`
+            : "";
+
+        html += `
+            <tr>
+                <td>
+                    <span class="event-name">
+                        ${escapeHtml(event.name)}
+                    </span>
+                </td>
+
+                <td>
+                    <span
+                        class="status ${status.className}"
+                        ${tooltipAttr}
+                    >
+                        <span class="dot"></span>
+                        ${status.text}
+                    </span>
+                </td>
+
+                <td class="date">
+                    ${formatDate(event.date)}
+                </td>
+            </tr>
+        `;
+    }
+
+    html += `
+            </tbody>
+        </table>
+    `;
+
+    document.getElementById("table-container").innerHTML = html;
+}
+
+
+/*
+ * 防止 API 数据中的特殊字符破坏 HTML
+ */
+function escapeHtml(value) {
+
+    if (value == null) {
+        return "";
+    }
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+/*
+ * 获取 API 数据
+ */
+async function loadEvents() {
+
+    try {
+
+        const response = await fetch(API_URL);
+
+        if (!response.ok) {
+            throw new Error(
+                `HTTP ${response.status}`
+            );
+        }
+
+        const events = await response.json();
+
+        renderTable(events);
+
+    } catch (error) {
+
+        console.error(error);
+
+        document.getElementById("table-container").innerHTML = `
+            <div class="error">
+                赛事数据加载失败
+            </div>
+        `;
+    }
+}
+
+loadEvents();
+
+</script>
+
+</body>
+</html>
