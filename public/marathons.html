@@ -1,38 +1,24 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-
 <head>
-
 <meta charset="UTF-8">
-
 <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0"
 >
-
 <title>我的马拉松赛事</title>
-
-
 <style>
-
 /* =========================================================
    基础
    ========================================================= */
-
 * {
     box-sizing: border-box;
 }
-
 body {
-
     margin: 0;
-
     padding: 40px 20px;
-
     background: #f5f7fa;
-
     color: #303133;
-
     font-family:
         -apple-system,
         BlinkMacSystemFont,
@@ -41,1409 +27,976 @@ body {
         Arial,
         sans-serif;
 }
-
-
 .container {
-
     max-width: 760px;
-
     margin: 0 auto;
 }
-
-
 h1 {
-
     margin: 0 0 24px;
-
     font-size: 24px;
-
     font-weight: 600;
 }
-
-
 /* =========================================================
    Card
    ========================================================= */
-
 .card {
-
     background: #fff;
-
     border-radius: 12px;
-
     box-shadow:
         0 2px 12px rgba(0, 0, 0, 0.06);
-
     overflow: visible;
 }
-
-
 /* =========================================================
    Table
    ========================================================= */
-
 .table-wrapper {
-
     overflow-x: auto;
-
     border-radius: 12px 12px 0 0;
 }
-
-
 table {
-
     width: 100%;
-
     border-collapse: collapse;
-
-    /*min-width: 500px;*/
 }
-
-
 th {
-
     background: #fafafa;
-
     color: #909399;
-
     font-size: 13px;
-
     font-weight: 500;
-
     text-align: left;
-
     padding: 13px 20px;
-
     border-bottom:
         1px solid #ebeef5;
 }
-
-
 td {
-
     padding: 14px 20px;
-
     border-bottom:
         1px solid #f0f2f5;
-
     font-size: 14px;
 }
-
-
 tr:last-child td {
-
     border-bottom: none;
 }
-
-
 tbody tr:hover td {
-
     background: #fafcff;
 }
-
-
 .event-name {
-
     font-weight: 500;
-
     color: #303133;
 }
-
-
 .date {
-
     color: #606266;
-
     white-space: nowrap;
 }
-
-
 /* =========================================================
    Status
    ========================================================= */
-
 .status {
-
     display: inline-flex;
-
     align-items: center;
-
     gap: 6px;
-
     white-space: nowrap;
-
     cursor: default;
-
     position: relative;
 }
-
-
 .dot {
-
     width: 8px;
-
     height: 8px;
-
     border-radius: 50%;
-
     display: inline-block;
-
     flex-shrink: 0;
 }
-
-
 /* 已中签 */
-
 .status-success {
-
     color: #16a34a;
 }
-
-
 .status-success .dot {
-
     background: #22c55e;
 }
-
-
 /* 报名中 */
-
 .status-registering {
-
     color: #2563eb;
 }
-
-
 .status-registering .dot {
-
     background: #3b82f6;
 }
-
-
 /* 待抽签 */
-
 .status-lottery {
-
     color: #d97706;
 }
-
-
 .status-lottery .dot {
-
     background: #f59e0b;
 }
-
-
 /* 未中签 */
-
 .status-failed {
-
     color: #dc2626;
 }
-
-
 .status-failed .dot {
-
     background: #ef4444;
 }
-
-
 /* 未启动 */
-
 .status-pending {
-
     color: #909399;
 }
-
-
 .status-pending .dot {
-
     background: #c0c4cc;
 }
-
-
+/* =========================================================
+   Tooltip Info Icon
+   ========================================================= */
+.status-info {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    margin-left: 0;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    font-family: Georgia, serif;
+    font-size: 10px;
+    font-weight: 700;
+    font-style: normal;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.72;
+    transition:
+        opacity 0.15s ease,
+        transform 0.15s ease;
+}
+.status-info:hover {
+    opacity: 1;
+    transform: scale(1.08);
+}
 /* =========================================================
    Tooltip
    ========================================================= */
-
 /*
  * 默认：
  * Tooltip 显示在状态上方
  */
-
 .status[data-tooltip]::after {
-
     content: attr(data-tooltip);
-
     position: absolute;
-
     left: 50%;
-
     bottom: calc(100% + 8px);
-
     transform: translateX(-50%);
-
-
     /*
-     * 使用 max-content，
-     * 避免中文被压缩成一个字一行
+     * 防止 Tooltip 过窄
      */
-
     width: max-content;
-
-    min-width: 120px;
-
-    max-width: 220px;
-
-
+    min-width: 150px;
+    max-width: 260px;
     background: #303133;
-
     color: #fff;
-
     padding: 7px 10px;
-
     border-radius: 6px;
-
-
     font-size: 12px;
-
     line-height: 1.6;
-
     text-align: center;
-
-
     /*
      * 保留 \n 换行
      */
-
     white-space: pre-line;
-
-
     /*
      * 中文不要一个字一个字拆开
      */
-
     word-break: keep-all;
-
     overflow-wrap: normal;
-
-
     opacity: 0;
-
     visibility: hidden;
-
-
     transition:
         opacity 0.15s ease;
-
-
+    /*
+     * Tooltip 本身不接收鼠标事件
+     */
     pointer-events: none;
-
     z-index: 100;
 }
-
-
-/*
- * Tooltip 箭头
- */
-
+/* =========================================================
+   Tooltip 箭头
+   ========================================================= */
 .status[data-tooltip]::before {
-
     content: "";
-
     position: absolute;
-
     left: 50%;
-
     bottom: calc(100% + 3px);
-
     transform: translateX(-50%);
-
-
     border: 5px solid transparent;
-
     border-top-color: #303133;
-
-
     opacity: 0;
-
     visibility: hidden;
-
-
     transition:
         opacity 0.15s ease;
-
-
     z-index: 100;
 }
-
-
-/*
- * Hover
- */
-
-.status[data-tooltip]:hover::after,
-.status[data-tooltip]:hover::before {
-
+/* =========================================================
+   Tooltip 打开状态
+   ========================================================= */
+.status.tooltip-open::after,
+.status.tooltip-open::before {
     opacity: 1;
-
     visibility: visible;
 }
-
-
 /* =========================================================
    第一行 Tooltip
    显示在下方，避免超出页面顶部
    ========================================================= */
-
 .status.tooltip-bottom::after {
-
     top: calc(100% + 8px);
-
     bottom: auto;
 }
-
-
 .status.tooltip-bottom::before {
-
     top: calc(100% + 3px);
-
     bottom: auto;
-
-
     border-top-color: transparent;
-
     border-bottom-color: #303133;
 }
-
-
 /* =========================================================
    Legend
    ========================================================= */
-
 .legend {
-
     display: flex;
-
     gap: 8px;
-
     flex-wrap: wrap;
-
     padding: 14px 20px;
-
     border-top:
         1px solid #ebeef5;
-
     background: #fafafa;
-
     border-radius:
         0 0 12px 12px;
 }
-
-
 .legend-item {
-
     display: inline-flex;
-
     align-items: center;
-
     gap: 6px;
-
     padding: 5px 9px;
-
     border-radius: 6px;
-
     font-size: 12px;
-
     color: #606266;
-
     cursor: pointer;
-
     user-select: none;
-
-
     transition:
         background 0.15s ease,
         opacity 0.15s ease;
 }
-
-
 .legend-item:hover {
-
     background: #eef2f7;
 }
-
-
 /*
  * 当前选中
  */
-
 .legend-item.active {
-
     background: #e8f1ff;
-
     color: #303133;
 }
-
-
 /*
  * 没有选中的项目变淡
  */
-
 .legend-item.inactive {
-
     opacity: 0.35;
 }
-
-
 /*
  * 全部
  */
-
 .legend-item.all {
-
     font-weight: 500;
 }
-
-
 /*
  * 数字
  */
-
 .legend-number {
-
     min-width: 18px;
-
     padding: 1px 5px;
-
     border-radius: 10px;
-
     background: #e5e7eb;
-
     color: #606266;
-
     text-align: center;
-
     font-size: 11px;
 }
-
-
 /* =========================================================
    Loading / Error / Empty
    ========================================================= */
-
 .loading,
 .error,
 .empty {
-
     padding: 40px;
-
     text-align: center;
-
     color: #909399;
 }
-
-
 .error {
-
     color: #dc2626;
 }
-
-
 /* =========================================================
    Mobile
    ========================================================= */
-
 @media (max-width: 600px) {
-
     body {
-
         padding: 20px 10px;
     }
-
-
     h1 {
-
         font-size: 21px;
-
         margin-bottom: 18px;
     }
-
-
     th,
     td {
-
         padding:
             12px 10px;
     }
-
-
     .legend {
-
         padding:
             12px 10px;
-
         gap: 4px;
     }
-
-
     .legend-item {
-
         padding:
             5px 7px;
     }
-
-
     /*
-     * 手机屏幕 Tooltip 稍微窄一点
+     * 手机屏幕 Tooltip
      */
-
     .status[data-tooltip]::after {
-
-        max-width: 200px;
+        max-width: 220px;
+        min-width: 140px;
     }
-
 }
-
 </style>
-
 </head>
-
-
 <body>
-
-
 <div class="container">
-
-
     <h1>我的马拉松赛事</h1>
-
-
     <div class="card">
-
-
         <div
             id="table-container"
             class="table-wrapper"
         >
-
             <div class="loading">
-
                 正在加载赛事数据...
-
             </div>
-
         </div>
-
-
         <div
             id="legend"
             class="legend"
         ></div>
-
-
     </div>
-
-
 </div>
-
-
 <script>
-
 /* =========================================================
    API
    ========================================================= */
-
 const API_URL =
     "https://workerrunapi.linwn.net/marathon-events";
-
-
 /* =========================================================
    全局状态
    ========================================================= */
-
 /*
  * 当前筛选状态
  *
  * null = 显示全部
  */
-
 let activeFilter = null;
-
-
 /*
  * API 返回的全部赛事
  */
-
 let allEvents = [];
-
-
 /* =========================================================
    状态配置
    ========================================================= */
-
 const STATUS_CONFIG = {
-
     "已中签": {
-
         className:
             "status-success",
-
         color:
             "#22c55e"
     },
-
-
     "报名中": {
-
         className:
             "status-registering",
-
         color:
             "#3b82f6"
     },
-
-
     "待抽签": {
-
         className:
             "status-lottery",
-
         color:
             "#f59e0b"
     },
-
-
     "未中签": {
-
         className:
             "status-failed",
-
         color:
             "#ef4444"
     },
-
-
     "未启动": {
-
         className:
             "status-pending",
-
         color:
             "#c0c4cc"
     }
-
 };
-
-
 /*
  * Legend 显示顺序
  */
-
 const STATUS_ORDER = [
-
     "已中签",
-
     "报名中",
-
     "待抽签",
-
     "未中签",
-
     "未启动"
-
 ];
-
-
 /* =========================================================
    状态转换
    ========================================================= */
-
 function normalizeStatus(status) {
-
     status = status || "";
-
-
     /*
      * 已中签
      *
-     * 按要求：
-     * 必须使用 includes("中签，")
+     * 必须使用：
+     * includes("中签，")
      */
-
-    if (status.includes("中签，")) {
-
+    if (
+        status.includes("中签，")
+    ) {
         return "已中签";
     }
-
-
     /*
      * 报名中
      */
-
-    if (status.includes("报名中")) {
-
+    if (
+        status.includes("报名中")
+    ) {
         return "报名中";
     }
-
-
     /*
      * 待抽签
      */
-
-    if (status.includes("待抽签")) {
-
+    if (
+        status.includes("待抽签")
+    ) {
         return "待抽签";
     }
-
-
     /*
      * 未中签
      */
-
-    if (status.includes("未中签")) {
-
+    if (
+        status.includes("未中签")
+    ) {
         return "未中签";
     }
-
-
     /*
      * 其他情况
      */
-
     return "未启动";
 }
-
-
 /* =========================================================
    Tooltip 内容
    ========================================================= */
-
-function getTooltip(event, status) {
-
-
+function getTooltip(
+    event,
+    status
+) {
     /*
      * 报名中
      *
-     * 同时显示：
+     * 显示：
      * 1. 报名截止日期
      * 2. 出签日期
      */
-
-    if (status === "报名中") {
-
+    if (
+        status === "报名中"
+    ) {
         const lines = [];
-
-
-        if (event.registration_end) {
-
+        if (
+            event.registration_end
+        ) {
             lines.push(
                 `报名截止：${event.registration_end}`
             );
         }
-
-
-        if (event.lottery_date) {
-
+        if (
+            event.lottery_date
+        ) {
             lines.push(
                 `出签日期：${event.lottery_date}`
             );
         }
-
-
         return lines.join("\n");
     }
-
-
     /*
      * 待抽签
      */
-
-    if (status === "待抽签") {
-
-        if (event.lottery_date) {
-
+    if (
+        status === "待抽签"
+    ) {
+        if (
+            event.lottery_date
+        ) {
             return (
                 `出签日期：${event.lottery_date}`
             );
         }
     }
-
-
     /*
      * 其他状态没有 Tooltip
      */
-
     return "";
 }
-
-
 /* =========================================================
    HTML 转义
    ========================================================= */
-
 function escapeHtml(value) {
-
-    if (value == null) {
-
+    if (
+        value == null
+    ) {
         return "";
     }
-
-
     return String(value)
-
         .replace(
             /&/g,
             "&amp;"
         )
-
         .replace(
             /</g,
             "&lt;"
         )
-
         .replace(
             />/g,
             "&gt;"
         )
-
         .replace(
             /"/g,
             "&quot;"
         )
-
         .replace(
             /'/g,
             "&#039;"
         );
 }
-
-
+/* =========================================================
+   Tooltip 点击
+   ========================================================= */
+function toggleTooltip(
+    clickEvent,
+    element
+) {
+    /*
+     * 防止点击冒泡到 document
+     */
+    clickEvent.stopPropagation();
+    /*
+     * 关闭其他 Tooltip
+     */
+    document
+        .querySelectorAll(
+            ".status.tooltip-open"
+        )
+        .forEach(item => {
+            if (
+                item !== element
+            ) {
+                item.classList.remove(
+                    "tooltip-open"
+                );
+            }
+        });
+    /*
+     * 切换当前 Tooltip
+     */
+    element.classList.toggle(
+        "tooltip-open"
+    );
+}
+/* =========================================================
+   点击页面其他地方关闭 Tooltip
+   ========================================================= */
+document.addEventListener(
+    "click",
+    () => {
+        document
+            .querySelectorAll(
+                ".status.tooltip-open"
+            )
+            .forEach(item => {
+                item.classList.remove(
+                    "tooltip-open"
+                );
+            });
+    }
+);
 /* =========================================================
    统计状态数量
    ========================================================= */
-
-function getStatusCounts(events) {
-
+function getStatusCounts(
+    events
+) {
     const counts = {};
-
-
     /*
      * 初始化
      */
-
-    STATUS_ORDER.forEach(status => {
-
-        counts[status] = 0;
-
-    });
-
-
+    STATUS_ORDER.forEach(
+        status => {
+            counts[status] = 0;
+        }
+    );
     /*
      * 统计
      */
-
-    events.forEach(event => {
-
-        const status =
-            normalizeStatus(event.status);
-
-        counts[status]++;
-
-    });
-
-
+    events.forEach(
+        event => {
+            const status =
+                normalizeStatus(
+                    event.status
+                );
+            counts[status]++;
+        }
+    );
     return counts;
 }
-
-
 /* =========================================================
    Legend
    ========================================================= */
-
 function renderLegend() {
-
     const counts =
-        getStatusCounts(allEvents);
-
-
+        getStatusCounts(
+            allEvents
+        );
     let html = "";
-
-
     /*
      * 全部
      */
-
     const allActive =
         activeFilter === null
             ? "active"
             : "";
-
-
     html += `
-
         <div
-            class="legend-item all ${allActive}"
-            onclick="filterStatus(null)"
+            class="
+                legend-item
+                all
+                ${allActive}
+            "
+            onclick="
+                filterStatus(null)
+            "
         >
-
             全部
-
             <span class="legend-number">
                 ${allEvents.length}
             </span>
-
         </div>
-
     `;
-
-
     /*
      * 各个状态
      */
-
-    STATUS_ORDER.forEach(status => {
-
-        const config =
-            STATUS_CONFIG[status];
-
-
-        /*
-         * 当前是否选中
-         */
-
-        const active =
-            activeFilter === status
-                ? "active"
-                : "";
-
-
-        /*
-         * 当前筛选后，
-         * 其他状态变淡
-         */
-
-        const inactive =
-            activeFilter !== null &&
-            activeFilter !== status
-                ? "inactive"
-                : "";
-
-
-        html += `
-
-            <div
-
-                class="
-                    legend-item
-                    ${active}
-                    ${inactive}
-                "
-
-                onclick="
-                    filterStatus('${status}')
-                "
-            >
-
-                <span
-
-                    class="dot"
-
-                    style="
-                        background:
-                        ${config.color}
+    STATUS_ORDER.forEach(
+        status => {
+            const config =
+                STATUS_CONFIG[
+                    status
+                ];
+            /*
+             * 当前是否选中
+             */
+            const active =
+                activeFilter === status
+                    ? "active"
+                    : "";
+            /*
+             * 当前筛选后，
+             * 其他状态变淡
+             */
+            const inactive =
+                activeFilter !== null &&
+                activeFilter !== status
+                    ? "inactive"
+                    : "";
+            html += `
+                <div
+                    class="
+                        legend-item
+                        ${active}
+                        ${inactive}
                     "
-                ></span>
-
-
-                <span>
-                    ${status}
-                </span>
-
-
-                <span class="legend-number">
-
-                    ${counts[status]}
-
-                </span>
-
-            </div>
-
-        `;
-
-    });
-
-
+                    onclick="
+                        filterStatus('${status}')
+                    "
+                >
+                    <span
+                        class="dot"
+                        style="
+                            background:
+                            ${config.color}
+                        "
+                    ></span>
+                    <span>
+                        ${status}
+                    </span>
+                    <span class="legend-number">
+                        ${counts[status]}
+                    </span>
+                </div>
+            `;
+        }
+    );
     document.getElementById(
         "legend"
     ).innerHTML = html;
 }
-
-
 /* =========================================================
    Legend 筛选
    ========================================================= */
-
-function filterStatus(status) {
-
-
+function filterStatus(
+    status
+) {
     /*
      * 如果再次点击当前状态，
      * 则取消筛选
      */
-
-    if (activeFilter === status) {
-
+    if (
+        activeFilter === status
+    ) {
         activeFilter = null;
-
     } else {
-
         activeFilter = status;
-
     }
-
-
     renderTable();
-
     renderLegend();
 }
-
-
 /* =========================================================
    Render Table
    ========================================================= */
-
 function renderTable() {
-
-
     /*
      * 默认显示全部
      */
-
     let events = allEvents;
-
-
     /*
      * 应用状态筛选
      */
-
-    if (activeFilter !== null) {
-
+    if (
+        activeFilter !== null
+    ) {
         events =
-            allEvents.filter(event => {
-
-                return (
-                    normalizeStatus(
-                        event.status
-                    )
-                    ===
-                    activeFilter
-                );
-
-            });
-
+            allEvents.filter(
+                event => {
+                    return (
+                        normalizeStatus(
+                            event.status
+                        )
+                        ===
+                        activeFilter
+                    );
+                }
+            );
     }
-
-
     /*
      * 按比赛日期排序
      */
-
     events = [...events].sort(
         (a, b) => {
-
             return (
                 new Date(a.date)
                 -
                 new Date(b.date)
             );
-
         }
     );
-
-
     /*
      * 无结果
      */
-
-    if (events.length === 0) {
-
+    if (
+        events.length === 0
+    ) {
         document.getElementById(
             "table-container"
         ).innerHTML = `
-
             <div class="empty">
-
                 没有符合条件的赛事
-
             </div>
-
         `;
-
         return;
     }
-
-
     /*
      * Table 开始
      */
-
     let html = `
-
         <div class="table-wrapper">
-
         <table>
-
             <thead>
-
                 <tr>
-
                     <th>
                         比赛
                     </th>
-
                     <th>
                         状态
                     </th>
-
                     <th>
                         比赛日期
                     </th>
-
                 </tr>
-
             </thead>
-
-
             <tbody>
-
     `;
-
-
     /*
      * 赛事
      */
-
     events.forEach(
         (event, index) => {
-
-
-        const status =
-            normalizeStatus(
-                event.status
-            );
-
-
-        const config =
-            STATUS_CONFIG[status];
-
-
-        const tooltip =
-            getTooltip(
-                event,
-                status
-            );
-
-
-        /*
-         * 第一行有 Tooltip 时，
-         * Tooltip 显示在下面。
-         *
-         * 注意：
-         * 这里的 index 是当前筛选后的
-         * 第一行。
-         */
-
-        const tooltipPositionClass =
-
-            index === 0 && tooltip
-
-                ? "tooltip-bottom"
-
-                : "";
-
-
-        /*
-         * Tooltip 属性
-         */
-
-        const tooltipAttr =
-
-            tooltip
-
-                ? `
-                    data-tooltip=
-                    "${escapeHtml(tooltip)}"
-                  `
-
-                : "";
-
-
-        html += `
-
-            <tr>
-
-
-                <td>
-
-                    <span class="event-name">
-
+            const status =
+                normalizeStatus(
+                    event.status
+                );
+            const config =
+                STATUS_CONFIG[
+                    status
+                ];
+            const tooltip =
+                getTooltip(
+                    event,
+                    status
+                );
+            /*
+             * 第一行有 Tooltip 时，
+             * Tooltip 显示在下面
+             */
+            const tooltipPositionClass =
+                index === 0 &&
+                tooltip
+                    ? "tooltip-bottom"
+                    : "";
+            /*
+             * Tooltip 属性
+             */
+            const tooltipAttr =
+                tooltip
+                    ? `
+                        data-tooltip="${escapeHtml(
+                            tooltip
+                        )}"
+                      `
+                    : "";
+            /*
+             * i 图标
+             *
+             * 只有：
+             * 报名中
+             * 待抽签
+             *
+             * 才显示
+             */
+            const infoIcon =
+                tooltip
+                    ? `
+                        <i
+                            class="status-info"
+                            title="查看详情"
+                            onclick="
+                                toggleTooltip(
+                                    event,
+                                    this.parentElement
+                                )
+                            "
+                        >i</i>
+                      `
+                    : "";
+            html += `
+                <tr>
+                    <td>
+                        <span class="event-name">
+                            ${escapeHtml(
+                                event.name
+                            )}
+                        </span>
+                    </td>
+                    <td>
+                        <span
+                            class="
+                                status
+                                ${config.className}
+                                ${tooltipPositionClass}
+                            "
+                            ${tooltipAttr}
+                        >
+                            <span class="dot"></span>
+                            ${status}
+                            ${infoIcon}
+                        </span>
+                    </td>
+                    <td class="date">
                         ${escapeHtml(
-                            event.name
+                            event.date
                         )}
-
-                    </span>
-
-                </td>
-
-
-                <td>
-
-                    <span
-
-                        class="
-                            status
-                            ${config.className}
-                            ${tooltipPositionClass}
-                        "
-
-                        ${tooltipAttr}
-
-                    >
-
-                        <span class="dot"></span>
-
-                        ${status}
-
-                    </span>
-
-                </td>
-
-
-                <td class="date">
-
-                    ${escapeHtml(
-                        event.date
-                    )}
-
-                </td>
-
-
-            </tr>
-
-        `;
-
-    });
-
-
+                    </td>
+                </tr>
+            `;
+        }
+    );
     /*
      * Table 结束
      */
-
     html += `
-
             </tbody>
-
         </table>
-
         </div>
-
     `;
-
-
     document.getElementById(
         "table-container"
     ).innerHTML = html;
 }
-
-
 /* =========================================================
    获取 API 数据
    ========================================================= */
-
 async function loadEvents() {
-
     try {
-
-
         const response =
-            await fetch(API_URL);
-
-
+            await fetch(
+                API_URL
+            );
         /*
          * HTTP 错误
          */
-
-        if (!response.ok) {
-
+        if (
+            !response.ok
+        ) {
             throw new Error(
                 `HTTP ${response.status}`
             );
         }
-
-
         /*
          * JSON
          */
-
         const data =
             await response.json();
-
-
         /*
          * 确保是数组
          */
-
         allEvents =
             Array.isArray(data)
                 ? data
                 : [];
-
-
         /*
          * 渲染
          */
-
         renderTable();
-
         renderLegend();
-
-
     } catch (error) {
-
-
         console.error(
             "Failed to load marathon events:",
             error
         );
-
-
         document.getElementById(
             "table-container"
         ).innerHTML = `
-
             <div class="error">
-
                 赛事数据加载失败
-
             </div>
-
         `;
-
     }
-
 }
-
-
 /* =========================================================
    Start
    ========================================================= */
-
 loadEvents();
-
 </script>
-
-
 </body>
-
 </html>
