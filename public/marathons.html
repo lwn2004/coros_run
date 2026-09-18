@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>马拉松赛事</title>
+
+<title>我的马拉松赛事</title>
 
 <style>
     * {
@@ -81,6 +82,10 @@
         white-space: nowrap;
     }
 
+    /* =========================
+       Status
+       ========================= */
+
     .status {
         display: inline-flex;
         align-items: center;
@@ -94,6 +99,7 @@
         height: 8px;
         border-radius: 50%;
         display: inline-block;
+        flex-shrink: 0;
     }
 
     /* 已中签 */
@@ -141,38 +147,53 @@
         background: #c0c4cc;
     }
 
-    /* 自定义 Tooltip */
+
+    /* =========================
+       Tooltip
+       ========================= */
+
     .status[data-tooltip] {
         position: relative;
     }
 
     .status[data-tooltip]::after {
         content: attr(data-tooltip);
+
         position: absolute;
         left: 50%;
         bottom: calc(100% + 8px);
+
         transform: translateX(-50%);
 
         background: #303133;
         color: #fff;
-        padding: 7px 10px;
+
+        padding: 8px 11px;
+
         border-radius: 6px;
+
         font-size: 12px;
-        line-height: 1.4;
-        white-space: nowrap;
+        line-height: 1.6;
+
+        white-space: pre-line;
 
         opacity: 0;
         visibility: hidden;
+
         transition: opacity 0.15s ease;
+
         pointer-events: none;
+
         z-index: 10;
     }
 
     .status[data-tooltip]::before {
         content: "";
+
         position: absolute;
         left: 50%;
         bottom: calc(100% + 3px);
+
         transform: translateX(-50%);
 
         border: 5px solid transparent;
@@ -180,7 +201,9 @@
 
         opacity: 0;
         visibility: hidden;
+
         transition: opacity 0.15s ease;
+
         z-index: 10;
     }
 
@@ -190,26 +213,93 @@
         visibility: visible;
     }
 
+
+    /* =========================
+       Legend
+       ========================= */
+
     .legend {
         display: flex;
-        gap: 18px;
+        gap: 8px;
+
         flex-wrap: wrap;
-        padding: 16px 20px;
+
+        padding: 14px 20px;
+
         border-top: 1px solid #ebeef5;
-        font-size: 12px;
-        color: #606266;
+
+        background: #fafafa;
     }
 
     .legend-item {
-        display: flex;
+        display: inline-flex;
+
         align-items: center;
-        gap: 5px;
+
+        gap: 6px;
+
+        padding: 5px 9px;
+
+        border-radius: 6px;
+
+        font-size: 12px;
+
+        color: #606266;
+
+        cursor: pointer;
+
+        user-select: none;
+
+        transition:
+            background 0.15s,
+            opacity 0.15s;
     }
 
-    .loading,
-    .error {
-        padding: 40px;
+    .legend-item:hover {
+        background: #eef2f7;
+    }
+
+    .legend-item.active {
+        background: #e8f1ff;
+        color: #303133;
+    }
+
+    .legend-item.inactive {
+        opacity: 0.35;
+    }
+
+    .legend-item.all {
+        font-weight: 500;
+    }
+
+    .legend-number {
+        min-width: 18px;
+
+        padding: 1px 5px;
+
+        border-radius: 10px;
+
+        background: #e5e7eb;
+
+        color: #606266;
+
         text-align: center;
+
+        font-size: 11px;
+    }
+
+
+    /* =========================
+       Empty / Loading / Error
+       ========================= */
+
+    .loading,
+    .error,
+    .empty {
+        padding: 40px;
+
+        text-align: center;
+
         color: #909399;
     }
 
@@ -217,9 +307,19 @@
         color: #dc2626;
     }
 
+
+    /* =========================
+       Mobile
+       ========================= */
+
     @media (max-width: 600px) {
+
         body {
             padding: 20px 10px;
+        }
+
+        h1 {
+            font-size: 21px;
         }
 
         th,
@@ -233,127 +333,153 @@
         }
 
         .legend {
-            gap: 12px;
+            gap: 4px;
+            padding: 12px 10px;
+        }
+
+        .legend-item {
+            padding: 5px 7px;
         }
     }
 </style>
 </head>
 
+
 <body>
 
 <div class="container">
 
-    <h1>我的马拉松赛事</h1>
+    <h1>🏃 我的马拉松赛事</h1>
 
     <div class="card">
 
         <div id="table-container">
-            <div class="loading">正在加载赛事数据...</div>
-        </div>
-
-        <div class="legend">
-            <div class="legend-item">
-                <span class="dot" style="background:#22c55e"></span>
-                已中签
-            </div>
-
-            <div class="legend-item">
-                <span class="dot" style="background:#3b82f6"></span>
-                报名中
-            </div>
-
-            <div class="legend-item">
-                <span class="dot" style="background:#f59e0b"></span>
-                待抽签
-            </div>
-
-            <div class="legend-item">
-                <span class="dot" style="background:#ef4444"></span>
-                未中签
-            </div>
-
-            <div class="legend-item">
-                <span class="dot" style="background:#c0c4cc"></span>
-                未启动
+            <div class="loading">
+                正在加载赛事数据...
             </div>
         </div>
+
+        <div id="legend" class="legend"></div>
 
     </div>
 
 </div>
 
+
 <script>
 
-const API_URL = "https://workerrunapi.linwn.net/marathon-events";
+const API_URL =
+    "https://workerrunapi.linwn.net/marathon-events";
+
+
+/* 当前筛选状态 */
+let activeFilter = null;
+
+/* 当前赛事数据 */
+let allEvents = [];
+
 
 /*
- * API 状态 → 页面显示状态
+ * 状态定义
+ */
+const STATUS_CONFIG = {
+
+    "已中签": {
+        className: "status-success",
+        color: "#22c55e"
+    },
+
+    "报名中": {
+        className: "status-registering",
+        color: "#3b82f6"
+    },
+
+    "待抽签": {
+        className: "status-lottery",
+        color: "#f59e0b"
+    },
+
+    "未中签": {
+        className: "status-failed",
+        color: "#ef4444"
+    },
+
+    "未启动": {
+        className: "status-pending",
+        color: "#c0c4cc"
+    }
+};
+
+
+/*
+ * 状态顺序
+ */
+const STATUS_ORDER = [
+    "已中签",
+    "报名中",
+    "待抽签",
+    "未中签",
+    "未启动"
+];
+
+
+/*
+ * API 状态 → 页面状态
  */
 function normalizeStatus(status) {
 
-    if (status.includes("已中签")) {
-        return {
-            text: "已中签",
-            className: "status-success"
-        };
+    status = status || "";
+
+    if (status.includes("中签，")) {
+        return "已中签";
     }
 
     if (status.includes("报名中")) {
-        return {
-            text: "报名中",
-            className: "status-registering"
-        };
+        return "报名中";
     }
 
     if (status.includes("待抽签")) {
-        return {
-            text: "待抽签",
-            className: "status-lottery"
-        };
+        return "待抽签";
     }
 
     if (status.includes("未中签")) {
-        return {
-            text: "未中签",
-            className: "status-failed"
-        };
+        return "未中签";
     }
 
-    return {
-        text: "未启动",
-        className: "status-pending"
-    };
+    return "未启动";
 }
 
 
 /*
- * 格式化日期
- *
- * 2026-11-29
- * ↓
- * 2026-11-29
- */
-function formatDate(date) {
-
-    if (!date) {
-        return "-";
-    }
-
-    return date;
-}
-
-
-/*
- * 生成 Tooltip
+ * Tooltip
  */
 function getTooltip(event, status) {
 
-    if (status.text === "报名中" && event.registration_end) {
-        return `报名截止：${event.registration_end}`;
+    if (status === "报名中") {
+
+        const lines = [];
+
+        if (event.registration_end) {
+            lines.push(
+                `报名截止：${event.registration_end}`
+            );
+        }
+
+        if (event.lottery_date) {
+            lines.push(
+                `出签日期：${event.lottery_date}`
+            );
+        }
+
+        return lines.join("\n");
     }
 
-    if (status.text === "待抽签" && event.lottery_date) {
-        return `出签日期：${event.lottery_date}`;
+
+    if (status === "待抽签") {
+
+        if (event.lottery_date) {
+            return `出签日期：${event.lottery_date}`;
+        }
     }
 
     return "";
@@ -361,72 +487,7 @@ function getTooltip(event, status) {
 
 
 /*
- * 创建表格
- */
-function renderTable(events) {
-
-    // 按比赛日期排序
-    events.sort((a, b) => {
-        return new Date(a.date) - new Date(b.date);
-    });
-
-    let html = `
-        <table>
-            <thead>
-                <tr>
-                    <th>比赛</th>
-                    <th>状态</th>
-                    <th>比赛日期</th>
-                </tr>
-            </thead>
-            <tbody>
-    `;
-
-    for (const event of events) {
-
-        const status = normalizeStatus(event.status);
-        const tooltip = getTooltip(event, status);
-
-        const tooltipAttr = tooltip
-            ? `data-tooltip="${escapeHtml(tooltip)}"`
-            : "";
-
-        html += `
-            <tr>
-                <td>
-                    <span class="event-name">
-                        ${escapeHtml(event.name)}
-                    </span>
-                </td>
-
-                <td>
-                    <span
-                        class="status ${status.className}"
-                        ${tooltipAttr}
-                    >
-                        <span class="dot"></span>
-                        ${status.text}
-                    </span>
-                </td>
-
-                <td class="date">
-                    ${formatDate(event.date)}
-                </td>
-            </tr>
-        `;
-    }
-
-    html += `
-            </tbody>
-        </table>
-    `;
-
-    document.getElementById("table-container").innerHTML = html;
-}
-
-
-/*
- * 防止 API 数据中的特殊字符破坏 HTML
+ * HTML 转义
  */
 function escapeHtml(value) {
 
@@ -444,35 +505,324 @@ function escapeHtml(value) {
 
 
 /*
- * 获取 API 数据
+ * 统计各状态数量
+ */
+function getStatusCounts(events) {
+
+    const counts = {};
+
+    STATUS_ORDER.forEach(status => {
+        counts[status] = 0;
+    });
+
+    events.forEach(event => {
+
+        const status =
+            normalizeStatus(event.status);
+
+        counts[status]++;
+    });
+
+    return counts;
+}
+
+
+/*
+ * 创建 Legend
+ */
+function renderLegend() {
+
+    const counts =
+        getStatusCounts(allEvents);
+
+    let html = "";
+
+
+    /*
+     * 全部
+     */
+    const allActive =
+        activeFilter === null
+            ? "active"
+            : "";
+
+    html += `
+        <div
+            class="legend-item all ${allActive}"
+            onclick="filterStatus(null)"
+        >
+            全部
+            <span class="legend-number">
+                ${allEvents.length}
+            </span>
+        </div>
+    `;
+
+
+    /*
+     * 各状态
+     */
+    STATUS_ORDER.forEach((status, index) => {
+
+        const config =
+            STATUS_CONFIG[status];
+
+        const active =
+            activeFilter === status
+                ? "active"
+                : "";
+
+        const inactive =
+            activeFilter !== null &&
+            activeFilter !== status
+                ? "inactive"
+                : "";
+
+        html += `
+            <div
+                class="legend-item ${active} ${inactive}"
+                onclick="filterStatus('${status}')"
+            >
+
+                <span
+                    class="dot"
+                    style="background:${config.color}"
+                ></span>
+
+                <span>
+                    ${status}
+                </span>
+
+                <span class="legend-number">
+                    ${counts[status]}
+                </span>
+
+            </div>
+        `;
+    });
+
+
+    document.getElementById("legend").innerHTML =
+        html;
+}
+
+
+/*
+ * 筛选
+ */
+function filterStatus(status) {
+
+    /*
+     * 再次点击当前状态
+     * → 取消筛选
+     */
+    if (activeFilter === status) {
+        activeFilter = null;
+    } else {
+        activeFilter = status;
+    }
+
+    renderTable();
+    renderLegend();
+}
+
+
+/*
+ * 创建表格
+ */
+function renderTable() {
+
+    let events = allEvents;
+
+
+    /*
+     * 应用筛选
+     */
+    if (activeFilter !== null) {
+
+        events = allEvents.filter(event => {
+
+            return normalizeStatus(event.status)
+                === activeFilter;
+
+        });
+    }
+
+
+    /*
+     * 按比赛日期排序
+     */
+    events = [...events].sort((a, b) => {
+
+        return new Date(a.date) -
+               new Date(b.date);
+
+    });
+
+
+    /*
+     * 没有数据
+     */
+    if (events.length === 0) {
+
+        document.getElementById(
+            "table-container"
+        ).innerHTML = `
+            <div class="empty">
+                没有符合条件的赛事
+            </div>
+        `;
+
+        return;
+    }
+
+
+    let html = `
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        比赛
+                    </th>
+
+                    <th>
+                        状态
+                    </th>
+
+                    <th>
+                        比赛日期
+                    </th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+    `;
+
+
+    events.forEach(event => {
+
+        const status =
+            normalizeStatus(event.status);
+
+        const config =
+            STATUS_CONFIG[status];
+
+        const tooltip =
+            getTooltip(event, status);
+
+
+        const tooltipAttr =
+            tooltip
+                ? `data-tooltip="${escapeHtml(tooltip)}"`
+                : "";
+
+
+        html += `
+
+            <tr>
+
+                <td>
+                    <span class="event-name">
+                        ${escapeHtml(event.name)}
+                    </span>
+                </td>
+
+                <td>
+
+                    <span
+                        class="status ${config.className}"
+                        ${tooltipAttr}
+                    >
+
+                        <span class="dot"></span>
+
+                        ${status}
+
+                    </span>
+
+                </td>
+
+                <td class="date">
+                    ${escapeHtml(event.date)}
+                </td>
+
+            </tr>
+        `;
+    });
+
+
+    html += `
+            </tbody>
+
+        </table>
+    `;
+
+
+    document.getElementById(
+        "table-container"
+    ).innerHTML = html;
+}
+
+
+/*
+ * 获取数据
  */
 async function loadEvents() {
 
     try {
 
-        const response = await fetch(API_URL);
+        const response =
+            await fetch(API_URL);
+
 
         if (!response.ok) {
+
             throw new Error(
                 `HTTP ${response.status}`
             );
         }
 
-        const events = await response.json();
 
-        renderTable(events);
+        const data =
+            await response.json();
+
+
+        /*
+         * 保存原始数据
+         */
+        allEvents = Array.isArray(data)
+            ? data
+            : [];
+
+
+        renderTable();
+        renderLegend();
+
 
     } catch (error) {
 
         console.error(error);
 
-        document.getElementById("table-container").innerHTML = `
+
+        document.getElementById(
+            "table-container"
+        ).innerHTML = `
+
             <div class="error">
+
                 赛事数据加载失败
+
             </div>
+
         `;
     }
 }
+
 
 loadEvents();
 
