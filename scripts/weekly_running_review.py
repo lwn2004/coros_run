@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Generate the weekly running review report.
 
-The script intentionally uses a public/secret-configured COROS data URL rather than
-embedding credentials. It produces a deterministic Markdown report and a small JSON
-adjustment request for later automation.
+Phase 1 uses the user's published COROS data feed and writes a factual report.
+A repository GitHub Action cannot directly use the private COROS connector, so
+COROS plan mutations are deliberately not attempted here. The ChatGPT-side
+automation remains responsible for private COROS review/changes until a supported
+external COROS API/write credential is available.
 """
 from __future__ import annotations
 
@@ -41,9 +43,9 @@ def get_rows(data):
 
 def distance_km(row):
     for k in ("distanceKm", "distance_km"):
-        if k in row:
+        if row.get(k) is not None:
             return float(row[k])
-    if "distance" in row:
+    if row.get("distance") is not None:
         value = float(row["distance"])
         return value / 1000 if value > 100 else value
     return 0.0
@@ -59,12 +61,11 @@ def hr(row):
 def pace_min(row):
     for k in ("pace", "average_pace", "averagePace"):
         if row.get(k) is not None:
-            v = float(row[k])
-            return v / 60 if v > 20 else v
+            value = float(row[k])
+            return value / 60 if value > 20 else value
     if row.get("average_speed"):
         speed = float(row["average_speed"])
         if speed > 0:
-            # speed is commonly m/s
             return 16.6666667 / speed
     return None
 
@@ -76,11 +77,17 @@ def row_date(row):
     return None
 
 
+def fmt_pace(minutes):
+    if minutes is None:
+        return "—"
+    total = round(minutes * 60)
+    return f"{total // 60}:{total % 60:02d}"
+
+
 def main():
     today = datetime.now(timezone.utc).astimezone(timezone(timedelta(hours=8))).date()
-    # Previous completed Monday-Sunday week.
-    this_monday = today - timedelta(days=today.weekday())
-    week_end = this_monday - timedelta(days=1)
+    monday = today - timedelta(days=today.weekday())
+    week_end = monday - timedelta(days=1)
     week_start = week_end - timedelta(days=6)
 
     data = fetch_json(DATA_URL)
@@ -93,35 +100,30 @@ def main():
     paces = [pace_min(r) for r in week if pace_min(r) is not None]
 
     lines = [
-        f"# 跑步训练周报｜{week_end.isoformat()}",
-        "",
+        f"# 跑步训练周报｜{week_end.isoformat()}", "",
         f"> 统计周期：{week_start.isoformat()} ～ {week_end.isoformat()}（北京时间）",
         "> 主赛：2026-12-20 汕头马拉松｜目标 3:30",
-        "> 训练计划：12 周、每周约 4 跑；肇庆半马作为体验赛。",
-        "",
-        "## 本周概况",
-        "",
+        "> 肇庆半马：2026-11-29｜体验赛定位", "",
+        "## 本周概况", "",
         f"- 实际跑量：**{total_km:.1f} km**",
-        f"- 完成训练：**{len(week)} 次**",
+        f"- 记录训练：**{len(week)} 次**",
     ]
     if hrs:
         lines.append(f"- 有心率记录的平均 HR：**{statistics.mean(hrs):.0f} bpm**")
     if paces:
-        lines.append(f"- 有配速记录的平均配速：**{statistics.mean(paces):.2f} min/km**")
+        lines.append(f"- 有配速记录的平均配速：**{fmt_pace(statistics.mean(paces))}/km**")
 
     lines += ["", "## 训练明细", "", "| 日期 | 距离 | 配速 | 平均HR |", "|---|---:|---:|---:|"]
     for r in week:
-        d = row_date(r)
-        p = pace_min(r)
-        h = hr(r)
-        lines.append(f"| {d} | {distance_km(r):.1f} km | {p:.2f} min/km | {h:.0f} bpm |" if p is not None and h is not None else f"| {d} | {distance_km(r):.1f} km | — | — |")
+        lines.append(f"| {row_date(r)} | {distance_km(r):.1f} km | {fmt_pace(pace_min(r))} | "
+                     + (f"{hr(r):.0f} bpm |" if hr(r) is not None else "— |"))
 
     lines += [
         "", "## 计划执行分析", "",
-        "当前版本先以 COROS 实际活动数据生成事实层周报；计划课程、恢复与训练负荷的结构化字段接入后，再自动进行逐课计划/实际对比。",
-        "",
-        "## 下周调整", "",
-        "本报告不会仅因单次训练异常自动改变训练计划。只有在连续趋势、关键课表现和恢复指标共同支持时，才提交调整建议。",
+        "当前为 GitHub Actions 第一阶段：先生成可靠的实际训练事实层。",
+        "私有 COROS 计划、恢复与训练负荷字段尚未暴露给 GitHub Actions，因此本阶段不会伪造逐课对比或直接修改 COROS。",
+        "", "## 下周调整", "",
+        "本阶段默认不自动修改 COROS。后续接入可写 COROS API 后，只有趋势证据充分时才调整，并记录原计划、新计划和原因。",
     ]
 
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
@@ -131,11 +133,10 @@ def main():
     ADJUSTMENT_FILE.parent.mkdir(parents=True, exist_ok=True)
     ADJUSTMENT_FILE.write_text(json.dumps({
         "week_end": week_end.isoformat(),
-        "status": "reviewed",
+        "status": "facts_only",
         "plan_adjustment_required": False,
-        "reason": "Initial GitHub Actions implementation; no automatic COROS mutation until structured plan/recovery integration is enabled."
+        "reason": "GitHub Actions currently has no supported private COROS write API."
     }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-
     print(f"Wrote {report_path}")
 
 
