@@ -1,0 +1,41 @@
+name: Weekly Running Review
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 12 * * 0'
+      timezone: 'Asia/Shanghai'
+
+permissions:
+  contents: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run weekly review
+        env:
+          COROS_DATA_URL: ${{ secrets.COROS_DATA_URL }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
+        run: python scripts/weekly_running_review.py
+
+      - name: Commit weekly report
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/data/summary/reports/ config/weekly_adjustment.json
+          if git diff --cached --quiet; then
+            echo 'No report changes to commit.'
+          else
+            git commit -m "chore: weekly running review $(date -u +%F)"
+            git push
+          fi
