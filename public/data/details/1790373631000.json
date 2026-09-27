@@ -2,7 +2,7 @@
     "run_id": 1790373631000,
     "start_time": "2026-09-25T22:00:31+00:00",
     "weather": {
-        "type": "forecast_api",
+        "type": "archive_api",
         "temperature_c": 26.2,
         "condition": "晴朗 ☀️",
         "wind_speed_kmh": 1.0
