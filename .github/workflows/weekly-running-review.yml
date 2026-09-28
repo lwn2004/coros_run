@@ -3,18 +3,27 @@ name: Weekly Running Review
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 12 * * 0'
+    # Every Sunday, 08:17–22:17 Beijing time.
+    # Running at :17 avoids the top-of-hour GitHub Actions load peak.
+    - cron: '17 8-22 * * 0'
       timezone: 'Asia/Shanghai'
 
 permissions:
   contents: write
 
+concurrency:
+  group: weekly-running-review-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   review:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -24,6 +33,8 @@ jobs:
       - name: Run weekly review
         env:
           COROS_DATA_URL: ${{ secrets.COROS_DATA_URL }}
+          TRAINING_PLAN_URL: ${{ secrets.TRAINING_PLAN_URL }}
+          TRAINING_PLAN_FILE: ${{ vars.TRAINING_PLAN_FILE }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
         run: python scripts/weekly_running_review.py
@@ -32,10 +43,27 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
           git add public/data/summary/reports/ config/weekly_adjustment.json
+
           if git diff --cached --quiet; then
-            echo 'No report changes to commit.'
-          else
-            git commit -m "chore: weekly running review $(date -u +%F)"
-            git push
+            echo 'No changes to commit. The report may already exist or this hour did not trigger analysis.'
+            exit 0
           fi
+
+          REPORT_DATE="$(TZ=Asia/Shanghai date +%F)"
+          git commit -m "chore: weekly running review ${REPORT_DATE}"
+          git push
+
+      - name: Verify report exists in Git
+        run: |
+          REPORT_DATE="$(TZ=Asia/Shanghai date +%F)"
+          REPORT="public/data/summary/reports/${REPORT_DATE}.md"
+
+          if [ ! -f "${REPORT}" ]; then
+            echo "ERROR: ${REPORT} was not generated."
+            exit 1
+          fi
+
+          test -s "${REPORT}"
+          echo "Verified: ${REPORT}"
