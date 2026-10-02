@@ -2387,7 +2387,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   }
   function renderLegend(){
     var items = [
-      ["dark",  C.empty,    null],
+      ["rest",  C.empty,    null],
       ["< 5km", C.levels[0], C.glow[0]],
       ["5-10km",C.levels[1], C.glow[1]],
       ["10-20km",C.levels[2],C.glow[2]],
@@ -2569,7 +2569,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
 
     // legend
     if(L.W >= 330){
-      var items = [["dark",C.empty],["< 5km",C.levels[0]],["5-10km",C.levels[1]],["10-20km",C.levels[2]],["> 20km",C.levels[3]]];
+      var items = [["rest",C.empty],["< 5km",C.levels[0]],["5-10km",C.levels[1]],["10-20km",C.levels[2]],["> 20km",C.levels[3]]];
       var la = Math.max(0, (t-0.2)/0.4); if(la>1) la = 1;
       ctx.globalAlpha = Math.max(0, la);
       ctx.font = '10px ui-monospace, Menlo, monospace';
