@@ -339,7 +339,7 @@ def update_ai_index():
 # 5. 主流程控制
 # ==========================================
 def main():
-    if now_utc8().weekday() != 6:
+    if now_utc8().weekday() != 60:
         return
     print("创建所需目录体系...")
     for directory in [reports_dir, plans_dir, reviews_dir]:
